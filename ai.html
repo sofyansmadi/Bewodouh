@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوضوح AI — مساحة تحكي فيها عن مشاعرك وعلاقاتك</title>
+<meta name="description" content="بوضوح AI — مساعد ذكاء اصطناعي متخصص بالعلاقات والمشاعر بس، تقدر تحكي معه براحتك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{ height:100%; }
+  body{
+    font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light);
+    line-height:1.8; -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  h1,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; }
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:var(--ink); border-bottom:1px solid rgba(255,255,255,.06);
+    padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+  }
+  .brand-row{ display:flex; align-items:center; gap:12px; }
+  .brand-badge{
+    width:38px; height:38px; border-radius:50%; background:radial-gradient(120% 120% at 30% 20%, var(--clarity-soft), var(--clarity));
+    display:flex; align-items:center; justify-content:center; font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; color:var(--ink); font-size:15px; flex-shrink:0;
+  }
+  .brand-name{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:18px; color:var(--fog); }
+  .brand-name span{ color:var(--clarity); }
+  .brand-sub{ font-size:12px; color:var(--text-muted-dark); margin-top:1px; }
+  .status-chip{
+    display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted-dark);
+    border:1px solid rgba(255,255,255,.1); padding:6px 12px; border-radius:100px;
+  }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--clarity); }
+
+  /* ---------- CHAT AREA ---------- */
+  .chat-wrap{ flex:1; overflow-y:auto; padding:28px 0 10px; }
+  .chat-inner{ max-width:720px; margin:0 auto; padding:0 20px; display:flex; flex-direction:column; gap:20px; }
+
+  .msg{ display:flex; gap:12px; max-width:88%; }
+  .msg.bot{ align-self:flex-start; flex-direction:row; }
+  .msg.user{ align-self:flex-end; flex-direction:row-reverse; }
+
+  .avatar{
+    width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:13px;
+  }
+  .msg.bot .avatar{ background:var(--ink); color:var(--clarity-soft); }
+  .msg.user .avatar{ background:var(--clarity-soft); color:var(--ink); }
+
+  .bubble{ padding:14px 18px; border-radius:16px; font-size:15.5px; line-height:1.85; }
+  .msg.bot .bubble{ background:#fff; border:1px solid var(--fog-dim); color:var(--text-on-light); border-top-right-radius:4px; }
+  .msg.user .bubble{ background:var(--ink); color:var(--text-on-dark); border-top-left-radius:4px; }
+  .bubble p + p{ margin-top:10px; }
+
+  .typing-bubble{ display:inline-flex; gap:5px; padding:16px 18px; }
+  .typing-dot{ width:7px; height:7px; border-radius:50%; background:var(--rose); opacity:.5; animation:blink 1.2s infinite; }
+  .typing-dot:nth-child(2){ animation-delay:.2s; }
+  .typing-dot:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink{ 0%,80%,100%{ opacity:.3; transform:translateY(0);} 40%{ opacity:1; transform:translateY(-3px);} }
+
+  /* ---------- WELCOME / STARTERS ---------- */
+  .welcome{ text-align:center; padding:18px 0 8px; }
+  .welcome .brand-badge{ width:56px; height:56px; margin:0 auto 18px; font-size:20px; }
+  .welcome h1{ font-size:22px; color:var(--ink); margin-bottom:8px; }
+  .welcome p{ font-size:14.5px; color:var(--text-muted-light); max-width:42ch; margin:0 auto; }
+
+  .starters{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:22px; }
+  .starter-chip{
+    background:#fff; border:1px solid var(--fog-dim); border-radius:100px; padding:10px 18px;
+    font-size:13.5px; color:var(--text-on-light); cursor:pointer; transition:.15s; font-family:inherit;
+  }
+  .starter-chip:hover{ border-color:var(--clarity); background:var(--fog); }
+
+  /* ---------- COMPOSER ---------- */
+  .composer-area{ flex-shrink:0; border-top:1px solid var(--fog-dim); background:var(--fog); padding:16px 20px 20px; }
+  .composer{
+    max-width:720px; margin:0 auto; display:flex; align-items:flex-end; gap:10px;
+    background:#fff; border:1.5px solid var(--fog-dim); border-radius:20px; padding:8px 8px 8px 8px; transition:.15s;
+  }
+  .composer:focus-within{ border-color:var(--clarity); }
+  .composer textarea{
+    flex:1; border:none; outline:none; resize:none; font-family:inherit; font-size:15px; color:var(--text-on-light);
+    background:transparent; padding:10px 12px; max-height:120px; line-height:1.7;
+  }
+  .send-btn{
+    width:40px; height:40px; border-radius:50%; background:var(--ink); border:none; cursor:pointer; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; transition:.15s;
+  }
+  .send-btn:hover{ background:var(--ink-soft); }
+  .send-btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .send-btn svg{ width:17px; height:17px; }
+
+  .disclaimer-line{ max-width:720px; margin:12px auto 0; text-align:center; font-size:11.5px; color:var(--text-muted-light); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <div class="brand-badge">ب</div>
+    <div>
+      <div class="brand-name">بوضوح <span>AI</span></div>
+      <div class="brand-sub">متخصص بالعلاقات والمشاعر فقط</div>
+    </div>
+  </div>
+  <div class="status-chip"><span class="status-dot"></span> جاهز للحديث</div>
+</header>
+
+<div class="chat-wrap" id="chatWrap">
+  <div class="chat-inner" id="chatInner">
+
+    <div class="welcome" id="welcomeBlock">
+      <div class="brand-badge">ب</div>
+      <h1>أهلاً فيك 👋</h1>
+      <p>أنا بوضوح AI — هون بس عشان تحكي عن مشاعرك وعلاقاتك براحتك. اسألني عن أي إشي متعلق بهاد الموضوع بس.</p>
+      <div class="starters">
+        <button class="starter-chip" type="button">شو الفرق بين الغيرة الطبيعية والمرضية؟</button>
+        <button class="starter-chip" type="button">كيف أحط حد صحي مع شريكي؟</button>
+        <button class="starter-chip" type="button">حاسة إني بحلل كل تصرف لشريكي</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="composer-area">
+  <div class="composer">
+    <textarea id="messageInput" rows="1" placeholder="اكتب شو حاسس فيه..."></textarea>
+    <button class="send-btn" id="sendBtn" type="button" aria-label="إرسال">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="6 11 12 5 18 11"></polyline>
+      </svg>
+    </button>
+  </div>
+  <p class="disclaimer-line">بوضوح AI أداة دعم عام، مش بديل عن استشارة مختص نفسي مرخّص. النسخة الحالية تجريبية.</p>
+</div>
+
+<script>
+/* ============================================================
+   بوضوح AI — chat front-end shell.
+   ------------------------------------------------------------
+   This is currently a MOCK integration: getAIResponse() below
+   returns a canned reply after a short delay so the UI/UX can
+   be demoed end-to-end. To connect a real backend later:
+
+   1) Real AI calls must NOT be made directly from this client-side
+      file with an API key embedded here — that would leak the key
+      to every visitor. You need a small server-side endpoint
+      (e.g. POST /api/chat) that holds the API key privately and
+      forwards the request to Claude / Gemini / etc.
+
+   2) Replace the body of getAIResponse() with a fetch() call to
+      YOUR backend endpoint, e.g.:
+
+        async function getAIResponse(userText, history) {
+          const res = await fetch('https://your-backend.example.com/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: userText, history })
+          });
+          const data = await res.json();
+          return data.reply;
+        }
+
+   3) On the backend, set a system prompt that restricts the model
+      to relationships / emotional-support topics only, and politely
+      declines anything outside that scope.
+   ============================================================ */
+
+const chatInner = document.getElementById('chatInner');
+const chatWrap = document.getElementById('chatWrap');
+const welcomeBlock = document.getElementById('welcomeBlock');
+const input = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+
+let history = [];
+let isThinking = false;
+
+const MOCK_REPLIES = [
+  "شكراً إنك شاركتني هاد الإحساس. حاسة/حاسس إنه هاد الموضوع مهم إلك — ممكن تحكيلي أكتر شو صار بالضبط؟",
+  "هاد إحساس طبيعي كثير ناس بيمروا فيه. خلينا ناخذها خطوة خطوة — شو أكتر جزء من الموقف حاسس إنه بيضايقك أكتر؟",
+  "بسمعك. قبل ما نكمل، حابة تعرف: هل هاد الموقف صار مرة وحدة ولا بيتكرر معك بالعلاقة؟",
+  "هاد ملاحظة مهمة. بناءً على يلي حكيتيه، ممكن يفيدك تفكري كيف بتحسي بعد المواقف المشابهة — بتحسي براحة ولا بتعبي أكتر؟"
+];
+
+function autoResize(){
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+}
+input.addEventListener('input', autoResize);
+
+function scrollToBottom(){
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+
+function appendMessage(role, text){
+  const msg = document.createElement('div');
+  msg.className = 'msg ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = role === 'bot' ? 'ب' : 'أ';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+
+  msg.appendChild(avatar);
+  msg.appendChild(bubble);
+  chatInner.appendChild(msg);
+  scrollToBottom();
+  return bubble;
+}
+
+function appendTyping(){
+  const msg = document.createElement('div');
+  msg.className = 'msg bot';
+  msg.id = 'typingMsg';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = 'ب';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble typing-bubble';
+  bubble.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+
+  msg.appendChild(avatar);
+  msg.appendChild(bubble);
+  chatInner.appendChild(msg);
+  scrollToBottom();
+}
+
+function removeTyping(){
+  const t = document.getElementById('typingMsg');
+  if (t) t.remove();
+}
+
+// --- MOCK response function: swap this out when wiring a real backend ---
+async function getAIResponse(userText){
+  await new Promise(r => setTimeout(r, 900 + Math.random() * 700));
+  const idx = history.filter(h => h.role === 'user').length % MOCK_REPLIES.length;
+  return MOCK_REPLIES[idx];
+}
+
+async function sendMessage(text){
+  const trimmed = text.trim();
+  if (!trimmed || isThinking) return;
+
+  if (welcomeBlock) { welcomeBlock.remove(); }
+
+  appendMessage('user', trimmed);
+  history.push({ role: 'user', text: trimmed });
+
+  input.value = '';
+  autoResize();
+  isThinking = true;
+  sendBtn.disabled = true;
+  appendTyping();
+
+  try {
+    const reply = await getAIResponse(trimmed, history);
+    removeTyping();
+    appendMessage('bot', reply);
+    history.push({ role: 'bot', text: reply });
+  } catch (err) {
+    removeTyping();
+    appendMessage('bot', 'صار في خطأ بسيط، جربي ترسلي الرسالة مرة تانية.');
+  }
+
+  isThinking = false;
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+sendBtn.addEventListener('click', () => sendMessage(input.value));
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage(input.value);
+  }
+});
+
+document.querySelectorAll('.starter-chip').forEach(chip => {
+  chip.addEventListener('click', () => sendMessage(chip.textContent));
+});
+
+autoResize();
+</script>
+
+</body>
+</html>
