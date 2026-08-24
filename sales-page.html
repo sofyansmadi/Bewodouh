@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوضوح — دليل التعرف على العلاقة السامة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E;
+    --ink-soft:#372C46;
+    --plum:#4A3B5C;
+    --fog:#F3EEEA;
+    --fog-dim:#E6DFDA;
+    --clarity:#C9A15F;
+    --clarity-soft:#E4C98A;
+    --rose:#8B6F7E;
+    --alert:#B5555B;
+    --text-on-dark:#EDE7E3;
+    --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130;
+    --text-muted-light:#6B6072;
+    --radius:14px;
+    --max:920px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    background:var(--fog);
+    color:var(--text-on-light);
+    line-height:1.9;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  img{max-width:100%;display:block;}
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; letter-spacing:.02em; color:var(--clarity);
+    font-weight:600; margin-bottom:18px;
+  }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity); display:inline-block; }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(36,29,46,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:var(--max); }
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); }
+  .brand span{ color:var(--clarity); }
+  a.nav-cta{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px;
+    padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
+  }
+  .nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; overflow:hidden;
+    background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%);
+    padding:96px 0 110px;
+  }
+  .hero-blob{
+    position:absolute; inset:-20% -10% auto auto; width:520px; height:520px;
+    background:radial-gradient(circle, rgba(201,161,95,.35), transparent 65%);
+    filter:blur(40px); pointer-events:none;
+  }
+  .hero .wrap{ position:relative; z-index:2; }
+  .hero-eyebrow{ color:var(--clarity-soft); }
+  .hero-eyebrow::before{ background:var(--clarity-soft); }
+  h1.hero-title{
+    color:var(--fog);
+    font-size:clamp(32px, 5.4vw, 54px);
+    font-weight:900; line-height:1.35; max-width:16ch;
+    filter: blur(7px); opacity:0;
+    animation: sharpen 1.1s cubic-bezier(.2,.7,.3,1) .15s forwards;
+  }
+  h1.hero-title em{ font-style:normal; color:var(--clarity); }
+  @keyframes sharpen{ to{ filter:blur(0); opacity:1; } }
+  .hero-sub{
+    color:var(--text-muted-dark); font-size:18px; max-width:52ch; margin-top:22px;
+    opacity:0; animation: rise .8s ease .55s forwards; transform:translateY(10px);
+  }
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+  .hero-actions{ margin-top:36px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    opacity:0; animation: rise .8s ease .8s forwards; }
+  .btn-primary{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:16px;
+    padding:16px 34px; border-radius:100px; display:inline-block;
+    box-shadow:0 12px 30px -10px rgba(201,161,95,.55);
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 16px 34px -8px rgba(201,161,95,.65); }
+  .hero-note{ color:var(--text-muted-dark); font-size:14px; }
+  .hero-stats{
+    margin-top:64px; display:flex; gap:40px; flex-wrap:wrap;
+    border-top:1px solid rgba(255,255,255,.1); padding-top:28px;
+    opacity:0; animation: rise .8s ease 1.05s forwards;
+  }
+  .stat b{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-size:24px; color:var(--fog); }
+  .stat span{ color:var(--text-muted-dark); font-size:13px; }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:88px 0; }
+  section.dark{ background:var(--ink); color:var(--text-on-dark); }
+  section.dark .text-muted{ color:var(--text-muted-dark); }
+  .text-muted{ color:var(--text-muted-light); }
+  h2.section-title{ font-size:clamp(26px,3.6vw,36px); font-weight:900; max-width:20ch; }
+  .section-lede{ font-size:17px; max-width:60ch; margin-top:16px; }
+
+  /* ---------- MIRROR / RESONANCE ---------- */
+  .mirror-grid{ margin-top:44px; display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .mirror-item{
+    background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius);
+    padding:22px 24px; font-size:16px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .mirror-item .mark{ color:var(--alert); font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:18px; flex:none; }
+
+  /* ---------- CONTENTS ---------- */
+  .toc-list{ margin-top:40px; display:flex; flex-direction:column; }
+  .toc-row{
+    display:flex; align-items:center; gap:22px; padding:22px 4px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .toc-num{ font-family:'Noto Kufi Arabic',sans-serif; font-size:15px; color:var(--clarity); flex:none; width:28px; }
+  .toc-row h3{ font-size:18px; font-weight:600; color:var(--text-on-dark); }
+  .toc-row p{ color:var(--text-muted-dark); font-size:14px; margin-top:4px; }
+
+  /* ---------- SAMPLE ---------- */
+  .sample-card{
+    margin-top:44px; background:var(--ink); color:var(--text-on-dark);
+    border-radius:20px; padding:40px; position:relative; overflow:hidden;
+  }
+  .sample-card::before{
+    content:"”"; position:absolute; top:-30px; right:20px; font-size:180px;
+    font-family:Georgia, serif; color:rgba(201,161,95,.12); line-height:1;
+  }
+  .sample-tag{
+    display:inline-block; background:rgba(201,161,95,.15); color:var(--clarity-soft);
+    font-size:12px; font-weight:700; padding:6px 14px; border-radius:100px; margin-bottom:18px;
+  }
+  .sample-quote{ font-size:19px; line-height:2; position:relative; z-index:1; max-width:60ch; }
+  .sample-dialog{ margin-top:24px; color:var(--text-muted-dark); font-style:italic; font-size:15px; border-right:2px solid var(--clarity); padding-right:16px; }
+
+  /* ---------- FOR WHOM ---------- */
+  .who-grid{ margin-top:44px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .who-card{ border-radius:var(--radius); padding:28px; }
+  .who-yes{ background:#fff; border:1px solid var(--fog-dim); }
+  .who-no{ background:transparent; border:1px dashed var(--rose); }
+  .who-card h3{ font-size:17px; margin-bottom:16px; }
+  .who-card ul{ list-style:none; display:flex; flex-direction:column; gap:12px; font-size:15px; }
+  .who-card li{ display:flex; gap:10px; align-items:flex-start; }
+
+  /* ---------- PRICING ---------- */
+  .price-card{
+    margin:44px auto 0; max-width:460px; background:#fff; border-radius:22px;
+    border:1px solid var(--fog-dim); padding:44px 36px; text-align:center;
+    box-shadow:0 30px 60px -30px rgba(36,29,46,.25);
+  }
+  .price-value{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:56px; color:var(--ink); margin:14px 0 4px; }
+  .price-value sup{ font-size:20px; font-weight:600; color:var(--rose); }
+  .price-list{ list-style:none; text-align:right; margin:28px 0; display:flex; flex-direction:column; gap:12px; font-size:15px; }
+  .price-list li{ display:flex; gap:10px; align-items:flex-start; }
+  .price-list li b{ color:var(--clarity); font-family:'Noto Kufi Arabic',sans-serif; }
+  .btn-full{ display:block; width:100%; text-align:center; background:var(--ink); color:var(--fog);
+    font-weight:700; padding:17px; border-radius:100px; font-size:16px; transition:.2s; }
+  .btn-full:hover{ background:var(--ink-soft); }
+  .price-guarantee{ margin-top:16px; font-size:13px; color:var(--text-muted-light); }
+
+  /* ---------- FAQ ---------- */
+  .faq-item{ border-bottom:1px solid var(--fog-dim); }
+  .faq-q{
+    width:100%; text-align:right; background:none; border:none; cursor:pointer;
+    font-family:'IBM Plex Sans Arabic',sans-serif; font-size:17px; font-weight:600;
+    color:var(--text-on-light); padding:22px 0; display:flex; justify-content:space-between; align-items:center; gap:16px;
+  }
+  .faq-q .icon{ flex:none; font-size:20px; color:var(--clarity); transition:transform .25s ease; }
+  .faq-item.open .icon{ transform:rotate(45deg); }
+  .faq-a{ max-height:0; overflow:hidden; transition:max-height .3s ease; font-size:15px; color:var(--text-muted-light); }
+  .faq-a-inner{ padding-bottom:22px; max-width:65ch; }
+
+  /* ---------- DISCLAIMER ---------- */
+  .disclaimer{ background:var(--fog-dim); border-radius:var(--radius); padding:26px 28px; font-size:14px; color:var(--text-muted-light); }
+  .disclaimer b{ color:var(--text-on-light); }
+
+  /* ---------- FOOTER ---------- */
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:48px 0; text-align:center; font-size:13px; }
+  footer .brand{ display:block; margin-bottom:10px; }
+
+  /* reveal on scroll */
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (max-width:720px){
+    .mirror-grid, .who-grid{ grid-template-columns:1fr; }
+    section{ padding:64px 0; }
+    .hero{ padding:72px 0 80px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="brand">بوضوح<span>.</span></a>
+    <div style="display:flex; align-items:center; gap:24px;">
+      <a href="index.html#pillars" style="color:var(--text-muted-dark); font-size:14px;">المواضيع</a>
+      <a href="blog.html" style="color:var(--text-muted-dark); font-size:14px;">المدونة</a>
+      <a href="quiz.html" style="color:var(--text-muted-dark); font-size:14px;">الاختبار</a>
+      <a href="about.html" style="color:var(--text-muted-dark); font-size:14px;">من نحن</a>
+      <a href="#price" class="nav-cta">احصل على الدليل</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-blob"></div>
+  <div class="wrap">
+    <div class="eyebrow hero-eyebrow">دليل رقمي — PDF قابل للتحميل فوراً</div>
+    <h1 class="hero-title">قبل ما تحكم على علاقتك، <em>افهمها بوضوح</em></h1>
+    <p class="hero-sub">دليل عملي بيساعدك تتعرف على علامات وأنماط العلاقة السامة قبل ما تضيع وقت وطاقة أكتر — وتاخد أول خطوة وانت واعي، مش تايه.</p>
+    <div class="hero-actions">
+      <a href="#price" class="btn-primary">حمّل الدليل الآن — ٧ د.أ</a>
+      <span class="hero-note">تحميل فوري بعد الدفع، بأي وقت وعلى أي جهاز</span>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>٧</b><span>أنماط شخصية سامة موثقة</span></div>
+      <div class="stat"><b>١٦</b><span>سؤال تشخيص ذاتي</span></div>
+      <div class="stat"><b>٣</b><span>خطوات عملية تبلش فيها اليوم</span></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">هل بتلاقي حالك هون؟</div>
+    <h2 class="section-title">أحياناً الأصعب مش العلاقة نفسها، هو إنك ما قادر تحدد شو بالضبط مش مظبوط</h2>
+    <div class="mirror-grid">
+      <div class="mirror-item"><span class="mark">؟</span><span>بحس إني "أمشي على البيض" حواليه، حتى بأبسط النقاشات.</span></div>
+      <div class="mirror-item"><span class="mark">؟</span><span>مشاعري كثير مرات بتترد بـ"إنت حساس زيادة" أو "إنت بتبالغ".</span></div>
+      <div class="mirror-item"><span class="mark">؟</span><span>بعد أغلب النقاشات، بحس بتعب نفسي أكتر من إحساس بالحل.</span></div>
+      <div class="mirror-item"><span class="mark">؟</span><span>أصدقائي أو عائلتي عبّروا لي، بلطف أو بقلق، إن العلاقة هاي مش مريحتلهم.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap reveal">
+    <div class="eyebrow hero-eyebrow">شو رح تلاقي جوا الدليل</div>
+    <h2 class="section-title" style="color:var(--fog)">ثمانية فصول، من الوعي لغاية أول خطوة فعلية</h2>
+    <div class="toc-list">
+      <div class="toc-row"><span class="toc-num">٠١</span><div><h3>مقدمة ودورة العلاقة السامة</h3><p>ليش صعب نلاحظ النمط ونحنا جوا العلاقة، وشكل "الدورة" المتكررة يلي بتخلينا نبرر ونكمل.</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٢</span><div><h3>چيك ليست التشخيص الذاتي</h3><p>١٦ عبارة موزعة على ٤ فئات، مع دليل تفسير نتيجتك بدون أحكام مسبقة.</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٣</span><div><h3>سبعة أنماط شخصية شائعة</h3><p>لكل نمط: علامات فارقة، مثال حواري، موقف توضيحي، وكيف تفرقه عن شخص عادي متعب بس.</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٤</span><div><h3>أسئلة شائعة</h3><p>هل ممكن يتغير؟ هل لازم أنفصل فوراً؟ ومتى الوضع يعتبر خطر حقيقي؟</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٥</span><div><h3>خلاف طبيعي أو علاقة سامة؟</h3><p>جدول مقارنة واضح + علامات تحذيرية تلاحظها أثناء النقاش نفسه.</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٦</span><div><h3>أول ثلاث خطوات عملية</h3><p>حدود، توثيق، ودعم — مع خطة أول أسبوع يوم بيوم.</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٧</span><div><h3>كيف تدعم صديق بنفس الموقف</h3><p>شو يساعد فعلاً وشو بيضر، لو حدا قريب منك شارك معك تجربته.</p></div></div>
+      <div class="toc-row"><span class="toc-num">٠٨</span><div><h3>ملحقات قابلة للطباعة</h3><p>ورقة توثيق أسبوعية وملخص سريع ترجعله بأي وقت.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">معاينة من الدليل</div>
+    <h2 class="section-title">مثال من فصل الأنماط السبعة</h2>
+    <div class="sample-card">
+      <span class="sample-tag">النمط المتلاعب — التلاعب النفسي</span>
+      <p class="sample-quote">هاد النمط بيشتغل بالتحكم بإدراكك لواقعك أنت. مو دايماً بيصرخ أو يتحكم بشكل واضح، أكتر إشي بيخليك تشك بذاكرتك، إحساسك، وحتى عقلك.</p>
+      <p class="sample-dialog">— إنت وعدتني إنك رح تجي الساعة سبعة.<br>— أبداً ما قلتلك هيك، إنت دايماً بتسمع اللي بدك ياه.</p>
+    </div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap reveal">
+    <div class="eyebrow hero-eyebrow">لمين هاد الدليل</div>
+    <h2 class="section-title" style="color:var(--fog)">قبل ما تشتري، تأكد إنه إلك</h2>
+    <div class="who-grid">
+      <div class="who-card who-yes">
+        <h3>هاد الدليل إلك لو:</h3>
+        <ul>
+          <li>✅ حاسس في إشي مش مظبوط بعلاقتك بس ما قادر تحدده بالضبط</li>
+          <li>✅ بدك أداة عملية تساعدك تفكر بوضوح، مش بس تتعاطف معك</li>
+          <li>✅ بتفضل تفهم الأنماط قبل ما تاخد قرار كبير</li>
+        </ul>
+      </div>
+      <div class="who-card who-no">
+        <h3>هاد الدليل مش بديل عن:</h3>
+        <ul>
+          <li>◇ علاج أو استشارة نفسية مع مختص مرخّص</li>
+          <li>◇ تدخل عاجل لو سلامتك الجسدية مهددة فعلياً</li>
+          <li>◇ تشخيص طبي رسمي لك أو لأي شخص تاني</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="price">
+  <div class="wrap reveal" style="text-align:center;">
+    <div class="eyebrow" style="justify-content:center;">جاهز تبلش؟</div>
+    <h2 class="section-title" style="margin:0 auto;">خطوة وعي وحدة، بسعر أقل من فنجان قهوة أسبوعين</h2>
+    <div class="price-card">
+      <span class="text-muted" style="font-size:14px;">دليل التعرف على العلاقة السامة</span>
+      <div class="price-value">٧<sup> د.أ</sup></div>
+      <span class="text-muted" style="font-size:13px;">دفعة واحدة — بدون اشتراك</span>
+      <ul class="price-list">
+        <li><b>✓</b> ملف PDF كامل، ١٨ صفحة، جاهز للتحميل فوراً</li>
+        <li><b>✓</b> چيك ليست تشخيص ذاتي + ٧ أنماط شخصية موثقة</li>
+        <li><b>✓</b> ملحقات قابلة للطباعة (سجل ملاحظات + ملخص سريع)</li>
+        <li><b>✓</b> يفتح على الموبايل والكمبيوتر بدون أي برنامج إضافي</li>
+      </ul>
+      <!-- TODO: بدّل هاد الرابط برابط الدفع الفعلي (Stripe / PayPal / Gumroad...) -->
+      <a href="#price" class="btn-full">حمّل الدليل الآن</a>
+      <p class="price-guarantee">الدفع آمن ومشفّر. رابط التحميل بيوصلك مباشرة بعد الدفع.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">أسئلة شائعة</div>
+    <h2 class="section-title">قبل ما تقرر</h2>
+    <div class="faq-list" style="margin-top:32px;">
+      <div class="faq-item">
+        <button class="faq-q">هل الدليل بيشخصلي شريكي؟ <span class="icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">لأ. الدليل أداة وعي بتساعدك تلاحظ أنماط سلوك متكررة، مش تشخيص طبي أو نفسي رسمي لأي شخص. الهدف إنك تفهم وضعك بشكل أوضح، مش تلصق تسمية نهائية على حدا.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">كيف بستلم الدليل بعد الدفع؟ <span class="icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">رابط تحميل مباشر بيوصلك فور إتمام الدفع، وبتقدر تفتح الملف على موبايلك أو كمبيوترك بدون أي برنامج إضافي.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">شو لو الدليل ما ناسبني؟ <span class="icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">تواصل معنا وبنراجع طلبك — هدفنا إنك تخرج بفايدة حقيقية، مش بس عملية بيع.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">في نسخة تانية عربية غير اللهجة الأردنية؟ <span class="icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">الإصدار الحالي مكتوب بلهجة قريبة من العامية الشامية عشان يحس القارئ إنه حديث مباشر لا محاضرة أكاديمية. نسخ بلهجات تانية قيد الدراسة حسب الطلب.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap reveal">
+    <div class="disclaimer">
+      <b>تنويه مهم:</b> هاد الدليل محتوى توعوي وتثقيفي، وليس بديلاً عن تشخيص طبي أو علاج نفسي مع مختص مرخّص. لو سلامتك الجسدية أو النفسية مهددة بشكل مباشر، توجه فوراً لجهة دعم مختصة أو شخص تثق فيه بمحيطك.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="brand kufi" style="color:var(--fog); font-size:18px;">بوضوح</span>
+    محتوى توعوي حول العلاقات وأنماط الشخصية — بالعربي، لكل حدا بده يشوف علاقته بوضوح أكتر.
+    <div style="margin-top:18px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; font-size:12.5px;">
+      <a href="index.html" style="color:var(--text-muted-dark);">الرئيسية</a>
+      <a href="blog.html" style="color:var(--text-muted-dark);">المدونة</a>
+      <a href="quiz.html" style="color:var(--text-muted-dark);">الاختبار</a>
+      <a href="about.html" style="color:var(--text-muted-dark);">من نحن</a>
+      <a href="terms.html" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
+      <a href="privacy.html" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const btn = item.querySelector('.faq-q');
+    const ans = item.querySelector('.faq-a');
+    btn.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(o => {
+        o.classList.remove('open');
+        o.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        ans.style.maxHeight = ans.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:.15 });
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

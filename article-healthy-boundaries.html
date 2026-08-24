@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كيف تحط حدود صحية بعلاقتك بدون ما تحس بالذنب — بوضوح</title>
+<meta name="description" content="الحدود مش قسوة ولا أنانية. تعرف على كيف تحط حدود واضحة بعلاقتك وتحافظ عليها بدون ما تخسر حالك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:2; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  nav{ position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); text-decoration:none; }
+  .brand span{ color:var(--clarity); }
+  .nav-links{ display:flex; align-items:center; gap:28px; }
+  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
+  .nav-links a:hover{ color:var(--fog); }
+  a.nav-cta{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px; padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease; }
+  a.nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  .article-hero{ position:relative; width:100%; height:500px; overflow:hidden; }
+  .article-hero img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .hero-overlay{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(36,29,46,.05) 0%, rgba(36,29,46,.35) 55%, rgba(36,29,46,.92) 100%); display:flex; align-items:flex-end; }
+  .hero-overlay .wrap{ width:100%; padding-bottom:44px; text-align:center; }
+  .tag{ display:inline-block; font-size:12px; font-weight:700; color:#8a6a2e; background:var(--clarity-soft); padding:5px 14px; border-radius:100px; margin-bottom:18px; }
+  .article-hero h1{ color:var(--fog); font-size:clamp(28px,4.4vw,42px); font-weight:900; max-width:22ch; margin:0 auto; line-height:1.4; }
+  .article-meta{ color:var(--text-muted-dark); font-size:13.5px; margin-top:18px; }
+  @media (max-width:700px){ .article-hero{ height:400px; } }
+
+  main{ padding:52px 0 40px; }
+  article p{ font-size:17px; color:var(--text-on-light); max-width:70ch; }
+  article p + p{ margin-top:18px; }
+  article h2{ font-size:22px; margin:40px 0 14px; }
+  .lede{ font-size:19px; color:var(--text-muted-light); }
+  .pull{ border-right:3px solid var(--clarity); padding-right:20px; margin:32px 0; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:20px; line-height:1.7; max-width:34ch; }
+  ul.plain{ margin-top:10px; display:flex; flex-direction:column; gap:14px; padding-right:20px; }
+  ul.plain li{ font-size:16.5px; color:var(--text-on-light); }
+
+  .cta-box{
+    margin:52px 0; background:var(--ink); border-radius:20px; padding:38px 34px; text-align:center;
+    background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink));
+  }
+  .cta-box h3{ color:var(--fog); font-size:21px; margin-bottom:10px; }
+  .cta-box p{ color:var(--text-muted-dark); font-size:14.5px; max-width:44ch; margin:0 auto 22px; }
+  .btn-primary{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:15px; padding:14px 28px; border-radius:100px; display:inline-block; text-decoration:none; }
+
+  .disclaimer{ background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius); padding:20px 24px; font-size:13.5px; color:var(--text-muted-light); margin-top:44px; }
+
+  .related{ margin-top:56px; }
+  .related h3{ font-size:15px; color:var(--text-muted-light); margin-bottom:16px; }
+  .related a{ display:block; text-decoration:none; color:var(--text-on-light); font-weight:600; font-size:15px; padding:14px 0; border-bottom:1px solid var(--fog-dim); }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; margin-top:60px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+  footer a{ text-decoration:none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="brand">بوضوح<span>.</span></a>
+    <div class="nav-links">
+      <a href="index.html#pillars">المواضيع</a>
+      <a href="blog.html">المدونة</a>
+      <a href="quiz.html">الاختبار</a>
+      <a href="about.html">من نحن</a>
+      <a href="sales-page.html" class="nav-cta">تصفّح المتجر</a>
+    </div>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <img src="https://images.pexels.com/photos/5723263/pexels-photo-5723263.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="امرأة تمد يدها بإشارة توقف هادئة وواثقة" loading="lazy">
+  <div class="hero-overlay">
+    <div class="wrap">
+      <span class="tag">علاقات صحية</span>
+      <h1>كيف تحط حدود صحية بعلاقتك بدون ما تحس بالذنب</h1>
+      <p class="article-meta">قراءة ٦ دقائق · فريق بوضوح</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <article>
+      <p class="lede">كثير ناس بيسمعوا كلمة "حدود" ويحسوا إنها كلمة قاسية — كأنها جدار بتبنيه بوجه اللي بتحبهم. الحقيقة عكس هيك تماماً: الحدود الصحية هي يلي بتخلي العلاقة تستمر بارتياح، لأنها بتحمي وقتك وطاقتك ومشاعرك من غير ما تحتاج تضحي فيهم كل مرة.</p>
+
+      <h2>شو الفرق بين الحد الصحي والأنانية؟</h2>
+      <p>الحد الصحي بيوضح شو مرتاح إلك وشو لأ، بدون ما يجرح الطرف التاني أو يحاول يسيطر عليه. الأنانية بالمقابل بتتجاهل احتياجات الطرف التاني بالكامل. الفرق مو بالشكل، هو بالنية: الحد بيقول "هاد يلي بحتاجه أنا"، مش "لازم تسوي يلي بدي أنا بس".</p>
+      <p>مثال بسيط: قول "محتاج ساعة لحالي بعد الشغل قبل ما نحكي عن مواضيع صعبة" هو حد صحي. أما "ما بدي تحكي معي أبداً عن مواضيعك" فهو رفض تام للتواصل، مش حد.</p>
+      <h2>ليش صعب علينا نحط حدود أحياناً؟</h2>
+      <p>كثير مننا اتربى على فكرة إن "الشخص الطيب" لازم يوافق دايماً، وإن الرفض بيعني إنك أناني أو قليل احترام. هاد التفكير بيخلينا نتحمل أشياء بتتعبنا فترة طويلة قبل ما نقدر نعبر عنها — وساعتها بيطلع الكلام بشكل انفجار مش بشكل حد واضح من البداية.</p>
+      <h2>كيف تحط حد بشكل فعّال؟</h2>
+      <ul class="plain">
+        <li>كن واضح ومباشر، بدون تبرير طويل. جملة قصيرة وهادئة أقوى من خطاب كامل.</li>
+        <li>احكي عن نفسك مش عن الطرف التاني: "أنا محتاج..." أفضل من "إنت دايماً...".</li>
+        <li>لا تستنى اللحظة يلي بتنفجر فيها — الحدود الفعالة بتنحط بهدوء، قبل ما يتراكم الضيق.</li>
+        <li>كن مستعد تكرر الحد أكتر من مرة. مش كل الناس رح يتقبلوه من أول مرة، وهاد طبيعي.</li>
+        <li>لا تحمّل حالك مسؤولية رد فعل الطرف التاني — إنت مسؤول عن كيف بتوصل الحد، مو عن كيف رح يستقبله هو.</li>
+      </ul>
+      <h2>لما رد الفعل نفسه بيصير مؤشر</h2>
+      <p>لو حطيت حد بهدوء واحترام، ورد الفعل كان غضب دائم، سخرية، أو محاولة تخليك تحس بالذنب — هاي معلومة مهمة عن نوع العلاقة يلي إنت فيها، مش بس عن الموقف نفسه. العلاقة الصحية بتتقبل حدودك حتى لو ما عجبتها، والعلاقة السامة بتعاقبك عليها.</p>
+
+      <div class="pull">الحد الصحي مش سور بتبنيه، هو باب بتحدد مين يدخل ومتى.</div>
+
+      <div class="cta-box">
+        <h3>بدك تفهم أكتر أثر غياب الحدود على العلاقة؟</h3>
+        <p>دليل "التعرف على العلاقة السامة" فيه فصل كامل عن الحدود والتحكم، مع خطة عملية لأول أسبوع.</p>
+        <a href="sales-page.html" class="btn-primary">اكتشف الدليل</a>
+      </div>
+
+      <div class="disclaimer">هاد المقال محتوى توعوي عام، وليس بديلاً عن استشارة أو تشخيص مع مختص نفسي مرخّص.</div>
+
+      <div class="related">
+        <h3>مقالات ذات صلة</h3>
+        <a href="article-early-signs.html">٧ علامات ما بتلاحظها بالعلاقة السامة إلا متأخر</a>
+        <a href="article-healthy-first-date.html">كيف تبني علاقة صحية من أول موعد</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="brand kufi">بوضوح<span style="color:var(--clarity);">.</span></span>
+    <div style="margin-top:10px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+      <a href="index.html" style="color:var(--text-muted-dark);">الرئيسية</a>
+      <a href="blog.html" style="color:var(--text-muted-dark);">المدونة</a>
+      <a href="quiz.html" style="color:var(--text-muted-dark);">الاختبار</a>
+      <a href="about.html" style="color:var(--text-muted-dark);">من نحن</a>
+      <a href="sales-page.html" style="color:var(--text-muted-dark);">المتجر</a>
+      <a href="terms.html" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
+      <a href="privacy.html" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
