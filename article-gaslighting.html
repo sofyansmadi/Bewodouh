@@ -29,6 +29,8 @@
   .nav-links{ display:flex; align-items:center; gap:28px; }
   .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
   .nav-links a:hover{ color:var(--fog); }
+  a.nav-cta{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px; padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease; }
+  a.nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
   @media (max-width:780px){ .nav-links{ display:none; } }
 
   .article-hero{ position:relative; width:100%; height:500px; overflow:hidden; }
@@ -46,12 +48,13 @@
   article h2{ font-size:22px; margin:40px 0 14px; }
   .lede{ font-size:19px; color:var(--text-muted-light); }
   .pull{ border-right:3px solid var(--clarity); padding-right:20px; margin:32px 0; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:20px; line-height:1.7; max-width:34ch; }
-  .dialog{ background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius); padding:24px 26px; margin:24px 0; font-style:italic; color:var(--text-muted-light); font-size:15.5px; }
-  .dialog p{ font-size:15.5px !important; }
-  ul.phrases{ margin-top:10px; display:flex; flex-direction:column; gap:12px; padding-right:20px; }
-  ul.phrases li{ font-size:16px; }
+  ul.plain{ margin-top:10px; display:flex; flex-direction:column; gap:14px; padding-right:20px; }
+  ul.plain li{ font-size:16.5px; color:var(--text-on-light); }
 
-  .cta-box{ margin:52px 0; background:var(--ink); border-radius:20px; padding:38px 34px; text-align:center; background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink)); }
+  .cta-box{
+    margin:52px 0; background:var(--ink); border-radius:20px; padding:38px 34px; text-align:center;
+    background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink));
+  }
   .cta-box h3{ color:var(--fog); font-size:21px; margin-bottom:10px; }
   .cta-box p{ color:var(--text-muted-dark); font-size:14.5px; max-width:44ch; margin:0 auto 22px; }
   .btn-primary{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:15px; padding:14px 28px; border-radius:100px; display:inline-block; text-decoration:none; }
@@ -65,8 +68,8 @@
   footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; margin-top:60px; }
   footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
   footer a{ text-decoration:none; }
-
 </style>
+  
 </head>
 <body>
 
@@ -79,7 +82,7 @@
       <a href="quiz.html">الاختبار</a>
       <a href="ai.html">بوضوح AI</a>
       <a href="about.html">من نحن</a>
-      <a href="sales-page.html">المتجر</a>
+      <a href="sales-page.html" class="nav-cta">تصفّح المتجر</a>
     </div>
   </div>
 </nav>
