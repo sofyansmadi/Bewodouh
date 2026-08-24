@@ -26,26 +26,45 @@
   h1,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
   a{ color:inherit; }
 
-  /* ---------- HEADER ---------- */
+  @keyframes orbPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(201,161,95,.45); }
+    50%{ box-shadow:0 0 0 8px rgba(201,161,95,0); }
+  }
+  .ai-orb{
+    position:relative; border-radius:50%; flex-shrink:0;
+    background:conic-gradient(from 0deg, var(--clarity-soft), var(--clarity), var(--rose), var(--clarity-soft));
+    display:flex; align-items:center; justify-content:center;
+    animation:orbPulse 2.6s ease-in-out infinite;
+  }
+  .ai-orb::before{ content:""; position:absolute; inset:2px; border-radius:50%; background:var(--ink); }
+  .ai-orb svg{ position:relative; z-index:1; }
+
   header{
     background:var(--ink); border-bottom:1px solid rgba(255,255,255,.06);
     padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    position:relative; overflow:hidden;
   }
-  .brand-row{ display:flex; align-items:center; gap:12px; }
-  .brand-badge{
-    width:38px; height:38px; border-radius:50%; background:radial-gradient(120% 120% at 30% 20%, var(--clarity-soft), var(--clarity));
-    display:flex; align-items:center; justify-content:center; font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; color:var(--ink); font-size:15px; flex-shrink:0;
+  header::before{
+    content:""; position:absolute; inset:0; opacity:.5;
+    background:radial-gradient(60% 140% at 15% 50%, rgba(201,161,95,.14), transparent 70%);
+    pointer-events:none;
   }
-  .brand-name{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:18px; color:var(--fog); }
-  .brand-name span{ color:var(--clarity); }
-  .brand-sub{ font-size:12px; color:var(--text-muted-dark); margin-top:1px; }
+  .brand-row{ display:flex; align-items:center; gap:12px; position:relative; z-index:1; }
+  .brand-row .ai-orb{ width:38px; height:38px; }
+  .brand-row .ai-orb svg{ width:18px; height:18px; }
+  .brand-name{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:18px; color:var(--fog); display:flex; align-items:center; gap:8px; }
+  .brand-name .ai-tag{
+    font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; font-size:10.5px; letter-spacing:.5px;
+    color:var(--ink); background:linear-gradient(120deg, var(--clarity-soft), var(--clarity));
+    padding:3px 8px; border-radius:100px;
+  }
+  .brand-sub{ font-size:12px; color:var(--text-muted-dark); margin-top:2px; }
   .status-chip{
     display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted-dark);
-    border:1px solid rgba(255,255,255,.1); padding:6px 12px; border-radius:100px;
+    border:1px solid rgba(255,255,255,.1); padding:6px 12px; border-radius:100px; position:relative; z-index:1;
   }
-  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--clarity); }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--clarity); animation:orbPulse 2.2s ease-in-out infinite; }
 
-  /* ---------- CHAT AREA ---------- */
   .chat-wrap{ flex:1; overflow-y:auto; padding:28px 0 10px; }
   .chat-inner{ max-width:720px; margin:0 auto; padding:0 20px; display:flex; flex-direction:column; gap:20px; }
 
@@ -53,17 +72,16 @@
   .msg.bot{ align-self:flex-start; flex-direction:row; }
   .msg.user{ align-self:flex-end; flex-direction:row-reverse; }
 
-  .avatar{
-    width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:13px;
+  .avatar{ width:32px; height:32px; flex-shrink:0; }
+  .avatar.ai-orb svg{ width:15px; height:15px; }
+  .user-avatar{
+    width:32px; height:32px; border-radius:50%; background:var(--clarity-soft);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
-  .msg.bot .avatar{ background:var(--ink); color:var(--clarity-soft); }
-  .msg.user .avatar{ background:var(--clarity-soft); color:var(--ink); }
 
   .bubble{ padding:14px 18px; border-radius:16px; font-size:15.5px; line-height:1.85; }
   .msg.bot .bubble{ background:#fff; border:1px solid var(--fog-dim); color:var(--text-on-light); border-top-right-radius:4px; }
   .msg.user .bubble{ background:var(--ink); color:var(--text-on-dark); border-top-left-radius:4px; }
-  .bubble p + p{ margin-top:10px; }
 
   .typing-bubble{ display:inline-flex; gap:5px; padding:16px 18px; }
   .typing-dot{ width:7px; height:7px; border-radius:50%; background:var(--rose); opacity:.5; animation:blink 1.2s infinite; }
@@ -71,27 +89,34 @@
   .typing-dot:nth-child(3){ animation-delay:.4s; }
   @keyframes blink{ 0%,80%,100%{ opacity:.3; transform:translateY(0);} 40%{ opacity:1; transform:translateY(-3px);} }
 
-  /* ---------- WELCOME / STARTERS ---------- */
-  .welcome{ text-align:center; padding:18px 0 8px; }
-  .welcome .brand-badge{ width:56px; height:56px; margin:0 auto 18px; font-size:20px; }
+  .welcome{ text-align:center; padding:14px 0 8px; }
+  .welcome .ai-orb{ width:60px; height:60px; margin:0 auto 18px; }
+  .welcome .ai-orb svg{ width:28px; height:28px; }
   .welcome h1{ font-size:22px; color:var(--ink); margin-bottom:8px; }
-  .welcome p{ font-size:14.5px; color:var(--text-muted-light); max-width:42ch; margin:0 auto; }
+  .welcome p{ font-size:14.5px; color:var(--text-muted-light); max-width:44ch; margin:0 auto; }
+  .welcome .scope-note{ font-size:12.5px; color:var(--rose); margin-top:10px; }
 
   .starters{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:22px; }
   .starter-chip{
     background:#fff; border:1px solid var(--fog-dim); border-radius:100px; padding:10px 18px;
     font-size:13.5px; color:var(--text-on-light); cursor:pointer; transition:.15s; font-family:inherit;
+    display:flex; align-items:center; gap:6px;
   }
   .starter-chip:hover{ border-color:var(--clarity); background:var(--fog); }
+  .starter-chip svg{ width:13px; height:13px; flex-shrink:0; color:var(--clarity); }
 
-  /* ---------- COMPOSER ---------- */
   .composer-area{ flex-shrink:0; border-top:1px solid var(--fog-dim); background:var(--fog); padding:16px 20px 20px; }
   .composer{
-    max-width:720px; margin:0 auto; display:flex; align-items:flex-end; gap:10px;
-    background:#fff; border:1.5px solid var(--fog-dim); border-radius:20px; padding:8px 8px 8px 8px; transition:.15s;
+    max-width:720px; margin:0 auto; position:relative; border-radius:20px; padding:1.5px;
+    background:var(--fog-dim); transition:background .3s;
   }
-  .composer:focus-within{ border-color:var(--clarity); }
-  .composer textarea{
+  .composer.active{
+    background:linear-gradient(120deg, var(--clarity-soft), var(--clarity), var(--rose), var(--clarity-soft));
+    background-size:300% 300%; animation:gradientMove 3s ease infinite;
+  }
+  @keyframes gradientMove{ 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+  .composer-inner{ display:flex; align-items:flex-end; gap:10px; background:#fff; border-radius:18.5px; padding:8px; }
+  .composer-inner textarea{
     flex:1; border:none; outline:none; resize:none; font-family:inherit; font-size:15px; color:var(--text-on-light);
     background:transparent; padding:10px 12px; max-height:120px; line-height:1.7;
   }
@@ -110,9 +135,9 @@
 
 <header>
   <div class="brand-row">
-    <div class="brand-badge">ب</div>
+    <div class="ai-orb"><svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg></div>
     <div>
-      <div class="brand-name">بوضوح <span>AI</span></div>
+      <div class="brand-name">بوضوح <span class="ai-tag">AI</span></div>
       <div class="brand-sub">متخصص بالعلاقات والمشاعر فقط</div>
     </div>
   </div>
@@ -123,13 +148,14 @@
   <div class="chat-inner" id="chatInner">
 
     <div class="welcome" id="welcomeBlock">
-      <div class="brand-badge">ب</div>
-      <h1>أهلاً فيك 👋</h1>
-      <p>أنا بوضوح AI — هون بس عشان تحكي عن مشاعرك وعلاقاتك براحتك. اسألني عن أي إشي متعلق بهاد الموضوع بس.</p>
+      <div class="ai-orb"><svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg></div>
+      <h1>أهلاً فيك</h1>
+      <p>أنا بوضوح AI — مساحة رقمية من "بوضوح" تقدر تحكي فيها عن مشاعرك وعلاقاتك براحتك، بعيد عن أي حكم.</p>
+      <p class="scope-note">بجاوب بس على أسئلة متعلقة بالعلاقات والمشاعر — هاد تخصصي الوحيد.</p>
       <div class="starters">
-        <button class="starter-chip" type="button">شو الفرق بين الغيرة الطبيعية والمرضية؟</button>
-        <button class="starter-chip" type="button">كيف أحط حد صحي مع شريكي؟</button>
-        <button class="starter-chip" type="button">حاسة إني بحلل كل تصرف لشريكي</button>
+        <button class="starter-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg> شو الفرق بين الغيرة الطبيعية والمرضية؟</button>
+        <button class="starter-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg> كيف أحط حد صحي مع شريكي؟</button>
+        <button class="starter-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg> حاسة إني بحلل كل تصرف لشريكي</button>
       </div>
     </div>
 
@@ -137,14 +163,16 @@
 </div>
 
 <div class="composer-area">
-  <div class="composer">
-    <textarea id="messageInput" rows="1" placeholder="اكتب شو حاسس فيه..."></textarea>
-    <button class="send-btn" id="sendBtn" type="button" aria-label="إرسال">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="19" x2="12" y2="5"></line>
-        <polyline points="6 11 12 5 18 11"></polyline>
-      </svg>
-    </button>
+  <div class="composer" id="composerBox">
+    <div class="composer-inner">
+      <textarea id="messageInput" rows="1" placeholder="اكتب شو حاسس فيه..."></textarea>
+      <button class="send-btn" id="sendBtn" type="button" aria-label="إرسال">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="19" x2="12" y2="5"></line>
+          <polyline points="6 11 12 5 18 11"></polyline>
+        </svg>
+      </button>
+    </div>
   </div>
   <p class="disclaimer-line">بوضوح AI أداة دعم عام، مش بديل عن استشارة مختص نفسي مرخّص. النسخة الحالية تجريبية.</p>
 </div>
@@ -153,9 +181,13 @@
 /* ============================================================
    بوضوح AI — chat front-end shell.
    ------------------------------------------------------------
-   This is currently a MOCK integration: getAIResponse() below
-   returns a canned reply after a short delay so the UI/UX can
-   be demoed end-to-end. To connect a real backend later:
+   MOCK integration: getAIResponse() below matches the user's
+   message against a bank of relationship-topic keywords and
+   returns a relevant canned reply. This is NOT a real language
+   model yet — it's a topic-matching placeholder so the product
+   feels coherent while the real backend isn't wired up.
+
+   To connect a real backend later:
 
    1) Real AI calls must NOT be made directly from this client-side
       file with an API key embedded here — that would leak the key
@@ -178,7 +210,8 @@
 
    3) On the backend, set a system prompt that restricts the model
       to relationships / emotional-support topics only, and politely
-      declines anything outside that scope.
+      declines anything outside that scope — the TOPIC_BANK below is
+      a good starting reference for the tone and scope to keep.
    ============================================================ */
 
 const chatInner = document.getElementById('chatInner');
@@ -186,61 +219,214 @@ const chatWrap = document.getElementById('chatWrap');
 const welcomeBlock = document.getElementById('welcomeBlock');
 const input = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
+const composerBox = document.getElementById('composerBox');
 
 let history = [];
 let isThinking = false;
 
-const MOCK_REPLIES = [
-  "شكراً إنك شاركتني هاد الإحساس. حاسة/حاسس إنه هاد الموضوع مهم إلك — ممكن تحكيلي أكتر شو صار بالضبط؟",
-  "هاد إحساس طبيعي كثير ناس بيمروا فيه. خلينا ناخذها خطوة خطوة — شو أكتر جزء من الموقف حاسس إنه بيضايقك أكتر؟",
-  "بسمعك. قبل ما نكمل، حابة تعرف: هل هاد الموقف صار مرة وحدة ولا بيتكرر معك بالعلاقة؟",
-  "هاد ملاحظة مهمة. بناءً على يلي حكيتيه، ممكن يفيدك تفكري كيف بتحسي بعد المواقف المشابهة — بتحسي براحة ولا بتعبي أكتر؟"
+/* ------------------------------------------------------------
+   SYSTEM_PROMPT — reference only, not used by the mock logic.
+   When a real backend is wired up (see notes above), send this
+   as the system prompt so the model keeps the same role, tone,
+   and boundaries the mock replies below are modeled on.
+   ------------------------------------------------------------
+   أنت مساعد ذكاء اصطناعي متخصص في تقديم نصائح واستشارات العلاقات
+   العاطفية والاجتماعية. دورك:
+   ١. تقديم نصائح متوازنة تنطلق من علم النفس وتراعي الاحترام
+      المتبادل والحدود الصحية.
+   ٢. عدم التحيز لطرف على حساب الآخر.
+   ٣. التمييز دائماً بين المشاكل العادية التي يمكن حلها بالحوار،
+      وبين السلوكيات السامة أو المؤذية التي تستدعي إنهاء العلاقة
+      أو اللجوء لمختص.
+   ٤. إجاباتك تكون دافئة، متفهمة، واضحة، وخالية من الحشو.
+   ------------------------------------------------------------ */
+const SYSTEM_PROMPT = `أنت مساعد ذكاء اصطناعي متخصص في تقديم نصائح واستشارات العلاقات العاطفية والاجتماعية.
+دورك:
+١. تقديم نصائح متوازنة تنطلق من علم النفس وتراعي الاحترام المتبادل والحدود الصحية.
+٢. عدم التحيز لطرف على حساب الآخر.
+٣. التمييز دائماً بين المشاكل العادية التي يمكن حلها بالحوار، وبين السلوكيات السامة أو المؤذية التي تستدعي إنهاء العلاقة أو اللجوء لمختص.
+٤. إجاباتك تكون دافئة، متفهمة، واضحة، وخالية من الحشو.`;
+
+const TOPIC_BANK = [
+  {
+    id: 'jealousy',
+    keywords: ['غيرة', 'غيران', 'يغار', 'بغار'],
+    replies: [
+      "الغيرة الصحية جاية من خوف طبيعي على فقدان حدا بتحبيه، وبتتوصل باحترام بدون ما تتعدى على حريتك. الغيرة السامة غير هيك: مراقبة مستمرة، تفتيش بالهاتف، عزل عن الأصدقاء، شك بدون دليل — هاي مش حب، هاي محاولة سيطرة.",
+      "في فرق بين غيرة عابرة بموقف واضح، وبين غيرة بتصير نمط ثابت بيحد من حريتك أو حرية شريكك. وين حاسة إنك واقفة إنتِ بالضبط؟"
+    ]
+  },
+  {
+    id: 'boundaries',
+    keywords: ['حد', 'حدود', 'أرفض', 'ما بقدر أقول لأ'],
+    replies: [
+      "الحدود مش قسوة، هي وضوح. جربي تصيغيها كإشي بتحتاجيه إنتِ: \"بحب أتواصل وياك، بس محتاجة وقت لحالي لشغلي/دراستي حتى أقدر أركز\". هيك بتحمي العلاقة على المدى الطويل بدل ما تخليها تستنزفك.",
+      "الحد الصحي مش قسوة، هو توضيح لإشي مرتاحة فيه وإشي لأ. جربي تفكري: شو أكتر موقف بتحسي فيه إن حدودك بتتكسر بالعلاقة؟"
+    ]
+  },
+  {
+    id: 'silent_treatment',
+    keywords: ['صمت', 'ساكت', 'مقاطعني', 'مش حاكيني', 'مسكرني'],
+    replies: [
+      "الصمت العقابي غالباً بيكون وسيلة سيطرة أو دفاع، مش حل. أحسن رد فعل إنك ما تترجّي ولا تضغطي — قوليله بهدوء: \"شايفة إنك منزعج، رح أعطيك مساحتك، وأنا هون لما تجهز تحكي\". وبعدين لما يهدى الوضع، وضحيله إنه الصمت بيضر العلاقة أكتر من أي نقاش.",
+      "قديش بيطول الصمت عادة، وكيف بتحسي وانتِ بهاي الفترة؟"
+    ]
+  },
+  {
+    id: 'expressing_upset',
+    keywords: ['كيف أعبر', 'زعلانة منه', 'بدون ما نتخانق', 'أحكيله زعلي'],
+    replies: [
+      "جربي تستخدمي \"لغة الأنا\" بدل الاتهام — بدل \"إنت دايماً بتهملني\"، قولي \"بحس بالحزن لما ما منحكي لفترة طويلة، ومحتاجة نقضي وقت سوا\". هيك بتوصلي إحساسك بدون ما يحس إنه متهم، وبيقل احتمال يدافع عن نفسه بدل ما يسمعك.",
+      "شو آخر موقف حسيتي فيه بزعل بدك تعبري عنه؟"
+    ]
+  },
+  {
+    id: 'refuses_accountability',
+    keywords: ['ما بعترف', 'ما بغلط', 'دايما صح', 'ما بعتذر'],
+    replies: [
+      "الشخص يلي بيرفض يعترف بغلطه غالباً بيربط الخطأ بقيمته الذاتية. حاولي ما توجهي النقاش كـ\"مين رابح ومين خسران\" — ركزي على الحل: \"مو المهم مين غلط، المهم كيف نتجنب هيك موقف بالمستقبل\". لو استمر ينكر دايماً، هاد بحتاج منك تفكري هل تقدري تتعايشي مع هاد النمط أو لأ.",
+      "هاد النمط بيتكرر كثير معه، ولا كان موقف معين بس؟"
+    ]
+  },
+  {
+    id: 'analyzing_partner',
+    keywords: ['بحلل', 'بحلّل', 'كل تصرف', 'بفكر فيه كتير', 'بدقق'],
+    replies: [
+      "لما نحس إننا لازم نحلل كل كلمة أو تصرف من الطرف التاني، غالباً هاد بيرجع لإحساس بعدم أمان بالعلاقة. من متى بدأتي تحسي بهاد النمط؟",
+      "التحليل المستمر بيتعب، وبيصير نمط دفاعي أحياناً. هل هاد الإحساس مرتبط بموقف معين صار بالعلاقة، ولا حاسة إنه معك من زمان؟"
+    ]
+  },
+  {
+    id: 'doubt_gaslighting',
+    keywords: ['بشك بنفسي', 'بتخيل', 'مش متأكدة', 'بتشك', 'بختلق'],
+    replies: [
+      "الشك المستمر بحكمك على الأمور، خصوصاً بعد نقاشات معينة، ممكن يكون مؤشر على نمط تلاعب نفسي. جربي توثقي المواقف يلي بتحسي فيها هيك — بيساعدك تشوفي النمط بوضوح أكتر.",
+      "لو كل نقاش بينتهي وانتِ حاسة إنك \"مبالغة\" أو \"بتختلقي أشياء\"، هاد يستاهل انتباه. شو آخر موقف حسيتي فيه هيك؟"
+    ]
+  },
+  {
+    id: 'relationship_fatigue',
+    keywords: ['ملل', 'فتور', 'روتين', 'برد المشاعر'],
+    replies: [
+      "الفتور طبيعي جداً، هو انتقال من \"الشغف الأعمى\" لـ\"الحب المستقر\" — مش نهاية الحب. جربوا تكسروا الروتين بتجربة جديدة سوا (سفرة، هواية مشتركة)، وقلّلوا شوي من التواجد الدائم عشان يرجع الشوق، وركزوا على الامتنان بالتفاصيل الصغيرة.",
+      "قديش صار إلكم وقت حاسة بهاد الفتور؟"
+    ]
+  },
+  {
+    id: 'being_used',
+    keywords: ['مستغلني', 'بيتسلى', 'مش جدي معي', 'بيستخدمني'],
+    replies: [
+      "علامات إنه مش جدي أو بيستغلك: بيتواجد بس لما يحتاجك، تناقض بين كلامه وأفعاله، بيتجنب الحديث عن المستقبل أو بيخلي العلاقة سرية، وما بيهتم بتفاصيل حياتك أو مشاعرك.",
+      "أي واحدة من هاي العلامات حاسة إنها الأقرب لموقفك؟"
+    ]
+  },
+  {
+    id: 'breakup',
+    keywords: ['انفصلت', 'انفصال', 'تركني', 'تركته', 'فراق', 'خلصت العلاقة'],
+    replies: [
+      "التعافي رحلة بتاخد وقت ووعي. قطع التواصل تماماً بيساعد عقلك وجسمك يعيدوا ضبط نفسهم بعيد عن المحفزات. اسمحي لنفسك تحسي بالحزن والحنين، هاد طبيعي، بس بدون ما تستسلمي لهم — وركزي على إعادة بناء ذاتك: أهدافك، رياضتك، وناسك يلي أهملتيهم.",
+      "معك حق تحزني بدون ما تحطي جدول زمني لحالك. شو أكتر إشي حاسة إنه صعب عليكِ دلوقتي؟"
+    ]
+  },
+  {
+    id: 'returning_to_ex',
+    keywords: ['أرجعله', 'أرجعلها', 'الإكس', 'أرجع لحبيبي السابق', 'أرجع له'],
+    replies: [
+      "الرجوع بيكون قرار صح بحالة وحدة بس: إذا فعلياً تغيرت الظروف أو الأسباب يلي خلت الانفصال يصير، ووصل الطرفين لوعي أو نضوج حقيقي. أما لو الرجوع بس بسبب الاشتياق أو الخوف من الوحدة، غالباً نفس المشاكل رح ترجع تصير.",
+      "شو يلي تغير فعلياً من وقت الانفصال، إذا في إشي تغير؟"
+    ]
+  },
+  {
+    id: 'trust',
+    keywords: ['ثقة', 'خيانة', 'ما بثق', 'خانني'],
+    replies: [
+      "الثقة لما تنكسر بتاخد وقت تترمم، وهاد طبيعي. هل الموضوع مرتبط بموقف محدد صار، ولا إحساس عام بعدم الأمان؟",
+      "فقدان الثقة بيأثر على كل التفاصيل الصغيرة بالعلاقة. شو بتحسي إنك محتاجة دلوقتي — تتكلمي عن اللي صار، ولا تفهمي كيف تتعاملي معه؟"
+    ]
+  },
+  {
+    id: 'communication',
+    keywords: ['ما بيسمعني', 'ما بيفهمني', 'نقاش', 'خناقة', 'بنتخانق'],
+    replies: [
+      "لما بتحسي إنه مش مسموعة بالنقاش، هاد بيصعب أي محاولة توصيل. كيف بتصير النقاشات عادة بينكم — مين بيبدأ ينسحب أو يرفع صوته أول؟",
+      "التواصل الصعب أحياناً بيرجع لطريقة النقاش مش لموضوعه. شو آخر خلاف صار بينكم، وكيف انتهى؟"
+    ]
+  },
+  {
+    id: 'attachment_styles',
+    keywords: ['نمط تعلق', 'تعلقي', 'قلق من الهجر', 'متجنب عاطفياً'],
+    replies: [
+      "في ثلاث أنماط تعلق رئيسية: الآمن (بيتواصل بوضوح وما بيخاف من القرب أو الاستقلالية)، القلق (محتاج تأكيد دائم وبيخاف من الهجر)، والمتجنب (بيبعد وبيغلق على نفسه لما تكبر المشاعر أو الالتزام). فهم نمطك ونمط شريكك بيساعدك تفهمي ردود أفعاله بدون ما تفسريها كرفض شخصي.",
+      "أي وصف من الثلاثة حاسة إنه الأقرب إلك، أو لشريكك؟"
+    ]
+  }
 ];
+
+const FALLBACK_REPLIES = [
+  "بسمعك. ممكن تحكيلي أكتر عن الموقف عشان أفهم أحسن؟",
+  "شكراً إنك شاركتيني هاد الإحساس. شو أكتر جزء من الموضوع حاسة إنه محتاج وضوح أكتر؟",
+  "هاد موضوع مهم. خلينا ناخذه خطوة خطوة — من وين حابة نبدأ؟"
+];
+
+const OFF_TOPIC_REPLY = "أنا متخصص بس بمواضيع العلاقات والمشاعر، فما بقدر أساعد بهاد الموضوع. بس لو في إشي متعلق بعلاقتك أو حالتك النفسية حابة تحكي عنه، أنا هون.";
+const OFF_TOPIC_HINTS = ['طقس', 'برمجة', 'كود', 'رياضة', 'اقتصاد', 'سياسة', 'وصفة أكل'];
+
+function pickReply(userText){
+  for (const off of OFF_TOPIC_HINTS){
+    if (userText.includes(off)) return { text: OFF_TOPIC_REPLY, topic: 'off_topic' };
+  }
+  for (const topic of TOPIC_BANK){
+    if (topic.keywords.some(k => userText.includes(k))){
+      const usedCount = history.filter(h => h.role === 'user' && h.topic === topic.id).length;
+      return { text: topic.replies[usedCount % topic.replies.length], topic: topic.id };
+    }
+  }
+  const usedFallback = history.filter(h => h.role === 'user' && h.topic === 'fallback').length;
+  return { text: FALLBACK_REPLIES[usedFallback % FALLBACK_REPLIES.length], topic: 'fallback' };
+}
 
 function autoResize(){
   input.style.height = 'auto';
   input.style.height = Math.min(input.scrollHeight, 120) + 'px';
 }
 input.addEventListener('input', autoResize);
+input.addEventListener('focus', () => composerBox.classList.add('active'));
+input.addEventListener('blur', () => composerBox.classList.remove('active'));
 
-function scrollToBottom(){
-  chatWrap.scrollTop = chatWrap.scrollHeight;
+function scrollToBottom(){ chatWrap.scrollTop = chatWrap.scrollHeight; }
+
+function aiOrbSVG(){
+  return '<div class="avatar ai-orb"><svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg></div>';
+}
+function userAvatarSVG(){
+  return '<div class="user-avatar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></div>';
 }
 
 function appendMessage(role, text){
   const msg = document.createElement('div');
   msg.className = 'msg ' + role;
-
-  const avatar = document.createElement('div');
-  avatar.className = 'avatar';
-  avatar.textContent = role === 'bot' ? 'ب' : 'أ';
+  msg.innerHTML = (role === 'bot' ? aiOrbSVG() : userAvatarSVG());
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
   bubble.textContent = text;
-
-  msg.appendChild(avatar);
   msg.appendChild(bubble);
+
   chatInner.appendChild(msg);
   scrollToBottom();
-  return bubble;
 }
 
 function appendTyping(){
   const msg = document.createElement('div');
   msg.className = 'msg bot';
   msg.id = 'typingMsg';
-
-  const avatar = document.createElement('div');
-  avatar.className = 'avatar';
-  avatar.textContent = 'ب';
+  msg.innerHTML = aiOrbSVG();
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble typing-bubble';
   bubble.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
-
-  msg.appendChild(avatar);
   msg.appendChild(bubble);
+
   chatInner.appendChild(msg);
   scrollToBottom();
 }
@@ -253,8 +439,7 @@ function removeTyping(){
 // --- MOCK response function: swap this out when wiring a real backend ---
 async function getAIResponse(userText){
   await new Promise(r => setTimeout(r, 900 + Math.random() * 700));
-  const idx = history.filter(h => h.role === 'user').length % MOCK_REPLIES.length;
-  return MOCK_REPLIES[idx];
+  return pickReply(userText);
 }
 
 async function sendMessage(text){
@@ -264,7 +449,6 @@ async function sendMessage(text){
   if (welcomeBlock) { welcomeBlock.remove(); }
 
   appendMessage('user', trimmed);
-  history.push({ role: 'user', text: trimmed });
 
   input.value = '';
   autoResize();
@@ -273,10 +457,11 @@ async function sendMessage(text){
   appendTyping();
 
   try {
-    const reply = await getAIResponse(trimmed, history);
+    const result = await getAIResponse(trimmed, history);
     removeTyping();
-    appendMessage('bot', reply);
-    history.push({ role: 'bot', text: reply });
+    appendMessage('bot', result.text);
+    history.push({ role: 'user', text: trimmed, topic: result.topic });
+    history.push({ role: 'bot', text: result.text });
   } catch (err) {
     removeTyping();
     appendMessage('bot', 'صار في خطأ بسيط، جربي ترسلي الرسالة مرة تانية.');
@@ -296,7 +481,7 @@ input.addEventListener('keydown', (e) => {
 });
 
 document.querySelectorAll('.starter-chip').forEach(chip => {
-  chip.addEventListener('click', () => sendMessage(chip.textContent));
+  chip.addEventListener('click', () => sendMessage(chip.textContent.trim()));
 });
 
 autoResize();
