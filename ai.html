@@ -487,5 +487,46 @@ document.querySelectorAll('.starter-chip').forEach(chip => {
 autoResize();
 </script>
 
+  
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="brand kufi" style="font-size:20px;">بوضوح<span style="color:var(--clarity);">.</span></span>
+        <p>محتوى توعوي حول العلاقات وأنماط الشخصية — بالعربي، لكل حدا بده يشوف علاقته بوضوح أكتر.</p>
+      </div>
+      <div class="footer-col">
+        <h4>الموقع</h4>
+        <a href="#pillars">المواضيع</a>
+        <a href="blog.html">المدونة</a>
+        <a href="ai.html">بوضوح AI</a>
+        <a href="quiz.html">الاختبار</a>
+        <a href="about.html">من نحن</a>
+        <a href="sales-page.html">المتجر</a>
+      </div>
+      <div class="footer-col">
+        <h4>تواصل</h4>
+        <a href="https://instagram.com" target="_blank" rel="noopener">إنستغرام</a>
+        <a href="https://tiktok.com" target="_blank" rel="noopener">تيك توك</a>
+        <a href="contact.html">راسلنا</a>
+      </div>
+      <div class="footer-col">
+        <h4>قانوني</h4>
+        <a href="terms.html">شروط الاستخدام</a>
+        <a href="privacy.html">سياسة الخصوصية</a>
+      </div>
+    </div>
+    <p class="footer-bottom">©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.</p>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:.15 });
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
 </body>
 </html>
+
