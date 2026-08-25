@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إنشاء حساب — بوضوح</title>
-<meta name="description" content="أنشئ حساباً في بوضوح لحفظ نتائج اختباراتك ومتابعة تقدمك.">
+<title>إنشاء حساب أو تسجيل الدخول — بوضوح</title>
+<meta name="description" content="أنشئ حساباً جديداً في بوضوح أو سجّل الدخول إلى حسابك الحالي.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -43,6 +43,14 @@
   .form-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:36px 32px; box-shadow:0 24px 50px -30px rgba(36,29,46,.25); }
   @media (max-width:600px){ .form-card{ padding:26px 22px; } }
 
+  /* ---------- TABS ---------- */
+  .tabs{ display:flex; background:var(--fog); border-radius:100px; padding:5px; margin-bottom:28px; }
+  .tab-btn{
+    flex:1; background:none; border:none; padding:11px 16px; border-radius:100px; cursor:pointer;
+    font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--text-muted-light); transition:.2s;
+  }
+  .tab-btn.active{ background:var(--ink); color:var(--fog); }
+
   .field{ margin-bottom:20px; }
   .field label{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; }
   .field input{
@@ -55,6 +63,12 @@
   .error-msg{ color:var(--alert); font-size:12.5px; margin-top:6px; display:none; }
   .error-msg.active{ display:block; }
 
+  .form-error-box{
+    display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13px; font-weight:600;
+    padding:12px 14px; border-radius:10px; margin-bottom:18px; text-align:center;
+  }
+  .form-error-box.active{ display:block; }
+
   .btn-primary{
     background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px;
     border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; margin-top:8px;
@@ -62,7 +76,7 @@
   .btn-primary:hover{ background:var(--ink-soft); }
 
   .switch-link{ text-align:center; margin-top:22px; font-size:13.5px; color:var(--text-muted-light); }
-  .switch-link a{ color:var(--clarity); font-weight:700; }
+  .switch-link a, .switch-link button{ color:var(--clarity); font-weight:700; background:none; border:none; font-family:inherit; font-size:inherit; cursor:pointer; padding:0; }
 
   .success-box{ display:none; text-align:center; padding:20px 0; }
   .success-box.active{ display:block; }
@@ -95,8 +109,8 @@
 <header class="page-head">
   <div class="wrap">
     <div class="eyebrow">حسابك في بوضوح</div>
-    <h1>إنشاء حساب جديد</h1>
-    <p>احفظ نتائج اختباراتك وتابع تقدمك في أي وقت تعود فيه للموقع.</p>
+    <h1 id="pageTitle">إنشاء حساب جديد</h1>
+    <p id="pageSubtitle">احفظ نتائج اختباراتك وتابع تقدمك في أي وقت تعود فيه للموقع.</p>
   </div>
 </header>
 
@@ -104,14 +118,20 @@
   <div class="wrap">
     <div class="form-card">
 
+      <div class="tabs">
+        <button type="button" class="tab-btn active" id="tabSignup">إنشاء حساب</button>
+        <button type="button" class="tab-btn" id="tabLogin">تسجيل الدخول</button>
+      </div>
+
+      <!-- ---- SIGNUP FORM ---- -->
       <form id="signupForm">
         <div class="field">
           <label for="fullName">الاسم الكامل</label>
           <input type="text" id="fullName" required>
         </div>
         <div class="field">
-          <label for="email">البريد الإلكتروني</label>
-          <input type="email" id="email" required>
+          <label for="signupEmail">البريد الإلكتروني</label>
+          <input type="email" id="signupEmail" required>
         </div>
         <div class="field">
           <label for="password">كلمة السر</label>
@@ -127,15 +147,30 @@
         <button type="submit" class="btn-primary">إنشاء الحساب</button>
       </form>
 
+      <!-- ---- LOGIN FORM ---- -->
+      <form id="loginForm" style="display:none;">
+        <div class="form-error-box" id="loginErrorBox">البريد الإلكتروني أو كلمة السر غير صحيحة.</div>
+        <div class="field">
+          <label for="loginEmail">البريد الإلكتروني</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">كلمة السر</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+
+        <button type="submit" class="btn-primary">تسجيل الدخول</button>
+      </form>
+
       <div class="success-box" id="successBox">
         <div class="check">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h2>تم إنشاء حسابك بنجاح</h2>
+        <h2 id="successTitle">تم إنشاء حسابك بنجاح</h2>
         <p>جارٍ تحويلك إلى صفحة حسابك...</p>
       </div>
 
-      <p class="switch-link" id="switchLink">لديك حساب بالفعل؟ <a href="account.html">اذهب إلى حسابي</a></p>
+      <p class="switch-link" id="switchLink">لديك حساب بالفعل؟ <button type="button" id="switchToLogin">سجّل الدخول</button></p>
 
       <div class="disclaimer">هذه نسخة تجريبية أولية لنظام الحسابات، وتُخزَّن بياناتك في متصفحك فقط، وليست مشفّرة أو محفوظة على خادم بعد.</div>
     </div>
@@ -159,27 +194,64 @@
 
 <script>
 /* ============================================================
-   بوضوح — نموذج إنشاء حساب (نسخة تجريبية أولية).
+   بوضوح — إنشاء حساب / تسجيل الدخول (نسخة تجريبية أولية).
    ------------------------------------------------------------
-   هذا النموذج يخزّن بيانات المستخدم في localStorage الخاص
-   بالمتصفح فقط — لا يوجد خادم أو قاعدة بيانات حقيقية بعد.
-   كلمة السر تُخزَّن كما هي، بدون تشفير حقيقي — هذا غير آمن
-   للاستخدام الفعلي ويجب عدم الاعتماد عليه لحماية بيانات حساسة.
+   يُخزَّن حساب واحد فقط لكل متصفح داخل localStorage تحت المفتاح
+   'bewodoh_user'. تسجيل الدخول هنا هو مجرد مطابقة بين ما تكتبه
+   وبين هذا الحساب المخزَّن محلياً — وليس نظام مصادقة حقيقي
+   يدعم عدة مستخدمين مختلفين على نفس الجهاز.
 
-   لربط نظام حسابات حقيقي لاحقاً:
-   - استخدم خدمة مثل Firebase Authentication أو Supabase Auth،
-     أو ابنِ خادماً خاصاً (Node.js / Django / إلخ) يخزّن كلمات
-     السر بشكل مشفّر (hashed) في قاعدة بيانات حقيقية.
-   - استبدل الكود بالأسفل بطلب fetch() إلى نقطة نهاية (API)
-     خاصة بالتسجيل، وخزّن رمز الجلسة (session token) الذي
-     يرجعه الخادم بدلاً من بيانات المستخدم كاملة.
+   لربط نظام حسابات حقيقي لاحقاً (يدعم عدداً غير محدود من
+   المستخدمين، ومزامنة عبر الأجهزة، وكلمات سر مشفّرة فعلياً):
+   - استخدم Firebase Authentication أو Supabase Auth، أو خادماً
+     خاصاً يتحقق من بيانات الدخول عبر قاعدة بيانات حقيقية.
+   - استبدل التحقق أدناه بطلب fetch() لنقطة نهاية تسجيل الدخول،
+     واحفظ رمز الجلسة (session token) الذي يُعيده الخادم.
    ============================================================ */
 
-document.getElementById('signupForm').addEventListener('submit', function(e){
+const tabSignup = document.getElementById('tabSignup');
+const tabLogin = document.getElementById('tabLogin');
+const signupForm = document.getElementById('signupForm');
+const loginForm = document.getElementById('loginForm');
+const switchLink = document.getElementById('switchLink');
+const switchToLogin = document.getElementById('switchToLogin');
+const pageTitle = document.getElementById('pageTitle');
+const pageSubtitle = document.getElementById('pageSubtitle');
+const loginErrorBox = document.getElementById('loginErrorBox');
+
+function showSignupTab(){
+  tabSignup.classList.add('active');
+  tabLogin.classList.remove('active');
+  signupForm.style.display = 'block';
+  loginForm.style.display = 'none';
+  switchLink.innerHTML = 'لديك حساب بالفعل؟ <button type="button" id="switchToLogin">سجّل الدخول</button>';
+  document.getElementById('switchToLogin').addEventListener('click', showLoginTab);
+  pageTitle.textContent = 'إنشاء حساب جديد';
+  pageSubtitle.textContent = 'احفظ نتائج اختباراتك وتابع تقدمك في أي وقت تعود فيه للموقع.';
+  loginErrorBox.classList.remove('active');
+}
+
+function showLoginTab(){
+  tabLogin.classList.add('active');
+  tabSignup.classList.remove('active');
+  loginForm.style.display = 'block';
+  signupForm.style.display = 'none';
+  switchLink.innerHTML = 'ما عندك حساب؟ <button type="button" id="switchToSignup">أنشئ حساباً جديداً</button>';
+  document.getElementById('switchToSignup').addEventListener('click', showSignupTab);
+  pageTitle.textContent = 'تسجيل الدخول';
+  pageSubtitle.textContent = 'سجّل الدخول إلى حسابك لمتابعة نتائج اختباراتك.';
+}
+
+tabSignup.addEventListener('click', showSignupTab);
+tabLogin.addEventListener('click', showLoginTab);
+switchToLogin.addEventListener('click', showLoginTab);
+
+// ---- Signup submit ----
+signupForm.addEventListener('submit', function(e){
   e.preventDefault();
 
   const fullName = document.getElementById('fullName').value.trim();
-  const email = document.getElementById('email').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
   const mismatchError = document.getElementById('mismatchError');
@@ -190,22 +262,46 @@ document.getElementById('signupForm').addEventListener('submit', function(e){
   }
   mismatchError.classList.remove('active');
 
-  // NOTE: mock storage only — see comment block above.
   const userData = { fullName, email, password, createdAt: new Date().toISOString() };
   localStorage.setItem('bewodoh_user', JSON.stringify(userData));
 
-  document.getElementById('signupForm').style.display = 'none';
-  document.getElementById('switchLink').style.display = 'none';
+  document.querySelector('.tabs').style.display = 'none';
+  signupForm.style.display = 'none';
+  switchLink.style.display = 'none';
+  document.getElementById('successTitle').textContent = 'تم إنشاء حسابك بنجاح';
   document.getElementById('successBox').classList.add('active');
 
   setTimeout(() => { window.location.href = 'account.html'; }, 1200);
 });
 
-// If already signed in, offer a quick way to their account instead of signing up again.
+// ---- Login submit ----
+loginForm.addEventListener('submit', function(e){
+  e.preventDefault();
+
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const stored = JSON.parse(localStorage.getItem('bewodoh_user') || 'null');
+
+  if (!stored || stored.email !== email || stored.password !== password) {
+    loginErrorBox.classList.add('active');
+    return;
+  }
+  loginErrorBox.classList.remove('active');
+
+  document.querySelector('.tabs').style.display = 'none';
+  loginForm.style.display = 'none';
+  switchLink.style.display = 'none';
+  document.getElementById('successTitle').textContent = 'تم تسجيل الدخول بنجاح';
+  document.getElementById('successBox').classList.add('active');
+
+  setTimeout(() => { window.location.href = 'account.html'; }, 1000);
+});
+
+// If already signed in on this browser, hint at it.
 (function(){
   const existing = localStorage.getItem('bewodoh_user');
   if (existing) {
-    document.getElementById('switchLink').innerHTML = 'عندك حساب مسجّل فعلاً على هذا المتصفح — <a href="account.html">اذهب إلى حسابي</a>';
+    showLoginTab();
   }
 })();
 </script>
