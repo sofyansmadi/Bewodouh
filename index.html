@@ -410,5 +410,20 @@
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 
+<script>
+(function(){
+  const link = document.getElementById('accountIconLink');
+  if (!link) return;
+  const user = localStorage.getItem('bewodoh_user');
+  if (user) {
+    link.href = 'account.html';
+    link.setAttribute('aria-label', 'حسابي');
+  } else {
+    link.href = 'signup.html';
+    link.setAttribute('aria-label', 'إنشاء حساب');
+  }
+})();
+</script>
+  
 </body>
 </html>
