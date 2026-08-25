@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>عجلة العلاقة — بوضوح</title>
-<meta name="description" content="أداة تفاعلية — حرّك المؤشرات وشوف عجلة علاقتك تترسم مباشرة على ثمانية محاور مختلفة.">
+<meta name="description" content="أداة تفاعلية — حرّك المؤشرات وشاهد عجلة علاقتك تُرسم مباشرة على ثمانية محاور مختلفة.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -105,7 +105,7 @@
     <a href="quizzes.html" class="back-link">← كل الاختبارات</a><br>
     <div class="eyebrow">أداة تفاعلية</div>
     <h1>عجلة العلاقة</h1>
-    <p>حرّك كل مؤشر حسب إحساسك الحقيقي بعلاقتك دلوقتي (١ = ضعيف جداً، ١٠ = ممتاز)، وشوف عجلتك تترسم أمامك مباشرة.</p>
+    <p>حرّك كل مؤشر حسب إحساسك الحقيقي بعلاقتك الآن (١ = ضعيف جداً، ١٠ = ممتاز)، وشاهد عجلتك تُرسم أمامك مباشرة.</p>
   </div>
 </header>
 
@@ -120,7 +120,7 @@
 
       <div class="sliders-card">
         <div id="slidersHost"></div>
-        <button class="analysis-btn" id="analyzeBtn">شوف التحليل</button>
+        <button class="analysis-btn" id="analyzeBtn">عرض التحليل</button>
       </div>
 
     </div>
@@ -130,16 +130,16 @@
       <p id="analysisDesc"></p>
       <p><strong>أقوى محاورك:</strong></p>
       <div id="strongTags"></div>
-      <p style="margin-top:16px;"><strong>محاور تستاهل اهتمام أكتر:</strong></p>
+      <p style="margin-top:16px;"><strong>محاور تستحق اهتماماً أكثر:</strong></p>
       <div id="weakTags"></div>
       <div class="cta-box">
-        <h3>بدك تشتغل على المحاور الضعيفة؟</h3>
-        <p id="ctaDynamic">دليل "التعرف على العلاقة السامة" فيه خطوات عملية تساعدك تبني أساس أقوى بعلاقتك.</p>
+        <h3>هل تريد العمل على المحاور الضعيفة؟</h3>
+        <p id="ctaDynamic">يتضمن دليل "التعرف على العلاقة السامة" خطوات عملية تساعدك على بناء أساس أقوى لعلاقتك.</p>
         <a href="sales-page.html" class="btn-primary">اكتشف الدليل</a>
       </div>
     </div>
 
-    <div class="disclaimer">هاي الأداة للتأمل الذاتي بس، وما بتعتبر تشخيص أو بديل عن استشارة مختص عند الحاجة.</div>
+    <div class="disclaimer">هذه الأداة للتأمل الذاتي فقط، ولا تُعتبر تشخيصاً أو بديلاً عن استشارة مختص عند الحاجة.</div>
   </div>
 </main>
 
@@ -297,17 +297,17 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
 
   let title, desc;
   if (avg >= 8) {
-    title = "عجلتك متوازنة وقوية بمعظم المحاور";
-    desc = "الصورة العامة إيجابية جداً. حتى لو في محور أو اتنين أقل من الباقي، هاد طبيعي — ما في علاقة كاملة ١٠٠٪ بكل المحاور بكل وقت.";
+    title = "عجلتك متوازنة وقوية في معظم المحاور";
+    desc = "الصورة العامة إيجابية جداً. حتى لو كان هناك محور أو محوران أقل من الباقي، فهذا طبيعي — لا توجد علاقة كاملة مئة بالمئة في كل المحاور طوال الوقت.";
   } else if (avg >= 6) {
-    title = "عجلتك متوازنة بشكل عام مع بعض المحاور تستاهل اهتمام";
-    desc = "أغلب المحاور بحالة جيدة، بس في محور أو اتنين ممكن يستفيدوا من اهتمام أكتر. مش لازم تصلح كل شي فوراً — ابدأ بمحور واحد.";
+    title = "عجلتك متوازنة بشكل عام مع بعض المحاور التي تستحق اهتماماً";
+    desc = "معظم المحاور بحالة جيدة، لكن هناك محوراً أو محورين قد يستفيدان من اهتمام أكبر. لا داعي لإصلاح كل شيء فوراً — ابدأ بمحور واحد.";
   } else if (avg >= 4) {
-    title = "في عدة محاور تستاهل شغل حقيقي";
-    desc = "عجلتك بتبين إن في أكتر من محور محتاج انتباه. هاد مش حكم على العلاقة كلها — بس إشارة واضحة وين تحط طاقتك أول.";
+    title = "هناك عدة محاور تستحق عملاً حقيقياً";
+    desc = "تُظهر عجلتك أن هناك أكثر من محور يحتاج انتباهاً. هذا ليس حكماً على العلاقة كلها، بل إشارة واضحة إلى أين تضع طاقتك أولاً.";
   } else {
-    title = "معظم المحاور محتاجة اهتمام جدي";
-    desc = "النتيجة العامة منخفضة على أغلب المحاور. ممكن يفيدك كثير تحكي مع شريكك بصراحة عن هاي النتيجة، أو تفكر بدعم مهني يساعدكم تفهموا وين المشكلة الأساسية.";
+    title = "معظم المحاور بحاجة إلى اهتمام جدي";
+    desc = "النتيجة العامة منخفضة على معظم المحاور. قد يفيدك كثيراً أن تتحدث مع شريكك بصراحة عن هذه النتيجة، أو تفكر بدعم مهني يساعدكما على فهم أين المشكلة الأساسية.";
   }
 
   document.getElementById('analysisTitle').textContent = title;
@@ -316,18 +316,18 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
   const strongHost = document.getElementById('strongTags');
   strongHost.innerHTML = strong.length
     ? strong.map(d => `<span class="strong-tag">${d.label}</span>`).join('')
-    : '<span style="font-size:14px;color:var(--text-muted-light);">ما في محور طالع بوضوح فوق الباقي بعد</span>';
+    : '<span style="font-size:14px;color:var(--text-muted-light);">لا يوجد محور يبرز بوضوح فوق الباقي بعد</span>';
 
   const weakHost = document.getElementById('weakTags');
   weakHost.innerHTML = weak.length
     ? weak.map(d => `<span class="weak-tag">${d.label}</span>`).join('')
-    : '<span style="font-size:14px;color:var(--text-muted-light);">ما في محور ضعيف بشكل واضح — عجلتك متوازنة!</span>';
+    : '<span style="font-size:14px;color:var(--text-muted-light);">لا يوجد محور ضعيف بشكل واضح — عجلتك متوازنة!</span>';
 
   if (weak.length) {
     const topWeak = weak[0];
     const link = articleMap[topWeak.key];
     document.getElementById('ctaDynamic').textContent =
-      `محور "${topWeak.label}" طالع أضعف محاورك — دليل "التعرف على العلاقة السامة" ومقالات بوضوح ممكن تساعدك تشتغل عليه.`;
+      `محور "${topWeak.label}" هو أضعف محاورك — دليل "التعرف على العلاقة السامة" ومقالات بوضوح قد تساعدك على العمل عليه.`;
   }
 
   const block = document.getElementById('analysisBlock');
