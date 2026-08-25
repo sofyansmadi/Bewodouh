@@ -61,12 +61,6 @@
     padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
   }
   .nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
-  .account-icon{
-  width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  border:1.5px solid rgba(255,255,255,.15); color:var(--text-muted-dark); transition:.2s;
-}
-.account-icon svg{ width:17px; height:17px; }
-.account-icon:hover{ border-color:var(--clarity); color:var(--fog); }
   .nav-toggle{ display:none; }
 
   /* ---------- HERO ---------- */
@@ -239,24 +233,17 @@
 <nav>
   <div class="wrap">
     <a href="index.html" class="brand">بوضوح<span>.</span></a>
-    <div style="display:flex; align-items:center; gap:14px;">
-      <a href="signup.html" id="accountIconLink" class="account-icon" aria-label="حسابي">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
-        </svg>
-      </a>
-      <div class="nav-links">
-        <a href="index.html#pillars">المواضيع</a>
-        <a href="blog.html">المدونة</a>
-        <a href="quizzes.html">الاختبارات</a>
-        <a href="ai.html">بوضوح AI</a>
-        <a href="about.html">من نحن</a>
-        <a href="sales-page.html" class="nav-cta">تصفّح المتجر</a>
-      </div>
+    <div class="nav-links">
+      <a href="#pillars">المواضيع</a>
+      <a href="blog.html">المدونة</a>
+      <a href="quizzes.html">الاختبارات</a>
+      <a href="ai.html">بوضوح AI</a>
+      <a href="about.html">من نحن</a>
+      <a href="sales-page.html" class="nav-cta">تصفّح المتجر</a>
     </div>
   </div>
 </nav>
+
 <header class="hero">
   <div class="hero-blob"></div>
   <div class="hero-blob2"></div>
@@ -351,7 +338,7 @@
     <h2 class="section-title" style="color:var(--fog); margin:0 auto;">المحتوى اليومي على وسائل التواصل الاجتماعي</h2>
     <p class="section-lede text-muted">قبل أن تشترك في النشرة أو تشتري أي دليل، يمكنك التعرف علينا أكثر من خلال المحتوى اليومي.</p>
     <div class="follow-grid">
-      <a href="https://www.instagram.com/bewoduh" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> إنستغرام</a>
+      <a href="https://instagram.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> إنستغرام</a>
       <a href="https://tiktok.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> تيك توك</a>
       <a href="https://youtube.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> يوتيوب</a>
     </div>
@@ -390,7 +377,7 @@
       </div>
       <div class="footer-col">
         <h4>تواصل</h4>
-        <a href="https://instagram.com/bewoduh" target="_blank" rel="noopener">إنستغرام</a>
+        <a href="https://instagram.com" target="_blank" rel="noopener">إنستغرام</a>
         <a href="https://tiktok.com" target="_blank" rel="noopener">تيك توك</a>
         <a href="contact.html">راسلنا</a>
       </div>
@@ -411,20 +398,5 @@
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 
-<script>
-(function(){
-  const link = document.getElementById('accountIconLink');
-  if (!link) return;
-  const user = localStorage.getItem('bewodoh_user');
-  if (user) {
-    link.href = 'account.html';
-    link.setAttribute('aria-label', 'حسابي');
-  } else {
-    link.href = 'signup.html';
-    link.setAttribute('aria-label', 'إنشاء حساب');
-  }
-})();
-</script>
-  
 </body>
 </html>
