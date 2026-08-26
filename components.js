@@ -39,11 +39,11 @@ class SiteNav extends HTMLElement {
   connectedCallback() {
     const active = this.getAttribute('active') || '';
     const links = [
-      { href: '/#pillars', label: 'المواضيع', key: '' },
-      { href: '/blog/', label: 'المدونة', key: 'blog' },
-      { href: '/quizzes/', label: 'الاختبارات', key: 'quizzes' },
-      { href: '/ai/', label: 'بوضوح AI', key: 'ai' },
-      { href: '/about/', label: 'من نحن', key: 'about' },
+      { href: 'index.html#pillars', label: 'المواضيع', key: '' },
+      { href: 'blog.html', label: 'المدونة', key: 'blog' },
+      { href: 'quizzes.html', label: 'الاختبارات', key: 'quizzes' },
+      { href: 'ai.html', label: 'بوضوح AI', key: 'ai' },
+      { href: 'about.html', label: 'من نحن', key: 'about' },
     ];
 
     const linksHtml = links.map(l => {
@@ -53,10 +53,10 @@ class SiteNav extends HTMLElement {
 
     this.innerHTML = `
     <div class="wrap">
-      <a href="/" class="brand">بوضوح<span>.</span></a>
+      <a href="index.html" class="brand">بوضوح<span>.</span></a>
       <div class="nav-links">
         ${linksHtml}
-        <a href="/sales-page/" class="nav-cta">احجز استشارة</a>
+        <a href="sales-page.html" class="nav-cta">احجز استشارة</a>
       </div>
     </div>`;
   }
@@ -76,23 +76,23 @@ class SiteFooter extends HTMLElement {
         </div>
         <div class="footer-col">
           <h4>الموقع</h4>
-          <a href="/#pillars">المواضيع</a>
-          <a href="/blog/">المدونة</a>
-          <a href="/ai/">بوضوح AI</a>
-          <a href="/quizzes/">الاختبارات</a>
-          <a href="/about/">من نحن</a>
-          <a href="/sales-page/">احجز استشارة</a>
+          <a href="index.html#pillars">المواضيع</a>
+          <a href="blog.html">المدونة</a>
+          <a href="ai.html">بوضوح AI</a>
+          <a href="quizzes.html">الاختبارات</a>
+          <a href="about.html">من نحن</a>
+          <a href="sales-page.html">احجز استشارة</a>
         </div>
         <div class="footer-col">
           <h4>تواصل</h4>
           <a href="https://instagram.com" target="_blank" rel="noopener">إنستغرام</a>
           <a href="https://tiktok.com" target="_blank" rel="noopener">تيك توك</a>
-          <a href="/contact/">راسلنا</a>
+          <a href="contact.html">راسلنا</a>
         </div>
         <div class="footer-col">
           <h4>قانوني</h4>
-          <a href="/terms/">شروط الاستخدام</a>
-          <a href="/privacy/">سياسة الخصوصية</a>
+          <a href="terms.html">شروط الاستخدام</a>
+          <a href="privacy.html">سياسة الخصوصية</a>
         </div>
       </div>
       <p class="footer-bottom">©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.</p>
@@ -105,14 +105,14 @@ class SiteFooter extends HTMLElement {
       <span class="brand kufi">بوضوح<span style="color:var(--clarity);">.</span></span>
       محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.
       <div style="margin-top:18px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; font-size:12.5px;">
-        <a href="/" style="color:var(--text-muted-dark);">الرئيسية</a>
-        <a href="/blog/" style="color:var(--text-muted-dark);">المدونة</a>
-        <a href="/quizzes/" style="color:var(--text-muted-dark);">الاختبارات</a>
-        <a href="/ai/" style="color:var(--text-muted-dark);">بوضوح AI</a>
-        <a href="/about/" style="color:var(--text-muted-dark);">من نحن</a>
-        <a href="/sales-page/" style="color:var(--text-muted-dark);">احجز استشارة</a>
-        <a href="/terms/" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
-        <a href="/privacy/" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
+        <a href="index.html" style="color:var(--text-muted-dark);">الرئيسية</a>
+        <a href="blog.html" style="color:var(--text-muted-dark);">المدونة</a>
+        <a href="quizzes.html" style="color:var(--text-muted-dark);">الاختبارات</a>
+        <a href="ai.html" style="color:var(--text-muted-dark);">بوضوح AI</a>
+        <a href="about.html" style="color:var(--text-muted-dark);">من نحن</a>
+        <a href="sales-page.html" style="color:var(--text-muted-dark);">احجز استشارة</a>
+        <a href="terms.html" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
+        <a href="privacy.html" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
       </div>
     </div>`;
   }
@@ -180,48 +180,3 @@ class PricingCards extends HTMLElement {
   }
 }
 customElements.define('pricing-cards', PricingCards);
-
-/* ============================================================
-   <dynamic-articles> — يُضاف داخل شبكة المقالات بصفحة المدونة
-   (#blogGrid). يجلب أي مقالات أُضيفت من لوحة التحكم (admin.html)
-   عبر جدول articles على Supabase، ويضيفها كبطاقات إضافية بنفس
-   شكل البطاقات الثابتة الموجودة أصلاً — دون المساس بالمقالات
-   العشرين الأصلية (تلك تبقى ملفات ثابتة منفصلة، تُدار بواسطة
-   الروبوت الآلي GitHub Action، لا بهذا المكوّن).
-
-   يحتاج display:contents حتى تصبح البطاقات التي يولّدها أبناءً
-   مباشرين فعلياً لصندوق الشبكة (CSS Grid) رغم وجود هذا الوسم
-   بينها وبين .blog-grid.
-   ============================================================ */
-const dynStyle = document.createElement('style');
-dynStyle.textContent = `dynamic-articles{ display:contents; }`;
-document.head.appendChild(dynStyle);
-
-class DynamicArticles extends HTMLElement {
-  async connectedCallback() {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
-
-    const { data, error } = await supabaseClient
-      .from('articles')
-      .select('*')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true });
-
-    if (error || !data || !data.length) return;
-
-    this.innerHTML = data.map(art => `
-      <a href="/${art.slug}/" class="article-card" data-cat="${art.filter_key}">
-        <div class="card-visual"><img src="${art.hero_image_url}" alt="${art.hero_image_alt}" loading="lazy"></div>
-        <div class="card-body">
-          <span class="card-tag">${art.tag_label}</span>
-          <h3>${art.title}</h3>
-          <p>${art.meta_description}</p>
-          <span class="card-meta">قراءة ${art.read_time}</span>
-        </div>
-      </a>
-    `).join('');
-
-    window.dispatchEvent(new CustomEvent('dynamic-articles-loaded'));
-  }
-}
-customElements.define('dynamic-articles', DynamicArticles);
