@@ -47,6 +47,11 @@
 
   /* ---------- ADMIN DASHBOARD ---------- */
   #dashboard{ display:none; }
+  .admin-tabs{ display:flex; gap:8px; margin-bottom:30px; border-bottom:1px solid var(--fog-dim); }
+  .admin-tab{ background:none; border:none; padding:12px 4px; margin-left:22px; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; color:var(--text-muted-light); cursor:pointer; border-bottom:2px solid transparent; }
+  .admin-tab.active{ color:var(--ink); border-bottom-color:var(--clarity); }
+  .field textarea{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog); min-height:80px; resize:vertical; }
+  .field textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
   .section-title{ font-size:20px; margin-bottom:6px; }
   .section-sub{ font-size:13.5px; color:var(--text-muted-light); margin-bottom:26px; }
 
@@ -109,6 +114,12 @@
     </div>
 
     <div id="dashboard">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="packages">الباقات والأسعار</button>
+        <button class="admin-tab" data-tab="articles">المقالات</button>
+      </div>
+
+      <div id="tab-packages" class="admin-tab-panel">
       <h2 class="section-title">إدارة الباقات والأسعار</h2>
       <p class="section-sub">أي تعديل هنا يظهر مباشرة لكل زوار الموقع على صفحة الحجز.</p>
 
@@ -165,13 +176,129 @@
           <div class="status-msg" id="formStatus"></div>
         </form>
       </div>
+      </div>
+
+      <div id="tab-articles" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">إدارة المقالات</h2>
+      <p class="section-sub">أي تعديل هنا ينشر على الموقع خلال ١٥ دقيقة تقريباً (وقت تشغيل الروبوت الآلي)، وليس فورياً كالباقات.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>العنوان</th>
+            <th>التصنيف</th>
+            <th>منشور؟</th>
+            <th>الترتيب</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="articlesTableBody">
+          <tr><td colspan="5">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 id="articleFormTitle">إضافة مقال جديد</h3>
+        <form id="articleForm">
+          <input type="hidden" id="artId">
+          <div class="form-grid">
+            <div class="field">
+              <label for="artSlug">المعرّف بالرابط (بالإنجليزي، بدون مسافات)</label>
+              <input type="text" id="artSlug" placeholder="article-my-new-topic" required>
+            </div>
+            <div class="field">
+              <label for="artTitle">عنوان المقال</label>
+              <input type="text" id="artTitle" required>
+            </div>
+            <div class="field full">
+              <label for="artMetaDesc">وصف الميتا (يظهر بنتائج البحث ومعاينة المشاركة)</label>
+              <input type="text" id="artMetaDesc" maxlength="160" required>
+            </div>
+            <div class="field">
+              <label for="artTagLabel">التصنيف كما يظهر للزوار</label>
+              <input type="text" id="artTagLabel" placeholder="الصحة النفسية" required>
+            </div>
+            <div class="field">
+              <label for="artFilterKey">مفتاح الفلترة (بالإنجليزي)</label>
+              <input type="text" id="artFilterKey" placeholder="mental-health" required>
+            </div>
+            <div class="field full">
+              <label for="artHeroImg">رابط صورة المقال الرئيسية</label>
+              <input type="url" id="artHeroImg" required>
+            </div>
+            <div class="field">
+              <label for="artHeroAlt">وصف الصورة (accessibility)</label>
+              <input type="text" id="artHeroAlt" required>
+            </div>
+            <div class="field">
+              <label for="artReadTime">مدة القراءة</label>
+              <input type="text" id="artReadTime" placeholder="٦ دقائق" required>
+            </div>
+            <div class="field full">
+              <label for="artLede">الفقرة الافتتاحية (Lede)</label>
+              <textarea id="artLede" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="artBody">محتوى المقال (HTML — h2, p, ul.plain > li)</label>
+              <textarea id="artBody" style="min-height:220px; font-family:monospace; direction:ltr; text-align:left;" placeholder="&lt;h2&gt;عنوان فرعي&lt;/h2&gt;
+&lt;p&gt;فقرة نص عادية.&lt;/p&gt;
+&lt;ul class=&quot;plain&quot;&gt;
+  &lt;li&gt;نقطة أولى&lt;/li&gt;
+  &lt;li&gt;نقطة ثانية&lt;/li&gt;
+&lt;/ul&gt;" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="artPull">جملة بارزة (اختياري)</label>
+              <input type="text" id="artPull">
+            </div>
+            <div class="field">
+              <label for="artCtaTitle">عنوان صندوق الدعوة للإجراء</label>
+              <input type="text" id="artCtaTitle" value="هل تحتاج دعماً حقيقياً بما تمر فيه؟">
+            </div>
+            <div class="field">
+              <label for="artCtaLabel">نص الزر</label>
+              <input type="text" id="artCtaLabel" value="احجز استشارتك الأولى">
+            </div>
+            <div class="field full">
+              <label for="artCtaDesc">وصف صندوق الدعوة للإجراء</label>
+              <input type="text" id="artCtaDesc" value="استشارة مع مختص نفسي مرخّص من فريق بوضوح ممكن تساعدك تفهم وضعك بعمق أكبر.">
+            </div>
+            <div class="field">
+              <label for="artCtaLink">رابط الزر</label>
+              <input type="text" id="artCtaLink" value="/sales-page/">
+            </div>
+            <div class="field">
+              <label for="artOrder">ترتيب الظهور</label>
+              <input type="number" id="artOrder" value="0">
+            </div>
+            <div class="field">
+              <label for="artRelated1">معرّف مقال ذي صلة ١</label>
+              <input type="text" id="artRelated1" placeholder="article-early-signs">
+            </div>
+            <div class="field">
+              <label for="artRelated2">معرّف مقال ذي صلة ٢</label>
+              <input type="text" id="artRelated2" placeholder="article-healthy-boundaries">
+            </div>
+            <div class="field full checkbox-row">
+              <input type="checkbox" id="artPublished" checked>
+              <label for="artPublished">منشور (يظهر للزوار)</label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" style="width:auto;">حفظ المقال</button>
+            <button type="button" class="btn-secondary" id="cancelArticleEditBtn" style="display:none;">إلغاء التعديل</button>
+          </div>
+          <div class="status-msg" id="articleFormStatus"></div>
+        </form>
+      </div>
+      </div>
     </div>
 
   </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script src="/supabase-config.js"></script>
 <script>
 /* ============================================================
    بوضوح — لوحة التحكم (Admin Panel).
@@ -340,6 +467,152 @@ async function deletePackage(id){
   if (!confirm('متأكدة تريدين حذف هذه الباقة؟')) return;
   const { error } = await supabaseClient.from('packages').delete().eq('id', id);
   if (!error) loadPackages();
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = 'none');
+    document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
+    if (tab.dataset.tab === 'articles') loadArticles();
+  });
+});
+
+// ---------- Articles table ----------
+async function loadArticles(){
+  const tbody = document.getElementById('articlesTableBody');
+  tbody.innerHTML = '<tr><td colspan="5">جارٍ التحميل...</td></tr>';
+
+  const { data, error } = await supabaseClient.from('articles').select('*').order('sort_order', { ascending: true });
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="5">تعذّر تحميل البيانات.</td></tr>';
+    return;
+  }
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="5">ما في مقالات بعد. أضيفي أول مقال بالفورم تحت.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(art => `
+    <tr>
+      <td>${art.title}</td>
+      <td>${art.tag_label}</td>
+      <td>${art.is_published ? '<span class="badge-yes">نعم</span>' : '—'}</td>
+      <td>${art.sort_order}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="تعديل" data-edit-art-id="${art.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 0 1 4 4L7 21l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="icon-btn danger" title="حذف" data-delete-art-id="${art.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-edit-art-id]').forEach(btn => {
+    btn.addEventListener('click', () => startEditArticle(data.find(a => a.id === btn.dataset.editArtId)));
+  });
+  tbody.querySelectorAll('[data-delete-art-id]').forEach(btn => {
+    btn.addEventListener('click', () => deleteArticle(btn.dataset.deleteArtId));
+  });
+}
+
+const articleForm = document.getElementById('articleForm');
+const articleFormTitle = document.getElementById('articleFormTitle');
+const cancelArticleEditBtn = document.getElementById('cancelArticleEditBtn');
+const articleFormStatus = document.getElementById('articleFormStatus');
+
+function startEditArticle(art){
+  document.getElementById('artId').value = art.id;
+  document.getElementById('artSlug').value = art.slug;
+  document.getElementById('artTitle').value = art.title;
+  document.getElementById('artMetaDesc').value = art.meta_description;
+  document.getElementById('artTagLabel').value = art.tag_label;
+  document.getElementById('artFilterKey').value = art.filter_key;
+  document.getElementById('artHeroImg').value = art.hero_image_url;
+  document.getElementById('artHeroAlt').value = art.hero_image_alt;
+  document.getElementById('artReadTime').value = art.read_time;
+  document.getElementById('artLede').value = art.lede;
+  document.getElementById('artBody').value = art.body_html;
+  document.getElementById('artPull').value = art.pull_quote || '';
+  document.getElementById('artCtaTitle').value = art.cta_title || '';
+  document.getElementById('artCtaDesc').value = art.cta_desc || '';
+  document.getElementById('artCtaLink').value = art.cta_link || '/sales-page/';
+  document.getElementById('artCtaLabel').value = art.cta_label || '';
+  document.getElementById('artOrder').value = art.sort_order;
+  document.getElementById('artRelated1').value = art.related_slug_1 || '';
+  document.getElementById('artRelated2').value = art.related_slug_2 || '';
+  document.getElementById('artPublished').checked = art.is_published;
+  articleFormTitle.textContent = 'تعديل: ' + art.title;
+  cancelArticleEditBtn.style.display = 'inline-block';
+  window.scrollTo({ top: document.querySelectorAll('.form-card')[1].offsetTop - 20, behavior: 'smooth' });
+}
+
+function resetArticleForm(){
+  articleForm.reset();
+  document.getElementById('artId').value = '';
+  document.getElementById('artPublished').checked = true;
+  articleFormTitle.textContent = 'إضافة مقال جديد';
+  cancelArticleEditBtn.style.display = 'none';
+}
+cancelArticleEditBtn.addEventListener('click', resetArticleForm);
+
+articleForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  articleFormStatus.classList.remove('active', 'success', 'error');
+
+  const id = document.getElementById('artId').value;
+  const payload = {
+    slug: document.getElementById('artSlug').value.trim(),
+    title: document.getElementById('artTitle').value.trim(),
+    meta_description: document.getElementById('artMetaDesc').value.trim(),
+    tag_label: document.getElementById('artTagLabel').value.trim(),
+    filter_key: document.getElementById('artFilterKey').value.trim(),
+    hero_image_url: document.getElementById('artHeroImg').value.trim(),
+    hero_image_alt: document.getElementById('artHeroAlt').value.trim(),
+    read_time: document.getElementById('artReadTime').value.trim(),
+    lede: document.getElementById('artLede').value.trim(),
+    body_html: document.getElementById('artBody').value,
+    pull_quote: document.getElementById('artPull').value.trim(),
+    cta_title: document.getElementById('artCtaTitle').value.trim(),
+    cta_desc: document.getElementById('artCtaDesc').value.trim(),
+    cta_link: document.getElementById('artCtaLink').value.trim(),
+    cta_label: document.getElementById('artCtaLabel').value.trim(),
+    sort_order: parseInt(document.getElementById('artOrder').value) || 0,
+    related_slug_1: document.getElementById('artRelated1').value.trim() || null,
+    related_slug_2: document.getElementById('artRelated2').value.trim() || null,
+    is_published: document.getElementById('artPublished').checked,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('articles').update(payload).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('articles').insert(payload));
+  }
+
+  if (error) {
+    articleFormStatus.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    articleFormStatus.classList.add('active', 'error');
+    return;
+  }
+
+  articleFormStatus.textContent = 'تم الحفظ. رح يظهر المقال على الموقع خلال ١٥ دقيقة تقريباً.';
+  articleFormStatus.classList.add('active', 'success');
+  resetArticleForm();
+  loadArticles();
+});
+
+async function deleteArticle(id){
+  if (!confirm('متأكدة تريدين حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
+  const { error } = await supabaseClient.from('articles').delete().eq('id', id);
+  if (!error) loadArticles();
 }
 </script>
 
