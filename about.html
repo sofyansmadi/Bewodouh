@@ -171,19 +171,7 @@
 </head>
 <body>
 
-<nav>
-  <div class="wrap">
-    <a href="index.html" class="brand">بوضوح<span>.</span></a>
-    <div class="nav-links">
-      <a href="index.html#pillars">المواضيع</a>
-      <a href="blog.html">المدونة</a>
-      <a href="quizzes.html">الاختبارات</a>
-      <a href="ai.html">بوضوح AI</a>
-      <a href="about.html" class="active">من نحن</a>
-      <a href="sales-page.html" class="nav-cta">احجز استشارة</a>
-    </div>
-  </div>
-</nav>
+<site-nav active="about"></site-nav>
 
 <header class="hero">
   <div class="hero-blob"></div>
@@ -288,21 +276,7 @@
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <span class="brand kufi">بوضوح<span style="color:var(--clarity);">.</span></span>
-    محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.
-    <div style="margin-top:18px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; font-size:12.5px;">
-      <a href="index.html" style="color:var(--text-muted-dark);">الرئيسية</a>
-      <a href="blog.html" style="color:var(--text-muted-dark);">المدونة</a>
-      <a href="quizzes.html" style="color:var(--text-muted-dark);">الاختبارات</a>
-      <a href="ai.html" style="color:var(--text-muted-dark);">بوضوح AI</a>
-      <a href="sales-page.html" style="color:var(--text-muted-dark);">احجز استشارة</a>
-      <a href="terms.html" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
-      <a href="privacy.html" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
-    </div>
-  </div>
-</footer>
+<site-footer></site-footer>
 
 <script>
   const io = new IntersectionObserver((entries)=>{
@@ -311,5 +285,6 @@
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 
+<script src="components.js"></script>
 </body>
 </html>
