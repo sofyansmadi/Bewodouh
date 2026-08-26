@@ -217,33 +217,7 @@
     <h2 class="section-title" style="text-align:center;">اختر ما يناسبك</h2>
     <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">كل الباقات تقدر تلغي الاشتراك فيها بأي وقت. الأسعار بالدينار الأردني.</p>
 
-    <div class="pkg-grid" id="pkgGrid">
-      <div class="pkg-card" data-pkg="quick">
-        <h3>استشارة سريعة</h3>
-        <p class="pkg-desc">جلسة واحدة، مناسبة لو بدك تجرب قبل ما تلتزم.</p>
-        <div class="pkg-price">٢٠ د.أ <span>جلسة واحدة (٤٥ دقيقة)</span></div>
-        <button class="pkg-select-btn" data-pkg-name="استشارة سريعة">اختر هذه الباقة</button>
-      </div>
-      <div class="pkg-card" data-pkg="starter">
-        <h3>باقة الانطلاقة</h3>
-        <p class="pkg-desc">أربع جلسات شهرياً، بداية جيدة لمتابعة حقيقية.</p>
-        <div class="pkg-price">٧٥ د.أ <span>شهرياً — ٤ جلسات</span></div>
-        <button class="pkg-select-btn" data-pkg-name="باقة الانطلاقة">اختر هذه الباقة</button>
-      </div>
-      <div class="pkg-card recommended" data-pkg="companion">
-        <span class="pkg-badge">الأكثر طلباً</span>
-        <h3>باقة المرافقة</h3>
-        <p class="pkg-desc">ثماني جلسات كل ثلاثة أشهر، لمتابعة أعمق وأثر حقيقي.</p>
-        <div class="pkg-price">١٣٥ د.أ <span>كل ٣ أشهر — ٨ جلسات</span></div>
-        <button class="pkg-select-btn" data-pkg-name="باقة المرافقة">اختر هذه الباقة</button>
-      </div>
-      <div class="pkg-card" data-pkg="urgent-pkg">
-        <h3>دعم فوري</h3>
-        <p class="pkg-desc">جلسة عاجلة خلال ٢٤ ساعة، لو الوضع محتاج تحرك أسرع.</p>
-        <div class="pkg-price">٣٠ د.أ <span>جلسة عاجلة</span></div>
-        <button class="pkg-select-btn" data-pkg-name="دعم فوري">اختر هذه الباقة</button>
-      </div>
-    </div>
+    <pricing-cards class="pkg-grid"></pricing-cards>
   </div>
 </section>
 
@@ -403,7 +377,8 @@ typeCards.forEach(card => {
     if (type === 'urgent') {
       triageBlock.classList.remove('active');
       urgentBlock.classList.add('active');
-      preselectPackage('دعم فوري');
+      window.dispatchEvent(new CustomEvent('recommend-package', { detail: { name: 'دعم فوري' } }));
+      document.getElementById('bkPackage').value = 'دعم فوري';
       urgentBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -455,24 +430,15 @@ function showRecommendation(){
   const reco = PACKAGE_RECOMMENDATIONS.find(r => score >= r.min && score <= r.max) || PACKAGE_RECOMMENDATIONS[PACKAGE_RECOMMENDATIONS.length - 1];
   recoText.textContent = reco.text;
   recoBanner.classList.add('active');
-  preselectPackage(reco.name);
+  window.dispatchEvent(new CustomEvent('recommend-package', { detail: { name: reco.name } }));
+  document.getElementById('bkPackage').value = reco.name;
   recoBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// ---------- Package selection ----------
-const pkgButtons = document.querySelectorAll('.pkg-select-btn');
-const bkPackageSelect = document.getElementById('bkPackage');
-
-function preselectPackage(name){
-  pkgButtons.forEach(b => b.classList.toggle('chosen', b.dataset.pkgName === name));
-  bkPackageSelect.value = name;
-}
-
-pkgButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    preselectPackage(btn.dataset.pkgName);
-    document.getElementById('booking-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+// ---------- Package selection (handled by <pricing-cards>; we just listen) ----------
+window.addEventListener('package-selected', (e) => {
+  document.getElementById('bkPackage').value = e.detail.name;
+  document.getElementById('booking-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // ---------- Booking form ----------
@@ -493,6 +459,8 @@ document.querySelectorAll('.faq-q').forEach(q => {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="components.js"></script>
 </body>
 </html>

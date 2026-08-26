@@ -120,3 +120,63 @@ class SiteFooter extends HTMLElement {
 
 customElements.define('site-nav', SiteNav);
 customElements.define('site-footer', SiteFooter);
+
+/* ============================================================
+   <pricing-cards> — يجلب الباقات مباشرة من جدول packages على
+   Supabase ويعرضها. يتطلب أن يكون supabase-config.js قد حمّل
+   قبل هذا الملف (يوفّر متغيّر supabaseClient).
+
+   يُطلق حدث 'package-selected' على window عند الضغط على "اختر
+   هذه الباقة"، وتفاصيله { name } — أي كود بالصفحة يقدر يستمع له
+   بدل ما يحتاج يعرف تفاصيل هذا المكوّن الداخلية.
+
+   ويستمع لحدث 'recommend-package' على window (تفاصيله { name })
+   عشان يعلّم بصرياً الباقة الموصى فيها من تدفّق الأسئلة.
+   ============================================================ */
+class PricingCards extends HTMLElement {
+  async connectedCallback() {
+    this.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); grid-column:1/-1;">جارٍ تحميل الباقات...</p>';
+
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+      this.innerHTML = '<p style="text-align:center; color:var(--alert); grid-column:1/-1;">تعذّر تحميل الباقات — لم يتم إعداد الاتصال بقاعدة البيانات بعد.</p>';
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from('packages')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error || !data || !data.length) {
+      this.innerHTML = '<p style="text-align:center; color:var(--alert); grid-column:1/-1;">تعذّر تحميل الباقات حالياً. حاول تحديث الصفحة.</p>';
+      console.error('pricing-cards:', error);
+      return;
+    }
+
+    this.innerHTML = data.map(pkg => `
+      <div class="pkg-card${pkg.is_recommended ? ' recommended' : ''}" data-pkg-id="${pkg.id}">
+        ${pkg.is_recommended ? '<span class="pkg-badge">الأكثر طلباً</span>' : ''}
+        <h3>${pkg.name}</h3>
+        <p class="pkg-desc">${pkg.description || ''}</p>
+        <div class="pkg-price">${pkg.price} د.أ <span>${pkg.price_unit}</span></div>
+        <button class="pkg-select-btn" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
+      </div>
+    `).join('');
+
+    this.querySelectorAll('.pkg-select-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.markChosen(btn.dataset.pkgName);
+        window.dispatchEvent(new CustomEvent('package-selected', { detail: { name: btn.dataset.pkgName } }));
+      });
+    });
+
+    window.addEventListener('recommend-package', (e) => this.markChosen(e.detail.name));
+  }
+
+  markChosen(name) {
+    this.querySelectorAll('.pkg-select-btn').forEach(b => {
+      b.classList.toggle('chosen', b.dataset.pkgName === name);
+    });
+  }
+}
+customElements.define('pricing-cards', PricingCards);
