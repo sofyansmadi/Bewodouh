@@ -1,0 +1,35 @@
+name: تحديث المقالات من قاعدة البيانات
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # كل ١٥ دقيقة
+  workflow_dispatch:          # يسمح بالتشغيل اليدوي من تبويب Actions
+
+jobs:
+  regenerate-articles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: سحب الكود
+        uses: actions/checkout@v4
+
+      - name: تجهيز Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: تثبيت مكتبة Supabase
+        run: npm install @supabase/supabase-js
+
+      - name: توليد ملفات المقالات
+        run: node scripts/generate-articles.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: حفظ ورفع أي تغييرات
+        run: |
+          git config user.name "بوضوح Bot"
+          git config user.email "bot@bewoduh.com"
+          git add article-*/
+          git diff --staged --quiet || git commit -m "تحديث تلقائي للمقالات من قاعدة البيانات"
+          git push
