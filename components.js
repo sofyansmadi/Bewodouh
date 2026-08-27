@@ -39,7 +39,7 @@ class SiteNav extends HTMLElement {
   connectedCallback() {
     const active = this.getAttribute('active') || '';
     const links = [
-      { href: 'Home#pillars', label: 'المواضيع', key: 'Home' },
+      { href: '/Home#pillars', label: 'المواضيع', key: 'Home' },
       { href: '/blog', label: 'المدونة', key: 'blog' },
       { href: 'quizzes.html', label: 'الاختبارات', key: 'quizzes' },
       { href: 'ai.html', label: 'بوضوح AI', key: 'ai' },
