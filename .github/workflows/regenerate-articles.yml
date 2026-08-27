@@ -1,3 +1,6 @@
+تفضلي، انسخي كل هاد وحطيه مكان المحتوى القديم بملف `.github/workflows/regenerate-articles.yml`:
+
+```yaml
 name: تحديث المقالات من قاعدة البيانات
 
 on:
@@ -7,6 +10,10 @@ on:
 
 permissions:
   contents: write            # يسمح للروبوت يرفع (push) تعديلات على الـ repository
+
+concurrency:
+  group: regenerate-articles  # يمنع تشغيل أكتر من نسخة بنفس الوقت (سبب الخطأ الأخير)
+  cancel-in-progress: false
 
 jobs:
   regenerate-articles:
@@ -35,4 +42,6 @@ jobs:
           git config user.email "bot@bewoduh.com"
           git add article-*/
           git diff --staged --quiet || git commit -m "تحديث تلقائي للمقالات من قاعدة البيانات"
+          git pull --rebase origin main
           git push
+```
