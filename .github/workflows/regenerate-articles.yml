@@ -1,6 +1,4 @@
-تفضلي، انسخي كل هاد وحطيه مكان المحتوى القديم بملف `.github/workflows/regenerate-articles.yml`:
 
-```yaml
 name: تحديث المقالات من قاعدة البيانات
 
 on:
