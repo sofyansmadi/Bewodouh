@@ -5,6 +5,9 @@ on:
     - cron: '*/15 * * * *'   # كل ١٥ دقيقة
   workflow_dispatch:          # يسمح بالتشغيل اليدوي من تبويب Actions
 
+permissions:
+  contents: write            # يسمح للروبوت يرفع (push) تعديلات على الـ repository
+
 jobs:
   regenerate-articles:
     runs-on: ubuntu-latest
