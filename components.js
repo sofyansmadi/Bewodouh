@@ -246,3 +246,71 @@ class DynamicArticles extends HTMLElement {
   }
 }
 customElements.define('dynamic-articles', DynamicArticles);
+
+/* ============================================================
+   <app-bottom-nav> — شريط تنقل سفلي بأيقونات، يظهر فقط لما
+   الموقع يشتغل جوا التطبيق (Capacitor)، لا بالمتصفح العادي.
+
+   الاكتشاف: Capacitor يضيف تلقائياً window.Capacitor لما يشتغل
+   جوا تطبيق حقيقي. لو مش موجود، معناها إحنا بمتصفح عادي، وهاد
+   الشريط ما بيظهر إطلاقاً — الموقع يبقى بشكله المعتاد بالويب.
+
+   يُضاف بكل صفحة زي: <app-bottom-nav active="home"></app-bottom-nav>
+   ============================================================ */
+const isRunningInApp = () => typeof window.Capacitor !== 'undefined';
+
+class AppBottomNav extends HTMLElement {
+  connectedCallback() {
+    if (!isRunningInApp()) {
+      this.style.display = 'none';
+      return;
+    }
+
+    const active = this.getAttribute('active') || '';
+    const items = [
+      { key: 'home', href: 'index.html', label: 'الرئيسية',
+        icon: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>' },
+      { key: 'blog', href: 'blog.html', label: 'المدونة',
+        icon: '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/>' },
+      { key: 'quizzes', href: 'quizzes.html', label: 'الاختبارات',
+        icon: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>' },
+      { key: 'ai', href: 'ai.html', label: 'بوضوح AI',
+        icon: '<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1.2 2.4 2 4 2s3-.8 4-2"/>' },
+      { key: 'account', href: 'account.html', label: 'حسابي',
+        icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
+    ];
+
+    const itemsHtml = items.map(item => `
+      <a href="${item.href}" class="app-nav-item${item.key === active ? ' active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg>
+        <span>${item.label}</span>
+      </a>`).join('');
+
+    this.innerHTML = itemsHtml;
+
+    // Add bottom padding to the page so content isn't hidden behind the fixed bar
+    document.body.style.paddingBottom = '76px';
+  }
+}
+
+const APP_NAV_STYLE = `
+  app-bottom-nav{
+    position:fixed; bottom:0; right:0; left:0; z-index:100;
+    display:flex; justify-content:space-around; align-items:center;
+    background:#fff; border-top:1px solid #E6DFDA;
+    padding:10px 6px calc(10px + env(safe-area-inset-bottom));
+  }
+  .app-nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:#6B6072; text-decoration:none; font-size:10.5px; font-family:'IBM Plex Sans Arabic', sans-serif;
+    flex:1; padding:4px 0;
+  }
+  .app-nav-item svg{ width:22px; height:22px; }
+  .app-nav-item.active{ color:#241D2E; }
+  .app-nav-item.active svg{ color:#C9A15F; }
+`;
+const appNavStyleTag = document.createElement('style');
+appNavStyleTag.textContent = APP_NAV_STYLE;
+document.head.appendChild(appNavStyleTag);
+
+customElements.define('app-bottom-nav', AppBottomNav);

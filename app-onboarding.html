@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>أهلاً بك في بوضوح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A;
+    --text-muted-light:#6B6072; --text-on-light:#2A2130;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html, body{ height:100%; }
+  body{
+    background:var(--fog); font-family:'IBM Plex Sans Arabic', sans-serif; color:var(--text-on-light);
+    display:flex; flex-direction:column; min-height:100vh; padding:0 22px;
+  }
+  .top-bar{ padding:20px 0 10px; display:flex; align-items:center; justify-content:space-between; }
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:18px; color:var(--ink); }
+  .brand span{ color:var(--clarity); }
+  .skip-link{ font-size:13px; color:var(--text-muted-light); text-decoration:none; }
+
+  .progress-track{ height:5px; background:var(--fog-dim); border-radius:100px; overflow:hidden; margin-bottom:36px; }
+  .progress-fill{ height:100%; background:var(--clarity); border-radius:100px; width:0%; transition:width .4s ease; }
+
+  main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .q-block{ display:none; }
+  .q-block.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .q-eyebrow{ font-size:13px; color:var(--clarity); font-weight:700; margin-bottom:10px; }
+  .q-text{ font-family:'Noto Kufi Arabic',sans-serif; font-size:23px; font-weight:700; line-height:1.6; margin-bottom:30px; max-width:20ch; }
+
+  .options{ display:flex; flex-direction:column; gap:12px; }
+  .opt{
+    border:1.5px solid var(--fog-dim); border-radius:16px; padding:18px 18px; background:#fff; cursor:pointer;
+    font-size:15.5px; text-align:right; transition:.15s; font-family:inherit; display:flex; align-items:center; gap:14px;
+  }
+  .opt:hover{ border-color:var(--clarity); }
+  .opt .opt-icon{ width:38px; height:38px; border-radius:50%; background:var(--fog); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .opt .opt-icon svg{ width:18px; height:18px; color:var(--ink); }
+  .opt-text{ flex:1; font-weight:600; }
+
+  /* Result screen */
+  .result-screen{ display:none; text-align:center; }
+  .result-screen.active{ display:block; animation:fadeIn .4s ease; }
+  .result-icon{ width:64px; height:64px; border-radius:50%; background:var(--ink); display:flex; align-items:center; justify-content:center; margin:0 auto 22px; }
+  .result-icon svg{ width:28px; height:28px; color:var(--clarity-soft); }
+  .result-title{ font-family:'Noto Kufi Arabic',sans-serif; font-size:21px; font-weight:900; margin-bottom:10px; }
+  .result-desc{ font-size:14.5px; color:var(--text-muted-light); max-width:38ch; margin:0 auto; }
+
+  .btn-primary{
+    background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:16px; border-radius:100px;
+    border:none; cursor:pointer; font-family:inherit; width:100%; margin-top:34px;
+  }
+  .btn-primary:hover{ background:var(--ink-soft); }
+  footer{ padding:24px 0 30px; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="brand">بوضوح<span>.</span></span>
+  <a href="app-signup-prompt.html" class="skip-link" id="skipLink">تخطي</a>
+</div>
+
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<main>
+  <div id="questionSection">
+    <div class="q-block active">
+      <div class="q-eyebrow">سؤال واحد بس</div>
+      <div class="q-text">شو اللي جابك اليوم لبوضوح؟</div>
+      <div class="options">
+        <button class="opt" data-answer="relationship">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
+          <span class="opt-text">بدي أفهم علاقتي الحالية أكتر</span>
+        </button>
+        <button class="opt" data-answer="breakup">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span>
+          <span class="opt-text">بدي دعم أتعافى بعد انفصال</span>
+        </button>
+        <button class="opt" data-answer="mental-health">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg></span>
+          <span class="opt-text">بدي أهتم بصحتي النفسية عموماً</span>
+        </button>
+        <button class="opt" data-answer="exploring">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+          <span class="opt-text">بس بتفرج حالياً</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-screen" id="resultScreen">
+    <div class="result-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2 class="result-title" id="resultTitle"></h2>
+    <p class="result-desc" id="resultDesc"></p>
+    <button class="btn-primary" id="continueBtn">كمّل</button>
+  </div>
+</main>
+
+<footer></footer>
+
+<script>
+/* ============================================================
+   سؤال ترحيبي واحد بيساعدنا نخصص أول تجربة للمستخدم — بدون أي
+   إلزام بحساب. الإجابة تتخزن محلياً وتُستخدم لاحقاً لتخصيص
+   الصفحة الرئيسية (تحية شخصية + محتوى مقترح حسب اهتمامه).
+   ============================================================ */
+const RESULTS = {
+  relationship: {
+    title: "تمام، جهّزنالك محتوى يناسبك",
+    desc: "رح تلاقي بالرئيسية اختبارات ومقالات تساعدك تفهم أنماط علاقتك بوضوح أكتر.",
+  },
+  breakup: {
+    title: "خطوة أولى مهمة إنك هون",
+    desc: "رح نوريك محتوى ودعم مخصص لمرحلة التعافي، بخطاك أنت.",
+  },
+  "mental-health": {
+    title: "الاهتمام بنفسك يستاهل",
+    desc: "جهّزنالك اختبارات ومقالات عن القلق، الرعاية الذاتية، واليقظة الذهنية.",
+  },
+  exploring: {
+    title: "خذي وقتك، بوضوح هون",
+    desc: "تصفّحي على راحتك — كل المحتوى متاح إلك تكتشفيه بالوقت المناسب إلك.",
+  },
+};
+
+document.getElementById('progressFill').style.width = '50%';
+
+document.querySelectorAll('.opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const answer = btn.dataset.answer;
+    localStorage.setItem('bewodoh_onboarding_interest', answer);
+
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('questionSection').style.display = 'none';
+    document.getElementById('skipLink').style.display = 'none';
+
+    const result = RESULTS[answer];
+    document.getElementById('resultTitle').textContent = result.title;
+    document.getElementById('resultDesc').textContent = result.desc;
+    document.getElementById('resultScreen').classList.add('active');
+  });
+});
+
+document.getElementById('continueBtn').addEventListener('click', () => {
+  localStorage.setItem('bewodoh_onboarding_done', '1');
+  window.location.href = 'app-signup-prompt.html';
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>بوضوح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html, body{ height:100%; overflow:hidden; }
+  body{
+    background:radial-gradient(140% 100% at 50% 0%, var(--ink-soft) 0%, var(--ink) 60%, #1A1522 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Kufi Arabic', sans-serif;
+  }
+  .logo-wrap{ text-align:center; opacity:0; animation:fadeIn 1s ease forwards; }
+  .logo{ font-size:48px; font-weight:900; color:#F3EEEA; }
+  .logo span{ color:var(--clarity); }
+  .tagline{ margin-top:10px; font-size:13px; color:#B7ACC4; font-family:'IBM Plex Sans Arabic', sans-serif; letter-spacing:.5px; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div class="logo-wrap">
+  <div class="logo">بوضوح<span>.</span></div>
+  <div class="tagline">مساحتك نحو الوضوح</div>
+</div>
+
+<script>
+/* ============================================================
+   شاشة البداية (Splash Screen) — تظهر لثانية ونص تقريباً، وبعدها
+   تنتقل تلقائياً حسب حالة المستخدم:
+   - لو أول مرة يفتح التطبيق (ما أكمل الأسئلة التعريفية) → أسئلة التعرف
+   - لو أكمل الأسئلة بس ما سجّل حساب → يروح مباشرة للرئيسية (كضيف)
+   - لو عنده حساب مسجّل دخول أصلاً → يروح مباشرة للرئيسية
+   ============================================================ */
+setTimeout(() => {
+  const completedOnboarding = localStorage.getItem('bewodoh_onboarding_done');
+  if (!completedOnboarding) {
+    window.location.href = 'app-onboarding.html';
+  } else {
+    window.location.href = 'index.html';
+  }
+}, 1500);
+</script>
+
+</body>
+</html>

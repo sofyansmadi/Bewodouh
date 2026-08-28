@@ -317,14 +317,15 @@
 </section>
 
 <site-footer></site-footer>
+<app-bottom-nav active="blog"></app-bottom-nav>
 
 <script>
   let cards = document.querySelectorAll('.article-card');
-  const buttons = document.querySelectorAll('.filter-btn');
+  const filterRow = document.getElementById('filterRow');
   const emptyState = document.getElementById('emptyState');
 
   function applyCurrentFilter(){
-    const activeBtn = document.querySelector('.filter-btn.active');
+    const activeBtn = filterRow.querySelector('.filter-btn.active');
     const filter = activeBtn ? activeBtn.dataset.filter : 'all';
     let visibleCount = 0;
     cards.forEach(card => {
@@ -335,18 +336,20 @@
     emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
   }
 
-  // Re-include any articles added dynamically from the admin panel (via <dynamic-articles>)
+  // Re-include any articles added dynamically from the admin panel (via <dynamic-articles>),
+  // and re-check filter buttons in case new ones were added for new categories.
   window.addEventListener('dynamic-articles-loaded', () => {
     cards = document.querySelectorAll('.article-card');
     applyCurrentFilter();
   });
 
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      applyCurrentFilter();
-    });
+  // Event delegation on the container — works automatically for buttons added later too.
+  filterRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    filterRow.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyCurrentFilter();
   });
 </script>
 
