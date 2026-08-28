@@ -246,7 +246,7 @@ signupForm.addEventListener('submit', function(e){
   document.getElementById('successTitle').textContent = 'تم إنشاء حسابك بنجاح';
   document.getElementById('successBox').classList.add('active');
 
-  setTimeout(() => { window.location.href = 'account.html'; }, 1200);
+  setTimeout(() => { window.location.href = '/account/'; }, 1200);
 });
 
 // ---- Login submit ----
@@ -269,7 +269,7 @@ loginForm.addEventListener('submit', function(e){
   document.getElementById('successTitle').textContent = 'تم تسجيل الدخول بنجاح';
   document.getElementById('successBox').classList.add('active');
 
-  setTimeout(() => { window.location.href = 'account.html'; }, 1000);
+  setTimeout(() => { window.location.href = '/account/'; }, 1000);
 });
 
 // If already signed in on this browser, hint at it.
