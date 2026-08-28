@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  /* لو التطبيق (مش الموقع بالمتصفح) وأول مرة يفتح ولسا ما خلّص
+     تدفق الترحيب، حوّليه فوراً لشاشة البداية قبل ما تبين الصفحة
+     الرئيسية العادية. */
+  if (typeof window.Capacitor !== 'undefined' && !localStorage.getItem('bewodoh_onboarding_done')) {
+    window.location.replace('app-splash.html');
+  }
+</script>
 <title>بوضوح — نرى علاقاتنا بوضوح</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
