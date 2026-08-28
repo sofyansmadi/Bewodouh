@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 <style>
   :root{
     --ink:#241D2E; --ink-soft:#372C46;
@@ -52,6 +53,14 @@
   .admin-tab.active{ color:var(--ink); border-bottom-color:var(--clarity); }
   .field textarea{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog); min-height:80px; resize:vertical; }
   .field textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  #artBodyEditor{ background:var(--fog); border:1.5px solid var(--fog-dim); border-radius:12px; min-height:260px; direction:rtl; text-align:right; font-family:'IBM Plex Sans Arabic', sans-serif; font-size:14.5px; }
+  .ql-toolbar.ql-snow{ border:none; border-bottom:1.5px solid var(--fog-dim); border-radius:12px 12px 0 0; font-family:'IBM Plex Sans Arabic', sans-serif; }
+  .ql-container.ql-snow{ border:none; border-radius:0 0 12px 12px; min-height:220px; }
+  .ql-editor{ min-height:220px; font-size:15px; line-height:1.9; }
+  .ql-editor h1{ font-family:'Noto Kufi Arabic',sans-serif; font-size:24px; }
+  .ql-editor h2{ font-family:'Noto Kufi Arabic',sans-serif; font-size:20px; }
+  .ql-editor h3{ font-family:'Noto Kufi Arabic',sans-serif; font-size:17px; }
+  .ql-snow .ql-picker{ font-family:'IBM Plex Sans Arabic', sans-serif; }
   .section-title{ font-size:20px; margin-bottom:6px; }
   .section-sub{ font-size:13.5px; color:var(--text-muted-light); margin-bottom:26px; }
 
@@ -239,13 +248,9 @@
               <textarea id="artLede" required></textarea>
             </div>
             <div class="field full">
-              <label for="artBody">محتوى المقال (HTML — h2, p, ul.plain > li)</label>
-              <textarea id="artBody" style="min-height:220px; font-family:monospace; direction:ltr; text-align:left;" placeholder="&lt;h2&gt;عنوان فرعي&lt;/h2&gt;
-&lt;p&gt;فقرة نص عادية.&lt;/p&gt;
-&lt;ul class=&quot;plain&quot;&gt;
-  &lt;li&gt;نقطة أولى&lt;/li&gt;
-  &lt;li&gt;نقطة ثانية&lt;/li&gt;
-&lt;/ul&gt;" required></textarea>
+              <label for="artBodyEditor">محتوى المقال</label>
+              <div id="artBodyEditor"></div>
+              <p style="font-size:12px; color:var(--text-muted-light); margin-top:8px;">استخدمي القائمة فوق لاختيار حجم العنوان (H1/H2/H3)، أو خط عريض/مائل، أو لإضافة رابط داخل النص.</p>
             </div>
             <div class="field full">
               <label for="artPull">جملة بارزة (اختياري)</label>
@@ -299,6 +304,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
 /* ============================================================
    بوضوح — لوحة التحكم (Admin Panel).
@@ -313,6 +319,20 @@
    لا تظهر بنتائج البحث، لكن هذا لا يخفيها تماماً — الحماية
    الحقيقية من تسجيل الدخول والـ RLS، لا من إخفاء الرابط.
    ============================================================ */
+
+const quill = new Quill('#artBodyEditor', {
+  theme: 'snow',
+  placeholder: 'اكتبي محتوى المقال هنا... اختاري نوع العنوان أو التنسيق من القائمة فوق.',
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic'],
+      ['link'],
+      [{ list: 'bullet' }, { list: 'ordered' }],
+      ['clean']
+    ]
+  }
+});
 
 const loginSection = document.getElementById('loginSection');
 const dashboard = document.getElementById('dashboard');
@@ -539,7 +559,7 @@ function startEditArticle(art){
   document.getElementById('artHeroAlt').value = art.hero_image_alt;
   document.getElementById('artReadTime').value = art.read_time;
   document.getElementById('artLede').value = art.lede;
-  document.getElementById('artBody').value = art.body_html;
+  quill.root.innerHTML = art.body_html;
   document.getElementById('artPull').value = art.pull_quote || '';
   document.getElementById('artCtaTitle').value = art.cta_title || '';
   document.getElementById('artCtaDesc').value = art.cta_desc || '';
@@ -556,6 +576,7 @@ function startEditArticle(art){
 
 function resetArticleForm(){
   articleForm.reset();
+  quill.setText('');
   document.getElementById('artId').value = '';
   document.getElementById('artPublished').checked = true;
   articleFormTitle.textContent = 'إضافة مقال جديد';
@@ -578,7 +599,7 @@ articleForm.addEventListener('submit', async (e) => {
     hero_image_alt: document.getElementById('artHeroAlt').value.trim(),
     read_time: document.getElementById('artReadTime').value.trim(),
     lede: document.getElementById('artLede').value.trim(),
-    body_html: document.getElementById('artBody').value,
+    body_html: quill.root.innerHTML.replace(/<ul>/g, '<ul class="plain">').replace(/<ol>/g, '<ol class="plain">'),
     pull_quote: document.getElementById('artPull').value.trim(),
     cta_title: document.getElementById('artCtaTitle').value.trim(),
     cta_desc: document.getElementById('artCtaDesc').value.trim(),

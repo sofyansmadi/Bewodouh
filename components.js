@@ -221,6 +221,27 @@ class DynamicArticles extends HTMLElement {
       </a>
     `).join('');
 
+    // Add a filter button for any category not already present on the page
+    // (e.g. blog.html's static filter-bar), so new categories added purely
+    // via the admin panel become filterable without editing blog.html by hand.
+    const filterRow = document.getElementById('filterRow');
+    if (filterRow) {
+      const existingKeys = new Set(
+        Array.from(filterRow.querySelectorAll('.filter-btn')).map(b => b.dataset.filter)
+      );
+      const seenNew = new Set();
+      data.forEach(art => {
+        if (!existingKeys.has(art.filter_key) && !seenNew.has(art.filter_key)) {
+          seenNew.add(art.filter_key);
+          const btn = document.createElement('button');
+          btn.className = 'filter-btn';
+          btn.dataset.filter = art.filter_key;
+          btn.textContent = art.tag_label;
+          filterRow.appendChild(btn);
+        }
+      });
+    }
+
     window.dispatchEvent(new CustomEvent('dynamic-articles-loaded'));
   }
 }

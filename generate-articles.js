@@ -64,11 +64,15 @@ const CSS = `  :root{
   main{ padding:52px 0 40px; }
   article p{ font-size:17px; color:var(--text-on-light); max-width:70ch; }
   article p + p{ margin-top:18px; }
+  article h1{ font-size:26px; margin:44px 0 16px; }
   article h2{ font-size:22px; margin:40px 0 14px; }
+  article h3{ font-size:19px; margin:32px 0 12px; }
+  article a{ color:var(--clarity); text-decoration:underline; }
+  article strong{ font-weight:700; color:var(--ink); }
   .lede{ font-size:19px; color:var(--text-muted-light); }
   .pull{ border-right:3px solid var(--clarity); padding-right:20px; margin:32px 0; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:20px; line-height:1.7; max-width:34ch; }
-  ul.plain{ margin-top:10px; display:flex; flex-direction:column; gap:14px; padding-right:20px; }
-  ul.plain li{ font-size:16.5px; color:var(--text-on-light); }
+  ul.plain, ol.plain{ margin-top:10px; display:flex; flex-direction:column; gap:14px; padding-right:20px; }
+  ul.plain li, ol.plain li{ font-size:16.5px; color:var(--text-on-light); }
 
   .cta-box{
     margin:52px 0; background:var(--ink); border-radius:20px; padding:38px 34px; text-align:center;
