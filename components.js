@@ -24,6 +24,25 @@
    الروابط أفقياً كما كانت بالضبط قبل التحويل لمكوّنات.
    ============================================================ */
 
+/* ============================================================
+   isRunningInApp() و appHref() — بما إنه Capacitor ما بيفهم
+   تلقائياً إنه رابط زي "/blog/" لازم يفتح "index.html" اللي جواه
+   (عكس متصفح الويب العادي وGitHub Pages اللي يعرفان هذا تلقائياً)،
+   بيرجع افتراضياً للصفحة الرئيسية كحل احتياطي. الحل: أي رابط
+   داخلي نولّده بمكوّناتنا يمرّ عبر appHref() أولاً، فيصير:
+   - على الموقع بالمتصفح: يبقى "/blog/" كما هو (روابط نظيفة).
+   - جوا التطبيق: يتحول تلقائياً لـ "/blog/index.html" صراحة.
+   ============================================================ */
+const isRunningInApp = () => typeof window.Capacitor !== 'undefined';
+function appHref(path){
+  if (!isRunningInApp()) return path;
+  const [base, fragment] = path.split('#');
+  const frag = fragment ? '#' + fragment : '';
+  if (base === '/' || base === '') return '/index.html' + frag;
+  if (base.endsWith('/')) return base + 'index.html' + frag;
+  return base + frag;
+}
+
 const STYLE_FIX = `
   site-nav{ display:block; position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
   site-nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
@@ -48,15 +67,15 @@ class SiteNav extends HTMLElement {
 
     const linksHtml = links.map(l => {
       const cls = l.key && l.key === active ? ' class="active"' : '';
-      return `<a href="${l.href}"${cls}>${l.label}</a>`;
+      return `<a href="${appHref(l.href)}"${cls}>${l.label}</a>`;
     }).join('\n      ');
 
     this.innerHTML = `
     <div class="wrap">
-      <a href="/" class="brand">بوضوح<span>.</span></a>
+      <a href="${appHref('/')}" class="brand">بوضوح<span>.</span></a>
       <div class="nav-links">
         ${linksHtml}
-        <a href="/sales-page/" class="nav-cta">احجز استشارة</a>
+        <a href="${appHref('/sales-page/')}" class="nav-cta">احجز استشارة</a>
       </div>
     </div>`;
   }
@@ -65,6 +84,7 @@ class SiteNav extends HTMLElement {
 class SiteFooter extends HTMLElement {
   connectedCallback() {
     const variant = this.getAttribute('variant') || 'simple';
+    const h = appHref; // اختصار محلي
 
     if (variant === 'rich') {
       this.innerHTML = `
@@ -76,23 +96,23 @@ class SiteFooter extends HTMLElement {
         </div>
         <div class="footer-col">
           <h4>الموقع</h4>
-          <a href="/#pillars">المواضيع</a>
-          <a href="/blog/">المدونة</a>
-          <a href="/ai/">بوضوح AI</a>
-          <a href="/quizzes/">الاختبارات</a>
-          <a href="/about/">من نحن</a>
-          <a href="/sales-page/">احجز استشارة</a>
+          <a href="${h('/#pillars')}">المواضيع</a>
+          <a href="${h('/blog/')}">المدونة</a>
+          <a href="${h('/ai/')}">بوضوح AI</a>
+          <a href="${h('/quizzes/')}">الاختبارات</a>
+          <a href="${h('/about/')}">من نحن</a>
+          <a href="${h('/sales-page/')}">احجز استشارة</a>
         </div>
         <div class="footer-col">
           <h4>تواصل</h4>
           <a href="https://instagram.com" target="_blank" rel="noopener">إنستغرام</a>
           <a href="https://tiktok.com" target="_blank" rel="noopener">تيك توك</a>
-          <a href="/contact/">راسلنا</a>
+          <a href="${h('/contact/')}">راسلنا</a>
         </div>
         <div class="footer-col">
           <h4>قانوني</h4>
-          <a href="/terms/">شروط الاستخدام</a>
-          <a href="/privacy/">سياسة الخصوصية</a>
+          <a href="${h('/terms/')}">شروط الاستخدام</a>
+          <a href="${h('/privacy/')}">سياسة الخصوصية</a>
         </div>
       </div>
       <p class="footer-bottom">©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.</p>
@@ -105,14 +125,14 @@ class SiteFooter extends HTMLElement {
       <span class="brand kufi">بوضوح<span style="color:var(--clarity);">.</span></span>
       محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.
       <div style="margin-top:18px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; font-size:12.5px;">
-        <a href="/" style="color:var(--text-muted-dark);">الرئيسية</a>
-        <a href="/blog/" style="color:var(--text-muted-dark);">المدونة</a>
-        <a href="/quizzes/" style="color:var(--text-muted-dark);">الاختبارات</a>
-        <a href="/ai/" style="color:var(--text-muted-dark);">بوضوح AI</a>
-        <a href="/about/" style="color:var(--text-muted-dark);">من نحن</a>
-        <a href="/sales-page/" style="color:var(--text-muted-dark);">احجز استشارة</a>
-        <a href="/terms/" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
-        <a href="/privacy/" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
+        <a href="${h('/')}" style="color:var(--text-muted-dark);">الرئيسية</a>
+        <a href="${h('/blog/')}" style="color:var(--text-muted-dark);">المدونة</a>
+        <a href="${h('/quizzes/')}" style="color:var(--text-muted-dark);">الاختبارات</a>
+        <a href="${h('/ai/')}" style="color:var(--text-muted-dark);">بوضوح AI</a>
+        <a href="${h('/about/')}" style="color:var(--text-muted-dark);">من نحن</a>
+        <a href="${h('/sales-page/')}" style="color:var(--text-muted-dark);">احجز استشارة</a>
+        <a href="${h('/terms/')}" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
+        <a href="${h('/privacy/')}" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
       </div>
     </div>`;
   }
@@ -210,7 +230,7 @@ class DynamicArticles extends HTMLElement {
     if (error || !data || !data.length) return;
 
     this.innerHTML = data.map(art => `
-      <a href="/${art.slug}/" class="article-card" data-cat="${art.filter_key}">
+      <a href="${appHref('/' + art.slug + '/')}" class="article-card" data-cat="${art.filter_key}">
         <div class="card-visual"><img src="${art.hero_image_url}" alt="${art.hero_image_alt}" loading="lazy"></div>
         <div class="card-body">
           <span class="card-tag">${art.tag_label}</span>
@@ -257,7 +277,6 @@ customElements.define('dynamic-articles', DynamicArticles);
 
    يُضاف بكل صفحة زي: <app-bottom-nav active="home"></app-bottom-nav>
    ============================================================ */
-const isRunningInApp = () => typeof window.Capacitor !== 'undefined';
 
 class AppBottomNav extends HTMLElement {
   connectedCallback() {
@@ -268,20 +287,20 @@ class AppBottomNav extends HTMLElement {
 
     const active = this.getAttribute('active') || '';
     const items = [
-      { key: 'home', href: 'index.html', label: 'الرئيسية',
+      { key: 'home', href: '/', label: 'الرئيسية',
         icon: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>' },
-      { key: 'blog', href: 'blog.html', label: 'المدونة',
+      { key: 'blog', href: '/blog/', label: 'المدونة',
         icon: '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/>' },
-      { key: 'quizzes', href: 'quizzes.html', label: 'الاختبارات',
+      { key: 'quizzes', href: '/quizzes/', label: 'الاختبارات',
         icon: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>' },
-      { key: 'ai', href: 'ai.html', label: 'بوضوح AI',
+      { key: 'ai', href: '/ai/', label: 'بوضوح AI',
         icon: '<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1.2 2.4 2 4 2s3-.8 4-2"/>' },
-      { key: 'account', href: 'account.html', label: 'حسابي',
+      { key: 'account', href: '/account/', label: 'حسابي',
         icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
     ];
 
     const itemsHtml = items.map(item => `
-      <a href="${item.href}" class="app-nav-item${item.key === active ? ' active' : ''}">
+      <a href="${appHref(item.href)}" class="app-nav-item${item.key === active ? ' active' : ''}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg>
         <span>${item.label}</span>
       </a>`).join('');
@@ -314,3 +333,26 @@ appNavStyleTag.textContent = APP_NAV_STYLE;
 document.head.appendChild(appNavStyleTag);
 
 customElements.define('app-bottom-nav', AppBottomNav);
+
+/* ============================================================
+   إصلاح شامل لكل الروابط الثابتة بالصفحة (مكتوبة يدوياً بملفات
+   HTML، مش مولّدة من هذا الملف) — زي بطاقات المقالات، بطاقات
+   الاختبارات، أزرار "احجز استشارة" جوا المقالات، إلخ. appHref()
+   بالأعلى بتغطي بس الروابط اللي هذا الملف نفسه يولّدها، لكن
+   معظم روابط الموقع مكتوبة مباشرة داخل كل صفحة HTML. هذا الكود
+   يفحص كل وسم <a> بالصفحة أول ما تحمّل جوا التطبيق فقط، ويضيف
+   index.html تلقائياً لأي رابط داخلي بالشكل "/شيء/" أو "/".
+   ============================================================ */
+if (isRunningInApp()) {
+  document.querySelectorAll('a[href^="/"]').forEach(a => {
+    const original = a.getAttribute('href');
+    if (!original || original.startsWith('//')) return; // تجاهل روابط خارجية بروتوكول نسبي
+    if (original.includes('index.html')) return; // مصلّح أصلاً
+    const [base, fragment] = original.split('#');
+    const frag = fragment ? '#' + fragment : '';
+    if (base === '/' || base.endsWith('/')) {
+      const fixed = (base === '/' ? '/index.html' : base + 'index.html') + frag;
+      a.setAttribute('href', fixed);
+    }
+  });
+}
