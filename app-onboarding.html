@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>أهلاً بك في بوضوح</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -85,7 +86,6 @@
     padding: 0 24px;
   }
   
-  /* 1. الشعار يبدأ مخفي */
   .splash-brand {
     font-family: 'Noto Kufi Arabic', sans-serif;
     font-size: 38px;
@@ -97,18 +97,16 @@
   }
   .splash-brand span { color: var(--clarity); }
 
-  /* 2. ظهور الشعار (Fade In) */
   .splash-screen.show-logo .splash-brand {
     opacity: 1;
   }
 
-  /* 3. صعود الشعار للأعلى بسلاسة */
   .splash-screen.move-up .splash-brand {
     transform: translateY(-20px);
   }
 
-  /* 4. المقولة تبدأ مخفية */
   .splash-quote {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
     font-size: 16px;
     line-height: 1.7;
     color: var(--clarity-soft);
@@ -119,7 +117,6 @@
     transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
   }
 
-  /* 5. ظهور المقولة تحت الشعار */
   .splash-screen.move-up .splash-quote {
     opacity: 1;
     transform: translateY(0);
@@ -180,23 +177,24 @@
 <footer></footer>
 
 <script>
-window.addEventListener('DOMContentLoaded', () => {
+// الانتظار حتى تحميل الخطوط بالكامل لمنع تغير الخط المفاجئ (Glitch)
+document.fonts.ready.then(() => {
   const splashScreen = document.getElementById('splashScreen');
 
-  // 1. ظهور الشعار (Fade In)
+  // 1. ظهور الشعار بعد إتمام تحميل الخطوط مباشرة
   setTimeout(() => {
     splashScreen.classList.add('show-logo');
-  }, 200);
+  }, 100);
 
   // 2. بعد 3 ثوانٍ من ظهور الشعار: صعوده للأعلى وظهور المقولة
   setTimeout(() => {
     splashScreen.classList.add('move-up');
-  }, 3200);
+  }, 3100);
 
-  // 3. بعد 3 ثوانٍ من ظهور المقولة: اختفاء الشاشة الداكنة وكشف الصفحة الرئيسية
+  // 3. بعد 3 ثوانٍ من ظهور المقولة: الاختفاء الكلي للـ Splash
   setTimeout(() => {
     splashScreen.classList.add('hidden');
-  }, 6200);
+  }, 6100);
 });
 
 const RESULTS = {
