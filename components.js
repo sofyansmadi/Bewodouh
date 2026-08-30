@@ -44,7 +44,7 @@ function appHref(path){
 }
 
 const STYLE_FIX = `
-  site-nav{ display:block; position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); padding-top:max(20px, env(safe-area-inset-top)); }
+  site-nav{ display:block; position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
   site-nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
   site-footer{ display:block; background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
   site-footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
@@ -56,6 +56,9 @@ document.head.appendChild(styleTag);
 
 class SiteNav extends HTMLElement {
   connectedCallback() {
+    if (isRunningInApp()) {
+      this.style.paddingTop = 'max(20px, env(safe-area-inset-top))';
+    }
     const active = this.getAttribute('active') || '';
     const links = [
       { href: '/#pillars', label: 'المواضيع', key: '' },
