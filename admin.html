@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — بوضوح</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.8; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:960px; margin:0 auto; padding:0 24px; }
+
+  header{ background:var(--ink); padding:18px 0; }
+  header .wrap{ display:flex; align-items:center; justify-content:space-between; }
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:20px; color:var(--fog); }
+  .brand span{ color:var(--clarity); }
+  .logout-btn{ background:none; border:1px solid rgba(255,255,255,.2); color:var(--text-muted-dark); font-size:13px; padding:8px 16px; border-radius:100px; cursor:pointer; font-family:inherit; }
+  .logout-btn:hover{ color:var(--fog); border-color:var(--clarity); }
+
+  main{ padding:44px 0 90px; }
+
+  /* ---------- LOGIN ---------- */
+  .login-wrap{ max-width:420px; margin:60px auto; }
+  .login-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:36px 32px; box-shadow:0 24px 50px -30px rgba(36,29,46,.25); text-align:center; }
+  .login-card h1{ font-size:20px; margin-bottom:8px; }
+  .login-card p{ font-size:13.5px; color:var(--text-muted-light); margin-bottom:24px; }
+  .field{ margin-bottom:16px; text-align:right; }
+  .field label{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:7px; }
+  .field input{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog); }
+  .field input:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:14.5px; padding:13px 24px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; width:100%; margin-top:6px; }
+  .btn-primary:hover{ background:var(--ink-soft); }
+  .login-error{ display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13px; padding:10px; border-radius:10px; margin-bottom:16px; }
+  .login-error.active{ display:block; }
+
+  /* ---------- ADMIN DASHBOARD ---------- */
+  #dashboard{ display:none; }
+  .admin-tabs{ display:flex; gap:8px; margin-bottom:30px; border-bottom:1px solid var(--fog-dim); }
+  .admin-tab{ background:none; border:none; padding:12px 4px; margin-left:22px; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; color:var(--text-muted-light); cursor:pointer; border-bottom:2px solid transparent; }
+  .admin-tab.active{ color:var(--ink); border-bottom-color:var(--clarity); }
+  .field textarea{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog); min-height:80px; resize:vertical; }
+  .field textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  #artBodyEditor{ background:var(--fog); border:1.5px solid var(--fog-dim); border-radius:12px; min-height:260px; direction:rtl; text-align:right; font-family:'IBM Plex Sans Arabic', sans-serif; font-size:14.5px; }
+  .ql-toolbar.ql-snow{ border:none; border-bottom:1.5px solid var(--fog-dim); border-radius:12px 12px 0 0; font-family:'IBM Plex Sans Arabic', sans-serif; }
+  .ql-container.ql-snow{ border:none; border-radius:0 0 12px 12px; min-height:220px; }
+  .ql-editor{ min-height:220px; font-size:15px; line-height:1.9; }
+  .ql-editor h1{ font-family:'Noto Kufi Arabic',sans-serif; font-size:24px; }
+  .ql-editor h2{ font-family:'Noto Kufi Arabic',sans-serif; font-size:20px; }
+  .ql-editor h3{ font-family:'Noto Kufi Arabic',sans-serif; font-size:17px; }
+  .ql-snow .ql-picker{ font-family:'IBM Plex Sans Arabic', sans-serif; }
+  .section-title{ font-size:20px; margin-bottom:6px; }
+  .section-sub{ font-size:13.5px; color:var(--text-muted-light); margin-bottom:26px; }
+
+  table{ width:100%; border-collapse:collapse; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 12px 30px -20px rgba(36,29,46,.2); margin-bottom:36px; }
+  th, td{ padding:14px 16px; text-align:right; font-size:14px; border-bottom:1px solid var(--fog-dim); }
+  th{ background:var(--ink); color:var(--fog); font-family:'Noto Kufi Arabic',sans-serif; font-size:13px; }
+  tr:last-child td{ border-bottom:none; }
+  .badge-yes{ background:rgba(201,161,95,.15); color:#8a6a2e; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:100px; }
+  .row-actions{ display:flex; gap:8px; }
+  .icon-btn{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.15s; }
+  .icon-btn:hover{ border-color:var(--clarity); }
+  .icon-btn.danger:hover{ border-color:var(--alert); background:rgba(181,85,91,.08); }
+  .icon-btn svg{ width:14px; height:14px; }
+
+  .form-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:16px; padding:28px 26px; }
+  .form-card h3{ font-size:16px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:600px){ .form-grid{ grid-template-columns:1fr; } }
+  .form-grid .full{ grid-column:1 / -1; }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; }
+  .checkbox-row input{ width:auto; }
+  .checkbox-row label{ margin-bottom:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:20px; }
+  .btn-secondary{ background:var(--fog); color:var(--ink); font-weight:700; font-size:14px; padding:11px 20px; border-radius:100px; border:1px solid var(--fog-dim); cursor:pointer; font-family:inherit; }
+  .status-msg{ font-size:13px; margin-top:12px; display:none; }
+  .status-msg.active{ display:block; }
+  .status-msg.success{ color:#5a7a4f; }
+  .status-msg.error{ color:var(--alert); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="brand">بوضوح<span>.</span> — لوحة التحكم</span>
+    <button class="logout-btn" id="logoutBtn" style="display:none;">تسجيل الخروج</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <div class="login-wrap" id="loginSection">
+      <div class="login-card">
+        <h1>دخول لوحة التحكم</h1>
+        <p>هذه الصفحة مخصّصة لفريق بوضوح فقط.</p>
+        <div class="login-error" id="loginError">البريد الإلكتروني أو كلمة السر غير صحيحة.</div>
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginEmail">البريد الإلكتروني</label>
+            <input type="email" id="loginEmail" required>
+          </div>
+          <div class="field">
+            <label for="loginPassword">كلمة السر</label>
+            <input type="password" id="loginPassword" required>
+          </div>
+          <button type="submit" class="btn-primary">تسجيل الدخول</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="dashboard">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="packages">الباقات والأسعار</button>
+        <button class="admin-tab" data-tab="articles">المقالات</button>
+        <button class="admin-tab" data-tab="bookings">الحجوزات</button>
+      </div>
+
+      <div id="tab-packages" class="admin-tab-panel">
+      <h2 class="section-title">إدارة الباقات والأسعار</h2>
+      <p class="section-sub">أي تعديل هنا يظهر مباشرة لكل زوار الموقع على صفحة الحجز.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>السعر</th>
+            <th>الوصف</th>
+            <th>موصى بها؟</th>
+            <th>الترتيب</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="packagesTableBody">
+          <tr><td colspan="6">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 id="formTitle">إضافة باقة جديدة</h3>
+        <form id="packageForm">
+          <input type="hidden" id="pkgId">
+          <div class="form-grid">
+            <div class="field">
+              <label for="pkgName">اسم الباقة</label>
+              <input type="text" id="pkgName" required>
+            </div>
+            <div class="field">
+              <label for="pkgPrice">السعر (د.أ)</label>
+              <input type="number" id="pkgPrice" step="0.01" required>
+            </div>
+            <div class="field full">
+              <label for="pkgDesc">الوصف</label>
+              <input type="text" id="pkgDesc">
+            </div>
+            <div class="field">
+              <label for="pkgUnit">تفاصيل السعر (مثال: شهرياً — ٤ جلسات)</label>
+              <input type="text" id="pkgUnit" required>
+            </div>
+            <div class="field">
+              <label for="pkgOrder">ترتيب الظهور</label>
+              <input type="number" id="pkgOrder" value="0">
+            </div>
+            <div class="field full checkbox-row">
+              <input type="checkbox" id="pkgRecommended">
+              <label for="pkgRecommended">علّمها "الأكثر طلباً"</label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" style="width:auto;" id="submitBtnLabel">حفظ الباقة</button>
+            <button type="button" class="btn-secondary" id="cancelEditBtn" style="display:none;">إلغاء التعديل</button>
+          </div>
+          <div class="status-msg" id="formStatus"></div>
+        </form>
+      </div>
+      </div>
+
+      <div id="tab-articles" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">إدارة المقالات</h2>
+      <p class="section-sub">أي تعديل هنا ينشر على الموقع خلال ١٥ دقيقة تقريباً (وقت تشغيل الروبوت الآلي)، وليس فورياً كالباقات.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>العنوان</th>
+            <th>التصنيف</th>
+            <th>منشور؟</th>
+            <th>الترتيب</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="articlesTableBody">
+          <tr><td colspan="5">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 id="articleFormTitle">إضافة مقال جديد</h3>
+        <form id="articleForm">
+          <input type="hidden" id="artId">
+          <div class="form-grid">
+            <div class="field">
+              <label for="artSlug">المعرّف بالرابط (بالإنجليزي، بدون مسافات)</label>
+              <input type="text" id="artSlug" placeholder="article-my-new-topic" required>
+            </div>
+            <div class="field">
+              <label for="artTitle">عنوان المقال</label>
+              <input type="text" id="artTitle" required>
+            </div>
+            <div class="field full">
+              <label for="artMetaDesc">وصف الميتا (يظهر بنتائج البحث ومعاينة المشاركة)</label>
+              <input type="text" id="artMetaDesc" maxlength="160" required>
+            </div>
+            <div class="field">
+              <label for="artTagLabel">التصنيف كما يظهر للزوار</label>
+              <input type="text" id="artTagLabel" placeholder="الصحة النفسية" required>
+            </div>
+            <div class="field">
+              <label for="artFilterKey">مفتاح الفلترة (بالإنجليزي)</label>
+              <input type="text" id="artFilterKey" placeholder="mental-health" required>
+            </div>
+            <div class="field full">
+              <label for="artHeroImg">رابط صورة المقال الرئيسية</label>
+              <input type="url" id="artHeroImg" required>
+            </div>
+            <div class="field">
+              <label for="artHeroAlt">وصف الصورة (accessibility)</label>
+              <input type="text" id="artHeroAlt" required>
+            </div>
+            <div class="field">
+              <label for="artReadTime">مدة القراءة</label>
+              <input type="text" id="artReadTime" placeholder="٦ دقائق" required>
+            </div>
+            <div class="field full">
+              <label for="artLede">الفقرة الافتتاحية (Lede)</label>
+              <textarea id="artLede" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="artBodyEditor">محتوى المقال</label>
+              <div id="artBodyEditor"></div>
+              <p style="font-size:12px; color:var(--text-muted-light); margin-top:8px;">استخدمي القائمة فوق لاختيار حجم العنوان (H1/H2/H3)، أو خط عريض/مائل، أو لإضافة رابط داخل النص.</p>
+            </div>
+            <div class="field full">
+              <label for="artPull">جملة بارزة (اختياري)</label>
+              <input type="text" id="artPull">
+            </div>
+            <div class="field">
+              <label for="artCtaTitle">عنوان صندوق الدعوة للإجراء</label>
+              <input type="text" id="artCtaTitle" value="هل تحتاج دعماً حقيقياً بما تمر فيه؟">
+            </div>
+            <div class="field">
+              <label for="artCtaLabel">نص الزر</label>
+              <input type="text" id="artCtaLabel" value="احجز استشارتك الأولى">
+            </div>
+            <div class="field full">
+              <label for="artCtaDesc">وصف صندوق الدعوة للإجراء</label>
+              <input type="text" id="artCtaDesc" value="استشارة مع مختص نفسي مرخّص من فريق بوضوح ممكن تساعدك تفهم وضعك بعمق أكبر.">
+            </div>
+            <div class="field">
+              <label for="artCtaLink">رابط الزر</label>
+              <input type="text" id="artCtaLink" value="/sales-page/">
+            </div>
+            <div class="field">
+              <label for="artOrder">ترتيب الظهور</label>
+              <input type="number" id="artOrder" value="0">
+            </div>
+            <div class="field">
+              <label for="artRelated1">معرّف مقال ذي صلة ١</label>
+              <input type="text" id="artRelated1" placeholder="article-early-signs">
+            </div>
+            <div class="field">
+              <label for="artRelated2">معرّف مقال ذي صلة ٢</label>
+              <input type="text" id="artRelated2" placeholder="article-healthy-boundaries">
+            </div>
+            <div class="field full checkbox-row">
+              <input type="checkbox" id="artPublished" checked>
+              <label for="artPublished">منشور (يظهر للزوار)</label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" style="width:auto;">حفظ المقال</button>
+            <button type="button" class="btn-secondary" id="cancelArticleEditBtn" style="display:none;">إلغاء التعديل</button>
+          </div>
+          <div class="status-msg" id="articleFormStatus"></div>
+        </form>
+      </div>
+      </div>
+
+      <div id="tab-bookings" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">طلبات الحجز</h2>
+      <p class="section-sub">كل الطلبات يلي وصلت من صفحة الحجز، بالأحدث أولاً.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الباقة</th>
+            <th>الموعد المطلوب</th>
+            <th>الهاتف</th>
+            <th>الحالة</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="bookingsTableBody">
+          <tr><td colspan="6">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+/* ============================================================
+   بوضوح — لوحة التحكم (Admin Panel).
+   ------------------------------------------------------------
+   تتطلب هذه الصفحة إعداد supabase-config.js ببيانات حقيقية أولاً.
+   الوصول محمي بتسجيل دخول حقيقي عبر Supabase Auth — فقط حسابك
+   الإداري (الذي أنشأتيه من لوحة Supabase) يقدر يدخل.
+
+   ملاحظة أمان: هذه الصفحة نفسها غير مخفية عن أحد (أي شخص يقدر
+   يفتح الرابط)، لكن بدون تسجيل دخول صحيح، سياسات RLS على قاعدة
+   البيانات تمنع أي تعديل فعلي. أضفنا meta robots="noindex" حتى
+   لا تظهر بنتائج البحث، لكن هذا لا يخفيها تماماً — الحماية
+   الحقيقية من تسجيل الدخول والـ RLS، لا من إخفاء الرابط.
+   ============================================================ */
+
+const quill = new Quill('#artBodyEditor', {
+  theme: 'snow',
+  placeholder: 'اكتبي محتوى المقال هنا... اختاري نوع العنوان أو التنسيق من القائمة فوق.',
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic'],
+      ['link'],
+      [{ list: 'bullet' }, { list: 'ordered' }],
+      ['clean']
+    ]
+  }
+});
+
+const loginSection = document.getElementById('loginSection');
+const dashboard = document.getElementById('dashboard');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginError = document.getElementById('loginError');
+
+function showDashboard(){
+  loginSection.style.display = 'none';
+  dashboard.style.display = 'block';
+  logoutBtn.style.display = 'inline-block';
+  loadPackages();
+}
+function showLogin(){
+  loginSection.style.display = 'block';
+  dashboard.style.display = 'none';
+  logoutBtn.style.display = 'none';
+}
+
+async function checkSession(){
+  if (!supabaseClient) return;
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) showDashboard(); else showLogin();
+}
+checkSession();
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  loginError.classList.remove('active');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!supabaseClient) {
+    loginError.textContent = 'لم يتم إعداد الاتصال بقاعدة البيانات بعد (supabase-config.js).';
+    loginError.classList.add('active');
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) {
+    loginError.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة.';
+    loginError.classList.add('active');
+    return;
+  }
+  showDashboard();
+});
+
+logoutBtn.addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  showLogin();
+});
+
+// ---------- Packages table ----------
+async function loadPackages(){
+  const tbody = document.getElementById('packagesTableBody');
+  tbody.innerHTML = '<tr><td colspan="6">جارٍ التحميل...</td></tr>';
+
+  const { data, error } = await supabaseClient.from('packages').select('*').order('sort_order', { ascending: true });
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="6">تعذّر تحميل البيانات.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(pkg => `
+    <tr>
+      <td>${pkg.name}</td>
+      <td>${pkg.price} د.أ</td>
+      <td>${pkg.description || ''}</td>
+      <td>${pkg.is_recommended ? '<span class="badge-yes">نعم</span>' : '—'}</td>
+      <td>${pkg.sort_order}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="تعديل" data-edit-id="${pkg.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 0 1 4 4L7 21l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="icon-btn danger" title="حذف" data-delete-id="${pkg.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-edit-id]').forEach(btn => {
+    btn.addEventListener('click', () => startEdit(data.find(p => p.id === btn.dataset.editId)));
+  });
+  tbody.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', () => deletePackage(btn.dataset.deleteId));
+  });
+}
+
+// ---------- Add / Edit form ----------
+const packageForm = document.getElementById('packageForm');
+const formTitle = document.getElementById('formTitle');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+const formStatus = document.getElementById('formStatus');
+
+function startEdit(pkg){
+  document.getElementById('pkgId').value = pkg.id;
+  document.getElementById('pkgName').value = pkg.name;
+  document.getElementById('pkgPrice').value = pkg.price;
+  document.getElementById('pkgDesc').value = pkg.description || '';
+  document.getElementById('pkgUnit').value = pkg.price_unit;
+  document.getElementById('pkgOrder').value = pkg.sort_order;
+  document.getElementById('pkgRecommended').checked = pkg.is_recommended;
+  formTitle.textContent = 'تعديل: ' + pkg.name;
+  cancelEditBtn.style.display = 'inline-block';
+  window.scrollTo({ top: document.querySelector('.form-card').offsetTop - 20, behavior: 'smooth' });
+}
+
+function resetForm(){
+  packageForm.reset();
+  document.getElementById('pkgId').value = '';
+  formTitle.textContent = 'إضافة باقة جديدة';
+  cancelEditBtn.style.display = 'none';
+}
+cancelEditBtn.addEventListener('click', resetForm);
+
+packageForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  formStatus.classList.remove('active', 'success', 'error');
+
+  const id = document.getElementById('pkgId').value;
+  const payload = {
+    name: document.getElementById('pkgName').value.trim(),
+    price: parseFloat(document.getElementById('pkgPrice').value),
+    description: document.getElementById('pkgDesc').value.trim(),
+    price_unit: document.getElementById('pkgUnit').value.trim(),
+    sort_order: parseInt(document.getElementById('pkgOrder').value) || 0,
+    is_recommended: document.getElementById('pkgRecommended').checked,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('packages').update(payload).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('packages').insert(payload));
+  }
+
+  if (error) {
+    formStatus.textContent = 'صار خطأ أثناء الحفظ. حاولي مرة أخرى.';
+    formStatus.classList.add('active', 'error');
+    return;
+  }
+
+  formStatus.textContent = 'تم الحفظ بنجاح.';
+  formStatus.classList.add('active', 'success');
+  resetForm();
+  loadPackages();
+});
+
+async function deletePackage(id){
+  if (!confirm('متأكدة تريدين حذف هذه الباقة؟')) return;
+  const { error } = await supabaseClient.from('packages').delete().eq('id', id);
+  if (!error) loadPackages();
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = 'none');
+    document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
+    if (tab.dataset.tab === 'articles') loadArticles();
+    if (tab.dataset.tab === 'bookings') loadBookings();
+  });
+});
+
+// ---------- Bookings table ----------
+async function loadBookings(){
+  const tbody = document.getElementById('bookingsTableBody');
+  tbody.innerHTML = '<tr><td colspan="6">جارٍ التحميل...</td></tr>';
+
+  const { data, error } = await supabaseClient
+    .from('bookings')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="6">تعذّر تحميل البيانات.</td></tr>';
+    return;
+  }
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6">ما في طلبات حجز بعد.</td></tr>';
+    return;
+  }
+
+  const statusOptions = ['قيد المراجعة', 'مؤكّد', 'تم التواصل', 'ملغى'];
+
+  tbody.innerHTML = data.map(b => {
+    const dt = new Date(b.preferred_datetime);
+    const formatted = dt.toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' });
+    const options = statusOptions.map(s => `<option value="${s}"${s === b.status ? ' selected' : ''}>${s}</option>`).join('');
+    return `
+    <tr>
+      <td>${b.full_name}<br><span style="font-size:12px; color:var(--text-muted-light);">${b.email}</span></td>
+      <td>${b.package_name}</td>
+      <td>${formatted}</td>
+      <td>${b.phone}</td>
+      <td>
+        <select data-booking-id="${b.id}" class="status-select" style="border:1px solid var(--fog-dim); border-radius:8px; padding:6px 8px; font-size:12.5px; font-family:inherit;">
+          ${options}
+        </select>
+      </td>
+      <td>
+        <button class="icon-btn danger" title="حذف" data-delete-booking-id="${b.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('.status-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      await supabaseClient.from('bookings').update({ status: sel.value }).eq('id', sel.dataset.bookingId);
+    });
+  });
+  tbody.querySelectorAll('[data-delete-booking-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('متأكدة تريدين حذف هذا الحجز؟')) return;
+      await supabaseClient.from('bookings').delete().eq('id', btn.dataset.deleteBookingId);
+      loadBookings();
+    });
+  });
+}
+
+// ---------- Articles table ----------
+async function loadArticles(){
+  const tbody = document.getElementById('articlesTableBody');
+  tbody.innerHTML = '<tr><td colspan="5">جارٍ التحميل...</td></tr>';
+
+  const { data, error } = await supabaseClient.from('articles').select('*').order('sort_order', { ascending: true });
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="5">تعذّر تحميل البيانات.</td></tr>';
+    return;
+  }
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="5">ما في مقالات بعد. أضيفي أول مقال بالفورم تحت.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(art => `
+    <tr>
+      <td>${art.title}</td>
+      <td>${art.tag_label}</td>
+      <td>${art.is_published ? '<span class="badge-yes">نعم</span>' : '—'}</td>
+      <td>${art.sort_order}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="تعديل" data-edit-art-id="${art.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 0 1 4 4L7 21l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="icon-btn danger" title="حذف" data-delete-art-id="${art.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-edit-art-id]').forEach(btn => {
+    btn.addEventListener('click', () => startEditArticle(data.find(a => a.id === btn.dataset.editArtId)));
+  });
+  tbody.querySelectorAll('[data-delete-art-id]').forEach(btn => {
+    btn.addEventListener('click', () => deleteArticle(btn.dataset.deleteArtId));
+  });
+}
+
+const articleForm = document.getElementById('articleForm');
+const articleFormTitle = document.getElementById('articleFormTitle');
+const cancelArticleEditBtn = document.getElementById('cancelArticleEditBtn');
+const articleFormStatus = document.getElementById('articleFormStatus');
+
+function startEditArticle(art){
+  document.getElementById('artId').value = art.id;
+  document.getElementById('artSlug').value = art.slug;
+  document.getElementById('artTitle').value = art.title;
+  document.getElementById('artMetaDesc').value = art.meta_description;
+  document.getElementById('artTagLabel').value = art.tag_label;
+  document.getElementById('artFilterKey').value = art.filter_key;
+  document.getElementById('artHeroImg').value = art.hero_image_url;
+  document.getElementById('artHeroAlt').value = art.hero_image_alt;
+  document.getElementById('artReadTime').value = art.read_time;
+  document.getElementById('artLede').value = art.lede;
+  quill.root.innerHTML = art.body_html;
+  document.getElementById('artPull').value = art.pull_quote || '';
+  document.getElementById('artCtaTitle').value = art.cta_title || '';
+  document.getElementById('artCtaDesc').value = art.cta_desc || '';
+  document.getElementById('artCtaLink').value = art.cta_link || '/sales-page/';
+  document.getElementById('artCtaLabel').value = art.cta_label || '';
+  document.getElementById('artOrder').value = art.sort_order;
+  document.getElementById('artRelated1').value = art.related_slug_1 || '';
+  document.getElementById('artRelated2').value = art.related_slug_2 || '';
+  document.getElementById('artPublished').checked = art.is_published;
+  articleFormTitle.textContent = 'تعديل: ' + art.title;
+  cancelArticleEditBtn.style.display = 'inline-block';
+  window.scrollTo({ top: document.querySelectorAll('.form-card')[1].offsetTop - 20, behavior: 'smooth' });
+}
+
+function resetArticleForm(){
+  articleForm.reset();
+  quill.setText('');
+  document.getElementById('artId').value = '';
+  document.getElementById('artPublished').checked = true;
+  articleFormTitle.textContent = 'إضافة مقال جديد';
+  cancelArticleEditBtn.style.display = 'none';
+}
+cancelArticleEditBtn.addEventListener('click', resetArticleForm);
+
+articleForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  articleFormStatus.classList.remove('active', 'success', 'error');
+
+  const id = document.getElementById('artId').value;
+  const payload = {
+    slug: document.getElementById('artSlug').value.trim(),
+    title: document.getElementById('artTitle').value.trim(),
+    meta_description: document.getElementById('artMetaDesc').value.trim(),
+    tag_label: document.getElementById('artTagLabel').value.trim(),
+    filter_key: document.getElementById('artFilterKey').value.trim(),
+    hero_image_url: document.getElementById('artHeroImg').value.trim(),
+    hero_image_alt: document.getElementById('artHeroAlt').value.trim(),
+    read_time: document.getElementById('artReadTime').value.trim(),
+    lede: document.getElementById('artLede').value.trim(),
+    body_html: quill.root.innerHTML.replace(/<ul>/g, '<ul class="plain">').replace(/<ol>/g, '<ol class="plain">'),
+    pull_quote: document.getElementById('artPull').value.trim(),
+    cta_title: document.getElementById('artCtaTitle').value.trim(),
+    cta_desc: document.getElementById('artCtaDesc').value.trim(),
+    cta_link: document.getElementById('artCtaLink').value.trim(),
+    cta_label: document.getElementById('artCtaLabel').value.trim(),
+    sort_order: parseInt(document.getElementById('artOrder').value) || 0,
+    related_slug_1: document.getElementById('artRelated1').value.trim() || null,
+    related_slug_2: document.getElementById('artRelated2').value.trim() || null,
+    is_published: document.getElementById('artPublished').checked,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('articles').update(payload).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('articles').insert(payload));
+  }
+
+  if (error) {
+    articleFormStatus.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    articleFormStatus.classList.add('active', 'error');
+    return;
+  }
+
+  articleFormStatus.textContent = 'تم الحفظ. رح يظهر المقال على الموقع خلال ١٥ دقيقة تقريباً.';
+  articleFormStatus.classList.add('active', 'success');
+  resetArticleForm();
+  loadArticles();
+});
+
+async function deleteArticle(id){
+  if (!confirm('متأكدة تريدين حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
+  const { error } = await supabaseClient.from('articles').delete().eq('id', id);
+  if (!error) loadArticles();
+}
+</script>
+
+</body>
+</html>
