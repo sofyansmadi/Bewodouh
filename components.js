@@ -57,7 +57,7 @@ document.head.appendChild(styleTag);
 class SiteNav extends HTMLElement {
   connectedCallback() {
     if (isRunningInApp()) {
-      this.style.paddingTop = 'max(20px, env(safe-area-inset-top))';
+      this.style.paddingTop = 'max(25px, env(safe-area-inset-top))';
     }
     const active = this.getAttribute('active') || '';
     const links = [
