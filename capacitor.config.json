@@ -9,6 +9,8 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "splashImmersive": true,
       "backgroundColor": "#241D2E"
     }
   }
