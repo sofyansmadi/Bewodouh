@@ -17,11 +17,10 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   html, body{ height:100%; }
   body{
-    
     background:var(--fog); font-family:'IBM Plex Sans Arabic', sans-serif; color:var(--text-on-light);
     display:flex; flex-direction:column; min-height:100vh; padding:0 22px;
   }
-  .top-bar{ padding:20px 0 10px; display:flex; align-items:center; justify-content:space-between; }
+  .top-bar{ padding:40px 0 20px; display:flex; align-items:center; justify-content:space-between; }
   .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:18px; color:var(--ink); }
   .brand span{ color:var(--clarity); }
   .skip-link{ font-size:13px; color:var(--text-muted-light); text-decoration:none; }
@@ -61,57 +60,75 @@
   }
   .btn-primary:hover{ background:var(--ink-soft); }
   footer{ padding:24px 0 30px; text-align:center; }
-  /* شاشة البداية (Splash Screen) */
-.splash-screen {
-  position: fixed;
-  inset: 0;
-  background: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.7s ease, visibility 0.7s ease;
-}
-.splash-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-.splash-content {
-  text-align: center;
-  padding: 0 24px;
-}
-.splash-brand {
-  font-family: 'Noto Kufi Arabic', sans-serif;
-  font-size: 38px;
-  font-weight: 900;
-  color: var(--fog);
-  transform: translateY(0);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.splash-brand span { color: var(--clarity); }
-.splash-screen.animate .splash-brand {
-  transform: translateY(-15px);
-}
-.splash-quote {
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--clarity-soft);
-  max-width: 28ch;
-  margin: 18px auto 0;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s;
-}
-.splash-screen.animate .splash-quote {
-  opacity: 1;
-  transform: translateY(0);
-}
+
+  /* ========================================== */
+  /* شاشة البداية والتنقلات                     */
+  /* ========================================== */
+  .splash-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  .splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .splash-content {
+    text-align: center;
+    padding: 0 24px;
+  }
+  
+  /* 1. الشعار يبدأ مخفي */
+  .splash-brand {
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--fog);
+    opacity: 0;
+    transform: translateY(0);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .splash-brand span { color: var(--clarity); }
+
+  /* 2. ظهور الشعار (Fade In) */
+  .splash-screen.show-logo .splash-brand {
+    opacity: 1;
+  }
+
+  /* 3. صعود الشعار للأعلى بسلاسة */
+  .splash-screen.move-up .splash-brand {
+    transform: translateY(-20px);
+  }
+
+  /* 4. المقولة تبدأ مخفية */
+  .splash-quote {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--clarity-soft);
+    max-width: 28ch;
+    margin: 18px auto 0;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+  }
+
+  /* 5. ظهور المقولة تحت الشعار */
+  .splash-screen.move-up .splash-quote {
+    opacity: 1;
+    transform: translateY(0);
+  }
 </style>
 </head>
 <body>
-  <!-- شاشة البداية -->
+
+<!-- شاشة البداية -->
 <div class="splash-screen" id="splashScreen">
   <div class="splash-content">
     <h1 class="splash-brand">بوضوح<span>.</span></h1>
@@ -163,25 +180,25 @@
 <footer></footer>
 
 <script>
-  // تشغيل حركات شاشة البداية والتحكم بمدتها
 window.addEventListener('DOMContentLoaded', () => {
   const splashScreen = document.getElementById('splashScreen');
 
-  // بدء حركة صعود الشعار وظهور المقولة
+  // 1. ظهور الشعار (Fade In)
   setTimeout(() => {
-    splashScreen.classList.add('animate');
+    splashScreen.classList.add('show-logo');
   }, 200);
 
-  // إخفاء شاشة البداية والانتقال للأسئلة بعد 3.5 ثانية (يمكنك تعديل الرقم حسب رغبتك)
+  // 2. بعد 3 ثوانٍ من ظهور الشعار: صعوده للأعلى وظهور المقولة
+  setTimeout(() => {
+    splashScreen.classList.add('move-up');
+  }, 3200);
+
+  // 3. بعد 3 ثوانٍ من ظهور المقولة: اختفاء الشاشة الداكنة وكشف الصفحة الرئيسية
   setTimeout(() => {
     splashScreen.classList.add('hidden');
-  }, 3500);
+  }, 6200);
 });
-/* ============================================================
-   سؤال ترحيبي واحد بيساعدنا نخصص أول تجربة للمستخدم — بدون أي
-   إلزام بحساب. الإجابة تتخزن محلياً وتُستخدم لاحقاً لتخصيص
-   الصفحة الرئيسية (تحية شخصية + محتوى مقترح حسب اهتمامه).
-   ============================================================ */
+
 const RESULTS = {
   relationship: {
     title: "تمام، جهّزنالك محتوى يناسبك",
