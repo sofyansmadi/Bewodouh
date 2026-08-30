@@ -57,7 +57,7 @@ document.head.appendChild(styleTag);
 class SiteNav extends HTMLElement {
   connectedCallback() {
     if (isRunningInApp()) {
-      this.style.paddingTop = 'max(25px, env(safe-area-inset-top))';
+      this.style.paddingTop = 'max(20px, env(safe-area-inset-top))';
     }
     const active = this.getAttribute('active') || '';
     const links = [
@@ -104,6 +104,7 @@ class SiteFooter extends HTMLElement {
           <a href="${h('/ai/')}">بوضوح AI</a>
           <a href="${h('/quizzes/')}">الاختبارات</a>
           <a href="${h('/about/')}">من نحن</a>
+          <a href="${h('/team/')}">فريق بوضوح</a>
           <a href="${h('/sales-page/')}">احجز استشارة</a>
         </div>
         <div class="footer-col">
@@ -133,6 +134,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/quizzes/')}" style="color:var(--text-muted-dark);">الاختبارات</a>
         <a href="${h('/ai/')}" style="color:var(--text-muted-dark);">بوضوح AI</a>
         <a href="${h('/about/')}" style="color:var(--text-muted-dark);">من نحن</a>
+        <a href="${h('/team/')}" style="color:var(--text-muted-dark);">فريق بوضوح</a>
         <a href="${h('/sales-page/')}" style="color:var(--text-muted-dark);">احجز استشارة</a>
         <a href="${h('/terms/')}" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
         <a href="${h('/privacy/')}" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>

@@ -227,6 +227,8 @@
     <h2 class="section-title" style="text-align:center;">أكمل بيانات الحجز</h2>
     <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">راح يتواصل معك فريقنا خلال ٢٤ ساعة لتأكيد الموعد وطريقة الدفع.</p>
 
+    <div class="specialist-banner" id="specialistBanner" style="display:none; background:var(--ink); color:var(--clarity-soft); text-align:center; border-radius:14px; padding:14px 18px; margin-bottom:24px; font-size:14px; font-weight:600;"></div>
+
     <div class="booking-card">
       <form id="bookingForm">
         <div class="field">
@@ -246,9 +248,9 @@
           <select id="bkPackage" required>
             <option value="">اختر باقة...</option>
             <option value="استشارة سريعة">استشارة سريعة — ٢٠ د.أ</option>
-            <option value="باقة الانطلاقة">باقة الانطلاقة — ١٠٠ د.أ / شهرياً</option>
-            <option value="باقة المرافقة">باقة المرافقة — ٢٢٠ د.أ / شهرياً</option>
-            <option value="دعم فوري">دعم فوري — ٥٠ د.أ</option>
+            <option value="باقة الانطلاقة">باقة الانطلاقة — ٧٥ د.أ / شهرياً</option>
+            <option value="باقة المرافقة">باقة المرافقة — ١٣٥ د.أ / كل ٣ أشهر</option>
+            <option value="دعم فوري">دعم فوري — ٣٠ د.أ</option>
           </select>
         </div>
         <div class="field">
@@ -448,6 +450,15 @@ window.addEventListener('package-selected', (e) => {
 
 // ---------- Booking form ----------
 
+// لو المستخدم إجت من صفحة أخصائي محدد، نوريها بانر تأكيد ونحفظ الاسم لاستخدامه بالحجز
+const urlParams = new URLSearchParams(window.location.search);
+const chosenSpecialist = urlParams.get('specialist');
+if (chosenSpecialist) {
+  const banner = document.getElementById('specialistBanner');
+  banner.textContent = `رح تحجزي مع: ${chosenSpecialist}`;
+  banner.style.display = 'block';
+}
+
 // نحدد أقل تاريخ/وقت مسموح (بعد ٢٤ ساعة من الآن بالضبط) ونحطه كحد أدنى لحقل الاختيار
 function setMinDateTime(){
   const min = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -486,6 +497,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     package_name: document.getElementById('bkPackage').value,
     preferred_datetime: selectedDate.toISOString(),
     message: document.getElementById('bkMessage').value.trim() || null,
+    specialist_name: chosenSpecialist || null,
   };
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {

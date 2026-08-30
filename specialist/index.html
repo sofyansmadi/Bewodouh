@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">أخصائي — بوضوح</title>
+<meta name="description" id="pageDesc" content="تعرّف على أحد أخصائيي فريق بوضوح.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--clarity-soft); margin-bottom:22px; }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:56px 0 60px; }
+
+  main{ padding:0 0 90px; }
+  .loading-state{ text-align:center; padding:80px 0; color:var(--text-muted-light); }
+
+  .profile-card{
+    background:#fff; border:1px solid var(--fog-dim); border-radius:24px; padding:0; margin-top:-70px;
+    box-shadow:0 30px 60px -30px rgba(36,29,46,.3); overflow:hidden; display:none;
+  }
+  .profile-card.loaded{ display:block; }
+  .profile-photo{ width:100%; height:340px; object-fit:cover; display:block; }
+  .profile-body{ padding:30px 30px 34px; }
+  .profile-name{ font-size:24px; font-weight:900; margin-bottom:6px; }
+  .profile-role{ font-size:14.5px; color:var(--clarity); font-weight:700; margin-bottom:20px; }
+  .profile-bio{ font-size:15.5px; color:var(--text-on-light); white-space:pre-line; }
+
+  .book-box{ margin-top:30px; background:var(--ink); border-radius:18px; padding:26px 24px; text-align:center; background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink)); }
+  .book-box h3{ color:var(--fog); font-size:17px; margin-bottom:8px; }
+  .book-box p{ color:var(--text-muted-dark); font-size:13.5px; margin-bottom:18px; }
+  .btn-primary{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14.5px; padding:13px 26px; border-radius:100px; display:inline-block; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; margin-top:60px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <a href="/team/" class="back-link">← فريق بوضوح</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="loading-state" id="loadingState">جارٍ تحميل بيانات الأخصائي...</p>
+
+    <div class="profile-card" id="profileCard">
+      <img class="profile-photo" id="profilePhoto" src="" alt="">
+      <div class="profile-body">
+        <h1 class="profile-name" id="profileName"></h1>
+        <div class="profile-role" id="profileRole"></div>
+        <p class="profile-bio" id="profileBio"></p>
+
+        <div class="book-box">
+          <h3>حابة تحجزي جلسة مع <span id="bookName"></span>؟</h3>
+          <p>اختاري باقتك وموعدك، وبنتأكد الجلسة تكون مع نفس الأخصائي يلي اخترتيه.</p>
+          <a href="#" class="btn-primary" id="bookLink">احجزي معها الآن</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+async function loadSpecialist(){
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('slug');
+  const loadingState = document.getElementById('loadingState');
+
+  if (!slug) {
+    loadingState.textContent = 'ما في أخصائي محدد. ارجعي لصفحة الفريق واختاري وحد منهم.';
+    return;
+  }
+
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+    loadingState.textContent = 'تعذّر تحميل البيانات حالياً.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('specialists')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .maybeSingle();
+
+  if (error || !data) {
+    loadingState.textContent = 'ما لقينا هذا الأخصائي. ارجعي لصفحة الفريق.';
+    return;
+  }
+
+  document.getElementById('pageTitle').textContent = data.full_name + ' — بوضوح';
+  document.getElementById('pageDesc').setAttribute('content', data.short_bio || data.bio.slice(0, 150));
+  document.getElementById('profilePhoto').src = data.photo_url;
+  document.getElementById('profilePhoto').alt = data.full_name;
+  document.getElementById('profileName').textContent = data.full_name;
+  document.getElementById('profileRole').textContent = data.specialty;
+  document.getElementById('profileBio').textContent = data.bio;
+  document.getElementById('bookName').textContent = data.full_name;
+  document.getElementById('bookLink').href = '/sales-page/?specialist=' + encodeURIComponent(data.full_name);
+
+  loadingState.style.display = 'none';
+  document.getElementById('profileCard').classList.add('loaded');
+}
+loadSpecialist();
+</script>
+
+<app-bottom-nav></app-bottom-nav>
+<script src="/components.js"></script>
+</body>
+</html>

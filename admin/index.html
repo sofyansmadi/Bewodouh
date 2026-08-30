@@ -127,6 +127,7 @@
         <button class="admin-tab active" data-tab="packages">الباقات والأسعار</button>
         <button class="admin-tab" data-tab="articles">المقالات</button>
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
+        <button class="admin-tab" data-tab="team">الفريق</button>
       </div>
 
       <div id="tab-packages" class="admin-tab-panel">
@@ -318,6 +319,72 @@
           <tr><td colspan="6">جارٍ التحميل...</td></tr>
         </tbody>
       </table>
+      </div>
+
+      <div id="tab-team" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">إدارة فريق الأخصائيين</h2>
+      <p class="section-sub">أي تعديل هنا يظهر مباشرة بصفحة "فريق بوضوح" وصفحة كل أخصائي.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>الاسم</th>
+            <th>التخصص</th>
+            <th>منشور؟</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="teamTableBody">
+          <tr><td colspan="5">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 id="specialistFormTitle">إضافة أخصائي جديد</h3>
+        <form id="specialistForm">
+          <input type="hidden" id="spId">
+          <div class="form-grid">
+            <div class="field">
+              <label for="spSlug">المعرّف بالرابط (بالإنجليزي، بدون مسافات)</label>
+              <input type="text" id="spSlug" placeholder="sara-ahmad" required>
+            </div>
+            <div class="field">
+              <label for="spName">الاسم الكامل</label>
+              <input type="text" id="spName" required>
+            </div>
+            <div class="field">
+              <label for="spSpecialty">التخصص</label>
+              <input type="text" id="spSpecialty" placeholder="أخصائية نفسية إكلينيكية" required>
+            </div>
+            <div class="field">
+              <label for="spOrder">ترتيب الظهور</label>
+              <input type="number" id="spOrder" value="0">
+            </div>
+            <div class="field full">
+              <label for="spPhoto">رابط الصورة الشخصية</label>
+              <input type="url" id="spPhoto" required>
+            </div>
+            <div class="field full">
+              <label for="spShortBio">جملة قصيرة (تظهر بالبطاقة بقائمة الفريق، اختياري)</label>
+              <input type="text" id="spShortBio">
+            </div>
+            <div class="field full">
+              <label for="spBio">النبذة الكاملة (تظهر بصفحته الشخصية)</label>
+              <textarea id="spBio" style="min-height:140px;" required></textarea>
+            </div>
+            <div class="field full checkbox-row">
+              <input type="checkbox" id="spPublished" checked>
+              <label for="spPublished">منشور (يظهر للزوار)</label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" style="width:auto;">حفظ الأخصائي</button>
+            <button type="button" class="btn-secondary" id="cancelSpecialistEditBtn" style="display:none;">إلغاء التعديل</button>
+          </div>
+          <div class="status-msg" id="specialistFormStatus"></div>
+        </form>
+      </div>
       </div>
     </div>
 
@@ -520,6 +587,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
     if (tab.dataset.tab === 'articles') loadArticles();
     if (tab.dataset.tab === 'bookings') loadBookings();
+    if (tab.dataset.tab === 'team') loadTeam();
   });
 });
 
@@ -716,6 +784,119 @@ async function deleteArticle(id){
   if (!confirm('متأكدة تريدين حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
   const { error } = await supabaseClient.from('articles').delete().eq('id', id);
   if (!error) loadArticles();
+}
+
+// ---------- Team table ----------
+async function loadTeam(){
+  const tbody = document.getElementById('teamTableBody');
+  tbody.innerHTML = '<tr><td colspan="5">جارٍ التحميل...</td></tr>';
+
+  const { data, error } = await supabaseClient.from('specialists').select('*').order('sort_order', { ascending: true });
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="5">تعذّر تحميل البيانات.</td></tr>';
+    return;
+  }
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="5">ما في أخصائيين بعد. أضيفي أول وحد بالفورم تحت.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(sp => `
+    <tr>
+      <td><img src="${sp.photo_url}" alt="${sp.full_name}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
+      <td>${sp.full_name}</td>
+      <td>${sp.specialty}</td>
+      <td>${sp.is_published ? '<span class="badge-yes">نعم</span>' : '—'}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="تعديل" data-edit-sp-id="${sp.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 0 1 4 4L7 21l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="icon-btn danger" title="حذف" data-delete-sp-id="${sp.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-edit-sp-id]').forEach(btn => {
+    btn.addEventListener('click', () => startEditSpecialist(data.find(s => s.id === btn.dataset.editSpId)));
+  });
+  tbody.querySelectorAll('[data-delete-sp-id]').forEach(btn => {
+    btn.addEventListener('click', () => deleteSpecialist(btn.dataset.deleteSpId));
+  });
+}
+
+const specialistForm = document.getElementById('specialistForm');
+const specialistFormTitle = document.getElementById('specialistFormTitle');
+const cancelSpecialistEditBtn = document.getElementById('cancelSpecialistEditBtn');
+const specialistFormStatus = document.getElementById('specialistFormStatus');
+
+function startEditSpecialist(sp){
+  document.getElementById('spId').value = sp.id;
+  document.getElementById('spSlug').value = sp.slug;
+  document.getElementById('spName').value = sp.full_name;
+  document.getElementById('spSpecialty').value = sp.specialty;
+  document.getElementById('spOrder').value = sp.sort_order;
+  document.getElementById('spPhoto').value = sp.photo_url;
+  document.getElementById('spShortBio').value = sp.short_bio || '';
+  document.getElementById('spBio').value = sp.bio;
+  document.getElementById('spPublished').checked = sp.is_published;
+  specialistFormTitle.textContent = 'تعديل: ' + sp.full_name;
+  cancelSpecialistEditBtn.style.display = 'inline-block';
+  window.scrollTo({ top: document.querySelectorAll('.form-card')[2].offsetTop - 20, behavior: 'smooth' });
+}
+
+function resetSpecialistForm(){
+  specialistForm.reset();
+  document.getElementById('spId').value = '';
+  document.getElementById('spPublished').checked = true;
+  specialistFormTitle.textContent = 'إضافة أخصائي جديد';
+  cancelSpecialistEditBtn.style.display = 'none';
+}
+cancelSpecialistEditBtn.addEventListener('click', resetSpecialistForm);
+
+specialistForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  specialistFormStatus.classList.remove('active', 'success', 'error');
+
+  const id = document.getElementById('spId').value;
+  const payload = {
+    slug: document.getElementById('spSlug').value.trim(),
+    full_name: document.getElementById('spName').value.trim(),
+    specialty: document.getElementById('spSpecialty').value.trim(),
+    sort_order: parseInt(document.getElementById('spOrder').value) || 0,
+    photo_url: document.getElementById('spPhoto').value.trim(),
+    short_bio: document.getElementById('spShortBio').value.trim() || null,
+    bio: document.getElementById('spBio').value.trim(),
+    is_published: document.getElementById('spPublished').checked,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('specialists').update(payload).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('specialists').insert(payload));
+  }
+
+  if (error) {
+    specialistFormStatus.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    specialistFormStatus.classList.add('active', 'error');
+    return;
+  }
+
+  specialistFormStatus.textContent = 'تم الحفظ بنجاح.';
+  specialistFormStatus.classList.add('active', 'success');
+  resetSpecialistForm();
+  loadTeam();
+});
+
+async function deleteSpecialist(id){
+  if (!confirm('متأكدة تريدين حذف هذا الأخصائي؟')) return;
+  const { error } = await supabaseClient.from('specialists').delete().eq('id', id);
+  if (!error) loadTeam();
 }
 </script>
 
