@@ -270,18 +270,18 @@ const RESULTS_INFO = {
 };
 
 const RELATED_MAP = {
-  quality_time: ["article-healthy-first-date.html"],
-  words: ["article-silent-treatment.html"],
-  touch: ["article-love-bombing.html"],
-  acts: ["article-codependency.html"],
-  security: ["article-jealousy-vs-control.html"],
+  quality_time: ["/article-healthy-first-date/"],
+  words: ["/article-silent-treatment/"],
+  touch: ["/article-love-bombing/"],
+  acts: ["/article-codependency/"],
+  security: ["/article-jealousy-vs-control/"],
 };
 const articleTitles = {
-  "article-healthy-first-date.html": "كيف تبني علاقة صحية من أول موعد",
-  "article-silent-treatment.html": "الصمت كعقاب: لماذا يكون أكثر أذى مما يبدو",
-  "article-love-bombing.html": "الحب القصفي: لماذا البداية القوية جداً ليست دائماً مؤشراً جيداً",
-  "article-codependency.html": "الاعتمادية العاطفية: حين تتحول \"أحبك\" إلى \"لا أستطيع العيش من دونك\"",
-  "article-jealousy-vs-control.html": "الفرق بين الغيرة الطبيعية والغيرة التي تتحول إلى تحكم",
+  "/article-healthy-first-date/": "كيف تبني علاقة صحية من أول موعد",
+  "/article-silent-treatment/": "الصمت كعقاب: لماذا يكون أكثر أذى مما يبدو",
+  "/article-love-bombing/": "الحب القصفي: لماذا البداية القوية جداً ليست دائماً مؤشراً جيداً",
+  "/article-codependency/": "الاعتمادية العاطفية: حين تتحول \"أحبك\" إلى \"لا أستطيع العيش من دونك\"",
+  "/article-jealousy-vs-control/": "الفرق بين الغيرة الطبيعية والغيرة التي تتحول إلى تحكم",
 };
 
 let current = 0;
@@ -391,6 +391,9 @@ document.getElementById('retakeBtn').addEventListener('click', (e) => {
 });
 renderQuestions(); updateNav();
 </script>
-<script src="/components.js"></script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

@@ -184,6 +184,9 @@
      واحفظ رمز الجلسة (session token) الذي يُعيده الخادم.
    ============================================================ */
 
+const inApp = typeof window.Capacitor !== 'undefined';
+function accountUrl(){ return inApp ? '/account/index.html' : '/account/'; }
+
 const tabSignup = document.getElementById('tabSignup');
 const tabLogin = document.getElementById('tabLogin');
 const signupForm = document.getElementById('signupForm');
@@ -246,7 +249,7 @@ signupForm.addEventListener('submit', function(e){
   document.getElementById('successTitle').textContent = 'تم إنشاء حسابك بنجاح';
   document.getElementById('successBox').classList.add('active');
 
-  setTimeout(() => { window.location.href = '/account/'; }, 1200);
+  setTimeout(() => { window.location.href = accountUrl(); }, 1200);
 });
 
 // ---- Login submit ----
@@ -269,7 +272,7 @@ loginForm.addEventListener('submit', function(e){
   document.getElementById('successTitle').textContent = 'تم تسجيل الدخول بنجاح';
   document.getElementById('successBox').classList.add('active');
 
-  setTimeout(() => { window.location.href = '/account/'; }, 1000);
+  setTimeout(() => { window.location.href = accountUrl(); }, 1000);
 });
 
 // If already signed in on this browser, hint at it.
@@ -281,6 +284,9 @@ loginForm.addEventListener('submit', function(e){
 })();
 </script>
 
-<script src="/components.js"></script>
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

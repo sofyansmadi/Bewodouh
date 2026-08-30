@@ -315,16 +315,16 @@ const RESULTS_INFO = {
 };
 
 const RELATED_MAP = {
-  secure: ["article-healthy-first-date.html"],
-  anxious: ["article-jealousy-vs-control.html"],
-  avoidant: ["article-codependency.html"],
-  disorganized: ["article-silent-treatment.html"],
+  secure: ["/article-healthy-first-date/"],
+  anxious: ["/article-jealousy-vs-control/"],
+  avoidant: ["/article-codependency/"],
+  disorganized: ["/article-silent-treatment/"],
 };
 const articleTitles = {
-  "article-healthy-first-date.html": "كيف تبني علاقة صحية من أول موعد",
-  "article-jealousy-vs-control.html": "الفرق بين الغيرة الطبيعية والغيرة التي تتحول إلى تحكم",
-  "article-codependency.html": "الاعتمادية العاطفية: حين تتحول \"أحبك\" إلى \"لا أستطيع العيش من دونك\"",
-  "article-silent-treatment.html": "الصمت كعقاب: لماذا يكون أكثر أذى مما يبدو",
+  "/article-healthy-first-date/": "كيف تبني علاقة صحية من أول موعد",
+  "/article-jealousy-vs-control/": "الفرق بين الغيرة الطبيعية والغيرة التي تتحول إلى تحكم",
+  "/article-codependency/": "الاعتمادية العاطفية: حين تتحول \"أحبك\" إلى \"لا أستطيع العيش من دونك\"",
+  "/article-silent-treatment/": "الصمت كعقاب: لماذا يكون أكثر أذى مما يبدو",
 };
 
 let current = 0;
@@ -432,6 +432,9 @@ document.getElementById('retakeBtn').addEventListener('click', (e) => {
 });
 renderQuestions(); updateNav();
 </script>
-<script src="/components.js"></script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

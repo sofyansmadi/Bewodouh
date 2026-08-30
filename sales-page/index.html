@@ -302,7 +302,6 @@
 </section>
 
 <site-footer></site-footer>
-<app-bottom-nav active="none"></app-bottom-nav>
 
 <script>
 /* ============================================================
@@ -462,6 +461,9 @@ document.querySelectorAll('.faq-q').forEach(q => {
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
-<script src="/components.js"></script>
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

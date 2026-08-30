@@ -271,7 +271,7 @@
     <div class="cta-band">
       <h2>خطوة الوعي الأولى تبدأ من هنا</h2>
       <p>إذا شعرت أن هناك ما هو غير صحيح في علاقتك، لكنك لا تستطيع تحديده، استشارة قصيرة مع مختص ممكن توضحلك الصورة أكتر.</p>
-      <a href="sales-page/" class="btn-primary">احجز استشارتك الأولى</a>
+      <a href="/sales-page/" class="btn-primary">احجز استشارتك الأولى</a>
     </div>
   </div>
 </section>
@@ -285,6 +285,9 @@
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 
-<script src="/components.js"></script>
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

@@ -489,7 +489,9 @@ autoResize();
 
 
 <app-bottom-nav active="ai"></app-bottom-nav>
-<script src="/components.js"></script>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>
 

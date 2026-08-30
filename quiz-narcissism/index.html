@@ -217,30 +217,30 @@ const results = [
     desc: "معظم إجاباتك تدل على إدراك متوازن للذات، مع قدرة على التعاطف مع الآخرين واحترام حدودهم. هذا لا يعني غياب الثقة بالنفس، بل يعني أنها مبنية على أساس صحي.",
     points: ["استمر في ملاحظة تصرفاتك من وقت لآخر، فالوعي الذاتي المستمر عادة صحية بحد ذاتها.", "الثقة الصحية بالنفس لا تتعارض مع التعاطف مع الآخرين، بل تكملها."],
     meterColor: "var(--clarity)", meterPct: 12,
-    articles: ["article-narcissist-vs-confident.html"] },
+    articles: ["/article-narcissist-vs-confident/"] },
   { min: 7, max: 13, tag: "مؤشرات خفيفة تستحق الانتباه", tagColor: "var(--rose)",
     title: "توجد لديك بعض السمات التي تستحق ملاحظة هادئة",
     desc: "بعض إجاباتك تشير إلى ميول عابرة نحو الحاجة إلى الإعجاب أو صعوبة في التعاطف أحياناً. هذا لا يعني بالضرورة وجود اضطراب، لكنه يستحق تأملاً صادقاً مع النفس.",
     points: ["حدد الأسئلة التي أجبت عنها بأعلى الدرجات، فهي أقرب نقطة تستحق التأمل.", "اسأل من تثق بهم كيف يرون تعاملك معهم، فالمنظور الخارجي قد يوضح أشياء يصعب رؤيتها من الداخل.", "لاحظ ردود أفعالك عند تلقي النقد أو عند عدم حصولك على الاهتمام المتوقع."],
     meterColor: "var(--clarity-soft)", meterPct: 42,
-    articles: ["article-narcissist-vs-confident.html", "article-healthy-boundaries.html"] },
+    articles: ["/article-narcissist-vs-confident/", "/article-healthy-boundaries/"] },
   { min: 14, max: 20, tag: "مؤشرات متوسطة إلى مرتفعة", tagColor: "var(--alert)",
     title: "إجاباتك تشير إلى أنماط متكررة تستحق اهتماماً جدياً",
     desc: "عدد من إجاباتك يشير إلى وجود سمات متكررة مرتبطة بالحاجة إلى الإعجاب، والشعور بالأحقية، وصعوبة التعاطف. هذه الأنماط قد تؤثر على علاقاتك الشخصية والمهنية.",
     points: ["توثيق المواقف التي تلاحظ فيها هذه الأنماط قد يساعدك على رؤيتها بوضوح أكبر.", "التحدث مع معالج نفسي مختص خطوة مفيدة جداً هنا، فهي ليست علامة ضعف، بل خطوة نحو فهم أعمق لذاتك.", "شارك من حولك رغبتك في التغيير، فالانفتاح على الملاحظات خطوة أولى مهمة."],
     meterColor: "var(--alert)", meterPct: 72,
-    articles: ["article-narcissist-vs-confident.html", "article-healthy-boundaries.html"] },
+    articles: ["/article-narcissist-vs-confident/", "/article-healthy-boundaries/"] },
   { min: 21, max: 27, tag: "مؤشرات مرتفعة تستدعي استشارة مختص", tagColor: "var(--alert)",
     title: "معظم إجاباتك تشير إلى سمات تستحق تقييماً مهنياً",
     desc: "معظم إجاباتك تشير إلى وجود سمات نرجسية بشكل ملحوظ ومتكرر. الاعتراف بهذا أمر صعب، لكنه أهم خطوة يمكنك اتخاذها الآن.",
     points: ["التحدث مع معالج نفسي مختص بهذا المجال خطوة مهمة جداً لفهم هذه السمات والعمل عليها بشكل حقيقي.", "التغيير الحقيقي يتطلب وقتاً والتزاماً، وهو ممكن دائماً عند وجود رغبة صادقة فيه.", "كن صادقاً مع نفسك ومع من حولك بشأن رغبتك في العمل على هذه الجوانب."],
     meterColor: "var(--alert)", meterPct: 94,
-    articles: ["article-narcissist-vs-confident.html", "article-healthy-boundaries.html"] },
+    articles: ["/article-narcissist-vs-confident/", "/article-healthy-boundaries/"] },
 ];
 
 const articleTitles = {
-  "article-narcissist-vs-confident.html": "الفرق بين الشخص الواثق والشخص النرجسي",
-  "article-healthy-boundaries.html": "كيف تحدد حدوداً صحية في علاقتك دون الشعور بالذنب",
+  "/article-narcissist-vs-confident/": "الفرق بين الشخص الواثق والشخص النرجسي",
+  "/article-healthy-boundaries/": "كيف تحدد حدوداً صحية في علاقتك دون الشعور بالذنب",
 };
 
 let current = 0;
@@ -329,6 +329,9 @@ document.getElementById('retakeBtn').addEventListener('click', (e) => {
 });
 renderQuestions(); updateNav();
 </script>
-<script src="/components.js"></script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

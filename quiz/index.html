@@ -283,7 +283,7 @@ const results = [
     ],
     meterColor: "var(--clarity)",
     meterPct: 15,
-    articles: ["article-healthy-first-date.html"],
+    articles: ["/article-healthy-first-date/"],
     ctaTitle: "هل تريد تعزيز هذا الأساس أكثر؟",
     ctaDesc: "استشارة قصيرة مع مختص ممكن تساعدك تحافظ على نفس هذه الأنماط الصحية وتبنيها أكثر."
   },
@@ -300,7 +300,7 @@ const results = [
     ],
     meterColor: "var(--clarity-soft)",
     meterPct: 45,
-    articles: ["article-early-signs.html", "article-healthy-first-date.html"],
+    articles: ["/article-early-signs/", "/article-healthy-first-date/"],
     ctaTitle: "هل تريد فهم هذه العلامات أكثر؟",
     ctaDesc: "استشارة مع مختص ممكن تساعدك تفرّق بين الموقف العابر والنمط المتكرر بوضوح أكبر."
   },
@@ -317,7 +317,7 @@ const results = [
     ],
     meterColor: "var(--alert)",
     meterPct: 75,
-    articles: ["article-gaslighting.html", "article-early-signs.html", "article-narcissist-vs-confident.html"],
+    articles: ["/article-gaslighting/", "/article-early-signs/", "/article-narcissist-vs-confident/"],
     ctaTitle: "هل تريد فهم هذه الأنماط بعمق أكثر؟",
     ctaDesc: "استشارة مع مختص نفسي ممكن تساعدك تفهم هذه الأنماط بعمق، وتبني خطوات عملية بدعم مباشر."
   },
@@ -334,18 +334,18 @@ const results = [
     ],
     meterColor: "var(--alert)",
     meterPct: 95,
-    articles: ["article-gaslighting.html", "article-narcissist-vs-confident.html"],
+    articles: ["/article-gaslighting/", "/article-narcissist-vs-confident/"],
     ctaTitle: "خطوة أولى قد تساعدك",
     ctaDesc: "استشارة مع مختص نفسي مرخّص خطوة مهمة جداً هنا — لا تتردد في طلب الدعم."
   },
 ];
 
 const articleTitles = {
-  "article-early-signs.html": "سبع علامات لا تلاحظها في العلاقة إلا متأخراً",
-  "article-gaslighting.html": "التلاعب النفسي (الغازلايتنغ): لماذا تشك بنفسك بعد كل نقاش؟",
-  "article-healing-after-breakup.html": "خمس خطوات واقعية للتعافي بعد الانفصال",
-  "article-healthy-first-date.html": "كيف تبني علاقة صحية من أول موعد",
-  "article-narcissist-vs-confident.html": "الفرق بين الشخص الواثق والشخص النرجسي",
+  "/article-early-signs/": "سبع علامات لا تلاحظها في العلاقة إلا متأخراً",
+  "/article-gaslighting/": "التلاعب النفسي (الغازلايتنغ): لماذا تشك بنفسك بعد كل نقاش؟",
+  "/article-healing-after-breakup/": "خمس خطوات واقعية للتعافي بعد الانفصال",
+  "/article-healthy-first-date/": "كيف تبني علاقة صحية من أول موعد",
+  "/article-narcissist-vs-confident/": "الفرق بين الشخص الواثق والشخص النرجسي",
 };
 
 let current = 0;
@@ -477,6 +477,9 @@ renderQuestions();
 updateNav();
 </script>
 
-<script src="/components.js"></script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

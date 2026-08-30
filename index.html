@@ -365,6 +365,8 @@
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 
-<script src="/components.js"></script>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

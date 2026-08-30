@@ -235,8 +235,8 @@ const results = [
 ];
 
 const articleTitles = {
-  "article-self-support-while-in-it.html": "كيف تعتني بنفسك وأنت لا تزال في علاقة صعبة",
-  "article-ready-for-new-relationship.html": "كيف تعرف أنك جاهز لأن تحب من جديد بعد علاقة سامة",
+  "/article-self-support-while-in-it/": "كيف تعتني بنفسك وأنت لا تزال في علاقة صعبة",
+  "/article-ready-for-new-relationship/": "كيف تعرف أنك جاهز لأن تحب من جديد بعد علاقة سامة",
 };
 
 let current = 0;
@@ -338,6 +338,9 @@ document.getElementById('retakeBtn').addEventListener('click', (e) => {
 });
 renderQuestions(); updateNav();
 </script>
-<script src="/components.js"></script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

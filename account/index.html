@@ -213,7 +213,8 @@ function saveUser(u){ localStorage.setItem('bewodoh_user', JSON.stringify(u)); }
 
 let userData = loadUser();
 if (!userData) {
-  window.location.href = '/signup/';
+  const inApp = typeof window.Capacitor !== 'undefined';
+  window.location.href = inApp ? '/signup/index.html' : '/signup/';
 }
 
 function renderAvatar(){
@@ -311,10 +312,13 @@ document.getElementById('photoInput').addEventListener('change', (e) => {
 // ---- Logout ----
 document.getElementById('logoutBtn').addEventListener('click', function(){
   localStorage.removeItem('bewodoh_user');
-  window.location.href = '/';
+  const inApp = typeof window.Capacitor !== 'undefined';
+  window.location.href = inApp ? '/index.html' : '/';
 });
 </script>
 
-<script src="/components.js"></script>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>

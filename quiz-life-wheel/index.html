@@ -254,14 +254,14 @@ buildSliders();
 updateChart();
 
 const articleMap = {
-  communication: 'article-early-signs.html',
-  trust: 'article-jealousy-vs-control.html',
-  respect: 'article-healthy-boundaries.html',
-  support: 'article-codependency.html',
-  independence: 'article-healthy-boundaries.html',
-  conflict: 'article-silent-treatment.html',
-  intimacy: 'article-love-bombing.html',
-  fun: 'article-healthy-first-date.html',
+  communication: '/article-early-signs/',
+  trust: '/article-jealousy-vs-control/',
+  respect: '/article-healthy-boundaries/',
+  support: '/article-codependency/',
+  independence: '/article-healthy-boundaries/',
+  conflict: '/article-silent-treatment/',
+  intimacy: '/article-love-bombing/',
+  fun: '/article-healthy-first-date/',
 };
 
 document.getElementById('analyzeBtn').addEventListener('click', () => {
@@ -311,6 +311,9 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
   block.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 </script>
-<script src="/components.js"></script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
 </body>
 </html>
