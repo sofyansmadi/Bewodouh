@@ -161,6 +161,21 @@
         <button type="submit" class="btn-primary">تسجيل الدخول</button>
       </form>
 
+      <!-- ---- OTP VERIFICATION BOX ---- -->
+      <div class="otp-box" id="otpBox" style="display:none;">
+        <h2 id="otpTitle" style="font-size:19px; margin-bottom:8px;">تأكيد بريدك الإلكتروني</h2>
+        <p style="font-size:13.5px; color:var(--text-muted-light); margin-bottom:20px;">بعتنالك رمز مكوّن من ٦ أرقام على <strong id="otpEmailDisplay"></strong>. اكتبيه تحت لإكمال إنشاء حسابك.</p>
+        <form id="otpForm">
+          <div class="field">
+            <label for="otpInput">رمز التأكيد</label>
+            <input type="text" id="otpInput" inputmode="numeric" maxlength="6" placeholder="------" required style="text-align:center; letter-spacing:8px; font-size:20px;">
+          </div>
+          <div class="form-error-box" id="otpErrorBox">الرمز غير صحيح أو منتهي الصلاحية. تأكدي منه وجرّبي مرة تانية.</div>
+          <button type="submit" class="btn-primary">تأكيد الحساب</button>
+        </form>
+        <p class="switch-link" style="margin-top:16px;">ما وصلك الرمز؟ <button type="button" id="resendOtpBtn">أعيدي الإرسال</button></p>
+      </div>
+
       <div class="success-box" id="successBox">
         <div class="check">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -245,6 +260,8 @@ document.getElementById('googleSignInBtn').addEventListener('click', async () =>
 });
 
 // ---- Signup submit ----
+let pendingSignupEmail = '';
+
 signupForm.addEventListener('submit', async function(e){
   e.preventDefault();
 
@@ -288,13 +305,52 @@ signupForm.addEventListener('submit', async function(e){
     });
   }
 
+  // نطلب رمز التأكيد بدل التحويل المباشر
+  pendingSignupEmail = email;
+  document.getElementById('googleSignInBtn').style.display = 'none';
   document.querySelector('.tabs').style.display = 'none';
   signupForm.style.display = 'none';
   switchLink.style.display = 'none';
+  document.getElementById('otpEmailDisplay').textContent = email;
+  document.getElementById('otpBox').style.display = 'block';
+  submitBtn.disabled = false;
+});
+
+// ---- OTP verification submit ----
+document.getElementById('otpForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const code = document.getElementById('otpInput').value.trim();
+  const otpErrorBox = document.getElementById('otpErrorBox');
+  const submitBtn = this.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  const { error } = await supabaseClient.auth.verifyOtp({
+    email: pendingSignupEmail,
+    token: code,
+    type: 'signup',
+  });
+
+  if (error) {
+    submitBtn.disabled = false;
+    console.error('verifyOtp error:', error);
+    otpErrorBox.classList.add('active');
+    return;
+  }
+
+  document.getElementById('otpBox').style.display = 'none';
   document.getElementById('successTitle').textContent = 'تم إنشاء حسابك بنجاح';
   document.getElementById('successBox').classList.add('active');
 
   setTimeout(() => { window.location.href = accountUrl(); }, 1200);
+});
+
+// ---- Resend OTP ----
+document.getElementById('resendOtpBtn').addEventListener('click', async function(){
+  this.disabled = true;
+  this.textContent = 'جارٍ الإرسال...';
+  await supabaseClient.auth.resend({ type: 'signup', email: pendingSignupEmail });
+  this.textContent = 'تم الإرسال. أعيدي الإرسال';
+  setTimeout(() => { this.disabled = false; this.textContent = 'أعيدي الإرسال'; }, 3000);
 });
 
 // ---- Login submit ----
@@ -311,6 +367,22 @@ loginForm.addEventListener('submit', async function(e){
 
   if (error) {
     submitBtn.disabled = false;
+    console.error('signIn error:', error);
+
+    if (error.message.toLowerCase().includes('confirm')) {
+      // الحساب موجود بس ما تأكد بعد — نوريها صندوق إدخال الرمز مباشرة
+      pendingSignupEmail = email;
+      document.getElementById('googleSignInBtn').style.display = 'none';
+      document.querySelector('.tabs').style.display = 'none';
+      loginForm.style.display = 'none';
+      switchLink.style.display = 'none';
+      document.getElementById('otpTitle').textContent = 'يجب تأكيد حسابك أولاً';
+      document.getElementById('otpEmailDisplay').textContent = email;
+      document.getElementById('otpBox').style.display = 'block';
+      await supabaseClient.auth.resend({ type: 'signup', email });
+      return;
+    }
+
     loginErrorBox.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة.';
     loginErrorBox.classList.add('active');
     return;
