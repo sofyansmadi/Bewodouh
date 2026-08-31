@@ -128,6 +128,7 @@
         <button class="admin-tab" data-tab="articles">المقالات</button>
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
         <button class="admin-tab" data-tab="team">الفريق</button>
+        <button class="admin-tab" data-tab="users">المستخدمين</button>
       </div>
 
       <div id="tab-packages" class="admin-tab-panel">
@@ -386,6 +387,25 @@
         </form>
       </div>
       </div>
+
+      <div id="tab-users" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">المستخدمون المسجّلون</h2>
+      <p class="section-sub">كل من عمل حساب حقيقي على الموقع.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>الاسم</th>
+            <th>البريد الإلكتروني</th>
+            <th>تاريخ التسجيل</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <tr><td colspan="4">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+      </div>
     </div>
 
   </div>
@@ -588,6 +608,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     if (tab.dataset.tab === 'articles') loadArticles();
     if (tab.dataset.tab === 'bookings') loadBookings();
     if (tab.dataset.tab === 'team') loadTeam();
+    if (tab.dataset.tab === 'users') loadUsers();
   });
 });
 
@@ -897,6 +918,42 @@ async function deleteSpecialist(id){
   if (!confirm('متأكدة تريدين حذف هذا الأخصائي؟')) return;
   const { error } = await supabaseClient.from('specialists').delete().eq('id', id);
   if (!error) loadTeam();
+}
+
+// ---------- Users table ----------
+async function loadUsers(){
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = '<tr><td colspan="4">جارٍ التحميل...</td></tr>';
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="4">تعذّر تحميل البيانات.</td></tr>';
+    return;
+  }
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="4">ما في مستخدمين مسجّلين بعد.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(u => {
+    const d = new Date(u.created_at);
+    const formatted = isNaN(d) ? '—' : d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+    const avatar = u.photo_url
+      ? `<img src="${u.photo_url}" alt="${u.full_name || ''}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">`
+      : `<div style="width:36px; height:36px; border-radius:50%; background:var(--fog-dim); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--ink);">${(u.full_name || '؟').trim().charAt(0)}</div>`;
+    return `
+    <tr>
+      <td>${avatar}</td>
+      <td>${u.full_name || '—'}${u.is_admin ? ' <span class="badge-yes">أدمن</span>' : ''}</td>
+      <td>${u.email || '—'}</td>
+      <td>${formatted}</td>
+    </tr>`;
+  }).join('');
 }
 </script>
 

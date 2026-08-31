@@ -160,28 +160,24 @@
 
       <p class="switch-link" id="switchLink">لديك حساب بالفعل؟ <button type="button" id="switchToLogin">سجّل الدخول</button></p>
 
-      <div class="disclaimer">هذه نسخة تجريبية أولية لنظام الحسابات، وتُخزَّن بياناتك في متصفحك فقط، وليست مشفّرة أو محفوظة على خادم بعد.</div>
+      <div class="disclaimer">بياناتك محمية ومشفّرة، ومحفوظة بقاعدة بيانات حقيقية آمنة.</div>
     </div>
   </div>
 </main>
 
 <site-footer></site-footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
 <script>
 /* ============================================================
-   بوضوح — إنشاء حساب / تسجيل الدخول (نسخة تجريبية أولية).
+   بوضوح — إنشاء حساب / تسجيل الدخول (نظام حقيقي عبر Supabase Auth).
    ------------------------------------------------------------
-   يُخزَّن حساب واحد فقط لكل متصفح داخل localStorage تحت المفتاح
-   'bewodoh_user'. تسجيل الدخول هنا هو مجرد مطابقة بين ما تكتبه
-   وبين هذا الحساب المخزَّن محلياً — وليس نظام مصادقة حقيقي
-   يدعم عدة مستخدمين مختلفين على نفس الجهاز.
-
-   لربط نظام حسابات حقيقي لاحقاً (يدعم عدداً غير محدود من
-   المستخدمين، ومزامنة عبر الأجهزة، وكلمات سر مشفّرة فعلياً):
-   - استخدم Firebase Authentication أو Supabase Auth، أو خادماً
-     خاصاً يتحقق من بيانات الدخول عبر قاعدة بيانات حقيقية.
-   - استبدل التحقق أدناه بطلب fetch() لنقطة نهاية تسجيل الدخول،
-     واحفظ رمز الجلسة (session token) الذي يُعيده الخادم.
+   كل حساب هون حقيقي فعلياً: كلمة السر مشفّرة من طرف Supabase
+   نفسه (احنا ما بنشوفها ولا بنخزّنها أبداً)، والحساب موجود
+   بقاعدة بيانات حقيقية، مش بس بمتصفح المستخدم. أي معلومات
+   إضافية (الاسم، الصورة) بتتخزن بجدول profiles المرتبط بحساب
+   المصادقة الحقيقي.
    ============================================================ */
 
 const inApp = typeof window.Capacitor !== 'undefined';
@@ -225,7 +221,7 @@ tabLogin.addEventListener('click', showLoginTab);
 switchToLogin.addEventListener('click', showLoginTab);
 
 // ---- Signup submit ----
-signupForm.addEventListener('submit', function(e){
+signupForm.addEventListener('submit', async function(e){
   e.preventDefault();
 
   const fullName = document.getElementById('fullName').value.trim();
@@ -240,8 +236,32 @@ signupForm.addEventListener('submit', function(e){
   }
   mismatchError.classList.remove('active');
 
-  const userData = { fullName, email, password, createdAt: new Date().toISOString() };
-  localStorage.setItem('bewodoh_user', JSON.stringify(userData));
+  const submitBtn = signupForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName } },
+  });
+
+  if (error) {
+    submitBtn.disabled = false;
+    loginErrorBox.textContent = error.message.includes('already registered')
+      ? 'هذا البريد الإلكتروني مسجّل عندنا أصلاً. جرّبي تسجّلي دخول بدلاً من إنشاء حساب.'
+      : 'صار خطأ أثناء إنشاء الحساب. تأكدي من البيانات وجرّبي مرة تانية.';
+    loginErrorBox.classList.add('active');
+    return;
+  }
+
+  // ننشئ صف بجدول profiles مرتبط بحساب المصادقة الحقيقي
+  if (data.user) {
+    await supabaseClient.from('profiles').insert({
+      id: data.user.id,
+      full_name: fullName,
+      email: email,
+    });
+  }
 
   document.querySelector('.tabs').style.display = 'none';
   signupForm.style.display = 'none';
@@ -253,14 +273,20 @@ signupForm.addEventListener('submit', function(e){
 });
 
 // ---- Login submit ----
-loginForm.addEventListener('submit', function(e){
+loginForm.addEventListener('submit', async function(e){
   e.preventDefault();
 
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  const stored = JSON.parse(localStorage.getItem('bewodoh_user') || 'null');
 
-  if (!stored || stored.email !== email || stored.password !== password) {
+  const submitBtn = loginForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    submitBtn.disabled = false;
+    loginErrorBox.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة.';
     loginErrorBox.classList.add('active');
     return;
   }
@@ -275,11 +301,11 @@ loginForm.addEventListener('submit', function(e){
   setTimeout(() => { window.location.href = accountUrl(); }, 1000);
 });
 
-// If already signed in on this browser, hint at it.
-(function(){
-  const existing = localStorage.getItem('bewodoh_user');
-  if (existing) {
-    showLoginTab();
+// لو المستخدم مسجّل دخول أصلاً، وجّهيه مباشرة لصفحة حسابه
+(async function(){
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) {
+    window.location.href = accountUrl();
   }
 })();
 </script>

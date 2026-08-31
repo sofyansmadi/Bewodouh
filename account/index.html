@@ -185,57 +185,67 @@
 <site-footer></site-footer>
 <app-bottom-nav active="account"></app-bottom-nav>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
 <script>
 /* ============================================================
-   بوضوح — صفحة حسابي (نسخة تجريبية أولية).
+   بوضوح — صفحة حسابي (نظام حقيقي عبر Supabase Auth + profiles).
    ------------------------------------------------------------
-   تقرأ هذه الصفحة وتكتب بيانات المستخدم من/إلى localStorage
-   فقط. إذا لم يكن هناك مستخدم مسجّل، تُعيد توجيهه فوراً لصفحة
-   إنشاء الحساب.
-
-   رفع الصورة: تُحوَّل الصورة المرفوعة إلى Data URL (نص Base64)
-   بعد تصغيرها عبر canvas إلى حد أقصى ٣٠٠×٣٠٠ بكسل، وتُخزَّن
-   داخل نفس كائن المستخدم في localStorage. هذا حل مؤقت مناسب
-   للتجربة فقط — المساحة المتاحة في localStorage محدودة
-   (~٥-١٠ ميغابايت لكل موقع)، وأي صورة كبيرة جداً أو عدد كبير
-   من المستخدمين يحتاج تخزيناً حقيقياً على خادم (مثل Firebase
-   Storage أو Amazon S3) بدلاً من localStorage.
-
-   عند ربط نظام حسابات حقيقي لاحقاً:
-   - استبدل localStorage.getItem/setItem بطلبات fetch() لخادم
-     حقيقي يتحقق من رمز الجلسة (session token) قبل أي تعديل.
-   - ارفع الصورة إلى خدمة تخزين ملفات حقيقية، واحفظ رابطها فقط
-     (URL) في بيانات المستخدم بدلاً من الصورة كاملة كنص.
+   بيانات الحساب (الاسم، الإيميل، الصورة) محفوظة بجدول profiles
+   الحقيقي، مربوطة بحساب مصادقة حقيقي — مش localStorage.
    ============================================================ */
 
-function loadUser(){ return JSON.parse(localStorage.getItem('bewodoh_user') || 'null'); }
-function saveUser(u){ localStorage.setItem('bewodoh_user', JSON.stringify(u)); }
+const inAppAccount = typeof window.Capacitor !== 'undefined';
+let userData = null;
+let currentUserId = null;
 
-let userData = loadUser();
-if (!userData) {
-  const inApp = typeof window.Capacitor !== 'undefined';
-  window.location.href = inApp ? '/signup/index.html' : '/signup/';
+async function initAccount(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData.session) {
+    window.location.href = inAppAccount ? '/signup/index.html' : '/signup/';
+    return;
+  }
+
+  currentUserId = sessionData.session.user.id;
+
+  const { data: profile, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUserId)
+    .maybeSingle();
+
+  if (error || !profile) {
+    // ملف شخصي مفقود لأي سبب — ننشئه بأقل بيانات ممكنة من حساب المصادقة
+    const email = sessionData.session.user.email;
+    await supabaseClient.from('profiles').insert({ id: currentUserId, email, full_name: email.split('@')[0] });
+    userData = { full_name: email.split('@')[0], email, photo_url: null, created_at: new Date().toISOString() };
+  } else {
+    userData = profile;
+  }
+
+  renderInfo();
 }
 
 function renderAvatar(){
   const circle = document.getElementById('avatarCircle');
-  if (userData.photo) {
-    circle.innerHTML = '<img src="' + userData.photo + '" alt="صورة الحساب">';
+  if (userData.photo_url) {
+    circle.innerHTML = '<img src="' + userData.photo_url + '" alt="صورة الحساب">';
   } else {
-    circle.textContent = (userData.fullName || '؟').trim().charAt(0) || '؟';
+    circle.textContent = (userData.full_name || '؟').trim().charAt(0) || '؟';
   }
 }
 
 function renderInfo(){
-  document.getElementById('greetName').textContent = 'أهلاً، ' + userData.fullName;
+  document.getElementById('greetName').textContent = 'أهلاً، ' + userData.full_name;
   document.getElementById('greetEmail').textContent = userData.email;
-  document.getElementById('infoName').textContent = userData.fullName;
+  document.getElementById('infoName').textContent = userData.full_name;
   document.getElementById('infoEmail').textContent = userData.email;
-  const d = new Date(userData.createdAt);
+  const d = new Date(userData.created_at);
   document.getElementById('infoDate').textContent = isNaN(d) ? '—' : d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   renderAvatar();
 }
-renderInfo();
+
+initAccount();
 
 // ---- Edit profile (name / email) ----
 const viewMode = document.getElementById('viewMode');
@@ -245,7 +255,7 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const savedToast = document.getElementById('savedToast');
 
 editToggleBtn.addEventListener('click', () => {
-  document.getElementById('editName').value = userData.fullName;
+  document.getElementById('editName').value = userData.full_name;
   document.getElementById('editEmail').value = userData.email;
   viewMode.style.display = 'none';
   editMode.style.display = 'block';
@@ -258,11 +268,15 @@ cancelEditBtn.addEventListener('click', () => {
   editToggleBtn.style.display = 'inline-block';
 });
 
-document.getElementById('editMode').addEventListener('submit', (e) => {
+document.getElementById('editMode').addEventListener('submit', async (e) => {
   e.preventDefault();
-  userData.fullName = document.getElementById('editName').value.trim();
-  userData.email = document.getElementById('editEmail').value.trim();
-  saveUser(userData);
+  const newName = document.getElementById('editName').value.trim();
+  const newEmail = document.getElementById('editEmail').value.trim();
+
+  await supabaseClient.from('profiles').update({ full_name: newName, email: newEmail }).eq('id', currentUserId);
+  userData.full_name = newName;
+  userData.email = newEmail;
+
   renderInfo();
   editMode.style.display = 'none';
   viewMode.style.display = 'block';
@@ -287,7 +301,7 @@ document.getElementById('photoInput').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = (evt) => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const maxSize = 300;
       let w = img.width, h = img.height;
       if (w > h && w > maxSize) { h = Math.round(h * (maxSize / w)); w = maxSize; }
@@ -297,8 +311,9 @@ document.getElementById('photoInput').addEventListener('change', (e) => {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
 
-      userData.photo = canvas.toDataURL('image/jpeg', 0.85);
-      saveUser(userData);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      await supabaseClient.from('profiles').update({ photo_url: dataUrl }).eq('id', currentUserId);
+      userData.photo_url = dataUrl;
       renderAvatar();
       savedToast.textContent = 'تم تحديث صورة حسابك.';
       savedToast.classList.add('active');
@@ -310,10 +325,9 @@ document.getElementById('photoInput').addEventListener('change', (e) => {
 });
 
 // ---- Logout ----
-document.getElementById('logoutBtn').addEventListener('click', function(){
-  localStorage.removeItem('bewodoh_user');
-  const inApp = typeof window.Capacitor !== 'undefined';
-  window.location.href = inApp ? '/index.html' : '/';
+document.getElementById('logoutBtn').addEventListener('click', async function(){
+  await supabaseClient.auth.signOut();
+  window.location.href = inAppAccount ? '/index.html' : '/';
 });
 </script>
 
