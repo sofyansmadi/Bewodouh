@@ -247,9 +247,10 @@ signupForm.addEventListener('submit', async function(e){
 
   if (error) {
     submitBtn.disabled = false;
+    console.error('Supabase signUp error:', error);
     loginErrorBox.textContent = error.message.includes('already registered')
       ? 'هذا البريد الإلكتروني مسجّل عندنا أصلاً. جرّبي تسجّلي دخول بدلاً من إنشاء حساب.'
-      : 'صار خطأ أثناء إنشاء الحساب. تأكدي من البيانات وجرّبي مرة تانية.';
+      : 'صار خطأ: ' + error.message;
     loginErrorBox.classList.add('active');
     return;
   }
