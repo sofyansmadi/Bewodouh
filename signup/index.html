@@ -134,12 +134,19 @@
         </div>
         <div class="field">
           <label for="password">كلمة السر</label>
-          <input type="password" id="password" required minlength="6">
-          <div class="hint">ست أحرف على الأقل.</div>
+          <input type="password" id="password" required minlength="8">
+          <div id="pwChecklist" style="margin-top:10px; display:flex; flex-direction:column; gap:5px; font-size:12.5px;">
+            <span data-rule="length" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> ٨ أحرف على الأقل</span>
+            <span data-rule="upper" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> حرف كبير (A-Z)</span>
+            <span data-rule="lower" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> حرف صغير (a-z)</span>
+            <span data-rule="number" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> رقم واحد على الأقل</span>
+            <span data-rule="special" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> رمز خاص (!@#$%^&* إلخ)</span>
+          </div>
+          <div id="pwStrengthLabel" style="margin-top:8px; font-size:12.5px; font-weight:700;"></div>
         </div>
         <div class="field">
           <label for="confirmPassword">تأكيد كلمة السر</label>
-          <input type="password" id="confirmPassword" required minlength="6">
+          <input type="password" id="confirmPassword" required minlength="8">
           <div class="error-msg" id="mismatchError">كلمتا السر غير متطابقتين.</div>
         </div>
 
@@ -260,6 +267,55 @@ document.getElementById('googleSignInBtn').addEventListener('click', async () =>
 });
 
 // ---- Signup submit ----
+// ---- التحقق الحي من قوة كلمة السر ----
+function checkPasswordRules(pw){
+  return {
+    length: pw.length >= 8,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    number: /[0-9]/.test(pw),
+    special: /[!@#$%^&*()_\-+=\[\]{};:'",.<>\/?\\|`~]/.test(pw),
+  };
+}
+
+function isPasswordValid(pw){
+  const rules = checkPasswordRules(pw);
+  return Object.values(rules).every(Boolean);
+}
+
+const passwordInput = document.getElementById('password');
+passwordInput.addEventListener('input', () => {
+  const rules = checkPasswordRules(passwordInput.value);
+  let metCount = 0;
+
+  Object.keys(rules).forEach(key => {
+    const el = document.querySelector(`#pwChecklist [data-rule="${key}"]`);
+    const icon = el.querySelector('.pw-icon');
+    if (rules[key]) {
+      el.style.color = 'var(--clarity)';
+      icon.textContent = '✓';
+      metCount++;
+    } else {
+      el.style.color = 'var(--text-muted-light)';
+      icon.textContent = '○';
+    }
+  });
+
+  const label = document.getElementById('pwStrengthLabel');
+  if (passwordInput.value.length === 0) {
+    label.textContent = '';
+  } else if (metCount <= 2) {
+    label.textContent = 'كلمة سر ضعيفة';
+    label.style.color = 'var(--alert)';
+  } else if (metCount <= 4) {
+    label.textContent = 'كلمة سر متوسطة';
+    label.style.color = '#C9A15F';
+  } else {
+    label.textContent = 'كلمة سر قوية';
+    label.style.color = '#4CAF50';
+  }
+});
+
 let pendingSignupEmail = '';
 
 signupForm.addEventListener('submit', async function(e){
@@ -270,6 +326,13 @@ signupForm.addEventListener('submit', async function(e){
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
   const mismatchError = document.getElementById('mismatchError');
+
+  if (!isPasswordValid(password)) {
+    document.getElementById('pwStrengthLabel').textContent = 'لازم تحققي كل شروط كلمة السر فوق قبل ما تكملي.';
+    document.getElementById('pwStrengthLabel').style.color = 'var(--alert)';
+    passwordInput.focus();
+    return;
+  }
 
   if (password !== confirmPassword) {
     mismatchError.classList.add('active');
