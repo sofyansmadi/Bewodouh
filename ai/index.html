@@ -146,7 +146,7 @@
 <script>
   // نفس تصليح مساحة الآيفون الآمنة فوق — بس جوا التطبيق، مش بالموقع العادي
   if (typeof window.Capacitor !== 'undefined') {
-    document.querySelector('header').style.paddingTop = 'max(55px, env(safe-area-inset-top))';
+    document.querySelector('header').style.paddingTop = 'max(20px, env(safe-area-inset-top))';
   }
 </script>
 
@@ -442,10 +442,28 @@ function removeTyping(){
   if (t) t.remove();
 }
 
-// --- MOCK response function: swap this out when wiring a real backend ---
-async function getAIResponse(userText){
-  await new Promise(r => setTimeout(r, 900 + Math.random() * 700));
-  return pickReply(userText);
+// --- الاتصال الحقيقي بـ"بوضوح AI" عبر Edge Function آمنة (المفتاح مش موجود هون إطلاقاً) ---
+const AI_ENDPOINT = 'https://vhsdhskynuwfloonjfec.supabase.co/functions/v1/ai-chat';
+
+async function getAIResponse(userText, historyList){
+  try {
+    const res = await fetch(AI_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
+        message: userText,
+        history: historyList.map(h => ({ role: h.role, text: h.text })),
+      }),
+    });
+    const data = await res.json();
+    return { text: data.reply || 'عذراً، ما قدرت أرد هلأ. جرّبي مرة تانية.' };
+  } catch (err) {
+    console.error('AI request failed:', err);
+    return { text: 'صار خطأ بالاتصال. تأكدي من الإنترنت وجرّبي مرة تانية.' };
+  }
 }
 
 async function sendMessage(text){
@@ -495,6 +513,8 @@ autoResize();
 
 
 <app-bottom-nav active="ai"></app-bottom-nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
 </script>
