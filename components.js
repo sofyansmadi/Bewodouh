@@ -49,6 +49,10 @@ const STYLE_FIX = `
   site-footer{ display:block; background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
   site-footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
   site-footer[variant="rich"]{ padding:56px 0 32px; text-align:initial; }
+  .nav-account-icon{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,.15); color:#B7ACC4; transition:.2s; flex-shrink:0; }
+  .nav-account-icon svg{ width:16px; height:16px; }
+  .nav-account-icon:hover{ border-color:#C9A15F; color:#F3EEEA; }
+  site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
 `;
 const styleTag = document.createElement('style');
 styleTag.textContent = STYLE_FIX;
@@ -73,14 +77,32 @@ class SiteNav extends HTMLElement {
       return `<a href="${appHref(l.href)}"${cls}>${l.label}</a>`;
     }).join('\n      ');
 
+    const accountIconHtml = isRunningInApp() ? '' : `
+        <a href="${appHref('/signup/')}" class="nav-account-icon" id="navAccountIcon" aria-label="حسابي">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </a>`;
+
     this.innerHTML = `
     <div class="wrap">
       <a href="${appHref('/')}" class="brand">بوضوح<span>.</span></a>
-      <div class="nav-links">
-        ${linksHtml}
-        <a href="${appHref('/sales-page/')}" class="nav-cta">احجز استشارة</a>
+      <div class="nav-actions">
+        <div class="nav-links">
+          ${linksHtml}
+          <a href="${appHref('/sales-page/')}" class="nav-cta">احجز استشارة</a>
+        </div>
+        ${accountIconHtml}
       </div>
     </div>`;
+
+    // لو الزائر مسجّل دخول أصلاً، وجّهي الأيقونة لصفحة حسابه بدل صفحة التسجيل
+    if (!isRunningInApp() && typeof supabaseClient !== 'undefined' && supabaseClient) {
+      supabaseClient.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          const icon = document.getElementById('navAccountIcon');
+          if (icon) icon.href = appHref('/account/');
+        }
+      });
+    }
   }
 }
 
