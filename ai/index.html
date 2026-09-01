@@ -495,13 +495,19 @@ async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
 
     for (const part of parts) {
       const line = part.trim();
+      if (!line) continue;
+      console.log('[AI stream raw part]', JSON.stringify(line));
       if (!line.startsWith('data:')) continue;
       const jsonStr = line.slice(5).trim();
       if (!jsonStr) continue;
       try {
         const parsed = JSON.parse(jsonStr);
+        console.log('[AI stream parsed]', parsed);
         const deltaText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (!deltaText) continue;
+        if (!deltaText) {
+          console.log('[AI stream] chunk has no text field — unexpected shape:', parsed);
+          continue;
+        }
         if (!startedReply) {
           startedReply = true;
           onFirstChunk();
@@ -509,7 +515,7 @@ async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
         fullText += deltaText;
         onUpdate(fullText);
       } catch (e) {
-        // نتجاهل أي جزء مش JSON صالح، نادر لكن ممكن يصير
+        console.error('[AI stream] JSON parse failed for chunk:', jsonStr, e);
       }
     }
   }
