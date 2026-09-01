@@ -51,6 +51,8 @@
   .admin-tabs{ display:flex; gap:8px; margin-bottom:30px; border-bottom:1px solid var(--fog-dim); }
   .admin-tab{ background:none; border:none; padding:12px 4px; margin-left:22px; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; color:var(--text-muted-light); cursor:pointer; border-bottom:2px solid transparent; }
   .admin-tab.active{ color:var(--ink); border-bottom-color:var(--clarity); }
+  .static-page-tab{ background:none; border:none; padding:12px 4px; margin-left:22px; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; color:var(--text-muted-light); cursor:pointer; border-bottom:2px solid transparent; }
+  .static-page-tab.active{ color:var(--ink); border-bottom-color:var(--clarity); }
   .field textarea{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog); min-height:80px; resize:vertical; }
   .field textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
   #artBodyEditor{ background:var(--fog); border:1.5px solid var(--fog-dim); border-radius:12px; min-height:260px; direction:rtl; text-align:right; font-family:'IBM Plex Sans Arabic', sans-serif; font-size:14.5px; }
@@ -129,6 +131,7 @@
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
         <button class="admin-tab" data-tab="team">الفريق</button>
         <button class="admin-tab" data-tab="users">المستخدمين</button>
+        <button class="admin-tab" data-tab="static-pages">الصفحات الثابتة</button>
       </div>
 
       <div id="tab-packages" class="admin-tab-panel">
@@ -406,6 +409,25 @@
         </tbody>
       </table>
       </div>
+
+      <div id="tab-static-pages" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">الصفحات الثابتة</h2>
+      <p class="section-sub">عدّلي محتوى صفحات الموقع الثابتة. أي تعديل يظهر مباشرة بالموقع بعد الحفظ.</p>
+
+      <div class="admin-tabs" style="margin-bottom:20px;">
+        <button class="static-page-tab active" data-static-page="privacy">سياسة الخصوصية</button>
+        <button class="static-page-tab" data-static-page="terms">شروط الاستخدام</button>
+        <button class="static-page-tab" data-static-page="faq">الأسئلة الأكثر شيوعاً</button>
+      </div>
+
+      <div class="form-card">
+        <div id="staticPageEditor" style="height:340px; background:#fff;"></div>
+        <div class="form-actions" style="margin-top:16px;">
+          <button type="button" class="btn-primary" id="saveStaticPageBtn" style="width:auto;">حفظ التعديلات</button>
+        </div>
+        <div class="status-msg" id="staticPageStatus"></div>
+      </div>
+      </div>
     </div>
 
   </div>
@@ -609,6 +631,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     if (tab.dataset.tab === 'bookings') loadBookings();
     if (tab.dataset.tab === 'team') loadTeam();
     if (tab.dataset.tab === 'users') loadUsers();
+    if (tab.dataset.tab === 'static-pages') loadStaticPage('privacy');
   });
 });
 
@@ -955,6 +978,71 @@ async function loadUsers(){
     </tr>`;
   }).join('');
 }
+
+// ---------- Static pages editor ----------
+const staticPageQuill = new Quill('#staticPageEditor', {
+  theme: 'snow',
+  placeholder: 'اكتبي محتوى الصفحة هنا...',
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic'],
+      ['link'],
+      [{ list: 'bullet' }, { list: 'ordered' }],
+      ['clean']
+    ]
+  }
+});
+
+let currentStaticSlug = 'privacy';
+
+async function loadStaticPage(slug){
+  currentStaticSlug = slug;
+  document.getElementById('staticPageStatus').classList.remove('active', 'success', 'error');
+
+  const { data, error } = await supabaseClient
+    .from('static_pages')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (error || !data) {
+    staticPageQuill.setText('');
+    return;
+  }
+  staticPageQuill.root.innerHTML = data.content_html;
+}
+
+document.querySelectorAll('.static-page-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.static-page-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    loadStaticPage(tab.dataset.staticPage);
+  });
+});
+
+document.getElementById('saveStaticPageBtn').addEventListener('click', async () => {
+  const statusBox = document.getElementById('staticPageStatus');
+  statusBox.classList.remove('active', 'success', 'error');
+
+  const contentHtml = staticPageQuill.root.innerHTML
+    .replace(/<ul>/g, '<ul class="plain">')
+    .replace(/<ol>/g, '<ol class="plain">');
+
+  const { error } = await supabaseClient
+    .from('static_pages')
+    .update({ content_html: contentHtml, updated_at: new Date().toISOString() })
+    .eq('slug', currentStaticSlug);
+
+  if (error) {
+    statusBox.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    statusBox.classList.add('active', 'error');
+    return;
+  }
+
+  statusBox.textContent = 'تم الحفظ بنجاح.';
+  statusBox.classList.add('active', 'success');
+});
 </script>
 
 </body>
