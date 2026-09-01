@@ -82,6 +82,18 @@
   .bubble{ padding:14px 18px; border-radius:16px; font-size:15.5px; line-height:1.85; }
   .msg.bot .bubble{ background:#fff; border:1px solid var(--fog-dim); color:var(--text-on-light); border-top-right-radius:4px; }
   .msg.user .bubble{ background:var(--ink); color:var(--text-on-dark); border-top-left-radius:4px; }
+  .bubble p{ margin:0 0 12px; }
+  .bubble p:last-child{ margin-bottom:0; }
+  .bubble h1, .bubble h2, .bubble h3{ font-family:'Noto Kufi Arabic', sans-serif; font-weight:700; margin:16px 0 8px; line-height:1.5; }
+  .bubble h1{ font-size:19px; } .bubble h2{ font-size:17.5px; } .bubble h3{ font-size:16px; }
+  .bubble h1:first-child, .bubble h2:first-child, .bubble h3:first-child{ margin-top:0; }
+  .bubble ul, .bubble ol{ margin:0 0 12px; padding-inline-start:22px; }
+  .bubble li{ margin-bottom:6px; }
+  .bubble li:last-child{ margin-bottom:0; }
+  .bubble strong{ font-weight:700; color:var(--ink); }
+  .msg.user .bubble strong{ color:var(--fog); }
+  .bubble hr{ border:none; border-top:1px solid var(--fog-dim); margin:16px 0; }
+  .bubble a{ color:var(--clarity); text-decoration:underline; }
 
   .typing-bubble{ display:inline-flex; gap:5px; padding:16px 18px; }
   .typing-dot{ width:7px; height:7px; border-radius:50%; background:var(--rose); opacity:.5; animation:blink 1.2s infinite; }
@@ -94,7 +106,7 @@
   .welcome .ai-orb svg{ width:28px; height:28px; }
   .welcome h1{ font-size:22px; color:var(--ink); margin-bottom:8px; }
   .welcome p{ font-size:14.5px; color:var(--text-muted-light); max-width:44ch; margin:0 auto; }
-  .welcome .scope-note{ font-size:12.5px; color:var(--rose); margin-:10px; }
+  .welcome .scope-note{ font-size:12.5px; color:var(--rose); margin-top:10px; }
 
   .starters{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:22px; }
   .starter-chip{
@@ -146,7 +158,7 @@
 <script>
   // نفس تصليح مساحة الآيفون الآمنة فوق — بس جوا التطبيق، مش بالموقع العادي
   if (typeof window.Capacitor !== 'undefined') {
-    document.querySelector('header').style.paddingTop = 'max(55px, env(safe-area-inset-top))';
+    document.querySelector('header').style.paddingTop = 'max(20px, env(safe-area-inset-top))';
   }
 </script>
 
@@ -415,11 +427,16 @@ function appendMessage(role, text){
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  bubble.textContent = text;
+  if (role === 'bot') {
+    bubble.innerHTML = marked.parse(text);
+  } else {
+    bubble.textContent = text;
+  }
   msg.appendChild(bubble);
 
   chatInner.appendChild(msg);
   scrollToBottom();
+  return bubble;
 }
 
 function appendTyping(){
@@ -445,25 +462,65 @@ function removeTyping(){
 // --- الاتصال الحقيقي بـ"بوضوح AI" عبر Edge Function آمنة (المفتاح مش موجود هون إطلاقاً) ---
 const AI_ENDPOINT = 'https://vhsdhskynuwfloonjfec.supabase.co/functions/v1/ai-chat';
 
-async function getAIResponse(userText, historyList){
-  try {
-    const res = await fetch(AI_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        message: userText,
-        history: historyList.map(h => ({ role: h.role, text: h.text })),
-      }),
-    });
-    const data = await res.json();
-    return { text: data.reply || 'عذراً، ما قدرت أرد هلأ. جرّبي مرة تانية.' };
-  } catch (err) {
-    console.error('AI request failed:', err);
-    return { text: 'صار خطأ بالاتصال. تأكدي من الإنترنت وجرّبي مرة تانية.' };
+async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
+  const res = await fetch(AI_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({
+      message: userText,
+      history: historyList.map(h => ({ role: h.role, text: h.text })),
+    }),
+  });
+
+  if (!res.ok || !res.body) {
+    throw new Error('bad response');
   }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullText = '';
+  let startedReply = false;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const parts = buffer.split('\n\n');
+    buffer = parts.pop(); // آخر جزء ممكن يكون غير مكتمل، نحتفظ فيه للدورة الجاية
+
+    for (const part of parts) {
+      const line = part.trim();
+      if (!line.startsWith('data:')) continue;
+      const jsonStr = line.slice(5).trim();
+      if (!jsonStr) continue;
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const deltaText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (!deltaText) continue;
+        if (!startedReply) {
+          startedReply = true;
+          onFirstChunk();
+        }
+        fullText += deltaText;
+        onUpdate(fullText);
+      } catch (e) {
+        // نتجاهل أي جزء مش JSON صالح، نادر لكن ممكن يصير
+      }
+    }
+  }
+
+  if (!fullText) {
+    fullText = 'عذراً، ما قدرت أرد هلأ. جرّبي تسألي مرة تانية بعد شوي.';
+    if (!startedReply) onFirstChunk();
+    onUpdate(fullText);
+  }
+
+  return fullText;
 }
 
 async function sendMessage(text){
@@ -480,15 +537,35 @@ async function sendMessage(text){
   sendBtn.disabled = true;
   appendTyping();
 
+  let bubble = null;
+
   try {
-    const result = await getAIResponse(trimmed, history);
-    removeTyping();
-    appendMessage('bot', result.text);
-    history.push({ role: 'user', text: trimmed, topic: result.topic });
-    history.push({ role: 'bot', text: result.text });
+    const fullText = await streamAIResponse(
+      trimmed,
+      history,
+      () => {
+        // أول جزء نص وصل فعلياً — نشيل مؤشر "بيفكر" ونبدأ فقاعة فاضية
+        removeTyping();
+        bubble = appendMessage('bot', '');
+      },
+      (accumulated) => {
+        if (bubble) {
+          bubble.innerHTML = marked.parse(accumulated);
+          scrollToBottom();
+        }
+      }
+    );
+
+    history.push({ role: 'user', text: trimmed });
+    history.push({ role: 'bot', text: fullText });
   } catch (err) {
+    console.error('AI stream failed:', err);
     removeTyping();
-    appendMessage('bot', 'حدث خطأ بسيط، جربي إرسال الرسالة مرة أخرى.');
+    if (bubble) {
+      bubble.innerHTML = marked.parse('صار خطأ بالاتصال. تأكدي من الإنترنت وجرّبي مرة تانية.');
+    } else {
+      appendMessage('bot', 'صار خطأ بالاتصال. تأكدي من الإنترنت وجرّبي مرة تانية.');
+    }
   }
 
   isThinking = false;
@@ -514,11 +591,10 @@ autoResize();
 
 <app-bottom-nav active="ai"></app-bottom-nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/supabase-config.js"></script>
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
 </script>
 </body>
 </html>
-
-
