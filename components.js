@@ -207,7 +207,7 @@ class PricingCards extends HTMLElement {
         ${pkg.is_recommended ? '<span class="pkg-badge">الأكثر طلباً</span>' : ''}
         <h3>${pkg.name}</h3>
         <p class="pkg-desc">${pkg.description || ''}</p>
-        <div class="pkg-price">${pkg.price} د.أ <span>${pkg.price_unit}</span></div>
+        <div class="pkg-price">$${pkg.price} <span>${pkg.price_unit}</span></div>
         <button class="pkg-select-btn" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
       </div>
     `).join('');
