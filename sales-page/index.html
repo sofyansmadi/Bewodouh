@@ -215,7 +215,7 @@
   <div class="wrap">
     <div class="eyebrow" style="justify-content:center;">الباقات والأسعار</div>
     <h2 class="section-title" style="text-align:center;">اختر ما يناسبك</h2>
-    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">كل الباقات تقدر تلغي الاشتراك فيها بأي وقت. الأسعار بالدولار الأمريكي</p>
+    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">كل الباقات تقدر تلغي الاشتراك فيها بأي وقت. الأسعار بالدينار الأردني.</p>
 
     <pricing-cards class="pkg-grid"></pricing-cards>
   </div>
@@ -251,7 +251,7 @@
             <option value="باقة الانطلاقة">باقة الانطلاقة — $150 / شهرياً</option>
             <option value="باقة المرافقة">باقة المرافقة — $300 / كل ٣ أشهر</option>
             <option value="دعم فوري">دعم فوري — $70</option>
-            <option value="تجربة"> تجربة — $1</option>
+            <option value="تجربة - بوضوح">تجربة - بوضوح — $1</option>
           </select>
         </div>
         <div class="field">
@@ -271,7 +271,8 @@
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h2>تم استلام طلب حجزك</h2>
-        <p>جارٍ تحويلك لإتمام الدفع عبر PayPal...</p>
+        <p>خطوة أخيرة بس — أكملي الدفع بالأسفل لتأكيد موعدك.</p>
+        <div id="paypal-button-container" style="max-width:340px; margin:20px auto 0;"></div>
       </div>
     </div>
   </div>
@@ -523,17 +524,17 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
 
-  // تحويل الزائر لرابط الدفع الصحيح حسب الباقة يلي اختارها
-  const PAYPAL_LINKS = {
-    'استشارة سريعة': 'https://www.paypal.com/ncp/payment/UCTWEQ75UE3BY',
-    'باقة الانطلاقة': 'https://www.paypal.com/ncp/payment/J2N8NRNRTKS2Q',
-    'باقة المرافقة': 'https://www.paypal.com/ncp/payment/TCKGDKGPABBTE',
-    'دعم فوري': 'https://www.paypal.com/ncp/payment/J465KVE9XRWVU',
-    'تجربة': 'https://www.paypal.com/ncp/payment/3KMYGVAD2YZRW',
+  // نعرض زر PayPal الصحيح مباشرة جوا الصفحة، حسب الباقة يلي اختارها — بدون أي تحويل لموقع خارجي
+  const PAYPAL_HOSTED_BUTTON_IDS = {
+    'استشارة سريعة': 'UCTWEQ75UE3BY',
+    'باقة الانطلاقة': 'J2N8NRNRTKS2Q',
+    'باقة المرافقة': 'TCKGDKGPABBTE',
+    'دعم فوري': 'J465KVE9XRWVU',
+    'تجربة - بوضوح': '3KMYGVAD2YZRW',
   };
-  const paymentLink = PAYPAL_LINKS[payload.package_name];
-  if (paymentLink) {
-    setTimeout(() => { window.location.href = paymentLink; }, 1800);
+  const hostedButtonId = PAYPAL_HOSTED_BUTTON_IDS[payload.package_name];
+  if (hostedButtonId && typeof paypal !== 'undefined') {
+    paypal.HostedButtons({ hostedButtonId }).render('#paypal-button-container');
   }
 });
 
@@ -548,6 +549,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
 });
 </script>
 
+<script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
 <app-bottom-nav></app-bottom-nav>
