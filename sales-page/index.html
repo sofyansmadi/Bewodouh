@@ -251,6 +251,7 @@
             <option value="باقة الانطلاقة">باقة الانطلاقة — $150 / شهرياً</option>
             <option value="باقة المرافقة">باقة المرافقة — $300 / كل ٣ أشهر</option>
             <option value="دعم فوري">دعم فوري — $70</option>
+            <option value="تجربة"> تجربة — $1</option>
           </select>
         </div>
         <div class="field">
@@ -528,6 +529,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     'باقة الانطلاقة': 'https://www.paypal.com/ncp/payment/J2N8NRNRTKS2Q',
     'باقة المرافقة': 'https://www.paypal.com/ncp/payment/TCKGDKGPABBTE',
     'دعم فوري': 'https://www.paypal.com/ncp/payment/J465KVE9XRWVU',
+    'تجربة': 'https://www.paypal.com/ncp/payment/3KMYGVAD2YZRW',
   };
   const paymentLink = PAYPAL_LINKS[payload.package_name];
   if (paymentLink) {
