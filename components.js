@@ -24,6 +24,14 @@
    الروابط أفقياً كما كانت بالضبط قبل التحويل لمكوّنات.
    ============================================================ */
 
+// نطبّق الوضع المحفوظ فوراً (قبل أي شي ثاني) لتفادي "ومضة" لون غلط لحظة فتح الصفحة
+(function applyStoredTheme(){
+  const saved = localStorage.getItem('bewodoh_theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
 /* ============================================================
    isRunningInApp() و appHref() — بما إنه Capacitor ما بيفهم
    تلقائياً إنه رابط زي "/blog/" لازم يفتح "index.html" اللي جواه
@@ -44,6 +52,25 @@ function appHref(path){
 }
 
 const STYLE_FIX = `
+  html[data-theme="dark"]{
+    --fog:#1A1522; --fog-dim:#2A2438;
+    --text-on-light:#EDE7E3; --text-muted-light:#B7ACC4;
+  }
+  html[data-theme="dark"] body{ background:var(--fog); }
+  html[data-theme="dark"] [style*="background:#fff"],
+  html[data-theme="dark"] .pkg-card,
+  html[data-theme="dark"] .specialist-card,
+  html[data-theme="dark"] .article-card,
+  html[data-theme="dark"] .booking-card,
+  html[data-theme="dark"] .profile-card,
+  html[data-theme="dark"] .form-card,
+  html[data-theme="dark"] .quiz-card{
+    background:var(--fog-dim) !important;
+    border-color:rgba(255,255,255,.08) !important;
+  }
+  .theme-toggle-btn{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,.15); color:#B7ACC4; transition:.2s; flex-shrink:0; background:none; cursor:pointer; }
+  .theme-toggle-btn svg{ width:16px; height:16px; }
+  .theme-toggle-btn:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav{ display:block; position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
   site-nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
   site-footer{ display:block; background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
@@ -82,6 +109,11 @@ class SiteNav extends HTMLElement {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </a>`;
 
+    const themeToggleHtml = `
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="تبديل الوضع الليلي">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M15.09 14c.35-.65.86-1.19 1.41-1.75A6 6 0 1 0 7.5 12.25c.55.56 1.05 1.1 1.41 1.75"/></svg>
+        </button>`;
+
     this.innerHTML = `
     <div class="wrap">
       <a href="${appHref('/')}" class="brand">بوضوح<span>.</span></a>
@@ -90,6 +122,7 @@ class SiteNav extends HTMLElement {
           ${linksHtml}
           <a href="${appHref('/sales-page/')}" class="nav-cta">احجز استشارة</a>
         </div>
+        ${themeToggleHtml}
         ${accountIconHtml}
       </div>
     </div>`;
@@ -100,6 +133,21 @@ class SiteNav extends HTMLElement {
         if (data.session) {
           const icon = document.getElementById('navAccountIcon');
           if (icon) icon.href = appHref('/account/');
+        }
+      });
+    }
+
+    // تبديل الوضع الداكن/الفاتح، وحفظ الاختيار حتى يضل مطبّق بالزيارة الجاية
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('bewodoh_theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('bewodoh_theme', 'dark');
         }
       });
     }
