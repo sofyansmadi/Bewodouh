@@ -110,16 +110,26 @@
   .pkg-select-btn{ width:100%; margin-top:18px; background:var(--fog); border:1.5px solid var(--fog-dim); color:var(--ink); font-weight:700; font-size:13.5px; padding:11px; border-radius:100px; cursor:pointer; font-family:inherit; transition:.2s; }
   .pkg-select-btn:hover, .pkg-select-btn.chosen{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
 
+  .payment-methods{ margin-top:34px; text-align:center; }
+  .payment-methods-label{ font-size:11.5px; color:var(--text-muted-light); letter-spacing:.03em; margin-bottom:14px; }
+  .payment-icons{ display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap; color:var(--text-muted-light); }
+  .payment-icons svg{ height:20px; width:auto; }
+  .payment-icons .pm-wordmark{ font-family:'Noto Kufi Arabic', sans-serif; font-weight:900; font-size:15px; letter-spacing:.01em; }
+
   /* ---------- BOOKING FORM ---------- */
   .booking-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:38px 34px; box-shadow:0 24px 50px -30px rgba(36,29,46,.2); }
   @media (max-width:600px){ .booking-card{ padding:26px 20px; } }
   .field{ margin-bottom:20px; }
   .field label{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; }
   .field input, .field select, .field textarea{
-    width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:13px 15px;
+    width:100%; max-width:100%; min-width:0; border:1.5px solid var(--fog-dim); border-radius:12px; padding:13px 15px;
     font-family:'IBM Plex Sans Arabic', sans-serif; font-size:15px; color:var(--text-on-light); background:var(--fog); transition:.15s;
   }
   .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  /* إصلاح مشكلة معروفة بمتصفح Safari بالآيفون: حقل datetime-local
+     بيتجاهل width:100% وبيطلع أعرض من الصندوق الأبيض المحيط فيه إلا
+     إذا ألغينا مظهره الافتراضي بهذا الشكل. */
+  .field input[type="datetime-local"]{ -webkit-appearance:none; appearance:none; }
   .field textarea{ min-height:110px; resize:vertical; }
   .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; }
   .btn-primary:hover{ background:var(--ink-soft); }
@@ -234,6 +244,16 @@
     </div>
 
     <pricing-cards class="pkg-grid"></pricing-cards>
+
+    <div class="payment-methods">
+      <div class="payment-methods-label">طرق الدفع المقبولة</div>
+      <div class="payment-icons">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-label="Apple Pay"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.856 4.42 2.955 4.45z"/></svg>
+        <span class="pm-wordmark" style="font-style:italic;" aria-label="PayPal">PayPal</span>
+        <span class="pm-wordmark" style="font-style:italic;" aria-label="Visa">VISA</span>
+        <svg viewBox="0 0 24 14" aria-label="Mastercard"><circle cx="9" cy="7" r="6.5" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="15" cy="7" r="6.5" fill="currentColor" opacity=".55"/></svg>
+      </div>
+    </div>
   </div>
 </section>
 
