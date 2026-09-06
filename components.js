@@ -27,8 +27,8 @@
 // نطبّق الوضع المحفوظ فوراً (قبل أي شي ثاني) لتفادي "ومضة" لون غلط لحظة فتح الصفحة
 (function applyStoredTheme(){
   const saved = localStorage.getItem('bewodoh_theme');
-  if (saved === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
   }
 })();
 
@@ -52,20 +52,20 @@ function appHref(path){
 }
 
 const STYLE_FIX = `
-  html[data-theme="dark"]{
-    --fog:#1A1522; --fog-dim:#2A2438;
+  html[data-theme="light"]{
+    --fog:#FFFFFF; --fog-dim:var(--ink-soft);
     --text-on-light:#EDE7E3; --text-muted-light:#B7ACC4;
   }
-  html[data-theme="dark"] body{ background:var(--fog); }
-  html[data-theme="dark"] [style*="background:#fff"],
-  html[data-theme="dark"] .pkg-card,
-  html[data-theme="dark"] .specialist-card,
-  html[data-theme="dark"] .article-card,
-  html[data-theme="dark"] .booking-card,
-  html[data-theme="dark"] .profile-card,
-  html[data-theme="dark"] .form-card,
-  html[data-theme="dark"] .quiz-card{
-    background:var(--fog-dim) !important;
+  html[data-theme="light"] body{ background:var(--fog); }
+  html[data-theme="light"] [style*="background:#fff"],
+  html[data-theme="light"] .pkg-card,
+  html[data-theme="light"] .specialist-card,
+  html[data-theme="light"] .article-card,
+  html[data-theme="light"] .booking-card,
+  html[data-theme="light"] .profile-card,
+  html[data-theme="light"] .form-card,
+  html[data-theme="light"] .quiz-card{
+    background:var(--ink) !important;
     border-color:rgba(255,255,255,.08) !important;
   }
   .theme-toggle-btn{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,.15); color:#B7ACC4; transition:.2s; flex-shrink:0; background:none; cursor:pointer; }
@@ -137,17 +137,17 @@ class SiteNav extends HTMLElement {
       });
     }
 
-    // تبديل الوضع الداكن/الفاتح، وحفظ الاختيار حتى يضل مطبّق بالزيارة الجاية
+    // تبديل بين الوضع الأساسي (Dark، شكل الموقع الحالي) والوضع الأبيض، وحفظ الاختيار
     const themeBtn = document.getElementById('themeToggleBtn');
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        if (isDark) {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
           document.documentElement.removeAttribute('data-theme');
-          localStorage.setItem('bewodoh_theme', 'light');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'dark');
           localStorage.setItem('bewodoh_theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('bewodoh_theme', 'light');
         }
       });
     }
