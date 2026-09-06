@@ -80,6 +80,7 @@ const STYLE_FIX = `
   .nav-lang-toggle{ font-size:12px; font-weight:700; color:#B7ACC4; border:1.5px solid rgba(255,255,255,.15); border-radius:100px; padding:6px 12px; transition:.2s; flex-shrink:0; }
   .nav-lang-toggle:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
+  @media (max-width:780px){ site-nav .nav-links{ display:none; } }
 `;
 const styleTag = document.createElement('style');
 styleTag.textContent = STYLE_FIX;
