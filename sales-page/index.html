@@ -558,7 +558,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     return;
   }
 
-  const { error } = await supabaseClient.from('bookings').insert(payload);
+  const { data: newBooking, error } = await supabaseClient.from('bookings').insert(payload).select().single();
 
   if (error) {
     submitBtn.disabled = false;
@@ -572,17 +572,40 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
 
-  // نعرض زر PayPal الصحيح مباشرة داخل الصفحة، حسب الباقة التي اختارها المستخدم — بدون أي تحويل إلى موقع خارجي
-  const PAYPAL_HOSTED_BUTTON_IDS = {
-    'استشارة سريعة': 'UCTWEQ75UE3BY',
-    'باقة الانطلاقة': 'J2N8NRNRTKS2Q',
-    'باقة المرافقة': 'TCKGDKGPABBTE',
-    'دعم فوري': 'J465KVE9XRWVU',
-    'تجربة - بوضوح': '3KMYGVAD2YZRW',
+  // نعرض زر دفع PayPal مباشرة داخل الصفحة بمبلغ الباقة الفعلي، وعند
+  // نجاح الدفع (onApprove) نعلّم الحجز كمدفوع عبر دالة mark_booking_paid
+  // — بدون أي تحويل إلى موقع خارجي، وبدون منح الزائر صلاحية تعديل الحجوزات مباشرة
+  const PACKAGE_PRICES_USD = {
+    'استشارة سريعة': 35,
+    'باقة الانطلاقة': 150,
+    'باقة المرافقة': 300,
+    'دعم فوري': 70,
+    'تجربة - بوضوح': 1,
   };
-  const hostedButtonId = PAYPAL_HOSTED_BUTTON_IDS[payload.package_name];
-  if (hostedButtonId && typeof paypal !== 'undefined') {
-    paypal.HostedButtons({ hostedButtonId }).render('#paypal-button-container');
+  const amount = PACKAGE_PRICES_USD[payload.package_name];
+  const paypalContainer = document.getElementById('paypal-button-container');
+
+  if (amount && typeof paypal !== 'undefined') {
+    paypal.Buttons({
+      createOrder: function (data, actions) {
+        return actions.order.create({
+          purchase_units: [{ amount: { value: amount.toFixed(2) } }],
+        });
+      },
+      onApprove: async function (data, actions) {
+        const details = await actions.order.capture();
+        const { error: markError } = await supabaseClient.rpc('mark_booking_paid', {
+          booking_id: newBooking.id,
+          order_id: details.id,
+        });
+        if (markError) console.error('mark_booking_paid error:', markError);
+        paypalContainer.innerHTML = '<p style="text-align:center; color:var(--clarity); font-weight:700;">تم الدفع بنجاح ✓</p>';
+      },
+      onError: function (err) {
+        console.error('PayPal error:', err);
+        paypalContainer.insertAdjacentHTML('afterend', '<p style="text-align:center; color:var(--alert); font-size:13px; margin-top:10px;">صار خطأ أثناء الدفع. حاول مرة أخرى أو تواصل معنا.</p>');
+      },
+    }).render('#paypal-button-container');
   }
 });
 
@@ -597,7 +620,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
 });
 </script>
 
-<script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=buttons&disable-funding=venmo&currency=USD"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
 <app-bottom-nav></app-bottom-nav>
