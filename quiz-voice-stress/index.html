@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مقياس التوتر الصوتي — بوضوح</title>
+<meta name="description" content="سجّل صوتك لمدة ٣٠ ثانية واحصل على مؤشر تقريبي لمستوى توترك، مبني على نبرة صوتك وحجمه وإيقاع كلامك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:640px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:52px 0 40px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(24px,4vw,32px); font-weight:900; }
+  .page-head p{ color:var(--text-muted-dark); font-size:14.5px; max-width:46ch; margin:12px auto 0; }
+
+  main{ padding:40px 0 90px; }
+  .card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:32px 28px; box-shadow:0 24px 50px -30px rgba(36,29,46,.2); }
+  @media (max-width:600px){ .card{ padding:24px 20px; } }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- شاشة البداية ---------- */
+  .intro-icon{ width:64px; height:64px; border-radius:50%; background:var(--ink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+  .intro-icon svg{ width:28px; height:28px; color:var(--clarity-soft); }
+  .card h2{ text-align:center; font-size:20px; margin-bottom:10px; }
+  .intro-text{ text-align:center; color:var(--text-muted-light); font-size:14.5px; margin-bottom:26px; }
+  .steps{ display:flex; flex-direction:column; gap:14px; margin-bottom:28px; }
+  .step-row{ display:flex; align-items:flex-start; gap:12px; }
+  .step-num{ width:26px; height:26px; border-radius:50%; background:var(--fog); color:var(--clarity); font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step-row p{ font-size:14px; color:var(--text-on-light); }
+
+  .btn-primary{
+    background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:15px; border-radius:100px;
+    border:none; cursor:pointer; font-family:inherit; width:100%; transition:.2s; display:block; text-align:center;
+  }
+  .btn-primary:hover{ background:var(--ink-soft); }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-ghost{
+    background:none; color:var(--text-muted-light); font-weight:600; font-size:13.5px; padding:10px; border-radius:100px;
+    border:none; cursor:pointer; font-family:inherit; width:100%; margin-top:10px;
+  }
+
+  .mic-error{ display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13px; padding:12px 14px; border-radius:10px; margin-top:16px; text-align:center; }
+  .mic-error.active{ display:block; }
+
+  /* ---------- شاشة التسجيل ---------- */
+  #recordScreen{ text-align:center; }
+  .rec-ring-wrap{ position:relative; width:180px; height:180px; margin:0 auto 24px; }
+  .rec-ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .rec-ring-bg{ fill:none; stroke:var(--fog-dim); stroke-width:8; }
+  .rec-ring-fill{ fill:none; stroke:var(--clarity); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .2s linear; }
+  .rec-time{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:34px; color:var(--ink); }
+  .rec-status{ font-size:14px; color:var(--text-muted-light); margin-bottom:18px; }
+  .rec-status.live{ color:var(--alert); font-weight:700; }
+  #liveCanvas{ width:100%; height:70px; display:block; border-radius:12px; background:var(--fog); margin-bottom:22px; }
+  .rec-prompt{ font-size:13px; color:var(--text-muted-light); margin-bottom:24px; }
+
+  /* ---------- شاشة التحليل ---------- */
+  #analyzingScreen{ text-align:center; padding:50px 0; }
+  .spinner{
+    width:52px; height:52px; border-radius:50%; margin:0 auto 22px;
+    border:3px solid var(--fog-dim); border-top-color:var(--clarity); animation:spin .9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #analyzingScreen p{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:16px; }
+
+  /* ---------- شاشة النتيجة ---------- */
+  #resultScreen{ text-align:center; }
+  .stress-gauge{ position:relative; width:190px; height:190px; margin:0 auto 8px; }
+  .stress-gauge svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .gauge-bg{ fill:none; stroke:var(--fog-dim); stroke-width:14; }
+  .gauge-fill{ fill:none; stroke-width:14; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+  .gauge-label{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .gauge-pct{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:38px; color:var(--ink); }
+  .gauge-word{ font-size:12.5px; color:var(--text-muted-light); margin-top:2px; }
+  .result-title{ font-size:19px; margin:18px 0 8px; }
+  .result-desc{ font-size:14px; color:var(--text-muted-light); max-width:44ch; margin:0 auto 26px; }
+
+  .signals{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:26px; text-align:right; }
+  @media (max-width:520px){ .signals{ grid-template-columns:1fr; } }
+  .signal-card{ background:var(--fog); border-radius:14px; padding:14px 16px; }
+  .signal-card .signal-label{ font-size:12px; color:var(--text-muted-light); margin-bottom:6px; }
+  .signal-card canvas{ width:100%; height:44px; display:block; }
+
+  .recs{ text-align:right; background:var(--fog); border-radius:14px; padding:18px 20px; margin-bottom:24px; }
+  .recs h3{ font-size:14px; margin-bottom:10px; }
+  .recs ul{ padding-inline-start:20px; display:flex; flex-direction:column; gap:8px; }
+  .recs li{ font-size:13.5px; color:var(--text-on-light); }
+
+  .disclaimer{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:14px 16px; font-size:12px; color:var(--text-muted-light); margin-top:20px; text-align:center; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; margin-top:50px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+</style>
+</head>
+<body>
+
+<site-nav active="quizzes"></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">أداة تجريبية</div>
+    <h1>مقياس التوتر الصوتي</h1>
+    <p>سجّل صوتك لمدة ٣٠ ثانية، ونحلّل نبرة صوتك وحجمه وإيقاع كلامك لنعطيك مؤشراً تقريبياً عن مستوى توترك الآن.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="card">
+
+      <!-- ---- شاشة البداية ---- -->
+      <div class="screen active" id="introScreen">
+        <div class="intro-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
+        <h2>جاهز تجرّب؟</h2>
+        <p class="intro-text">تحتاج فقط إلى ميكروفون ومكان هادئ نسبياً.</p>
+        <div class="steps">
+          <div class="step-row"><span class="step-num">١</span><p>اضغط "ابدأ التسجيل" واسمح للموقع بالوصول للميكروفون.</p></div>
+          <div class="step-row"><span class="step-num">٢</span><p>تحدث بصوت طبيعي عن أي موضوع تريده لمدة ٣٠ ثانية — لا يهم المحتوى، يهم صوتك.</p></div>
+          <div class="step-row"><span class="step-num">٣</span><p>احصل فوراً على مؤشر تقريبي لمستوى توترك مع بضع توصيات.</p></div>
+        </div>
+        <button class="btn-primary" id="startBtn">ابدأ التسجيل</button>
+        <div class="mic-error" id="micError">تعذّر الوصول إلى الميكروفون. تأكد من منح الإذن للموقع/التطبيق من إعدادات جهازك وحاول مرة أخرى.</div>
+      </div>
+
+      <!-- ---- شاشة التسجيل ---- -->
+      <div class="screen" id="recordScreen">
+        <div class="rec-ring-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="rec-ring-bg" cx="50" cy="50" r="44"/>
+            <circle class="rec-ring-fill" id="recRing" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="0"/>
+          </svg>
+          <div class="rec-time" id="recTime">٠:٣٠</div>
+        </div>
+        <div class="rec-status live" id="recStatus">جارٍ التسجيل الآن...</div>
+        <canvas id="liveCanvas" width="600" height="140"></canvas>
+        <p class="rec-prompt">تحدث بصوت طبيعي — عن يومك، عن أي شيء يخطر ببالك.</p>
+        <button class="btn-ghost" id="stopEarlyBtn">إنهاء الآن</button>
+      </div>
+
+      <!-- ---- شاشة التحليل ---- -->
+      <div class="screen" id="analyzingScreen">
+        <div class="spinner"></div>
+        <p>جارٍ تحليل نبرة صوتك...</p>
+      </div>
+
+      <!-- ---- شاشة النتيجة ---- -->
+      <div class="screen" id="resultScreen">
+        <div class="stress-gauge">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="42"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+          </svg>
+          <div class="gauge-label">
+            <span class="gauge-pct" id="gaugePct">٪</span>
+            <span class="gauge-word">مؤشر التوتر</span>
+          </div>
+        </div>
+        <h2 class="result-title" id="resultTitle"></h2>
+        <p class="result-desc" id="resultDesc"></p>
+
+        <div class="signals">
+          <div class="signal-card">
+            <div class="signal-label">نبرة الصوت (Pitch) عبر الوقت</div>
+            <canvas id="pitchChart" width="260" height="88"></canvas>
+          </div>
+          <div class="signal-card">
+            <div class="signal-label">حجم الصوت عبر الوقت</div>
+            <canvas id="volumeChart" width="260" height="88"></canvas>
+          </div>
+        </div>
+
+        <div class="recs">
+          <h3>توصيات بناءً على نتيجتك</h3>
+          <ul id="recsList"></ul>
+        </div>
+
+        <button class="btn-primary" id="retryBtn">أعد المحاولة</button>
+        <div class="disclaimer">هذا مؤشر تقريبي مبني على تحليل مبسّط لنبرة الصوت وحجمه وإيقاعه، وليس أداة تشخيصية أو طبية. التسجيل يُحلَّل بالكامل على جهازك ولا يُرفع لأي خادم. إذا كنت تشعر بتوتر مستمر، تحدّث مع مختص نفسي مرخّص.</div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+
+<script>
+/* ============================================================
+   بوضوح — مقياس التوتر الصوتي.
+   ------------------------------------------------------------
+   كل التحليل يصير محلياً بالكامل داخل متصفح المستخدم عبر
+   Web Audio API — الصوت المسجَّل ما بيتخزّن ولا بيتبعت لأي مكان.
+
+   المنهجية (تقريبية وغير سريرية، مذكورة بوضوح للمستخدم):
+   نحسب من الصوت المسجَّل ثلاث خصائص صوتية بسيطة كل ~150ms:
+   - تردد النبرة الأساسي (Pitch/F0) عبر خوارزمية الارتباط الذاتي
+     (autocorrelation) — تقنية DSP قياسية ومعروفة.
+   - حجم الصوت (RMS).
+   - نسبة الوقت الفعلي يلي فيه كلام (voiced ratio)، كمؤشر تقريبي
+     لسرعة/تدفق الكلام مقابل التوقفات.
+   وبعدين نحوّل كل خاصية لدرجة من ٠-١٠٠ باستخدام نطاقات تقريبية
+   لصوت بشري طبيعي، ونجمعهم بمعادلة ترجيح بسيطة لمؤشر توتر واحد.
+   هذا ليس نموذجاً علمياً معتمَداً لقياس التوتر — هو أداة تأمل ذاتي
+   تفاعلية، والوضوح حول هذا موجود بالتنويه أسفل النتيجة.
+   ============================================================ */
+
+const introScreen = document.getElementById('introScreen');
+const recordScreen = document.getElementById('recordScreen');
+const analyzingScreen = document.getElementById('analyzingScreen');
+const resultScreen = document.getElementById('resultScreen');
+const screens = [introScreen, recordScreen, analyzingScreen, resultScreen];
+
+function showScreen(screen) {
+  screens.forEach(s => s.classList.remove('active'));
+  screen.classList.add('active');
+}
+
+const RECORD_SECONDS = 30;
+const RING_CIRCUMFERENCE = 2 * Math.PI * 44;
+document.getElementById('recRing').setAttribute('stroke-dasharray', RING_CIRCUMFERENCE.toFixed(1));
+
+let audioContext, analyser, micStream, sourceNode;
+let sampleFrames = []; // { t, pitch, rms } كل ~150ms
+let recordTimer = null, sampleTimer = null, elapsedMs = 0;
+let liveCanvasCtx = document.getElementById('liveCanvas').getContext('2d');
+
+const arabicNums = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+function toArabicNum(n){ return String(n).split('').map(d => arabicNums[+d] ?? d).join(''); }
+
+// ---- كشف تردد النبرة عبر الارتباط الذاتي (autocorrelation)، مبني على
+// نطاق تردد صوت بشري واقعي (٧٠-٤٠٠ هرتز) لتسريع الحساب ----
+function detectPitch(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.012) return { pitch: -1, rms }; // صمت أو ضجيج خلفية ضعيف جداً
+
+  const minLag = Math.floor(sampleRate / 400);
+  const maxLag = Math.floor(sampleRate / 70);
+  let bestLag = -1, bestCorr = 0;
+
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let corr = 0;
+    for (let i = 0; i < SIZE - lag; i++) corr += buf[i] * buf[i + lag];
+    if (corr > bestCorr) { bestCorr = corr; bestLag = lag; }
+  }
+
+  if (bestLag <= 0) return { pitch: -1, rms };
+  return { pitch: sampleRate / bestLag, rms };
+}
+
+async function startRecording() {
+  document.getElementById('micError').classList.remove('active');
+  document.getElementById('startBtn').disabled = true;
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    console.error('getUserMedia error:', err);
+    document.getElementById('micError').classList.add('active');
+    document.getElementById('startBtn').disabled = false;
+    return;
+  }
+
+  document.getElementById('startBtn').disabled = false;
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  sourceNode = audioContext.createMediaStreamSource(micStream);
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 2048;
+  sourceNode.connect(analyser);
+
+  sampleFrames = [];
+  elapsedMs = 0;
+  showScreen(recordScreen);
+  drawLiveVisualizer();
+
+  const timeBuf = new Float32Array(analyser.fftSize);
+  sampleTimer = setInterval(() => {
+    analyser.getFloatTimeDomainData(timeBuf);
+    const { pitch, rms } = detectPitch(timeBuf, audioContext.sampleRate);
+    sampleFrames.push({ t: elapsedMs, pitch, rms });
+  }, 150);
+
+  recordTimer = setInterval(() => {
+    elapsedMs += 100;
+    const remaining = Math.max(0, RECORD_SECONDS - elapsedMs / 1000);
+    document.getElementById('recTime').textContent = '٠:' + toArabicNum(Math.ceil(remaining)).padStart(2, '٠');
+    const progress = Math.min(1, elapsedMs / (RECORD_SECONDS * 1000));
+    document.getElementById('recRing').style.strokeDashoffset = (RING_CIRCUMFERENCE * (1 - progress)).toFixed(1);
+    if (remaining <= 0) finishRecording();
+  }, 100);
+}
+
+function drawLiveVisualizer() {
+  if (!analyser) return;
+  const freqData = new Uint8Array(analyser.frequencyBinCount);
+  const canvas = document.getElementById('liveCanvas');
+  const ctx = liveCanvasCtx;
+
+  function draw() {
+    if (!analyser) return; // توقف التسجيل
+    requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(freqData);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barCount = 40;
+    const step = Math.floor(freqData.length / barCount);
+    const barWidth = canvas.width / barCount;
+    for (let i = 0; i < barCount; i++) {
+      const v = freqData[i * step] / 255;
+      const barHeight = Math.max(3, v * canvas.height);
+      ctx.fillStyle = 'rgba(201,161,95,' + (0.4 + v * 0.6).toFixed(2) + ')';
+      ctx.fillRect(i * barWidth + 1, canvas.height - barHeight, barWidth - 2, barHeight);
+    }
+  }
+  draw();
+}
+
+function stopMic() {
+  clearInterval(recordTimer);
+  clearInterval(sampleTimer);
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  if (audioContext) audioContext.close();
+  analyser = null;
+}
+
+function finishRecording() {
+  stopMic();
+  showScreen(analyzingScreen);
+  setTimeout(() => analyzeAndShowResults(), 1600);
+}
+
+document.getElementById('startBtn').addEventListener('click', startRecording);
+document.getElementById('stopEarlyBtn').addEventListener('click', () => {
+  if (elapsedMs < 8000) return; // نحتاج ٨ ثوانٍ عالأقل لتحليل معقول
+  finishRecording();
+});
+
+// ---- التحليل بعد انتهاء التسجيل ----
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function analyzeAndShowResults() {
+  const voiced = sampleFrames.filter(f => f.pitch > 0);
+  const voicedRatio = sampleFrames.length ? voiced.length / sampleFrames.length : 0;
+
+  let avgPitch = 0, pitchStd = 0, avgRmsDb = -50;
+  if (voiced.length >= 3) {
+    avgPitch = voiced.reduce((s, f) => s + f.pitch, 0) / voiced.length;
+    const variance = voiced.reduce((s, f) => s + Math.pow(f.pitch - avgPitch, 2), 0) / voiced.length;
+    pitchStd = Math.sqrt(variance);
+  }
+  if (sampleFrames.length) {
+    const avgRms = sampleFrames.reduce((s, f) => s + f.rms, 0) / sampleFrames.length;
+    avgRmsDb = avgRms > 0 ? 20 * Math.log10(avgRms) : -60;
+  }
+
+  // تطبيع كل خاصية لدرجة ٠-١٠٠ حسب نطاقات تقريبية لصوت بشري طبيعي
+  const pitchVariabilityScore = clamp((pitchStd - 5) / (55 - 5), 0, 1) * 100;
+  const volumeScore = clamp((avgRmsDb + 45) / (45 - 15), 0, 1) * 100;
+  const paceScore = clamp((voicedRatio - 0.3) / (0.9 - 0.3), 0, 1) * 100;
+
+  const stressIndex = Math.round(0.4 * pitchVariabilityScore + 0.35 * volumeScore + 0.25 * paceScore);
+  showResults(stressIndex, voiced);
+}
+
+const STRESS_LEVELS = [
+  { max: 35, word: 'منخفض', color: '#4CAF50',
+    title: 'مؤشرك يوحي بهدوء نسبي الآن',
+    desc: 'نبرة صوتك وإيقاعك كانا مستقرين نسبياً خلال التسجيل — هذا مؤشر جيد، لكنه لحظي فقط ولا يعكس حالتك بشكل دائم.',
+    recs: ['حافظ على العادات التي تساعدك تصل لهذا الهدوء — نوم كافٍ، وقت هادئ، حركة يومية.', 'جرّب الأداة مرة أخرى بأوقات مختلفة من يومك لترى إذا كان هناك نمط.'] },
+  { max: 65, word: 'متوسط', color: 'var(--clarity)',
+    title: 'مؤشرك يشير إلى توتر متوسط',
+    desc: 'كانت هناك بعض التقلبات في نبرة صوتك وحجمه — قد تكون علامة على توتر عابر أو تعب، وليس بالضرورة شيئاً مقلقاً.',
+    recs: ['جرّب تمريناً بسيطاً للتنفس العميق قبل أن تكمل يومك.', 'لاحظ إذا كان هذا التوتر مرتبطاً بموقف معين اليوم.', 'تصفّح مقالاتنا عن إدارة التوتر والقلق لمزيد من الأدوات العملية.'] },
+  { max: 100, word: 'مرتفع', color: 'var(--alert)',
+    title: 'مؤشرك يشير إلى توتر مرتفع نسبياً',
+    desc: 'أظهر صوتك تقلبات ملحوظة في النبرة والحجم وإيقاع الكلام خلال التسجيل — هذا لا يعني تشخيصاً، لكنه يستحق انتباهاً.',
+    recs: ['خذ بضع دقائق الآن لتهدئة تنفسك قبل المتابعة.', 'إذا استمر هذا الشعور لأيام، قد يفيدك التحدث مع مختص نفسي مرخّص.', 'جرّب اختبار "الفحص السريع" (PHQ-2) للاطمئنان أكثر على حالتك النفسية العامة.'] },
+];
+
+function showResults(stressIndex, voicedFrames) {
+  showScreen(resultScreen);
+
+  const level = STRESS_LEVELS.find(l => stressIndex <= l.max);
+  document.getElementById('gaugePct').textContent = toArabicNum(stressIndex) + '٪';
+  document.getElementById('resultTitle').textContent = level.title;
+  document.getElementById('resultDesc').textContent = level.desc;
+  document.getElementById('recsList').innerHTML = level.recs.map(r => `<li>${r}</li>`).join('');
+
+  const gaugeFill = document.getElementById('gaugeFill');
+  const GAUGE_CIRC = 2 * Math.PI * 42;
+  gaugeFill.style.stroke = level.color;
+  requestAnimationFrame(() => {
+    gaugeFill.style.strokeDashoffset = (GAUGE_CIRC * (1 - stressIndex / 100)).toFixed(1);
+  });
+
+  drawMiniChart('pitchChart', voicedFrames.map(f => f.pitch), '#C9A15F');
+  drawMiniChart('volumeChart', sampleFrames.map(f => f.rms * 400), '#8B6F7E');
+}
+
+function drawMiniChart(canvasId, values, color) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!values.length) return;
+
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const range = Math.max(max - min, 1);
+  const step = canvas.width / Math.max(values.length - 1, 1);
+
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  values.forEach((v, i) => {
+    const x = i * step;
+    const y = canvas.height - ((v - min) / range) * (canvas.height - 8) - 4;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  showScreen(introScreen);
+});
+</script>
+
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>
