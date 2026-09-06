@@ -175,6 +175,16 @@ ${relatedLinks}
 `;
 }
 
+const MANIFEST_PATH = path.join(__dirname, '.generated-articles.json');
+
+function readManifest() {
+  try {
+    return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
 async function main() {
   const { data: articles, error } = await supabase
     .from('articles')
@@ -202,6 +212,21 @@ async function main() {
   }
 
   console.log(`تم توليد ${written} ملف مقال بنجاح.`);
+
+  // نحذف مجلد أي مقال كنا ولّدناه بتشغيل سابق وما عاد موجوداً أو منشوراً الآن —
+  // بدون هذا، حذف مقال من لوحة التحكم ما كان يحذف ملفه الثابت أبداً.
+  const newSlugs = articles.map(a => a.slug);
+  const oldSlugs = readManifest();
+  let removed = 0;
+  for (const slug of oldSlugs) {
+    if (!newSlugs.includes(slug)) {
+      fs.rmSync(path.join(process.cwd(), slug), { recursive: true, force: true });
+      removed++;
+    }
+  }
+  if (removed) console.log(`تم حذف ${removed} مجلد مقال لم يعد منشوراً.`);
+
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(newSlugs, null, 2), 'utf-8');
 }
 
 main();
