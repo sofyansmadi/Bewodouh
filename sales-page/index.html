@@ -89,6 +89,14 @@
   .reco-banner span{ color:var(--clarity-soft); font-weight:700; font-size:13px; }
   .reco-banner p{ color:var(--fog); font-size:15px; margin-top:6px; }
 
+  .currency-switcher{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
+  .currency-btn{
+    background:#fff; border:1.5px solid var(--fog-dim); border-radius:100px; padding:8px 16px;
+    font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text-on-light); transition:.15s;
+  }
+  .currency-btn:hover{ border-color:var(--clarity); }
+  .currency-btn.active{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
+
   .pkg-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:20px; }
   @media (max-width:900px){ .pkg-grid{ grid-template-columns:repeat(2,1fr); } }
   @media (max-width:560px){ .pkg-grid{ grid-template-columns:1fr; } }
@@ -215,7 +223,15 @@
   <div class="wrap">
     <div class="eyebrow" style="justify-content:center;">الباقات والأسعار</div>
     <h2 class="section-title" style="text-align:center;">اختر ما يناسبك</h2>
-    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">يمكنك إلغاء الاشتراك في أي من الباقات في أي وقت. الأسعار بالدينار الأردني.</p>
+    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">يمكنك إلغاء الاشتراك في أي من الباقات في أي وقت. اختر العملة التي تناسبك أدناه.</p>
+
+    <div class="currency-switcher" id="currencySwitcher">
+      <button type="button" class="currency-btn active" data-currency="USD">🇺🇸 USD</button>
+      <button type="button" class="currency-btn" data-currency="JOD">🇯🇴 JOD</button>
+      <button type="button" class="currency-btn" data-currency="SAR">🇸🇦 SAR</button>
+      <button type="button" class="currency-btn" data-currency="AED">🇦🇪 AED</button>
+      <button type="button" class="currency-btn" data-currency="EGP">🇪🇬 EGP</button>
+    </div>
 
     <pricing-cards class="pkg-grid"></pricing-cards>
   </div>
@@ -443,6 +459,15 @@ function showRecommendation(){
   document.getElementById('bkPackage').value = reco.name;
   recoBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
+// ---------- Currency switcher (تحويل تقريبي، <pricing-cards> هو اللي بيعمل التحويل الفعلي) ----------
+document.querySelectorAll('.currency-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.dispatchEvent(new CustomEvent('currency-changed', { detail: { code: btn.dataset.currency } }));
+  });
+});
 
 // ---------- Package selection (handled by <pricing-cards>; we just listen) ----------
 window.addEventListener('package-selected', (e) => {

@@ -183,9 +183,36 @@ customElements.define('site-footer', SiteFooter);
    ويستمع لحدث 'recommend-package' على window (تفاصيله { name })
    عشان يعلّم بصرياً الباقة الموصى فيها من تدفّق الأسئلة.
    ============================================================ */
+/* ============================================================
+   أسعار صرف تقريبية أمام الدولار (العملة الأساسية بقاعدة البيانات).
+   تحويل تقديري لعرض الأسعار فقط، وليس سعر صرف حي — يحتاج تحديث
+   يدوي بين فترة وأخرى إذا تغيّر سعر الصرف الحقيقي بشكل ملحوظ.
+   ============================================================ */
+const CURRENCY_RATES = {
+  USD: { rate: 1, symbol: '$' },
+  JOD: { rate: 0.71, symbol: 'د.أ' },
+  SAR: { rate: 3.75, symbol: 'ر.س' },
+  AED: { rate: 3.67, symbol: 'د.إ' },
+  EGP: { rate: 49, symbol: 'ج.م' },
+};
+
+function convertPackagePrice(usdPrice, currencyCode) {
+  const currency = CURRENCY_RATES[currencyCode] || CURRENCY_RATES.USD;
+  const converted = Number(usdPrice) * currency.rate;
+  const amount = currencyCode === 'USD' ? converted : Math.round(converted);
+  return { amount, symbol: currency.symbol };
+}
+
 class PricingCards extends HTMLElement {
   async connectedCallback() {
     this.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); grid-column:1/-1;">جارٍ تحميل الباقات...</p>';
+
+    this._currentCurrency = 'USD';
+    this._chosenName = null;
+    window.addEventListener('currency-changed', (e) => {
+      this._currentCurrency = e.detail.code;
+      if (this._packages) this.renderCards();
+    });
 
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       this.innerHTML = '<p style="text-align:center; color:var(--alert); grid-column:1/-1;">تعذّر تحميل الباقات — لم يتم إعداد الاتصال بقاعدة البيانات بعد.</p>';
@@ -203,15 +230,24 @@ class PricingCards extends HTMLElement {
       return;
     }
 
-    this.innerHTML = data.map(pkg => `
+    this._packages = data;
+    this.renderCards();
+    window.addEventListener('recommend-package', (e) => this.markChosen(e.detail.name));
+  }
+
+  renderCards() {
+    this.innerHTML = this._packages.map(pkg => {
+      const { amount, symbol } = convertPackagePrice(pkg.price, this._currentCurrency);
+      return `
       <div class="pkg-card${pkg.is_recommended ? ' recommended' : ''}" data-pkg-id="${pkg.id}">
         ${pkg.is_recommended ? '<span class="pkg-badge">الأكثر طلباً</span>' : ''}
         <h3>${pkg.name}</h3>
         <p class="pkg-desc">${pkg.description || ''}</p>
-        <div class="pkg-price">$${pkg.price} <span>${pkg.price_unit}</span></div>
+        <div class="pkg-price">${amount} ${symbol} <span>${pkg.price_unit}</span></div>
         <button class="pkg-select-btn" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     this.querySelectorAll('.pkg-select-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -220,10 +256,11 @@ class PricingCards extends HTMLElement {
       });
     });
 
-    window.addEventListener('recommend-package', (e) => this.markChosen(e.detail.name));
+    if (this._chosenName) this.markChosen(this._chosenName);
   }
 
   markChosen(name) {
+    this._chosenName = name;
     this.querySelectorAll('.pkg-select-btn').forEach(b => {
       b.classList.toggle('chosen', b.dataset.pkgName === name);
     });
