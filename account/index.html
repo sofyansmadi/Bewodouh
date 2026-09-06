@@ -253,9 +253,10 @@ function renderAvatar(){
 
 const GOALS_QUESTION_LABELS = {
   goal: 'الهدف من استخدام بوضوح',
-  mood: 'حالتك النفسية عند التسجيل',
-  relationship_status: 'وضعك العلاقي',
+  mood: 'الحالة النفسية عند التسجيل',
+  relationship_status: 'الوضع العلاقي',
   support_preference: 'نوع الدعم المفضّل',
+  improvement_areas: 'الجوانب المطلوب تحسينها',
 };
 
 function renderGoals(){
@@ -264,12 +265,21 @@ function renderGoals(){
   if (!goals || typeof goals !== 'object') { card.style.display = 'none'; return; }
 
   const rows = Object.keys(GOALS_QUESTION_LABELS)
-    .filter(key => goals[key] && goals[key].label)
-    .map(key => `
+    .map(key => {
+      const answer = goals[key];
+      let value = null;
+      if (Array.isArray(answer) && answer.length) {
+        value = answer.map(a => a.label).join('، ');
+      } else if (answer && answer.label) {
+        value = answer.label;
+      }
+      if (!value) return '';
+      return `
       <div class="info-row">
         <span class="label">${GOALS_QUESTION_LABELS[key]}</span>
-        <span class="value">${goals[key].label}</span>
-      </div>`)
+        <span class="value">${value}</span>
+      </div>`;
+    })
     .join('');
 
   if (!rows) { card.style.display = 'none'; return; }

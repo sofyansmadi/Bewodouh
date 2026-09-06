@@ -47,6 +47,16 @@
   .opt .opt-icon svg{ width:18px; height:18px; color:var(--ink); }
   .opt-text{ flex:1; font-weight:600; }
 
+  .options-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .opt-chip{
+    border:1.5px solid var(--fog-dim); border-radius:14px; padding:14px 12px; background:#fff; cursor:pointer;
+    font-size:13.5px; font-weight:600; text-align:center; transition:.15s; font-family:inherit;
+  }
+  .opt-chip:hover{ border-color:var(--clarity); }
+  .opt-chip.selected{ border-color:var(--clarity); background:var(--clarity-soft); }
+  .multi-continue{ margin-top:22px; }
+  .multi-continue:disabled{ opacity:.4; cursor:not-allowed; }
+
   /* Personalizing screen */
   .personalizing-screen{ display:none; text-align:center; }
   .personalizing-screen.active{ display:block; animation:fadeIn .4s ease; }
@@ -154,7 +164,7 @@
 <main>
   <div id="questionSection">
     <div class="q-block active" data-step="0" data-question="goal">
-      <div class="q-eyebrow">سؤال ١ من ٤</div>
+      <div class="q-eyebrow">سؤال ١ من ٥</div>
       <div class="q-text">ما الذي جاء بك إلى بوضوح اليوم؟</div>
       <div class="options">
         <button class="opt" data-answer="relationship" data-label="فهم علاقتي الحالية">
@@ -177,7 +187,7 @@
     </div>
 
     <div class="q-block" data-step="1" data-question="mood">
-      <div class="q-eyebrow">سؤال ٢ من ٤</div>
+      <div class="q-eyebrow">سؤال ٢ من ٥</div>
       <div class="q-text">كيف تصفين حالتك النفسية هذه الأيام؟</div>
       <div class="options">
         <button class="opt" data-answer="good" data-label="بخير إلى حد كبير">
@@ -200,7 +210,7 @@
     </div>
 
     <div class="q-block" data-step="2" data-question="relationship_status">
-      <div class="q-eyebrow">سؤال ٣ من ٤</div>
+      <div class="q-eyebrow">سؤال ٣ من ٥</div>
       <div class="q-text">ما وضعك العلاقي حالياً؟</div>
       <div class="options">
         <button class="opt" data-answer="in_relationship" data-label="في علاقة مستمرة">
@@ -223,7 +233,7 @@
     </div>
 
     <div class="q-block" data-step="3" data-question="support_preference">
-      <div class="q-eyebrow">سؤال ٤ من ٤</div>
+      <div class="q-eyebrow">سؤال ٤ من ٥</div>
       <div class="q-text">أي نوع من الدعم تفضّلين أكثر؟</div>
       <div class="options">
         <button class="opt" data-answer="self_guided" data-label="محتوى تتعلم منه بنفسها">
@@ -238,11 +248,35 @@
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
           <span class="opt-text">جلسة حقيقية مع مختص</span>
         </button>
-        <button class="opt" data-answer="not_sure" data-label="غير متأكدة بعد">
+        <button class="opt" data-answer="not_sure" data-label="غير متأكد بعد">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
-          <span class="opt-text">لست متأكدة بعد</span>
+          <span class="opt-text">لست متأكداً بعد</span>
         </button>
       </div>
+    </div>
+
+    <div class="q-block" data-step="4" data-question="improvement_areas" data-multi="true">
+      <div class="q-eyebrow">سؤال ٥ من ٥</div>
+      <div class="q-text">ما الجوانب التي تحتاج إلى تحسينها؟</div>
+      <p style="font-size:13px; color:var(--text-muted-light); margin-top:-20px; margin-bottom:22px;">يمكن اختيار أكثر من جانب</p>
+      <div class="options-grid">
+        <button class="opt-chip" data-answer="reduce_stress" data-label="تقليل التوتر والقلق">تقليل التوتر والقلق</button>
+        <button class="opt-chip" data-answer="better_sleep" data-label="تحسين جودة النوم">تحسين جودة النوم</button>
+        <button class="opt-chip" data-answer="focus" data-label="زيادة التركيز والإنتاجية">زيادة التركيز والإنتاجية</button>
+        <button class="opt-chip" data-answer="self_confidence" data-label="بناء ثقة أكبر بالنفس">بناء ثقة أكبر بالنفس</button>
+        <button class="opt-chip" data-answer="communication" data-label="تحسين التواصل مع الشريك">تحسين التواصل مع الشريك</button>
+        <button class="opt-chip" data-answer="boundaries" data-label="وضع حدود صحية مع الآخرين">وضع حدود صحية مع الآخرين</button>
+        <button class="opt-chip" data-answer="breakup_recovery" data-label="التعافي بعد انفصال">التعافي بعد انفصال</button>
+        <button class="opt-chip" data-answer="attachment_patterns" data-label="فهم أنماط التعلق الشخصية">فهم أنماط التعلق الشخصية</button>
+        <button class="opt-chip" data-answer="jealousy" data-label="التعامل مع الغيرة أو الشك">التعامل مع الغيرة أو الشك</button>
+        <button class="opt-chip" data-answer="overthinking" data-label="تقليل التفكير الزائد">تقليل التفكير الزائد</button>
+        <button class="opt-chip" data-answer="family_relations" data-label="تحسين العلاقة مع الأهل">تحسين العلاقة مع الأهل</button>
+        <button class="opt-chip" data-answer="emotional_awareness" data-label="زيادة الوعي بالمشاعر">زيادة الوعي بالمشاعر</button>
+        <button class="opt-chip" data-answer="conflict_resolution" data-label="تطوير مهارات حل الخلافات">تطوير مهارات حل الخلافات</button>
+        <button class="opt-chip" data-answer="leaving_toxic" data-label="الخروج من علاقة أو نمط سام">الخروج من علاقة أو نمط سام</button>
+        <button class="opt-chip" data-answer="self_care" data-label="الاهتمام بالرعاية الذاتية">الاهتمام بالرعاية الذاتية</button>
+      </div>
+      <button class="btn-primary multi-continue" id="multiContinueBtn" disabled>متابعة</button>
     </div>
   </div>
 
@@ -312,36 +346,65 @@ function showStep(i){
 }
 showStep(0);
 
+function advanceOrFinish(){
+  if (currentStep < qBlocks.length - 1) {
+    currentStep++;
+    showStep(currentStep);
+    return;
+  }
+
+  // انتهت كل الأسئلة — نخزّن الإجابات محلياً (ستُحفظ فعلياً في حساب
+  // المستخدم عند إنشائه، لأنه لا يوجد حساب مصادَق عليه بعد في هذه المرحلة)
+  localStorage.setItem('bewodoh_onboarding_answers', JSON.stringify(answers));
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('questionSection').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('personalizingScreen').classList.add('active');
+
+  setTimeout(() => {
+    document.getElementById('personalizingScreen').classList.remove('active');
+    const result = RESULTS[answers.goal.value];
+    document.getElementById('resultTitle').textContent = result.title;
+    document.getElementById('resultDesc').textContent = result.desc;
+    document.getElementById('resultScreen').classList.add('active');
+  }, 1800);
+}
+
 qBlocks.forEach(block => {
+  if (block.dataset.multi === 'true') return; // هاي مسؤولية الكود اللي بعده
+
   block.querySelectorAll('.opt').forEach(btn => {
     btn.addEventListener('click', () => {
       const question = block.dataset.question;
       answers[question] = { value: btn.dataset.answer, label: btn.dataset.label };
-
-      if (currentStep < qBlocks.length - 1) {
-        currentStep++;
-        showStep(currentStep);
-        return;
-      }
-
-      // انتهت كل الأسئلة — نخزّن الإجابات محلياً (ستُحفظ فعلياً في حساب
-      // المستخدم عند إنشائه، لأنه لا يوجد حساب مصادَق عليه بعد في هذه المرحلة)
-      localStorage.setItem('bewodoh_onboarding_answers', JSON.stringify(answers));
-
-      document.getElementById('progressFill').style.width = '100%';
-      document.getElementById('questionSection').style.display = 'none';
-      document.getElementById('skipLink').style.display = 'none';
-      document.getElementById('personalizingScreen').classList.add('active');
-
-      setTimeout(() => {
-        document.getElementById('personalizingScreen').classList.remove('active');
-        const result = RESULTS[answers.goal.value];
-        document.getElementById('resultTitle').textContent = result.title;
-        document.getElementById('resultDesc').textContent = result.desc;
-        document.getElementById('resultScreen').classList.add('active');
-      }, 1800);
+      advanceOrFinish();
     });
   });
+});
+
+// ---- سؤال الاختيار المتعدد (الجوانب التي تحتاج إلى تحسينها) ----
+const multiBlock = document.querySelector('.q-block[data-multi="true"]');
+const multiContinueBtn = document.getElementById('multiContinueBtn');
+const selectedAreas = new Map();
+
+multiBlock.querySelectorAll('.opt-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const answer = chip.dataset.answer;
+    if (selectedAreas.has(answer)) {
+      selectedAreas.delete(answer);
+      chip.classList.remove('selected');
+    } else {
+      selectedAreas.set(answer, chip.dataset.label);
+      chip.classList.add('selected');
+    }
+    multiContinueBtn.disabled = selectedAreas.size === 0;
+  });
+});
+
+multiContinueBtn.addEventListener('click', () => {
+  answers[multiBlock.dataset.question] = Array.from(selectedAreas, ([value, label]) => ({ value, label }));
+  advanceOrFinish();
 });
 
 document.getElementById('continueBtn').addEventListener('click', () => {
