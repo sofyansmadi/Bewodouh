@@ -17,5 +17,5 @@ const supabaseClient = (typeof window.supabase !== 'undefined' && SUPABASE_URL !
   : null;
 
 if (!supabaseClient) {
-  console.warn('بوضوح: لسا ما تم إدخال بيانات Supabase الحقيقية في supabase-config.js — البيانات الحية (الباقات، الأدمن) لن تعمل حتى تُستبدل القيم.');
+  console.warn('بوضوح: لم يتم بعد إدخال بيانات Supabase الحقيقية في supabase-config.js — البيانات الحية (الباقات، الأدمن) لن تعمل حتى تُستبدل القيم.');
 }

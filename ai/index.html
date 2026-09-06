@@ -156,7 +156,7 @@
   <div class="status-chip"><span class="status-dot"></span> جاهز للحديث</div>
 </header>
 <script>
-  // نفس تصليح مساحة الآيفون الآمنة فوق — بس جوا التطبيق، مش بالموقع العادي
+  // نفس تصليح مساحة الآيفون الآمنة أعلاه — لكن داخل التطبيق فقط، لا في الموقع العادي
   if (typeof window.Capacitor !== 'undefined') {
     document.querySelector('header').style.paddingTop = 'max(20px, env(safe-area-inset-top))';
   }
@@ -459,7 +459,7 @@ function removeTyping(){
   if (t) t.remove();
 }
 
-// --- الاتصال الحقيقي بـ"بوضوح AI" عبر Edge Function آمنة (المفتاح مش موجود هون إطلاقاً) ---
+// --- الاتصال الحقيقي بـ"بوضوح AI" عبر Edge Function آمنة (المفتاح غير موجود هنا إطلاقاً) ---
 const AI_ENDPOINT = 'https://vhsdhskynuwfloonjfec.supabase.co/functions/v1/ai-chat';
 
 async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
@@ -521,7 +521,7 @@ async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
   }
 
   if (!fullText) {
-    fullText = 'عذراً، ما قدرت أرد هلأ. جرّبي تسألي مرة تانية بعد شوي.';
+    fullText = 'عذراً، لم أستطع الردّ الآن. حاولي مرة أخرى بعد قليل.';
     if (!startedReply) onFirstChunk();
     onUpdate(fullText);
   }
@@ -568,9 +568,9 @@ async function sendMessage(text){
     console.error('AI stream failed:', err);
     removeTyping();
     if (bubble) {
-      bubble.innerHTML = marked.parse('صار خطأ بالاتصال. تأكدي من الإنترنت وجرّبي مرة تانية.');
+      bubble.innerHTML = marked.parse('حدث خطأ في الاتصال. تأكدي من الإنترنت وحاولي مرة أخرى.');
     } else {
-      appendMessage('bot', 'صار خطأ بالاتصال. تأكدي من الإنترنت وجرّبي مرة تانية.');
+      appendMessage('bot', 'حدث خطأ في الاتصال. تأكدي من الإنترنت وحاولي مرة أخرى.');
     }
   }
 

@@ -306,7 +306,7 @@
 
       <div id="tab-bookings" class="admin-tab-panel" style="display:none;">
       <h2 class="section-title">طلبات الحجز</h2>
-      <p class="section-sub">كل الطلبات يلي وصلت من صفحة الحجز، بالأحدث أولاً.</p>
+      <p class="section-sub">كل الطلبات التي وصلت من صفحة الحجز، بالأحدث أولاً.</p>
 
       <table>
         <thead>
@@ -603,7 +603,7 @@ packageForm.addEventListener('submit', async (e) => {
   }
 
   if (error) {
-    formStatus.textContent = 'صار خطأ أثناء الحفظ. حاولي مرة أخرى.';
+    formStatus.textContent = 'حدث خطأ أثناء الحفظ. حاولي مرة أخرى.';
     formStatus.classList.add('active', 'error');
     return;
   }
@@ -813,7 +813,7 @@ articleForm.addEventListener('submit', async (e) => {
   }
 
   if (error) {
-    articleFormStatus.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    articleFormStatus.textContent = 'حدث خطأ أثناء الحفظ: ' + error.message;
     articleFormStatus.classList.add('active', 'error');
     return;
   }
@@ -926,7 +926,7 @@ specialistForm.addEventListener('submit', async (e) => {
   }
 
   if (error) {
-    specialistFormStatus.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    specialistFormStatus.textContent = 'حدث خطأ أثناء الحفظ: ' + error.message;
     specialistFormStatus.classList.add('active', 'error');
     return;
   }
@@ -1035,7 +1035,7 @@ document.getElementById('saveStaticPageBtn').addEventListener('click', async () 
     .eq('slug', currentStaticSlug);
 
   if (error) {
-    statusBox.textContent = 'صار خطأ أثناء الحفظ: ' + error.message;
+    statusBox.textContent = 'حدث خطأ أثناء الحفظ: ' + error.message;
     statusBox.classList.add('active', 'error');
     return;
   }

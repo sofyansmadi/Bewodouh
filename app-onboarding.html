@@ -143,24 +143,24 @@
 <main>
   <div id="questionSection">
     <div class="q-block active">
-      <div class="q-eyebrow">سؤال واحد بس</div>
-      <div class="q-text">شو اللي جابك اليوم لبوضوح؟</div>
+      <div class="q-eyebrow">سؤال واحد فقط</div>
+      <div class="q-text">ما الذي جاء بك إلى بوضوح اليوم؟</div>
       <div class="options">
         <button class="opt" data-answer="relationship">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
-          <span class="opt-text">بدي أفهم علاقتي الحالية أكتر</span>
+          <span class="opt-text">أريد أن أفهم علاقتي الحالية أكثر</span>
         </button>
         <button class="opt" data-answer="breakup">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span>
-          <span class="opt-text">بدي دعم أتعافى بعد انفصال</span>
+          <span class="opt-text">أريد دعماً لأتعافى بعد انفصال</span>
         </button>
         <button class="opt" data-answer="mental-health">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg></span>
-          <span class="opt-text">بدي أهتم بصحتي النفسية عموماً</span>
+          <span class="opt-text">أريد أن أهتم بصحتي النفسية عموماً</span>
         </button>
         <button class="opt" data-answer="exploring">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
-          <span class="opt-text">بس بتفرج حالياً</span>
+          <span class="opt-text">أتصفّح فقط في الوقت الحالي</span>
         </button>
       </div>
     </div>
@@ -170,7 +170,7 @@
     <div class="result-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
     <h2 class="result-title" id="resultTitle"></h2>
     <p class="result-desc" id="resultDesc"></p>
-    <button class="btn-primary" id="continueBtn">كمّل</button>
+    <button class="btn-primary" id="continueBtn">متابعة</button>
   </div>
 </main>
 
@@ -199,20 +199,20 @@ document.fonts.ready.then(() => {
 
 const RESULTS = {
   relationship: {
-    title: "تمام، جهّزنالك محتوى يناسبك",
-    desc: "رح تلاقي بالرئيسية اختبارات ومقالات تساعدك تفهم أنماط علاقتك بوضوح أكتر.",
+    title: "رائع، جهّزنا لك محتوى يناسبك",
+    desc: "ستجدين في الصفحة الرئيسية اختبارات ومقالات تساعدك على فهم أنماط علاقتك بوضوح أكبر.",
   },
   breakup: {
-    title: "خطوة أولى مهمة إنك هون",
-    desc: "رح نوريك محتوى ودعم مخصص لمرحلة التعافي، بخطاك أنت.",
+    title: "خطوة أولى مهمة أنّكِ هنا",
+    desc: "سنُريكِ محتوى ودعماً مخصصاً لمرحلة التعافي، بخطواتك أنتِ.",
   },
   "mental-health": {
-    title: "الاهتمام بنفسك يستاهل",
-    desc: "جهّزنالك اختبارات ومقالات عن القلق، الرعاية الذاتية، واليقظة الذهنية.",
+    title: "الاهتمام بنفسك يستحق ذلك",
+    desc: "جهّزنا لك اختبارات ومقالات عن القلق، الرعاية الذاتية، واليقظة الذهنية.",
   },
   exploring: {
-    title: "خذي وقتك، بوضوح هون",
-    desc: "تصفّحي على راحتك — كل المحتوى متاح إلك تكتشفيه بالوقت المناسب إلك.",
+    title: "خذي وقتك، بوضوح هنا",
+    desc: "تصفّحي على راحتك — كل المحتوى متاح لك لتكتشفيه في الوقت المناسب لك.",
   },
 };
 

@@ -177,7 +177,7 @@
             <label for="otpInput">رمز التأكيد</label>
             <input type="text" id="otpInput" inputmode="numeric" maxlength="8" placeholder="--------" required style="text-align:center; letter-spacing:6px; font-size:18px;">
           </div>
-          <div class="form-error-box" id="otpErrorBox">الرمز غير صحيح أو منتهي الصلاحية. تأكدي منه وجرّبي مرة تانية.</div>
+          <div class="form-error-box" id="otpErrorBox">الرمز غير صحيح أو منتهي الصلاحية. تأكدي منه وحاولي مرة أخرى.</div>
           <button type="submit" class="btn-primary">تأكيد الحساب</button>
         </form>
         <p class="switch-link" style="margin-top:16px;">ما وصلك الرمز؟ <button type="button" id="resendOtpBtn">أعيدي الإرسال</button></p>
@@ -206,10 +206,10 @@
 /* ============================================================
    بوضوح — إنشاء حساب / تسجيل الدخول (نظام حقيقي عبر Supabase Auth).
    ------------------------------------------------------------
-   كل حساب هون حقيقي فعلياً: كلمة السر مشفّرة من طرف Supabase
-   نفسه (احنا ما بنشوفها ولا بنخزّنها أبداً)، والحساب موجود
-   بقاعدة بيانات حقيقية، مش بس بمتصفح المستخدم. أي معلومات
-   إضافية (الاسم، الصورة) بتتخزن بجدول profiles المرتبط بحساب
+   كل حساب هنا حقيقي فعلياً: كلمة السر مشفّرة من طرف Supabase
+   نفسه (نحن لا نراها ولا نخزّنها أبداً)، والحساب موجود في
+   قاعدة بيانات حقيقية، لا في متصفح المستخدم فقط. أي معلومات
+   إضافية (الاسم، الصورة) تُخزَّن في جدول profiles المرتبط بحساب
    المصادقة الحقيقي.
    ============================================================ */
 
@@ -261,7 +261,7 @@ document.getElementById('googleSignInBtn').addEventListener('click', async () =>
   });
   if (error) {
     console.error('Google sign-in error:', error);
-    loginErrorBox.textContent = 'صار خطأ بالدخول عبر جوجل. جرّبي مرة تانية.';
+    loginErrorBox.textContent = 'حدث خطأ أثناء الدخول عبر جوجل. حاولي مرة أخرى.';
     loginErrorBox.classList.add('active');
   }
 });
@@ -328,7 +328,7 @@ signupForm.addEventListener('submit', async function(e){
   const mismatchError = document.getElementById('mismatchError');
 
   if (!isPasswordValid(password)) {
-    document.getElementById('pwStrengthLabel').textContent = 'لازم تحققي كل شروط كلمة السر فوق قبل ما تكملي.';
+    document.getElementById('pwStrengthLabel').textContent = 'يجب أن تحققي كل شروط كلمة السر أعلاه قبل أن تكملي.';
     document.getElementById('pwStrengthLabel').style.color = 'var(--alert)';
     passwordInput.focus();
     return;
@@ -353,8 +353,8 @@ signupForm.addEventListener('submit', async function(e){
     submitBtn.disabled = false;
     console.error('Supabase signUp error:', error);
     loginErrorBox.textContent = error.message.includes('already registered')
-      ? 'هذا البريد الإلكتروني مسجّل عندنا أصلاً. جرّبي تسجّلي دخول بدلاً من إنشاء حساب.'
-      : 'صار خطأ: ' + error.message;
+      ? 'هذا البريد الإلكتروني مسجّل لدينا بالفعل. حاولي تسجيل الدخول بدلاً من إنشاء حساب.'
+      : 'حدث خطأ: ' + error.message;
     loginErrorBox.classList.add('active');
     return;
   }

@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-  /* لو التطبيق (مش الموقع بالمتصفح) وأول مرة يفتح ولسا ما خلّص
-     تدفق الترحيب، حوّليه فوراً لشاشة البداية قبل ما تبين الصفحة
-     الرئيسية العادية. */
+  /* إذا كان التطبيق (لا الموقع عبر المتصفح) يُفتح لأول مرة ولم
+     يُكمل مسار الترحيب بعد، حوّله فوراً إلى شاشة البداية قبل أن
+     تظهر الصفحة الرئيسية العادية. */
   if (typeof window.Capacitor !== 'undefined' && !localStorage.getItem('bewodoh_onboarding_done')) {
     window.location.replace('app-splash.html');
   }
@@ -312,7 +312,7 @@
   <div class="wrap reveal">
     <div class="eyebrow">استشارات فردية</div>
     <h2 class="section-title">استشارتك الأولى مع بوضوح</h2>
-    <p class="section-lede">دعم مباشر من مختصين نفسيين مرخّصين، يناسب وضعك أنت تحديداً — مش وصفة عامة للجميع.</p>
+    <p class="section-lede">دعم مباشر من مختصين نفسيين مرخّصين، يناسب وضعك أنت تحديداً — وليس وصفة عامة تناسب الجميع.</p>
     <div class="feature-card">
       <div class="feature-visual">
         <div class="book"><span>بوضوح<br>—<br>استشارة<br>مع مختص مرخّص</span></div>
@@ -320,7 +320,7 @@
       <div class="feature-body">
         <span class="feature-badge">استشارة فردية أو باقة متكاملة</span>
         <h3>من أول جلسة، بدعم حقيقي</h3>
-        <p>اختر نوع الاستشارة يلي بتحتاجها، جاوب على أسئلة بسيطة توضح وضعك، واحجز مع مختص يناسبك — كل هذا بخطوات قليلة.</p>
+        <p>اختر نوع الاستشارة التي تحتاجها، أجب عن أسئلة بسيطة توضّح وضعك، واحجز مع مختص يناسبك — كل هذا بخطوات قليلة.</p>
         <div class="feature-price">تبدأ من ١٥ د.أ <span>— جلسة واحدة أو باقة</span></div>
         <a href="/sales-page/" class="btn-primary" style="width:fit-content;">احجز استشارتك الآن</a>
       </div>
