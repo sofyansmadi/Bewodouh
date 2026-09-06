@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  /* إذا كان التطبيق (لا الموقع عبر المتصفح) يُفتح لأول مرة ولم
+     يُكمل مسار الترحيب بعد، حوّله فوراً إلى شاشة البداية قبل أن
+     تظهر الصفحة الرئيسية العادية. */
+  if (typeof window.Capacitor !== 'undefined' && !localStorage.getItem('bewodoh_onboarding_done')) {
+    window.location.replace('/app-splash.html');
+  }
+</script>
+<title>Bewoduh — See Your Relationships Clearly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E;
+    --ink-soft:#372C46;
+    --plum:#4A3B5C;
+    --fog:#F3EEEA;
+    --fog-dim:#E6DFDA;
+    --clarity:#C9A15F;
+    --clarity-soft:#E4C98A;
+    --rose:#8B6F7E;
+    --alert:#B5555B;
+    --text-on-dark:#EDE7E3;
+    --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130;
+    --text-muted-light:#6B6072;
+    --radius:14px;
+    --max:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    background:var(--fog);
+    color:var(--text-on-light);
+    line-height:1.9;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  img{max-width:100%;display:block;}
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; letter-spacing:.02em; color:var(--clarity);
+    font-weight:600; margin-bottom:18px;
+  }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity); display:inline-block; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; overflow:hidden;
+    background:radial-gradient(120% 90% at 25% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%);
+    padding:110px 0 130px;
+  }
+  .hero-blob{
+    position:absolute; inset:-25% auto auto -5%; width:560px; height:560px;
+    background:radial-gradient(circle, rgba(201,161,95,.32), transparent 65%);
+    filter:blur(40px); pointer-events:none;
+  }
+  .hero-blob2{
+    position:absolute; inset:auto -10% -20% auto; width:420px; height:420px;
+    background:radial-gradient(circle, rgba(139,111,126,.35), transparent 65%);
+    filter:blur(40px); pointer-events:none;
+  }
+  .hero .wrap{ position:relative; z-index:2; text-align:center; }
+  .hero-eyebrow{ color:var(--clarity-soft); justify-content:center; }
+  .hero-eyebrow::before{ background:var(--clarity-soft); }
+  h1.hero-title{
+    color:var(--fog); margin:0 auto;
+    font-size:clamp(34px, 6vw, 62px);
+    font-weight:900; line-height:1.3; max-width:18ch;
+    filter: blur(7px); opacity:0;
+    animation: sharpen 1.1s cubic-bezier(.2,.7,.3,1) .15s forwards;
+  }
+  h1.hero-title em{ font-style:normal; color:var(--clarity); }
+  @keyframes sharpen{ to{ filter:blur(0); opacity:1; } }
+  .hero-sub{
+    color:var(--text-muted-dark); font-size:18px; max-width:56ch; margin:22px auto 0;
+    opacity:0; animation: rise .8s ease .55s forwards; transform:translateY(10px);
+  }
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+  .hero-actions{ margin-top:38px; display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap;
+    opacity:0; animation: rise .8s ease .8s forwards; }
+  .btn-primary{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:16px;
+    padding:16px 34px; border-radius:100px; display:inline-block;
+    box-shadow:0 12px 30px -10px rgba(201,161,95,.55);
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 16px 34px -8px rgba(201,161,95,.65); }
+  .btn-ghost{
+    border:1px solid rgba(237,231,227,.3); color:var(--fog); font-weight:600; font-size:15px;
+    padding:15px 30px; border-radius:100px; transition:.2s;
+  }
+  .btn-ghost:hover{ border-color:var(--clarity); color:var(--clarity-soft); }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:96px 0; }
+  section.dark{ background:var(--ink); color:var(--text-on-dark); }
+  section.dark .text-muted{ color:var(--text-muted-dark); }
+  .text-muted{ color:var(--text-muted-light); }
+  .center{ text-align:center; }
+  h2.section-title{ font-size:clamp(26px,3.6vw,38px); font-weight:900; max-width:22ch; }
+  .center h2.section-title{ margin:0 auto; }
+  .section-lede{ font-size:17px; max-width:60ch; margin-top:16px; }
+  .center .section-lede{ margin-inline:auto; }
+
+  /* ---------- VALUES ---------- */
+  .values-grid{ margin-top:50px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .value-card{
+    background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius);
+    padding:32px 28px;
+  }
+  .value-num{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; color:var(--clarity); font-size:15px; margin-bottom:16px; display:block; }
+  .value-card h3{ font-size:19px; margin-bottom:10px; }
+  .value-card p{ font-size:15px; color:var(--text-muted-light); }
+
+  /* ---------- PILLARS ---------- */
+  .pillars-grid{ margin-top:50px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .pillar-card{
+    border:1px solid rgba(255,255,255,.1); border-radius:var(--radius);
+    padding:30px; background:var(--ink-soft);
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .pillar-card:hover{ transform:translateY(-4px); border-color:var(--clarity); }
+  .pillar-tag{ display:inline-block; font-size:12px; color:var(--clarity-soft); font-weight:700; margin-bottom:14px; }
+  .pillar-card h3{ font-size:19px; color:var(--fog); margin-bottom:10px; }
+  .pillar-card p{ font-size:14.5px; color:var(--text-muted-dark); }
+
+  /* ---------- FEATURED PRODUCT ---------- */
+  .feature-card{
+    margin-top:50px; display:grid; grid-template-columns:1fr 1fr; gap:0;
+    background:#fff; border:1px solid var(--fog-dim); border-radius:22px; overflow:hidden;
+    box-shadow:0 30px 60px -35px rgba(36,29,46,.3);
+  }
+  .feature-visual{
+    background:radial-gradient(120% 120% at 80% 0%, var(--ink-soft), var(--ink));
+    display:flex; align-items:center; justify-content:center; padding:50px; position:relative; overflow:hidden;
+  }
+  .feature-visual .book{
+    width:180px; height:240px; background:linear-gradient(160deg, var(--plum), var(--ink));
+    border-radius:6px; box-shadow:0 25px 50px -15px rgba(0,0,0,.6);
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:20px;
+    border:1px solid rgba(201,161,95,.35);
+  }
+  .feature-visual .book span{ color:var(--clarity-soft); font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; line-height:1.7; }
+  .feature-body{ padding:46px 40px; display:flex; flex-direction:column; justify-content:center; }
+  .feature-badge{
+    display:inline-block; background:rgba(201,161,95,.15); color:#8a6a2e;
+    font-size:12px; font-weight:700; padding:6px 14px; border-radius:100px; margin-bottom:16px; width:fit-content;
+  }
+  .feature-body h3{ font-size:24px; margin-bottom:12px; }
+  .feature-body p{ font-size:15px; color:var(--text-muted-light); margin-bottom:22px; }
+  .feature-price{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; margin-bottom:20px; }
+  .feature-price span{ font-size:14px; color:var(--text-muted-light); font-weight:500; }
+
+  /* ---------- FOLLOW ---------- */
+  .follow-grid{ margin-top:44px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+  .follow-chip{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid var(--fog-dim); border-radius:100px; padding:12px 24px;
+    background:#fff; color:var(--text-on-light); font-size:14px; font-weight:600; transition:.2s;
+  }
+  .follow-chip:hover{ border-color:var(--clarity); background:var(--fog-dim); }
+  .follow-dot{ width:8px; height:8px; border-radius:50%; background:var(--clarity); }
+
+  /* ---------- NEWSLETTER ---------- */
+  .newsletter{
+    margin-top:0; background:var(--ink); border-radius:24px; padding:56px 40px; text-align:center;
+    background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink));
+  }
+  .newsletter h2{ color:var(--fog); font-size:clamp(22px,3vw,30px); max-width:20ch; margin:0 auto 12px; }
+  .newsletter p{ color:var(--text-muted-dark); font-size:15px; max-width:50ch; margin:0 auto 30px; }
+  .newsletter-form{ display:flex; gap:12px; max-width:420px; margin:0 auto; flex-wrap:wrap; justify-content:center; }
+  .newsletter-form input{
+    flex:1; min-width:220px; padding:15px 20px; border-radius:100px; border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.06); color:var(--fog); font-family:inherit; font-size:14px;
+  }
+  .newsletter-form input::placeholder{ color:var(--text-muted-dark); }
+  .newsletter-form button{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px;
+    padding:15px 28px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s;
+  }
+  .newsletter-form button:hover{ background:var(--clarity-soft); }
+  .newsletter-note{ margin-top:14px; font-size:12px; color:var(--text-muted-dark); }
+
+  /* reveal on scroll */
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (max-width:780px){
+    .values-grid{ grid-template-columns:1fr; }
+    .pillars-grid{ grid-template-columns:1fr; }
+    .feature-card{ grid-template-columns:1fr; }
+    section{ padding:64px 0; }
+    .hero{ padding:80px 0 90px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-blob2"></div>
+  <div class="wrap">
+    <div class="eyebrow hero-eyebrow">Content about relationships and personality patterns</div>
+    <h1 class="hero-title">See Your Relationships <em>Clearly</em></h1>
+    <p class="hero-sub">Bewoduh is a space that helps you understand your relationships and the personality patterns around you, through direct content built on a clear foundation.</p>
+    <div class="hero-actions">
+      <a href="#booking" class="btn-primary">Book Your First Consultation</a>
+      <a href="#pillars" class="btn-ghost">What do we cover?</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap reveal center">
+    <div class="eyebrow" style="justify-content:center;">Why Bewoduh</div>
+    <h2 class="section-title">Built on three simple convictions</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <span class="value-num">1</span>
+        <h3>Awareness Before Judgment</h3>
+        <p>Our goal is to help you understand the pattern, not to attach final labels to you or anyone else.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-num">2</span>
+        <h3>Clarity Without Drama</h3>
+        <p>Direct content built on clear foundations, far from exaggeration and content that's only meant to provoke.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-num">3</span>
+        <h3>Support Without Judgment</h3>
+        <p>Every experience is different, and our role is to give you tools that help you think — not ready-made advice meant for everyone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="pillars">
+  <div class="wrap reveal center">
+    <div class="eyebrow hero-eyebrow" style="justify-content:center;">The Topics We Cover</div>
+    <h2 class="section-title" style="color:var(--fog)">Four Angles, One Complete Journey</h2>
+    <p class="section-lede text-muted">From the first moment you notice something isn't right, to building healthy relationships from the ground up.</p>
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <span class="pillar-tag">Angle One</span>
+        <h3>Recognizing Early Signs</h3>
+        <p>How to notice a toxic pattern before it grows and becomes the new "normal" in your life.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-tag">Angle Two</span>
+        <h3>Understanding Personality Patterns</h3>
+        <p>Narcissistic, manipulative, avoidant, anxious-preoccupied — recognize the behavior before you judge the person.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-tag">Angle Three</span>
+        <h3>Healing After a Breakup</h3>
+        <p>How to deal with the void, self-doubt, and rebuilding your confidence from scratch.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-tag">Angle Four</span>
+        <h3>Building Healthy Relationships</h3>
+        <p>Not just how to avoid what's toxic, but how to build a relationship rooted in safety and respect from the start.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="booking">
+  <div class="wrap reveal">
+    <div class="eyebrow">Individual Consultations</div>
+    <h2 class="section-title">Your First Consultation with Bewoduh</h2>
+    <p class="section-lede">Direct support from licensed mental health professionals, tailored to your specific situation — not a one-size-fits-all prescription.</p>
+    <div class="feature-card">
+      <div class="feature-visual">
+        <div class="book"><span>Bewoduh<br>—<br>Consultation<br>with a Licensed Professional</span></div>
+      </div>
+      <div class="feature-body">
+        <span class="feature-badge">Individual session or full package</span>
+        <h3>Real support, from your very first session</h3>
+        <p>Choose the type of consultation you need, answer a few simple questions about your situation, and book with a specialist who fits you — all in just a few steps.</p>
+        <div class="feature-price">Starting from $35 <span>— single session or package</span></div>
+        <a href="/en/sales-page/" class="btn-primary" style="width:fit-content;">Book Your Consultation Now</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="follow">
+  <div class="wrap reveal center">
+    <div class="eyebrow hero-eyebrow" style="justify-content:center;">Follow Us</div>
+    <h2 class="section-title" style="color:var(--fog); margin:0 auto;">Daily Content on Social Media</h2>
+    <p class="section-lede text-muted">Before subscribing to the newsletter or getting a guide, you can get to know us better through our daily content.</p>
+    <div class="follow-grid">
+      <a href="https://instagram.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> Instagram</a>
+      <a href="https://tiktok.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> TikTok</a>
+      <a href="https://youtube.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> YouTube</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal">
+    <div class="newsletter">
+      <h2>Subscribe to be the first to know when new content is out</h2>
+      <p>No spam, no daily emails — only when there's something worth sharing with you.</p>
+      <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Subscribed ✓';">
+        <input type="email" placeholder="Your email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <p class="newsletter-note">By subscribing, you agree to receive emails from Bewoduh. You can unsubscribe at any time.</p>
+    </div>
+  </div>
+</section>
+
+<site-footer variant="rich"></site-footer>
+<app-bottom-nav active="home"></app-bottom-nav>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:.15 });
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

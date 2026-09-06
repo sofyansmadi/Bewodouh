@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Use — Bewoduh</title>
+<meta name="description" content="The terms governing your use of the Bewoduh website and its services.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:820px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .page-head{ background:var(--ink); padding:64px 0 48px; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(28px,4vw,40px); font-weight:900; }
+  .page-head .updated{ color:var(--text-muted-dark); font-size:13.5px; margin-top:14px; }
+
+  main{ padding:56px 0 90px; }
+  #staticPageContent h1, #staticPageContent h2, #staticPageContent h3{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; color:var(--text-on-light); margin:28px 0 12px; }
+  #staticPageContent h1:first-child, #staticPageContent h2:first-child, #staticPageContent h3:first-child{ margin-top:0; }
+  #staticPageContent h2{ font-size:18px; background:#fff; border:1px solid var(--fog-dim); border-radius:12px; padding:16px 20px; margin-top:16px; }
+  #staticPageContent p{ font-size:15.5px; color:var(--text-muted-light); max-width:70ch; margin:0 0 24px; padding:0 20px; line-height:1.9; }
+  #staticPageContent ul, #staticPageContent ol{ margin:0 0 14px; padding-inline-start:22px; }
+  #staticPageContent li{ font-size:15.5px; color:var(--text-muted-light); margin-bottom:8px; }
+  #staticPageContent strong{ color:var(--text-on-light); }
+  #staticPageContent a{ color:var(--clarity); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">Legal</div>
+    <h1>Terms of Use</h1>
+    <p class="updated">Last updated: August 2026</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <div id="staticPageContent"><p style="text-align:center; color:var(--text-muted-light);">Loading...</p></div>
+
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<app-bottom-nav></app-bottom-nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+(async function loadStaticPageContent(){
+  const container = document.getElementById('staticPageContent');
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+    container.innerHTML = '<p style="text-align:center; color:var(--alert);">Unable to load content right now.</p>';
+    return;
+  }
+  const { data, error } = await supabaseClient
+    .from('static_pages')
+    .select('content_html')
+    .eq('slug', 'terms-en')
+    .maybeSingle();
+
+  if (error || !data) {
+    container.innerHTML = '<p style="text-align:center; color:var(--alert);">Unable to load content right now.</p>';
+    return;
+  }
+  container.innerHTML = data.content_html;
+})();
+</script>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

@@ -44,6 +44,30 @@ function appHref(path){
   return base + frag;
 }
 
+/* ============================================================
+   دعم اللغتين — بما إنه هذا الملف مشترك بين النسخة العربية
+   والإنجليزية (بدل ما يتكرر لكل لغة)، isEnglish() بتكتشف اللغة
+   من <html lang="..">، و localizedHref() بتحوّل أي رابط عربي
+   داخلي (زي "/blog/") لمكافئه الإنجليزي ("/en/blog/") تلقائياً.
+
+   langToggleHref() خاصة بزر التبديل نفسه: من صفحة إنجليزية بترجع
+   لنفس الصفحة بالعربي، ومن صفحة عربية بترجع لمكافئها الإنجليزي —
+   إلا إذا الصفحة الحالية لسا ما تُرجمت (TRANSLATED_ROUTES)، وقتها
+   بترجع للصفحة الرئيسية الإنجليزية بدل رابط مكسور.
+   ============================================================ */
+const isEnglish = () => document.documentElement.lang === 'en';
+const TRANSLATED_ROUTES = ['/', '/quizzes/', '/blog/', '/about/', '/contact/', '/faq/', '/terms/', '/privacy/', '/signup/', '/account/', '/sales-page/', '/team/', '/ai/'];
+
+function localizedHref(arPath){
+  return isEnglish() ? '/en' + arPath : arPath;
+}
+function langToggleHref(){
+  const path = window.location.pathname;
+  if (isEnglish()) return path.replace(/^\/en/, '') || '/';
+  const target = TRANSLATED_ROUTES.includes(path) ? path : '/';
+  return '/en' + target;
+}
+
 const STYLE_FIX = `
   site-nav{ display:block; position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
   site-nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
@@ -53,6 +77,8 @@ const STYLE_FIX = `
   .nav-account-icon{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,.15); color:#B7ACC4; transition:.2s; flex-shrink:0; }
   .nav-account-icon svg{ width:16px; height:16px; }
   .nav-account-icon:hover{ border-color:#C9A15F; color:#F3EEEA; }
+  .nav-lang-toggle{ font-size:12px; font-weight:700; color:#B7ACC4; border:1.5px solid rgba(255,255,255,.15); border-radius:100px; padding:6px 12px; transition:.2s; flex-shrink:0; }
+  .nav-lang-toggle:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
 `;
 const styleTag = document.createElement('style');
@@ -65,7 +91,16 @@ class SiteNav extends HTMLElement {
       this.style.paddingTop = 'max(20px, env(safe-area-inset-top))';
     }
     const active = this.getAttribute('active') || '';
-    const links = [
+    const en = isEnglish();
+    const h = (p) => appHref(localizedHref(p));
+
+    const links = en ? [
+      { href: '/#pillars', label: 'Topics', key: '' },
+      { href: '/blog/', label: 'Blog', key: 'blog' },
+      { href: '/quizzes/', label: 'Quizzes', key: 'quizzes' },
+      { href: '/ai/', label: 'Bewoduh AI', key: 'ai' },
+      { href: '/about/', label: 'About', key: 'about' },
+    ] : [
       { href: '/#pillars', label: 'المواضيع', key: '' },
       { href: '/blog/', label: 'المدونة', key: 'blog' },
       { href: '/quizzes/', label: 'الاختبارات', key: 'quizzes' },
@@ -75,22 +110,25 @@ class SiteNav extends HTMLElement {
 
     const linksHtml = links.map(l => {
       const cls = l.key && l.key === active ? ' class="active"' : '';
-      return `<a href="${appHref(l.href)}"${cls}>${l.label}</a>`;
+      return `<a href="${h(l.href)}"${cls}>${l.label}</a>`;
     }).join('\n      ');
 
     const accountIconHtml = isRunningInApp() ? '' : `
-        <a href="${appHref('/signup/')}" class="nav-account-icon" id="navAccountIcon" aria-label="حسابي">
+        <a href="${h('/signup/')}" class="nav-account-icon" id="navAccountIcon" aria-label="${en ? 'My Account' : 'حسابي'}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </a>`;
 
+    const langToggleHtml = `<a href="${appHref(langToggleHref())}" class="nav-lang-toggle" aria-label="${en ? 'Switch to Arabic' : 'Switch to English'}">${en ? 'AR' : 'EN'}</a>`;
+
     this.innerHTML = `
     <div class="wrap">
-      <a href="${appHref('/')}" class="brand">بوضوح<span>.</span></a>
+      <a href="${h('/')}" class="brand">${en ? 'Bewoduh' : 'بوضوح'}<span>.</span></a>
       <div class="nav-actions">
         <div class="nav-links">
           ${linksHtml}
-          <a href="${appHref('/sales-page/')}" class="nav-cta">احجز استشارة</a>
+          <a href="${h('/sales-page/')}" class="nav-cta">${en ? 'Book a Consultation' : 'احجز استشارة'}</a>
         </div>
+        ${langToggleHtml}
         ${accountIconHtml}
       </div>
     </div>`;
@@ -100,7 +138,7 @@ class SiteNav extends HTMLElement {
       supabaseClient.auth.getSession().then(({ data }) => {
         if (data.session) {
           const icon = document.getElementById('navAccountIcon');
-          if (icon) icon.href = appHref('/account/');
+          if (icon) icon.href = h('/account/');
         }
       });
     }
@@ -110,59 +148,64 @@ class SiteNav extends HTMLElement {
 class SiteFooter extends HTMLElement {
   connectedCallback() {
     const variant = this.getAttribute('variant') || 'simple';
-    const h = appHref; // اختصار محلي
+    const en = isEnglish();
+    const h = (p) => appHref(localizedHref(p));
+    const brandName = en ? 'Bewoduh' : 'بوضوح';
+    const tagline = en
+      ? 'Educational content about relationships and personality patterns, for anyone who wants to see their relationship more clearly.'
+      : 'محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.';
 
     if (variant === 'rich') {
       this.innerHTML = `
     <div class="wrap">
       <div class="footer-grid">
         <div class="footer-brand">
-          <span class="brand kufi" style="font-size:20px;">بوضوح<span style="color:var(--clarity);">.</span></span>
-          <p>محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.</p>
+          <span class="brand kufi" style="font-size:20px;">${brandName}<span style="color:var(--clarity);">.</span></span>
+          <p>${tagline}</p>
         </div>
         <div class="footer-col">
-          <h4>الموقع</h4>
-          <a href="${h('/#pillars')}">المواضيع</a>
-          <a href="${h('/blog/')}">المدونة</a>
-          <a href="${h('/ai/')}">بوضوح AI</a>
-          <a href="${h('/quizzes/')}">الاختبارات</a>
-          <a href="${h('/about/')}">من نحن</a>
-          <a href="${h('/team/')}">فريق بوضوح</a>
-          <a href="${h('/faq/')}">الأسئلة الأكثر شيوعاً</a>
-          <a href="${h('/sales-page/')}">احجز استشارة</a>
+          <h4>${en ? 'Site' : 'الموقع'}</h4>
+          <a href="${h('/#pillars')}">${en ? 'Topics' : 'المواضيع'}</a>
+          <a href="${h('/blog/')}">${en ? 'Blog' : 'المدونة'}</a>
+          <a href="${h('/ai/')}">${en ? 'Bewoduh AI' : 'بوضوح AI'}</a>
+          <a href="${h('/quizzes/')}">${en ? 'Quizzes' : 'الاختبارات'}</a>
+          <a href="${h('/about/')}">${en ? 'About' : 'من نحن'}</a>
+          <a href="${h('/team/')}">${en ? 'Our Team' : 'فريق بوضوح'}</a>
+          <a href="${h('/faq/')}">${en ? 'FAQ' : 'الأسئلة الأكثر شيوعاً'}</a>
+          <a href="${h('/sales-page/')}">${en ? 'Book a Consultation' : 'احجز استشارة'}</a>
         </div>
         <div class="footer-col">
-          <h4>تواصل</h4>
-          <a href="https://instagram.com" target="_blank" rel="noopener">إنستغرام</a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener">تيك توك</a>
-          <a href="${h('/contact/')}">راسلنا</a>
+          <h4>${en ? 'Contact' : 'تواصل'}</h4>
+          <a href="https://instagram.com" target="_blank" rel="noopener">${en ? 'Instagram' : 'إنستغرام'}</a>
+          <a href="https://tiktok.com" target="_blank" rel="noopener">${en ? 'TikTok' : 'تيك توك'}</a>
+          <a href="${h('/contact/')}">${en ? 'Contact Us' : 'راسلنا'}</a>
         </div>
         <div class="footer-col">
-          <h4>قانوني</h4>
-          <a href="${h('/terms/')}">شروط الاستخدام</a>
-          <a href="${h('/privacy/')}">سياسة الخصوصية</a>
+          <h4>${en ? 'Legal' : 'قانوني'}</h4>
+          <a href="${h('/terms/')}">${en ? 'Terms of Use' : 'شروط الاستخدام'}</a>
+          <a href="${h('/privacy/')}">${en ? 'Privacy Policy' : 'سياسة الخصوصية'}</a>
         </div>
       </div>
-      <p class="footer-bottom">©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.</p>
+      <p class="footer-bottom">${en ? '©Bewoduh 2026 — All content is educational and is not a substitute for professional psychological consultation or treatment.' : '©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.'}</p>
     </div>`;
       return;
     }
 
     this.innerHTML = `
     <div class="wrap">
-      <span class="brand kufi">بوضوح<span style="color:var(--clarity);">.</span></span>
-      محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.
+      <span class="brand kufi">${brandName}<span style="color:var(--clarity);">.</span></span>
+      ${tagline}
       <div style="margin-top:18px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; font-size:12.5px;">
-        <a href="${h('/')}" style="color:var(--text-muted-dark);">الرئيسية</a>
-        <a href="${h('/blog/')}" style="color:var(--text-muted-dark);">المدونة</a>
-        <a href="${h('/quizzes/')}" style="color:var(--text-muted-dark);">الاختبارات</a>
-        <a href="${h('/ai/')}" style="color:var(--text-muted-dark);">بوضوح AI</a>
-        <a href="${h('/about/')}" style="color:var(--text-muted-dark);">من نحن</a>
-        <a href="${h('/team/')}" style="color:var(--text-muted-dark);">فريق بوضوح</a>
-        <a href="${h('/faq/')}" style="color:var(--text-muted-dark);">الأسئلة الأكثر شيوعاً</a>
-        <a href="${h('/sales-page/')}" style="color:var(--text-muted-dark);">احجز استشارة</a>
-        <a href="${h('/terms/')}" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
-        <a href="${h('/privacy/')}" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
+        <a href="${h('/')}" style="color:var(--text-muted-dark);">${en ? 'Home' : 'الرئيسية'}</a>
+        <a href="${h('/blog/')}" style="color:var(--text-muted-dark);">${en ? 'Blog' : 'المدونة'}</a>
+        <a href="${h('/quizzes/')}" style="color:var(--text-muted-dark);">${en ? 'Quizzes' : 'الاختبارات'}</a>
+        <a href="${h('/ai/')}" style="color:var(--text-muted-dark);">${en ? 'Bewoduh AI' : 'بوضوح AI'}</a>
+        <a href="${h('/about/')}" style="color:var(--text-muted-dark);">${en ? 'About' : 'من نحن'}</a>
+        <a href="${h('/team/')}" style="color:var(--text-muted-dark);">${en ? 'Our Team' : 'فريق بوضوح'}</a>
+        <a href="${h('/faq/')}" style="color:var(--text-muted-dark);">${en ? 'FAQ' : 'الأسئلة الأكثر شيوعاً'}</a>
+        <a href="${h('/sales-page/')}" style="color:var(--text-muted-dark);">${en ? 'Book a Consultation' : 'احجز استشارة'}</a>
+        <a href="${h('/terms/')}" style="color:var(--text-muted-dark);">${en ? 'Terms of Use' : 'شروط الاستخدام'}</a>
+        <a href="${h('/privacy/')}" style="color:var(--text-muted-dark);">${en ? 'Privacy Policy' : 'سياسة الخصوصية'}</a>
       </div>
     </div>`;
   }
@@ -354,21 +397,22 @@ class AppBottomNav extends HTMLElement {
     }
 
     const active = this.getAttribute('active') || '';
+    const en = isEnglish();
     const items = [
-      { key: 'home', href: '/', label: 'الرئيسية',
+      { key: 'home', href: '/', label: en ? 'Home' : 'الرئيسية',
         icon: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>' },
-      { key: 'blog', href: '/blog/', label: 'المدونة',
+      { key: 'blog', href: '/blog/', label: en ? 'Blog' : 'المدونة',
         icon: '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/>' },
-      { key: 'quizzes', href: '/quizzes/', label: 'الاختبارات',
+      { key: 'quizzes', href: '/quizzes/', label: en ? 'Quizzes' : 'الاختبارات',
         icon: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>' },
-      { key: 'ai', href: '/ai/', label: 'بوضوح AI',
+      { key: 'ai', href: '/ai/', label: en ? 'Bewoduh AI' : 'بوضوح AI',
         icon: '<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1.2 2.4 2 4 2s3-.8 4-2"/>' },
-      { key: 'account', href: '/account/', label: 'حسابي',
+      { key: 'account', href: '/account/', label: en ? 'Account' : 'حسابي',
         icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
     ];
 
     const itemsHtml = items.map(item => `
-      <a href="${appHref(item.href)}" class="app-nav-item${item.key === active ? ' active' : ''}">
+      <a href="${appHref(localizedHref(item.href))}" class="app-nav-item${item.key === active ? ' active' : ''}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg>
         <span>${item.label}</span>
       </a>`).join('');
