@@ -47,6 +47,17 @@
   .opt .opt-icon svg{ width:18px; height:18px; color:var(--ink); }
   .opt-text{ flex:1; font-weight:600; }
 
+  /* Personalizing screen */
+  .personalizing-screen{ display:none; text-align:center; }
+  .personalizing-screen.active{ display:block; animation:fadeIn .4s ease; }
+  .personalizing-spinner{
+    width:52px; height:52px; border-radius:50%; margin:0 auto 24px;
+    border:3px solid var(--fog-dim); border-top-color:var(--clarity);
+    animation:spin .9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .personalizing-text{ font-family:'Noto Kufi Arabic',sans-serif; font-size:17px; font-weight:700; }
+
   /* Result screen */
   .result-screen{ display:none; text-align:center; }
   .result-screen.active{ display:block; animation:fadeIn .4s ease; }
@@ -142,28 +153,102 @@
 
 <main>
   <div id="questionSection">
-    <div class="q-block active">
-      <div class="q-eyebrow">سؤال واحد فقط</div>
+    <div class="q-block active" data-step="0" data-question="goal">
+      <div class="q-eyebrow">سؤال ١ من ٤</div>
       <div class="q-text">ما الذي جاء بك إلى بوضوح اليوم؟</div>
       <div class="options">
-        <button class="opt" data-answer="relationship">
+        <button class="opt" data-answer="relationship" data-label="فهم علاقتي الحالية">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
           <span class="opt-text">أريد أن أفهم علاقتي الحالية أكثر</span>
         </button>
-        <button class="opt" data-answer="breakup">
+        <button class="opt" data-answer="breakup" data-label="التعافي بعد انفصال">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span>
           <span class="opt-text">أريد دعماً لأتعافى بعد انفصال</span>
         </button>
-        <button class="opt" data-answer="mental-health">
+        <button class="opt" data-answer="mental-health" data-label="الاهتمام بالصحة النفسية">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg></span>
           <span class="opt-text">أريد أن أهتم بصحتي النفسية عموماً</span>
         </button>
-        <button class="opt" data-answer="exploring">
+        <button class="opt" data-answer="exploring" data-label="استكشاف الموقع">
           <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
           <span class="opt-text">أتصفّح فقط في الوقت الحالي</span>
         </button>
       </div>
     </div>
+
+    <div class="q-block" data-step="1" data-question="mood">
+      <div class="q-eyebrow">سؤال ٢ من ٤</div>
+      <div class="q-text">كيف تصفين حالتك النفسية هذه الأيام؟</div>
+      <div class="options">
+        <button class="opt" data-answer="good" data-label="بخير إلى حد كبير">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></span>
+          <span class="opt-text">بخير إلى حد كبير</span>
+        </button>
+        <button class="opt" data-answer="stressed" data-label="متوترة أو قلقة أحياناً">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 15h8M9 9h.01M15 9h.01"/></svg></span>
+          <span class="opt-text">متوترة أو قلقة أحياناً</span>
+        </button>
+        <button class="opt" data-answer="difficult" data-label="أمرّ بوقت صعب فعلاً">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 16s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01"/></svg></span>
+          <span class="opt-text">أمرّ بوقت صعب فعلاً</span>
+        </button>
+        <button class="opt" data-answer="prefer_not_say" data-label="تفضّل عدم الإجابة">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M9.5 9.5h5v5"/></svg></span>
+          <span class="opt-text">أفضّل عدم الإجابة الآن</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="q-block" data-step="2" data-question="relationship_status">
+      <div class="q-eyebrow">سؤال ٣ من ٤</div>
+      <div class="q-text">ما وضعك العلاقي حالياً؟</div>
+      <div class="options">
+        <button class="opt" data-answer="in_relationship" data-label="في علاقة مستمرة">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
+          <span class="opt-text">في علاقة مستمرة</span>
+        </button>
+        <button class="opt" data-answer="single" data-label="عزباء وأستكشف">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+          <span class="opt-text">عزباء، وأستكشف حالياً</span>
+        </button>
+        <button class="opt" data-answer="recent_breakup" data-label="خرجت من علاقة مؤخراً">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span>
+          <span class="opt-text">خرجت من علاقة مؤخراً</span>
+        </button>
+        <button class="opt" data-answer="prefer_not_say" data-label="تفضّل عدم الإجابة">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M9.5 9.5h5v5"/></svg></span>
+          <span class="opt-text">أفضّل عدم الإجابة الآن</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="q-block" data-step="3" data-question="support_preference">
+      <div class="q-eyebrow">سؤال ٤ من ٤</div>
+      <div class="q-text">أي نوع من الدعم تفضّلين أكثر؟</div>
+      <div class="options">
+        <button class="opt" data-answer="self_guided" data-label="محتوى تتعلم منه بنفسها">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></span>
+          <span class="opt-text">محتوى أقرأه وأتعلم منه بنفسي</span>
+        </button>
+        <button class="opt" data-answer="ai_chat" data-label="محادثة مع بوضوح AI">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1.2 2.4 2 4 2s3-.8 4-2"/></svg></span>
+          <span class="opt-text">محادثة مع بوضوح AI</span>
+        </button>
+        <button class="opt" data-answer="specialist" data-label="جلسة مع مختص">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+          <span class="opt-text">جلسة حقيقية مع مختص</span>
+        </button>
+        <button class="opt" data-answer="not_sure" data-label="غير متأكدة بعد">
+          <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+          <span class="opt-text">لست متأكدة بعد</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="personalizing-screen" id="personalizingScreen">
+    <div class="personalizing-spinner"></div>
+    <div class="personalizing-text">جارٍ تخصيص تجربتك في بوضوح...</div>
   </div>
 
   <div class="result-screen" id="resultScreen">
@@ -216,21 +301,46 @@ const RESULTS = {
   },
 };
 
-document.getElementById('progressFill').style.width = '50%';
+const qBlocks = Array.from(document.querySelectorAll('.q-block'));
+const answers = {};
+let currentStep = 0;
 
-document.querySelectorAll('.opt').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const answer = btn.dataset.answer;
-    localStorage.setItem('bewodoh_onboarding_interest', answer);
+function showStep(i){
+  qBlocks.forEach(b => b.classList.remove('active'));
+  qBlocks[i].classList.add('active');
+  document.getElementById('progressFill').style.width = Math.round(((i + 1) / qBlocks.length) * 90) + '%';
+}
+showStep(0);
 
-    document.getElementById('progressFill').style.width = '100%';
-    document.getElementById('questionSection').style.display = 'none';
-    document.getElementById('skipLink').style.display = 'none';
+qBlocks.forEach(block => {
+  block.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const question = block.dataset.question;
+      answers[question] = { value: btn.dataset.answer, label: btn.dataset.label };
 
-    const result = RESULTS[answer];
-    document.getElementById('resultTitle').textContent = result.title;
-    document.getElementById('resultDesc').textContent = result.desc;
-    document.getElementById('resultScreen').classList.add('active');
+      if (currentStep < qBlocks.length - 1) {
+        currentStep++;
+        showStep(currentStep);
+        return;
+      }
+
+      // انتهت كل الأسئلة — نخزّن الإجابات محلياً (ستُحفظ فعلياً في حساب
+      // المستخدم عند إنشائه، لأنه لا يوجد حساب مصادَق عليه بعد في هذه المرحلة)
+      localStorage.setItem('bewodoh_onboarding_answers', JSON.stringify(answers));
+
+      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('questionSection').style.display = 'none';
+      document.getElementById('skipLink').style.display = 'none';
+      document.getElementById('personalizingScreen').classList.add('active');
+
+      setTimeout(() => {
+        document.getElementById('personalizingScreen').classList.remove('active');
+        const result = RESULTS[answers.goal.value];
+        document.getElementById('resultTitle').textContent = result.title;
+        document.getElementById('resultDesc').textContent = result.desc;
+        document.getElementById('resultScreen').classList.add('active');
+      }, 1800);
+    });
   });
 });
 

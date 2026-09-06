@@ -161,6 +161,13 @@
       </form>
     </div>
 
+    <div class="card" id="goalsCard" style="display:none;">
+      <div class="card-head">
+        <h3>أهدافك مع بوضوح</h3>
+      </div>
+      <div id="goalsList"></div>
+    </div>
+
     <div class="quick-links">
       <a href="/quizzes/">
         <span>تصفّح الاختبارات</span>
@@ -216,8 +223,17 @@ async function initAccount(){
 
   if (error || !profile) {
     // ملف شخصي مفقود لأي سبب — ننشئه بأقل بيانات ممكنة من حساب المصادقة
+    // (هذا هو مسار إنشاء الملف الشخصي لتسجيل الدخول عبر جوجل، حيث لا يمر
+    // المستخدم بنموذج التسجيل العادي) مع إرفاق إجابات onboarding إن وُجدت
     const email = sessionData.session.user.email;
-    await supabaseClient.from('profiles').insert({ id: currentUserId, email, full_name: email.split('@')[0] });
+    const onboardingAnswers = JSON.parse(localStorage.getItem('bewodoh_onboarding_answers') || 'null');
+    await supabaseClient.from('profiles').insert({
+      id: currentUserId,
+      email,
+      full_name: email.split('@')[0],
+      ...(onboardingAnswers ? { onboarding_goals: onboardingAnswers } : {}),
+    });
+    localStorage.removeItem('bewodoh_onboarding_answers');
     userData = { full_name: email.split('@')[0], email, photo_url: null, created_at: new Date().toISOString() };
   } else {
     userData = profile;
@@ -235,6 +251,32 @@ function renderAvatar(){
   }
 }
 
+const GOALS_QUESTION_LABELS = {
+  goal: 'الهدف من استخدام بوضوح',
+  mood: 'حالتك النفسية عند التسجيل',
+  relationship_status: 'وضعك العلاقي',
+  support_preference: 'نوع الدعم المفضّل',
+};
+
+function renderGoals(){
+  const goals = userData.onboarding_goals;
+  const card = document.getElementById('goalsCard');
+  if (!goals || typeof goals !== 'object') { card.style.display = 'none'; return; }
+
+  const rows = Object.keys(GOALS_QUESTION_LABELS)
+    .filter(key => goals[key] && goals[key].label)
+    .map(key => `
+      <div class="info-row">
+        <span class="label">${GOALS_QUESTION_LABELS[key]}</span>
+        <span class="value">${goals[key].label}</span>
+      </div>`)
+    .join('');
+
+  if (!rows) { card.style.display = 'none'; return; }
+  document.getElementById('goalsList').innerHTML = rows;
+  card.style.display = 'block';
+}
+
 function renderInfo(){
   document.getElementById('greetName').textContent = 'أهلاً، ' + userData.full_name;
   document.getElementById('greetEmail').textContent = userData.email;
@@ -243,6 +285,7 @@ function renderInfo(){
   const d = new Date(userData.created_at);
   document.getElementById('infoDate').textContent = isNaN(d) ? '—' : d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   renderAvatar();
+  renderGoals();
 }
 
 initAccount();

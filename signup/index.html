@@ -359,13 +359,18 @@ signupForm.addEventListener('submit', async function(e){
     return;
   }
 
-  // ننشئ صف بجدول profiles مرتبط بحساب المصادقة الحقيقي
+  // ننشئ صف بجدول profiles مرتبط بحساب المصادقة الحقيقي، ونرفق معه
+  // إجابات onboarding التطبيق (إن وُجدت) — هي محفوظة محلياً من قبل
+  // إنشاء الحساب، لأنه ما كان في مستخدم مصادَق عليه وقتها
   if (data.user) {
+    const onboardingAnswers = JSON.parse(localStorage.getItem('bewodoh_onboarding_answers') || 'null');
     await supabaseClient.from('profiles').insert({
       id: data.user.id,
       full_name: fullName,
       email: email,
+      ...(onboardingAnswers ? { onboarding_goals: onboardingAnswers } : {}),
     });
+    localStorage.removeItem('bewodoh_onboarding_answers');
   }
 
   // نطلب رمز التأكيد بدل التحويل المباشر
