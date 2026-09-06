@@ -171,16 +171,16 @@
       <!-- ---- OTP VERIFICATION BOX ---- -->
       <div class="otp-box" id="otpBox" style="display:none;">
         <h2 id="otpTitle" style="font-size:19px; margin-bottom:8px;">تأكيد بريدك الإلكتروني</h2>
-        <p style="font-size:13.5px; color:var(--text-muted-light); margin-bottom:20px;">بعتنالك رمز مكوّن من ٨ أرقام على <strong id="otpEmailDisplay"></strong>. اكتبيه تحت لإكمال إنشاء حسابك.</p>
+        <p style="font-size:13.5px; color:var(--text-muted-light); margin-bottom:20px;">أرسلنا لك رمزاً مكوّناً من ٨ أرقام على <strong id="otpEmailDisplay"></strong>. اكتبه أدناه لإكمال إنشاء حسابك.</p>
         <form id="otpForm">
           <div class="field">
             <label for="otpInput">رمز التأكيد</label>
             <input type="text" id="otpInput" inputmode="numeric" maxlength="8" placeholder="--------" required style="text-align:center; letter-spacing:6px; font-size:18px;">
           </div>
-          <div class="form-error-box" id="otpErrorBox">الرمز غير صحيح أو منتهي الصلاحية. تأكدي منه وحاولي مرة أخرى.</div>
+          <div class="form-error-box" id="otpErrorBox">الرمز غير صحيح أو منتهي الصلاحية. تأكد منه وحاول مرة أخرى.</div>
           <button type="submit" class="btn-primary">تأكيد الحساب</button>
         </form>
-        <p class="switch-link" style="margin-top:16px;">ما وصلك الرمز؟ <button type="button" id="resendOtpBtn">أعيدي الإرسال</button></p>
+        <p class="switch-link" style="margin-top:16px;">ما وصلك الرمز؟ <button type="button" id="resendOtpBtn">أعد الإرسال</button></p>
       </div>
 
       <div class="success-box" id="successBox">
@@ -261,7 +261,7 @@ document.getElementById('googleSignInBtn').addEventListener('click', async () =>
   });
   if (error) {
     console.error('Google sign-in error:', error);
-    loginErrorBox.textContent = 'حدث خطأ أثناء الدخول عبر جوجل. حاولي مرة أخرى.';
+    loginErrorBox.textContent = 'حدث خطأ أثناء الدخول عبر جوجل. حاول مرة أخرى.';
     loginErrorBox.classList.add('active');
   }
 });
@@ -328,7 +328,7 @@ signupForm.addEventListener('submit', async function(e){
   const mismatchError = document.getElementById('mismatchError');
 
   if (!isPasswordValid(password)) {
-    document.getElementById('pwStrengthLabel').textContent = 'يجب أن تحققي كل شروط كلمة السر أعلاه قبل أن تكملي.';
+    document.getElementById('pwStrengthLabel').textContent = 'يجب أن تتحقق من كل شروط كلمة السر أعلاه قبل أن تكمل.';
     document.getElementById('pwStrengthLabel').style.color = 'var(--alert)';
     passwordInput.focus();
     return;
@@ -353,7 +353,7 @@ signupForm.addEventListener('submit', async function(e){
     submitBtn.disabled = false;
     console.error('Supabase signUp error:', error);
     loginErrorBox.textContent = error.message.includes('already registered')
-      ? 'هذا البريد الإلكتروني مسجّل لدينا بالفعل. حاولي تسجيل الدخول بدلاً من إنشاء حساب.'
+      ? 'هذا البريد الإلكتروني مسجّل لدينا بالفعل. حاول تسجيل الدخول بدلاً من إنشاء حساب.'
       : 'حدث خطأ: ' + error.message;
     loginErrorBox.classList.add('active');
     return;
@@ -417,8 +417,8 @@ document.getElementById('resendOtpBtn').addEventListener('click', async function
   this.disabled = true;
   this.textContent = 'جارٍ الإرسال...';
   await supabaseClient.auth.resend({ type: 'signup', email: pendingSignupEmail });
-  this.textContent = 'تم الإرسال. أعيدي الإرسال';
-  setTimeout(() => { this.disabled = false; this.textContent = 'أعيدي الإرسال'; }, 3000);
+  this.textContent = 'تم الإرسال. أعد الإرسال';
+  setTimeout(() => { this.disabled = false; this.textContent = 'أعد الإرسال'; }, 3000);
 });
 
 // ---- Login submit ----

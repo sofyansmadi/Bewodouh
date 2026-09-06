@@ -83,9 +83,9 @@
         <p class="profile-bio" id="profileBio"></p>
 
         <div class="book-box">
-          <h3>حابة تحجزي جلسة مع <span id="bookName"></span>؟</h3>
-          <p>اختاري باقتك وموعدك، ونحرص على أن تكون الجلسة مع نفس الأخصائي الذي اخترتِه.</p>
-          <a href="#" class="btn-primary" id="bookLink">احجزي معها الآن</a>
+          <h3>هل تريد حجز جلسة مع <span id="bookName"></span>؟</h3>
+          <p>اختر باقتك وموعدك، ونحرص على أن تكون الجلسة مع نفس الأخصائي الذي اخترته.</p>
+          <a href="#" class="btn-primary" id="bookLink">احجز الآن</a>
         </div>
       </div>
     </div>
@@ -103,7 +103,7 @@ async function loadSpecialist(){
   const loadingState = document.getElementById('loadingState');
 
   if (!slug) {
-    loadingState.textContent = 'ما في أخصائي محدد. ارجعي لصفحة الفريق واختاري وحد منهم.';
+    loadingState.textContent = 'لا يوجد أخصائي محدد. ارجع إلى صفحة الفريق واختر واحداً منهم.';
     return;
   }
 

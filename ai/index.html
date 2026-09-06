@@ -521,7 +521,7 @@ async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
   }
 
   if (!fullText) {
-    fullText = 'عذراً، لم أستطع الردّ الآن. حاولي مرة أخرى بعد قليل.';
+    fullText = 'عذراً، لم أستطع الردّ الآن. حاول مرة أخرى بعد قليل.';
     if (!startedReply) onFirstChunk();
     onUpdate(fullText);
   }
@@ -568,9 +568,9 @@ async function sendMessage(text){
     console.error('AI stream failed:', err);
     removeTyping();
     if (bubble) {
-      bubble.innerHTML = marked.parse('حدث خطأ في الاتصال. تأكدي من الإنترنت وحاولي مرة أخرى.');
+      bubble.innerHTML = marked.parse('حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مرة أخرى.');
     } else {
-      appendMessage('bot', 'حدث خطأ في الاتصال. تأكدي من الإنترنت وحاولي مرة أخرى.');
+      appendMessage('bot', 'حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مرة أخرى.');
     }
   }
 

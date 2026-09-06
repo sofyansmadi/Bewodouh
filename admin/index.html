@@ -412,7 +412,7 @@
 
       <div id="tab-static-pages" class="admin-tab-panel" style="display:none;">
       <h2 class="section-title">الصفحات الثابتة</h2>
-      <p class="section-sub">عدّلي محتوى صفحات الموقع الثابتة. أي تعديل يظهر مباشرة بالموقع بعد الحفظ.</p>
+      <p class="section-sub">عدّل محتوى صفحات الموقع الثابتة. أي تعديل يظهر مباشرة بالموقع بعد الحفظ.</p>
 
       <div class="admin-tabs" style="margin-bottom:20px;">
         <button class="static-page-tab active" data-static-page="privacy">سياسة الخصوصية</button>
@@ -453,7 +453,7 @@
 
 const quill = new Quill('#artBodyEditor', {
   theme: 'snow',
-  placeholder: 'اكتبي محتوى المقال هنا... اختاري نوع العنوان أو التنسيق من القائمة فوق.',
+  placeholder: 'اكتب محتوى المقال هنا... اختر نوع العنوان أو التنسيق من القائمة فوق.',
   modules: {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -603,7 +603,7 @@ packageForm.addEventListener('submit', async (e) => {
   }
 
   if (error) {
-    formStatus.textContent = 'حدث خطأ أثناء الحفظ. حاولي مرة أخرى.';
+    formStatus.textContent = 'حدث خطأ أثناء الحفظ. حاول مرة أخرى.';
     formStatus.classList.add('active', 'error');
     return;
   }
@@ -615,7 +615,7 @@ packageForm.addEventListener('submit', async (e) => {
 });
 
 async function deletePackage(id){
-  if (!confirm('متأكدة تريدين حذف هذه الباقة؟')) return;
+  if (!confirm('هل أنت متأكد من حذف هذه الباقة؟')) return;
   const { error } = await supabaseClient.from('packages').delete().eq('id', id);
   if (!error) loadPackages();
 }
@@ -687,7 +687,7 @@ async function loadBookings(){
   });
   tbody.querySelectorAll('[data-delete-booking-id]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('متأكدة تريدين حذف هذا الحجز؟')) return;
+      if (!confirm('هل أنت متأكد من حذف هذا الحجز؟')) return;
       await supabaseClient.from('bookings').delete().eq('id', btn.dataset.deleteBookingId);
       loadBookings();
     });
@@ -825,7 +825,7 @@ articleForm.addEventListener('submit', async (e) => {
 });
 
 async function deleteArticle(id){
-  if (!confirm('متأكدة تريدين حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
+  if (!confirm('هل أنت متأكد من حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
   const { error } = await supabaseClient.from('articles').delete().eq('id', id);
   if (!error) loadArticles();
 }
@@ -938,7 +938,7 @@ specialistForm.addEventListener('submit', async (e) => {
 });
 
 async function deleteSpecialist(id){
-  if (!confirm('متأكدة تريدين حذف هذا الأخصائي؟')) return;
+  if (!confirm('هل أنت متأكد من حذف هذا الأخصائي؟')) return;
   const { error } = await supabaseClient.from('specialists').delete().eq('id', id);
   if (!error) loadTeam();
 }
@@ -959,7 +959,7 @@ async function loadUsers(){
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="4">ما في مستخدمين مسجّلين بعد.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4">لا يوجد مستخدمون مسجّلون بعد.</td></tr>';
     return;
   }
 
@@ -982,7 +982,7 @@ async function loadUsers(){
 // ---------- Static pages editor ----------
 const staticPageQuill = new Quill('#staticPageEditor', {
   theme: 'snow',
-  placeholder: 'اكتبي محتوى الصفحة هنا...',
+  placeholder: 'اكتب محتوى الصفحة هنا...',
   modules: {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
