@@ -37,7 +37,7 @@ jobs:
         run: |
           git config user.name "بوضوح Bot"
           git config user.email "bot@bewoduh.com"
-          git add article-*/
+          git add -A -- 'article-*' scripts/.generated-articles.json
           git diff --staged --quiet || git commit -m "تحديث تلقائي للمقالات من قاعدة البيانات"
           git pull --rebase origin main
           git push
