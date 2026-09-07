@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Bewoduh | Articles on Relationships and Personality Patterns</title>
+<meta name="description" content="Articles on toxic relationships, personality patterns, healing after a breakup, and building healthy relationships — from the Bewoduh team.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity); font-weight:600; margin-bottom:14px; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity); display:inline-block; }
+
+  .page-head{
+    background:radial-gradient(120% 90% at 25% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%);
+    padding:80px 0 56px; text-align:center;
+  }
+  .page-head h1{ color:var(--fog); font-size:clamp(30px,4.6vw,46px); font-weight:900; margin:0 auto; max-width:20ch; }
+  .page-head p{ color:var(--text-muted-dark); font-size:16px; max-width:52ch; margin:16px auto 0; }
+
+  /* ---------- FILTER ---------- */
+  .filter-bar{ padding:36px 0 8px; }
+  .filter-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .filter-btn{
+    border:1px solid var(--fog-dim); background:#fff; color:var(--text-muted-light);
+    font-family:inherit; font-size:14px; font-weight:600; padding:10px 20px; border-radius:100px;
+    cursor:pointer; transition:.2s;
+  }
+  .filter-btn:hover{ border-color:var(--clarity); color:var(--text-on-light); }
+  .filter-btn.active{ background:var(--ink); border-color:var(--ink); color:var(--fog); }
+
+  /* ---------- GRID ---------- */
+  .blog-grid{ padding:44px 0 100px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .article-card{
+    background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius); overflow:hidden;
+    display:flex; flex-direction:column; transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .article-card:hover{ transform:translateY(-4px); box-shadow:0 20px 40px -20px rgba(36,29,46,.25); }
+  .card-visual{
+    height:140px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg, var(--ink-soft), var(--ink));
+  }
+  .card-visual img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card-body{ padding:22px 22px 24px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .card-tag{ display:inline-block; font-size:11.5px; font-weight:700; color:#8a6a2e; background:rgba(201,161,95,.15); padding:4px 12px; border-radius:100px; width:fit-content; }
+  .card-body h3{ font-size:17.5px; line-height:1.6; }
+  .card-body p{ font-size:14px; color:var(--text-muted-light); flex:1; }
+  .card-meta{ font-size:12.5px; color:var(--rose); margin-top:6px; }
+
+  .empty-state{ text-align:center; padding:60px 0; color:var(--text-muted-light); display:none; }
+
+  @media (max-width:900px){ .blog-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .blog-grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<site-nav active="blog"></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow" style="justify-content:center; color:var(--clarity-soft);">Blog</div>
+    <h1>Articles That Help You See Your Relationships Clearly</h1>
+    <p>Content on toxic relationships, personality patterns, healing, building healthy relationships, and mental health in general.</p>
+  </div>
+</header>
+
+<section class="filter-bar">
+  <div class="wrap">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="early">Early Signs</button>
+      <button class="filter-btn" data-filter="patterns">Understanding Patterns</button>
+      <button class="filter-btn" data-filter="healing">Healing</button>
+      <button class="filter-btn" data-filter="healthy">Healthy Relationships</button>
+      <button class="filter-btn" data-filter="mental-health">Mental Health</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="blog-grid" id="blogGrid">
+
+      <a href="/article-early-signs/" class="article-card" data-cat="early">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/7278919/pexels-photo-7278919.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Illustrative image of early tension in a relationship" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Early Signs</span>
+          <h3>Seven Signs You Don't Notice in a Relationship Until It's Too Late</h3>
+          <p>Most toxic relationships don't start out toxic. They start with small signs we ignore because they come disguised as love and attention.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-narcissist-vs-confident/" class="article-card" data-cat="patterns">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/29852896/pexels-photo-29852896.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Illustrative image of self-reflection and confidence" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Understanding Patterns</span>
+          <h3>The Difference Between a Confident Person and a Narcissistic One</h3>
+          <p>We often confuse healthy confidence with narcissism, which is exactly what makes the narcissistic pattern hard to spot at first.</p>
+          <span class="card-meta">7 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-gaslighting/" class="article-card" data-cat="patterns">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/3958400/pexels-photo-3958400.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Illustrative image of self-doubt and gaslighting" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Understanding Patterns</span>
+          <h3>Gaslighting: Why Do You Doubt Yourself After Every Argument?</h3>
+          <p>If every argument ends with you convinced you're "overreacting" or "making things up," you may be under the influence of a well-known pattern of psychological manipulation.</p>
+          <span class="card-meta">8 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-healing-after-breakup/" class="article-card" data-cat="healing">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/8835892/pexels-photo-8835892.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Illustrative image of healing and a new beginning" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healing</span>
+          <h3>Five Realistic Steps to Heal After a Breakup</h3>
+          <p>Healing isn't a straight line, and there's no "correct" timeline for it. Here are five steps to help you build your own path.</p>
+          <span class="card-meta">7 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-healthy-first-date/" class="article-card" data-cat="healthy">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/6180716/pexels-photo-6180716.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Illustrative image of a healthy date between two people" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healthy Relationships</span>
+          <h3>How to Build a Healthy Relationship From the First Date</h3>
+          <p>A healthy relationship isn't chance or luck — it's made of small habits and decisions that start from the very first meeting. Here are the most important ones.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-healthy-boundaries/" class="article-card" data-cat="healthy">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/5723263/pexels-photo-5723263.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A woman extending her hand in a calm stop gesture" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healthy Relationships</span>
+          <h3>How to Set Healthy Boundaries in Your Relationship Without Feeling Guilty</h3>
+          <p>Boundaries aren't cruelty or selfishness — they're what lets a relationship last comfortably, because they protect your time and energy.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-jealousy-vs-control/" class="article-card" data-cat="patterns">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/6383268/pexels-photo-6383268.jpeg?auto=compress&cs=tinysrgb&w=600" alt="An anxious woman browsing her phone with unease" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Understanding Patterns</span>
+          <h3>The Difference Between Natural Jealousy and Jealousy That Turns Into Control</h3>
+          <p>Jealousy isn't always a red flag, but there's a fine line between natural jealousy and jealousy that turns into surveillance and control.</p>
+          <span class="card-meta">5 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-returning-to-toxic/" class="article-card" data-cat="healing">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/3808801/pexels-photo-3808801.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A woman reflecting deeply behind a fence" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healing</span>
+          <h3>Why Do We Go Back to a Toxic Partner Even After Deciding to Leave?</h3>
+          <p>Returning to a toxic relationship after a breakup isn't weakness or foolishness — it's a well-known psychological pattern with clear causes.</p>
+          <span class="card-meta">7 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-codependency/" class="article-card" data-cat="patterns">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/29258671/pexels-photo-29258671.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Two hands intertwined, symbolizing support and attachment" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Understanding Patterns</span>
+          <h3>Emotional Codependency: When "I Love You" Becomes "I Can't Live Without You"</h3>
+          <p>There's a huge difference between love and emotional codependency. One completes your life; the other consumes it piece by piece.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-in-laws-boundaries/" class="article-card" data-cat="healthy">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/6957232/pexels-photo-6957232.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Two women at a family gathering with subtle tension" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healthy Relationships</span>
+          <h3>How to Deal With Your Partner's Family Without Losing Yourself</h3>
+          <p>Your relationship with your partner's family can be one of the hardest parts of a relationship. Practical steps to help you protect your peace of mind.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-love-bombing/" class="article-card" data-cat="early">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/6578938/pexels-photo-6578938.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A man surprising a woman with a large bouquet of flowers" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Early Signs</span>
+          <h3>Love Bombing: Why a Very Intense Start Isn't Always a Good Sign</h3>
+          <p>Constant messages and over-the-top declarations of love in the first few weeks? Sometimes it's genuine romance — and sometimes it's a tactic to fast-track your trust.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-self-support-while-in-it/" class="article-card" data-cat="healing">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/1650207/pexels-photo-1650207.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A woman journaling thoughtfully by a window" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healing</span>
+          <h3>How to Take Care of Yourself While Still in a Difficult Relationship</h3>
+          <p>Not everyone is ready to leave a toxic relationship right away. Practical steps to protect your mental health until you reach your decision.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-silent-treatment/" class="article-card" data-cat="patterns">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/8560762/pexels-photo-8560762.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A couple sitting on a bed in silent tension" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Understanding Patterns</span>
+          <h3>Silence as Punishment: Why It's More Harmful Than It Looks</h3>
+          <p>Silence isn't always "time to cool off." When it becomes a recurring punishment, it turns into a real pattern of psychological manipulation.</p>
+          <span class="card-meta">5 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-ready-for-new-relationship/" class="article-card" data-cat="healing">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/4781473/pexels-photo-4781473.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A woman enjoying a peaceful moment in nature" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healing</span>
+          <h3>How to Know You're Ready to Love Again After a Toxic Relationship</h3>
+          <p>There's no set timeline for readiness, but there are real signs that can help you understand where you stand right now.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-questions-before-committing/" class="article-card" data-cat="healthy">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/5711601/pexels-photo-5711601.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A couple in a calm, thoughtful conversation on a couch" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Healthy Relationships</span>
+          <h3>Ten Questions to Ask Yourself Before Committing to a New Relationship</h3>
+          <p>Commitment is a big decision, and a few simple questions beforehand can save you a lot of pain later.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-understanding-anxiety/" class="article-card" data-cat="mental-health">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/6382634/pexels-photo-6382634.jpeg?auto=compress&cs=tinysrgb&w=600" alt="An anxious woman covering her face with her hand" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Mental Health</span>
+          <h3>Understanding Anxiety: When Is It Normal, and When Does It Deserve Attention?</h3>
+          <p>Anxiety is a normal feeling everyone experiences, but the real question is when it shifts from a useful signal into a burden that deserves real attention.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-depression-signs/" class="article-card" data-cat="mental-health">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/4349903/pexels-photo-4349903.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A person struggling with depression behind a blurred window" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Mental Health</span>
+          <h3>Signs of Depression That Are Easy to Overlook</h3>
+          <p>Depression doesn't always look the way we imagine. Learn about the less obvious signs that are easy to write off as just "temporary tiredness."</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-self-care/" class="article-card" data-cat="mental-health">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/4346281/pexels-photo-4346281.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A book and a cup of tea in a warm, quiet room" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Mental Health</span>
+          <h3>Self-Care: Beyond a Warm Bath and a Cup of Tea</h3>
+          <p>Real self-care runs much deeper than the cozy stereotype, and sometimes means making hard decisions before any relaxation.</p>
+          <span class="card-meta">5 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-power-of-breathing/" class="article-card" data-cat="mental-health">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/4498220/pexels-photo-4498220.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A calm woman sitting in a meditative pose, practicing breathing" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Mental Health</span>
+          <h3>The Power of Breathing: How Your Breath Calms Your Mind Under Pressure</h3>
+          <p>Breathing is a direct bridge between your body and mind. Learn the scientific reason deep breathing calms you, plus a simple exercise you can try right now.</p>
+          <span class="card-meta">5 min read</span>
+        </div>
+      </a>
+
+      <a href="/article-mindfulness-present-moment/" class="article-card" data-cat="mental-health">
+        <div class="card-visual"><img src="https://images.pexels.com/photos/6453915/pexels-photo-6453915.jpeg?auto=compress&cs=tinysrgb&w=600" alt="A calm woman with closed eyes in morning light" loading="lazy"></div>
+        <div class="card-body">
+          <span class="card-tag">Mental Health</span>
+          <h3>Mindfulness: How to Live in the Present Moment Instead of Worrying About Tomorrow</h3>
+          <p>Much of our daily stress doesn't come from the present — it comes from a mind living in the past or the future. Learn about mindfulness.</p>
+          <span class="card-meta">6 min read</span>
+        </div>
+      </a>
+    </div>
+    <p class="empty-state" id="emptyState">No articles in this category right now — try another one.</p>
+  </div>
+</section>
+
+<site-footer></site-footer>
+<app-bottom-nav active="blog"></app-bottom-nav>
+
+<script>
+  let cards = document.querySelectorAll('.article-card');
+  const filterRow = document.getElementById('filterRow');
+  const emptyState = document.getElementById('emptyState');
+
+  function applyCurrentFilter(){
+    const activeBtn = filterRow.querySelector('.filter-btn.active');
+    const filter = activeBtn ? activeBtn.dataset.filter : 'all';
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const show = filter === 'all' || card.dataset.cat === filter;
+      card.style.display = show ? 'flex' : 'none';
+      if (show) visibleCount++;
+    });
+    emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  filterRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    filterRow.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyCurrentFilter();
+  });
+</script>
+
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

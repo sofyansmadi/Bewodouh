@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>فريق بوضوح — الأخصائيون</title>
-<meta name="description" content="تعرّف على فريق المختصين النفسيين المرخّصين بمنصة بوضوح.">
+<title>Our Team — Specialists | Bewoduh</title>
+<meta name="description" content="Meet the team of licensed mental health professionals on the Bewoduh platform.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -22,20 +22,7 @@
   a{ color:inherit; text-decoration:none; }
   .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
 
-  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); }
-  .brand span{ color:var(--clarity); }
-  .nav-links{ display:flex; align-items:center; gap:30px; }
-  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; transition:color .2s; }
-  .nav-links a:hover{ color:var(--fog); }
-  .nav-links a.active{ color:var(--clarity-soft); }
-  a.nav-cta{
-    background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px;
-    padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
-  }
-  .nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
-  @media (max-width:780px){ .nav-links{ display:none; } }
-
-  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 48px; text-align:center; }
+  .page-head{ background:radial-gradient(120% 90% at 25% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 48px; text-align:center; }
   .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; justify-content:center; }
   .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
   .page-head h1{ color:var(--fog); font-size:clamp(28px,4.4vw,42px); font-weight:900; }
@@ -58,9 +45,6 @@
   .specialist-bio{ font-size:13.5px; color:var(--text-muted-light); }
 
   .empty-state{ text-align:center; padding:60px 0; color:var(--text-muted-light); }
-
-  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
-  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
 </style>
 </head>
 <body>
@@ -69,16 +53,16 @@
 
 <header class="page-head">
   <div class="wrap">
-    <div class="eyebrow">من سيستمع إليك</div>
-    <h1>فريق بوضوح</h1>
-    <p>مختصون نفسيون مرخّصون، اخترناهم بعناية — تعرّف على كل واحد منهم قبل أن تحجز.</p>
+    <div class="eyebrow">Who Will Listen to You</div>
+    <h1>Our Team</h1>
+    <p>Licensed mental health professionals, carefully selected — get to know each one before you book.</p>
   </div>
 </header>
 
 <main>
   <div class="wrap">
     <div class="team-grid" id="teamGrid">
-      <p class="empty-state">جارٍ تحميل الفريق...</p>
+      <p class="empty-state">Loading the team...</p>
     </div>
   </div>
 </main>
@@ -91,7 +75,7 @@
 async function loadTeam(){
   const grid = document.getElementById('teamGrid');
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    grid.innerHTML = '<p class="empty-state">تعذّر تحميل الفريق حالياً.</p>';
+    grid.innerHTML = '<p class="empty-state">Unable to load the team right now.</p>';
     return;
   }
 
@@ -102,7 +86,7 @@ async function loadTeam(){
     .order('sort_order', { ascending: true });
 
   if (error || !data || !data.length) {
-    grid.innerHTML = '<p class="empty-state">لا يوجد أخصائيون معروضون حالياً.</p>';
+    grid.innerHTML = '<p class="empty-state">No specialists are listed right now.</p>';
     return;
   }
 
