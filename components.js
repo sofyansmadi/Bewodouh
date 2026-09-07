@@ -80,7 +80,6 @@ const STYLE_FIX = `
   .nav-lang-toggle{ font-size:12px; font-weight:700; color:#B7ACC4; border:1.5px solid rgba(255,255,255,.15); border-radius:100px; padding:6px 12px; transition:.2s; flex-shrink:0; }
   .nav-lang-toggle:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
-  @media (max-width:780px){ site-nav .nav-links{ display:none; } }
 
   /* هاي القواعد كانت مكرّرة يدوياً جوا <style> كل صفحة عربية قبل التحويل
      لمكوّنات، ونسيت تُنقل لصفحات /en/ الجديدة — نقلتها هون مرة وحدة نهائية
@@ -97,6 +96,11 @@ const STYLE_FIX = `
     padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
   }
   site-nav a.nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
+  /* لازم هاي القاعدة تجي بعد كل قواعد site-nav .nav-links فوق مباشرة —
+     نفس الـ selector ونفس الأولوية (specificity)، فالقاعدة الأخيرة بترتيب
+     الملف هي يلي بتربح، ولو ضلّت فوق كانت الشاشات الصغيرة بتبين النافبار
+     كامل بدل ما تختفي. */
+  @media (max-width:780px){ site-nav .nav-links{ display:none; } }
 
   site-footer[variant="rich"] .footer-grid{ display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr; gap:32px; padding-bottom:36px; border-bottom:1px solid rgba(255,255,255,.08); }
   site-footer[variant="rich"] .footer-brand p{ font-size:14px; margin-top:14px; max-width:32ch; }
