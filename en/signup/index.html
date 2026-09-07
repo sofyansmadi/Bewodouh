@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create an Account or Log In — Bewoduh</title>
+<meta name="description" content="Create a new Bewoduh account or log in to your existing one.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:520px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .page-head{ background:radial-gradient(120% 90% at 25% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 48px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; justify-content:center; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(26px,4vw,36px); font-weight:900; }
+  .page-head p{ color:var(--text-muted-dark); font-size:15px; max-width:40ch; margin:12px auto 0; }
+
+  main{ padding:48px 0 90px; }
+  .form-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:36px 32px; box-shadow:0 24px 50px -30px rgba(36,29,46,.25); }
+  @media (max-width:600px){ .form-card{ padding:26px 22px; } }
+
+  /* ---------- TABS ---------- */
+  .tabs{ display:flex; background:var(--fog); border-radius:100px; padding:5px; margin-bottom:28px; }
+  .tab-btn{
+    flex:1; background:none; border:none; padding:11px 16px; border-radius:100px; cursor:pointer;
+    font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--text-muted-light); transition:.2s;
+  }
+  .tab-btn.active{ background:var(--ink); color:var(--fog); }
+
+  .field{ margin-bottom:20px; }
+  .field label{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; }
+  .field input{
+    width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:13px 15px;
+    font-family:'IBM Plex Sans Arabic', sans-serif; font-size:15px; color:var(--text-on-light);
+    background:var(--fog); transition:.15s;
+  }
+  .field input:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  .field .hint{ font-size:12px; color:var(--text-muted-light); margin-top:6px; }
+  .error-msg{ color:var(--alert); font-size:12.5px; margin-top:6px; display:none; }
+  .error-msg.active{ display:block; }
+
+  .form-error-box{
+    display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13px; font-weight:600;
+    padding:12px 14px; border-radius:10px; margin-bottom:18px; text-align:center;
+  }
+  .form-error-box.active{ display:block; }
+
+  .btn-primary{
+    background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px;
+    border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; margin-top:8px;
+  }
+  .btn-primary:hover{ background:var(--ink-soft); }
+
+  .switch-link{ text-align:center; margin-top:22px; font-size:13.5px; color:var(--text-muted-light); }
+  .switch-link a, .switch-link button{ color:var(--clarity); font-weight:700; background:none; border:none; font-family:inherit; font-size:inherit; cursor:pointer; padding:0; }
+
+  .success-box{ display:none; text-align:center; padding:20px 0; }
+  .success-box.active{ display:block; }
+  .success-box .check{ width:56px; height:56px; border-radius:50%; background:var(--clarity); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
+  .success-box h2{ font-size:20px; color:var(--ink); margin-bottom:8px; }
+  .success-box p{ font-size:14px; color:var(--text-muted-light); }
+
+  .disclaimer{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:14px 16px; font-size:12px; color:var(--text-muted-light); margin-top:24px; text-align:center; }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">Your Bewoduh Account</div>
+    <h1 id="pageTitle">Create a New Account</h1>
+    <p id="pageSubtitle">Save your quiz results and track your progress any time you come back to the site.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="form-card">
+
+      <div class="tabs">
+        <button type="button" class="tab-btn active" id="tabSignup">Sign Up</button>
+        <button type="button" class="tab-btn" id="tabLogin">Log In</button>
+      </div>
+
+      <button type="button" id="googleSignInBtn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; border:1.5px solid var(--fog-dim); border-radius:100px; padding:13px; font-family:inherit; font-size:14.5px; font-weight:600; color:var(--text-on-light); cursor:pointer; margin-bottom:18px;">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5c-2 1.4-4.6 2.3-7.5 2.3-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px; color:var(--text-muted-light); font-size:12.5px;">
+        <div style="flex:1; height:1px; background:var(--fog-dim);"></div>
+        or
+        <div style="flex:1; height:1px; background:var(--fog-dim);"></div>
+      </div>
+
+      <!-- ---- SIGNUP FORM ---- -->
+      <form id="signupForm">
+        <div class="field">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" required>
+        </div>
+        <div class="field">
+          <label for="signupEmail">Email Address</label>
+          <input type="email" id="signupEmail" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" required minlength="8">
+          <div id="pwChecklist" style="margin-top:10px; display:flex; flex-direction:column; gap:5px; font-size:12.5px;">
+            <span data-rule="length" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> At least 8 characters</span>
+            <span data-rule="upper" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> An uppercase letter (A-Z)</span>
+            <span data-rule="lower" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> A lowercase letter (a-z)</span>
+            <span data-rule="number" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> At least one number</span>
+            <span data-rule="special" style="color:var(--text-muted-light); display:flex; align-items:center; gap:6px;"><span class="pw-icon">○</span> A special character (!@#$%^&* etc.)</span>
+          </div>
+          <div id="pwStrengthLabel" style="margin-top:8px; font-size:12.5px; font-weight:700;"></div>
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" required minlength="8">
+          <div class="error-msg" id="mismatchError">The passwords don't match.</div>
+        </div>
+
+        <button type="submit" class="btn-primary">Create Account</button>
+      </form>
+
+      <!-- ---- LOGIN FORM ---- -->
+      <form id="loginForm" style="display:none;">
+        <div class="form-error-box" id="loginErrorBox">Incorrect email or password.</div>
+        <div class="field">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Log In</button>
+      </form>
+
+      <!-- ---- OTP VERIFICATION BOX ---- -->
+      <div class="otp-box" id="otpBox" style="display:none;">
+        <h2 id="otpTitle" style="font-size:19px; margin-bottom:8px;">Verify Your Email</h2>
+        <p style="font-size:13.5px; color:var(--text-muted-light); margin-bottom:20px;">We sent an 8-digit code to <strong id="otpEmailDisplay"></strong>. Enter it below to finish creating your account.</p>
+        <form id="otpForm">
+          <div class="field">
+            <label for="otpInput">Verification Code</label>
+            <input type="text" id="otpInput" inputmode="numeric" maxlength="8" placeholder="--------" required style="text-align:center; letter-spacing:6px; font-size:18px;">
+          </div>
+          <div class="form-error-box" id="otpErrorBox">The code is incorrect or has expired. Double-check it and try again.</div>
+          <button type="submit" class="btn-primary">Verify Account</button>
+        </form>
+        <p class="switch-link" style="margin-top:16px;">Didn't get the code? <button type="button" id="resendOtpBtn">Resend</button></p>
+      </div>
+
+      <div class="success-box" id="successBox">
+        <div class="check">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 id="successTitle">Your Account Has Been Created</h2>
+        <p>Redirecting you to your account page...</p>
+      </div>
+
+      <p class="switch-link" id="switchLink">Already have an account? <button type="button" id="switchToLogin">Log In</button></p>
+
+      <div class="disclaimer">Your data is protected, encrypted, and stored in a real, secure database.</div>
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+/* ============================================================
+   بوضوح — إنشاء حساب / تسجيل الدخول (نظام حقيقي عبر Supabase Auth).
+   ------------------------------------------------------------
+   نفس منطق النسخة العربية بالضبط، بس accountUrl() هون بترجع
+   لمسار /en/account/ حتى يضل المستخدم داخل النسخة الإنجليزية
+   بعد تسجيل الدخول أو إنشاء الحساب.
+   ============================================================ */
+
+const inApp = typeof window.Capacitor !== 'undefined';
+function accountUrl(){ return inApp ? '/en/account/index.html' : '/en/account/'; }
+
+const tabSignup = document.getElementById('tabSignup');
+const tabLogin = document.getElementById('tabLogin');
+const signupForm = document.getElementById('signupForm');
+const loginForm = document.getElementById('loginForm');
+const switchLink = document.getElementById('switchLink');
+const switchToLogin = document.getElementById('switchToLogin');
+const pageTitle = document.getElementById('pageTitle');
+const pageSubtitle = document.getElementById('pageSubtitle');
+const loginErrorBox = document.getElementById('loginErrorBox');
+
+function showSignupTab(){
+  tabSignup.classList.add('active');
+  tabLogin.classList.remove('active');
+  signupForm.style.display = 'block';
+  loginForm.style.display = 'none';
+  switchLink.innerHTML = 'Already have an account? <button type="button" id="switchToLogin">Log In</button>';
+  document.getElementById('switchToLogin').addEventListener('click', showLoginTab);
+  pageTitle.textContent = 'Create a New Account';
+  pageSubtitle.textContent = 'Save your quiz results and track your progress any time you come back to the site.';
+  loginErrorBox.classList.remove('active');
+}
+
+function showLoginTab(){
+  tabLogin.classList.add('active');
+  tabSignup.classList.remove('active');
+  loginForm.style.display = 'block';
+  signupForm.style.display = 'none';
+  switchLink.innerHTML = 'Don\'t have an account? <button type="button" id="switchToSignup">Create One</button>';
+  document.getElementById('switchToSignup').addEventListener('click', showSignupTab);
+  pageTitle.textContent = 'Log In';
+  pageSubtitle.textContent = 'Log in to your account to keep track of your quiz results.';
+}
+
+tabSignup.addEventListener('click', showSignupTab);
+tabLogin.addEventListener('click', showLoginTab);
+switchToLogin.addEventListener('click', showLoginTab);
+
+// ---- Google sign-in (works for both signup and login with the same button) ----
+document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + accountUrl() },
+  });
+  if (error) {
+    console.error('Google sign-in error:', error);
+    loginErrorBox.textContent = 'An error occurred while signing in with Google. Please try again.';
+    loginErrorBox.classList.add('active');
+  }
+});
+
+// ---- Signup submit ----
+// ---- Live password strength check ----
+function checkPasswordRules(pw){
+  return {
+    length: pw.length >= 8,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    number: /[0-9]/.test(pw),
+    special: /[!@#$%^&*()_\-+=\[\]{};:'",.<>\/?\\|`~]/.test(pw),
+  };
+}
+
+function isPasswordValid(pw){
+  const rules = checkPasswordRules(pw);
+  return Object.values(rules).every(Boolean);
+}
+
+const passwordInput = document.getElementById('password');
+passwordInput.addEventListener('input', () => {
+  const rules = checkPasswordRules(passwordInput.value);
+  let metCount = 0;
+
+  Object.keys(rules).forEach(key => {
+    const el = document.querySelector(`#pwChecklist [data-rule="${key}"]`);
+    const icon = el.querySelector('.pw-icon');
+    if (rules[key]) {
+      el.style.color = 'var(--clarity)';
+      icon.textContent = '✓';
+      metCount++;
+    } else {
+      el.style.color = 'var(--text-muted-light)';
+      icon.textContent = '○';
+    }
+  });
+
+  const label = document.getElementById('pwStrengthLabel');
+  if (passwordInput.value.length === 0) {
+    label.textContent = '';
+  } else if (metCount <= 2) {
+    label.textContent = 'Weak password';
+    label.style.color = 'var(--alert)';
+  } else if (metCount <= 4) {
+    label.textContent = 'Medium password';
+    label.style.color = '#C9A15F';
+  } else {
+    label.textContent = 'Strong password';
+    label.style.color = '#4CAF50';
+  }
+});
+
+let pendingSignupEmail = '';
+
+signupForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const fullName = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const mismatchError = document.getElementById('mismatchError');
+
+  if (!isPasswordValid(password)) {
+    document.getElementById('pwStrengthLabel').textContent = 'You need to meet all the password requirements above before continuing.';
+    document.getElementById('pwStrengthLabel').style.color = 'var(--alert)';
+    passwordInput.focus();
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    mismatchError.classList.add('active');
+    return;
+  }
+  mismatchError.classList.remove('active');
+
+  const submitBtn = signupForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName } },
+  });
+
+  if (error) {
+    submitBtn.disabled = false;
+    console.error('Supabase signUp error:', error);
+    loginErrorBox.textContent = error.message.includes('already registered')
+      ? 'This email is already registered with us. Try logging in instead of creating a new account.'
+      : 'An error occurred: ' + error.message;
+    loginErrorBox.classList.add('active');
+    return;
+  }
+
+  // ننشئ صف بجدول profiles مرتبط بحساب المصادقة الحقيقي، ونرفق معه
+  // إجابات onboarding التطبيق (إن وُجدت) — هي محفوظة محلياً من قبل
+  // إنشاء الحساب، لأنه ما كان في مستخدم مصادَق عليه وقتها
+  if (data.user) {
+    const onboardingAnswers = JSON.parse(localStorage.getItem('bewodoh_onboarding_answers') || 'null');
+    await supabaseClient.from('profiles').insert({
+      id: data.user.id,
+      full_name: fullName,
+      email: email,
+      ...(onboardingAnswers ? { onboarding_goals: onboardingAnswers } : {}),
+    });
+    localStorage.removeItem('bewodoh_onboarding_answers');
+  }
+
+  // نطلب رمز التأكيد بدل التحويل المباشر
+  pendingSignupEmail = email;
+  document.getElementById('googleSignInBtn').style.display = 'none';
+  document.querySelector('.tabs').style.display = 'none';
+  signupForm.style.display = 'none';
+  switchLink.style.display = 'none';
+  document.getElementById('otpEmailDisplay').textContent = email;
+  document.getElementById('otpBox').style.display = 'block';
+  submitBtn.disabled = false;
+});
+
+// ---- OTP verification submit ----
+document.getElementById('otpForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const code = document.getElementById('otpInput').value.trim();
+  const otpErrorBox = document.getElementById('otpErrorBox');
+  const submitBtn = this.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  const { error } = await supabaseClient.auth.verifyOtp({
+    email: pendingSignupEmail,
+    token: code,
+    type: 'signup',
+  });
+
+  if (error) {
+    submitBtn.disabled = false;
+    console.error('verifyOtp error:', error);
+    otpErrorBox.classList.add('active');
+    return;
+  }
+
+  document.getElementById('otpBox').style.display = 'none';
+  document.getElementById('successTitle').textContent = 'Your Account Has Been Created';
+  document.getElementById('successBox').classList.add('active');
+
+  setTimeout(() => { window.location.href = accountUrl(); }, 1200);
+});
+
+// ---- Resend OTP ----
+document.getElementById('resendOtpBtn').addEventListener('click', async function(){
+  this.disabled = true;
+  this.textContent = 'Sending...';
+  await supabaseClient.auth.resend({ type: 'signup', email: pendingSignupEmail });
+  this.textContent = 'Sent. Resend';
+  setTimeout(() => { this.disabled = false; this.textContent = 'Resend'; }, 3000);
+});
+
+// ---- Login submit ----
+loginForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const submitBtn = loginForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    submitBtn.disabled = false;
+    console.error('signIn error:', error);
+
+    if (error.message.toLowerCase().includes('confirm')) {
+      // الحساب موجود بس ما تأكد بعد — نوريها صندوق إدخال الرمز مباشرة
+      pendingSignupEmail = email;
+      document.getElementById('googleSignInBtn').style.display = 'none';
+      document.querySelector('.tabs').style.display = 'none';
+      loginForm.style.display = 'none';
+      switchLink.style.display = 'none';
+      document.getElementById('otpTitle').textContent = 'You Need to Verify Your Account First';
+      document.getElementById('otpEmailDisplay').textContent = email;
+      document.getElementById('otpBox').style.display = 'block';
+      await supabaseClient.auth.resend({ type: 'signup', email });
+      return;
+    }
+
+    loginErrorBox.textContent = 'Incorrect email or password.';
+    loginErrorBox.classList.add('active');
+    return;
+  }
+  loginErrorBox.classList.remove('active');
+
+  document.querySelector('.tabs').style.display = 'none';
+  loginForm.style.display = 'none';
+  switchLink.style.display = 'none';
+  document.getElementById('successTitle').textContent = 'Successfully Logged In';
+  document.getElementById('successBox').classList.add('active');
+
+  setTimeout(() => { window.location.href = accountUrl(); }, 1000);
+});
+
+// لو المستخدم مسجّل دخول أصلاً، وجّهه مباشرة لصفحة حسابه
+(async function(){
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) {
+    window.location.href = accountUrl();
+  }
+})();
+</script>
+
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>
