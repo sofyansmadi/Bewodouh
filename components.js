@@ -81,6 +81,30 @@ const STYLE_FIX = `
   .nav-lang-toggle:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
   @media (max-width:780px){ site-nav .nav-links{ display:none; } }
+
+  /* هاي القواعد كانت مكرّرة يدوياً جوا <style> كل صفحة عربية قبل التحويل
+     لمكوّنات، ونسيت تُنقل لصفحات /en/ الجديدة — نقلتها هون مرة وحدة نهائية
+     حتى تنطبق تلقائياً على أي صفحة (عربي أو إنجليزي، حالية أو مستقبلية)
+     بدون ما تحتاج كل صفحة تكرّرها بنفسها. */
+  site-nav .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); }
+  site-nav .brand span{ color:var(--clarity); }
+  site-nav .nav-links{ display:flex; align-items:center; gap:30px; }
+  site-nav .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; transition:color .2s; }
+  site-nav .nav-links a:hover{ color:var(--fog); }
+  site-nav .nav-links a.active{ color:var(--clarity-soft); }
+  site-nav a.nav-cta{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px;
+    padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
+  }
+  site-nav a.nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
+
+  site-footer[variant="rich"] .footer-grid{ display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr; gap:32px; padding-bottom:36px; border-bottom:1px solid rgba(255,255,255,.08); }
+  site-footer[variant="rich"] .footer-brand p{ font-size:14px; margin-top:14px; max-width:32ch; }
+  site-footer[variant="rich"] .footer-col h4{ font-size:13px; color:var(--fog); margin-bottom:16px; font-weight:700; }
+  site-footer[variant="rich"] .footer-col a{ display:block; font-size:14px; margin-bottom:10px; color:var(--text-muted-dark); transition:.2s; }
+  site-footer[variant="rich"] .footer-col a:hover{ color:var(--clarity-soft); }
+  site-footer[variant="rich"] .footer-bottom{ padding-top:24px; font-size:12.5px; text-align:center; }
+  @media (max-width:780px){ site-footer[variant="rich"] .footer-grid{ grid-template-columns:1fr; gap:28px; } }
 `;
 const styleTag = document.createElement('style');
 styleTag.textContent = STYLE_FIX;
