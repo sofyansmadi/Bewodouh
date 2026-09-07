@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Depression Screening Quiz — Bewoduh</title>
+<meta name="description" content="An initial self-screening tool for depression symptoms, based on the internationally recognized PHQ-9 scale.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  nav{ position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); text-decoration:none; }
+  .brand span{ color:var(--clarity); }
+  .nav-links{ display:flex; align-items:center; gap:28px; }
+  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
+  .nav-links a:hover{ color:var(--fog); }
+  a.nav-cta{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px; padding:9px 20px; border-radius:100px; transition:.2s; }
+  a.nav-cta:hover{ background:var(--clarity-soft); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 48px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; justify-content:center; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(28px,4.4vw,42px); font-weight:900; max-width:20ch; margin:0 auto; line-height:1.4; }
+  .page-head p{ color:var(--text-muted-dark); font-size:15.5px; max-width:48ch; margin:14px auto 0; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--clarity-soft); margin-bottom:22px; text-decoration:none; }
+
+  main{ padding:48px 0 90px; }
+  .quiz-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:38px 34px; box-shadow:0 24px 50px -30px rgba(36,29,46,.25); }
+  @media (max-width:600px){ .quiz-card{ padding:28px 20px; } }
+
+  .intro-note{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:18px 20px; font-size:13.5px; color:var(--text-muted-light); margin-bottom:28px; }
+
+  .progress-row{ display:flex; align-items:center; gap:14px; margin-bottom:30px; }
+  .progress-track{ flex:1; height:6px; background:var(--fog-dim); border-radius:100px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--clarity); border-radius:100px; width:11%; transition:width .4s ease; }
+  .progress-label{ font-size:12.5px; color:var(--text-muted-light); font-weight:600; white-space:nowrap; }
+
+  .q-block{ display:none; }
+  .q-block.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+  .q-eyebrow{ font-size:12.5px; color:var(--clarity); font-weight:700; margin-bottom:8px; }
+  .q-text{ font-family:'Noto Kufi Arabic',sans-serif; font-size:19px; font-weight:700; line-height:1.7; margin-bottom:22px; max-width:42ch; }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{ display:flex; align-items:center; gap:12px; text-align:left; border:1.5px solid var(--fog-dim); border-radius:12px; padding:14px 16px; background:var(--fog); cursor:pointer; font-size:15px; color:var(--text-on-light); transition:.15s; width:100%; font-family:inherit; }
+  .opt:hover{ border-color:var(--clarity); background:#fff; }
+  .opt.selected{ border-color:var(--clarity); background:rgba(201,161,95,.1); }
+  .opt-dot{ width:18px; height:18px; border-radius:50%; border:1.5px solid var(--rose); flex-shrink:0; position:relative; }
+  .opt.selected .opt-dot{ border-color:var(--clarity); }
+  .opt.selected .opt-dot::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--clarity); }
+
+  .nav-row{ display:flex; justify-content:space-between; align-items:center; margin-top:30px; }
+  .btn-ghost{ background:none; border:none; color:var(--text-muted-light); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; padding:10px 6px; }
+  .btn-ghost:disabled{ opacity:0; pointer-events:none; }
+  .btn-next{ background:var(--ink); color:var(--fog); font-weight:700; font-size:14.5px; padding:13px 28px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; }
+  .btn-next:hover{ background:var(--ink-soft); }
+  .btn-next:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .result-block{ display:none; }
+  .result-block.active{ display:block; animation:fadeIn .4s ease; }
+
+  .crisis-box{ background:var(--alert); color:#fff; border-radius:16px; padding:24px 26px; margin-bottom:26px; }
+  .crisis-box h3{ font-size:18px; margin-bottom:10px; }
+  .crisis-box p{ font-size:14.5px; margin-bottom:14px; opacity:.95; }
+  .crisis-box .crisis-contacts{ display:flex; flex-direction:column; gap:8px; }
+  .crisis-box .crisis-contacts a{ display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.15); border-radius:10px; padding:12px 14px; font-size:14px; font-weight:700; text-decoration:none; color:#fff; }
+  .crisis-box .crisis-contacts a:hover{ background:rgba(255,255,255,.25); }
+
+  .always-support{ background:#fff; border:1px solid var(--fog-dim); border-radius:16px; padding:22px 24px; margin-bottom:26px; }
+  .always-support h4{ font-size:15px; color:var(--ink); margin-bottom:10px; }
+  .always-support p{ font-size:13.5px; color:var(--text-muted-light); margin-bottom:6px; }
+  .always-support a{ color:var(--clarity); font-weight:700; }
+
+  .result-tag{ display:inline-block; font-size:12px; font-weight:700; padding:5px 14px; border-radius:100px; margin-bottom:16px; }
+  .result-title{ font-family:'Noto Kufi Arabic',sans-serif; font-size:24px; font-weight:900; margin-bottom:14px; line-height:1.5; }
+  .result-desc{ font-size:15.5px; color:var(--text-muted-light); margin-bottom:26px; max-width:56ch; }
+  .meter{ margin:26px 0 30px; }
+  .meter-track{ height:10px; border-radius:100px; background:var(--fog-dim); overflow:hidden; }
+  .meter-fill{ height:100%; border-radius:100px; transition:width 1s ease; }
+  .meter-labels{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted-light); margin-top:8px; }
+  .result-points{ display:flex; flex-direction:column; gap:12px; margin:24px 0; }
+  .result-points li{ list-style:none; display:flex; gap:10px; font-size:14.5px; color:var(--text-on-light); align-items:flex-start; }
+  .result-points b{ flex-shrink:0; color:var(--clarity); font-family:'Noto Kufi Arabic',sans-serif; }
+  .related-articles{ margin-top:28px; padding-top:24px; border-top:1px solid var(--fog-dim); }
+  .related-articles h4{ font-size:14px; color:var(--text-muted-light); margin-bottom:14px; font-weight:600; }
+  .related-articles a{ display:block; text-decoration:none; color:var(--text-on-light); font-weight:600; font-size:14.5px; padding:12px 0; border-bottom:1px solid var(--fog-dim); }
+  .related-articles a:last-child{ border-bottom:none; }
+  .cta-box{ margin-top:30px; background:var(--ink); border-radius:18px; padding:30px 28px; text-align:center; background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink)); }
+  .cta-box h3{ color:var(--fog); font-size:19px; margin-bottom:8px; }
+  .cta-box p{ color:var(--text-muted-dark); font-size:14px; max-width:44ch; margin:0 auto 20px; }
+  .btn-primary{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14.5px; padding:13px 26px; border-radius:100px; display:inline-block; text-decoration:none; }
+  .retake{ display:block; text-align:center; margin-top:22px; font-size:13.5px; color:var(--text-muted-light); text-decoration:none; }
+  .retake:hover{ color:var(--text-on-light); }
+  .disclaimer{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:18px 20px; font-size:13px; color:var(--text-muted-light); margin-top:30px; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+</style>
+</head>
+<body>
+
+<site-nav active="quizzes"></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <a href="/en/quizzes/" class="back-link">← All Quizzes</a><br>
+    <div class="eyebrow">Initial Self-Screening · Based on an Internationally Recognized Scale</div>
+    <h1>Depression Screening Quiz</h1>
+    <p>Nine questions about how you've felt over the past two weeks, based on the PHQ-9, a scale used worldwide as an initial screening tool for depression symptoms.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="quiz-card">
+
+      <div id="quizSection">
+        <div class="intro-note">This quiz is an initial screening tool, not a diagnostic tool. Answer each question based on how you've actually felt over the past two weeks.</div>
+        <div class="progress-row">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <span class="progress-label" id="progressLabel">1 / 9</span>
+        </div>
+        <div id="questionsHost"></div>
+        <div class="nav-row">
+          <button class="btn-ghost" id="btnBack">Back</button>
+          <button class="btn-next" id="btnNext" disabled>Next</button>
+        </div>
+      </div>
+
+      <div id="resultsSection" style="display:none;">
+
+        <div class="crisis-box" id="crisisBox" style="display:none;">
+          <h3>We're here for you</h3>
+          <p>One of your answers points to having thoughts of harming yourself. This feeling matters, and you shouldn't have to face it alone. Reach out now to one of the following support resources in Jordan:</p>
+          <div class="crisis-contacts">
+            <a href="tel:00962795440416">Jordanian Clinical Psychologists Association (JCPA) Hotline — available 24/7, free and confidential — 00962795440416 (call or text)</a>
+            <a href="tel:110">Family and Childhood Protection Line — 110 (free)</a>
+            <a href="tel:911">Emergency — 911</a>
+          </div>
+        </div>
+
+        <div class="always-support">
+          <h4>Need to talk to someone right now?</h4>
+          <p>If you're going through severe emotional distress at any time, don't hesitate to reach out to the <a href="tel:00962795440416">Jordanian Clinical Psychologists Association (JCPA) Hotline</a>, available free of charge 24/7.</p>
+        </div>
+
+        <span class="result-tag" id="resultTag"></span>
+        <h2 class="result-title" id="resultTitle"></h2>
+        <p class="result-desc" id="resultDesc"></p>
+        <div class="meter">
+          <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+          <div class="meter-labels"><span>Minimal symptoms</span><span>Severe symptoms</span></div>
+        </div>
+        <ul class="result-points" id="resultPoints"></ul>
+        <div class="related-articles">
+          <h4>Articles you might find helpful</h4>
+          <div id="relatedLinks"></div>
+        </div>
+        <div class="cta-box">
+          <h3>Would you like some extra support?</h3>
+          <p>Bewoduh AI offers a space to talk about your feelings, and Bewoduh's articles cover aspects related to mental health and relationships.</p>
+          <a href="/en/ai/" class="btn-primary">Talk to Bewoduh AI</a>
+        </div>
+        <a href="#" class="retake" id="retakeBtn">Retake the Quiz</a>
+        <div class="disclaimer">This quiz is based on the internationally recognized PHQ-9 scale and is used only as an initial screening tool, not an official diagnostic tool. A clinical diagnosis of depression requires an evaluation by a qualified physician or mental health professional. If your result points to moderate or severe symptoms, it's strongly recommended that you see a professional as soon as possible.</div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<script>
+const FREQUENCY_OPTIONS = [
+  { label: "Not at all", pts: 0 },
+  { label: "Several days", pts: 1 },
+  { label: "More than half the days", pts: 2 },
+  { label: "Nearly every day", pts: 3 },
+];
+
+const questions = [
+  { text: "Little interest or pleasure in doing things.", options: FREQUENCY_OPTIONS },
+  { text: "Feeling down, depressed, or hopeless.", options: FREQUENCY_OPTIONS },
+  { text: "Trouble falling or staying asleep, or sleeping too much.", options: FREQUENCY_OPTIONS },
+  { text: "Feeling tired or having little energy.", options: FREQUENCY_OPTIONS },
+  { text: "Poor appetite or overeating.", options: FREQUENCY_OPTIONS },
+  { text: "Feeling bad about yourself, or that you're a failure, or that you've let yourself or your family down.", options: FREQUENCY_OPTIONS },
+  { text: "Trouble concentrating on things like reading or watching TV.", options: FREQUENCY_OPTIONS },
+  { text: "Moving or speaking so slowly that other people have noticed, or the opposite: feeling restless and more physically fidgety than usual.", options: FREQUENCY_OPTIONS },
+  { text: "Thoughts that you would be better off dead, or thoughts of hurting yourself in some way.", options: FREQUENCY_OPTIONS },
+];
+
+const results = [
+  { min: 0, max: 4, tag: "Minimal or no symptoms", tagColor: "var(--clarity)",
+    title: "Your answers don't point to notable depression symptoms right now",
+    desc: "Most of your answers suggest that you're not experiencing notable depression symptoms over the past two weeks. This is a positive sign, and it's still worth keeping an eye on your mental well-being in general.",
+    points: ["Keep taking care of your mental health through enough sleep and staying connected with people you trust.", "If your feelings change in the future, there's no harm in retaking this screening or talking to a professional."],
+    meterColor: "var(--clarity)", meterPct: 10 },
+  { min: 5, max: 9, tag: "Mild symptoms", tagColor: "var(--clarity-soft)",
+    title: "Your answers point to mild depression symptoms",
+    desc: "Your answers suggest the presence of some mild depression symptoms. These could be temporary and tied to a specific circumstance, but they're worth paying attention to and following up on.",
+    points: ["Keep an eye on whether these symptoms persist over the coming weeks.", "Maintaining a healthy daily routine (sleep, movement, social connection) can help noticeably.", "If the symptoms persist or increase, talking to a professional is a useful, early step to take."],
+    meterColor: "var(--clarity-soft)", meterPct: 32 },
+  { min: 10, max: 14, tag: "Moderate symptoms", tagColor: "var(--rose)",
+    title: "Your answers point to moderate depression symptoms",
+    desc: "Your score suggests the presence of moderate depression symptoms that may be affecting your daily life. This doesn't necessarily mean a final diagnosis, but it's a clear sign worth a professional evaluation.",
+    points: ["It's recommended to talk to a qualified physician or therapist to properly assess your condition.", "Share what you're feeling with someone you trust — isolation can make these symptoms worse.", "Don't underestimate what you're feeling — asking for support at this stage is a strong step, not a weakness."],
+    meterColor: "var(--rose)", meterPct: 55 },
+  { min: 15, max: 19, tag: "Moderately severe symptoms", tagColor: "var(--alert)",
+    title: "Your answers point to moderately severe depression symptoms",
+    desc: "Your score points to a notable level of depression symptoms. It's strongly recommended that you see a mental health or medical professional as soon as possible to assess your condition and get appropriate support.",
+    points: ["Schedule an appointment with a qualified physician or therapist as soon as possible.", "Tell someone you trust what you're going through — you don't need to face this alone.", "If at any moment things feel like more than you can handle, reach out immediately to one of the support lines mentioned above."],
+    meterColor: "var(--alert)", meterPct: 78 },
+  { min: 20, max: 27, tag: "Severe symptoms", tagColor: "var(--alert)",
+    title: "Your answers point to severe depression symptoms",
+    desc: "Your score points to a high level of depression symptoms. It's very important that you get real professional support as soon as possible — you don't need to reach this point alone.",
+    points: ["Reach out to a qualified physician or therapist as soon as possible — this is an urgent and important step.", "Tell someone close to you what you're going through right now, and don't stay alone with these feelings.", "If you have thoughts of harming yourself at any moment, reach out immediately to one of the support lines mentioned above or head to the nearest emergency room."],
+    meterColor: "var(--alert)", meterPct: 96 },
+];
+
+const articleTitles = {
+  "/en/article-self-support-while-in-it/": "How to Take Care of Yourself While Still in a Difficult Relationship You Haven't Left Yet",
+  "/en/article-ready-for-new-relationship/": "How to Know You're Ready to Love Again After a Toxic Relationship",
+};
+
+let current = 0;
+const answers = new Array(questions.length).fill(null);
+const host = document.getElementById('questionsHost');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const btnNext = document.getElementById('btnNext');
+const btnBack = document.getElementById('btnBack');
+
+function renderQuestions(){
+  host.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'q-block' + (qi === current ? ' active' : '');
+    const eyebrow = document.createElement('div');
+    eyebrow.className = 'q-eyebrow';
+    eyebrow.textContent = 'Over the past two weeks, how often have you been bothered by:';
+    block.appendChild(eyebrow);
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = q.text;
+    block.appendChild(qt);
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    q.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt' + (answers[qi] === oi ? ' selected' : '');
+      btn.innerHTML = '<span class="opt-dot"></span><span>' + opt.label + '</span>';
+      btn.addEventListener('click', () => { answers[qi] = oi; renderQuestions(); updateNav(); });
+      opts.appendChild(btn);
+    });
+    block.appendChild(opts);
+    host.appendChild(block);
+  });
+}
+function updateNav(){
+  progressFill.style.width = ((current + 1) / questions.length * 100) + '%';
+  progressLabel.textContent = (current + 1) + ' / ' + questions.length;
+  btnBack.disabled = current === 0;
+  btnNext.disabled = answers[current] === null;
+  btnNext.textContent = current === questions.length - 1 ? 'See Result' : 'Next';
+}
+btnNext.addEventListener('click', () => {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) { current++; renderQuestions(); updateNav(); }
+  else { showResults(); }
+});
+btnBack.addEventListener('click', () => { if (current > 0) { current--; renderQuestions(); updateNav(); } });
+
+function showResults(){
+  const score = answers.reduce((sum, ai, qi) => sum + questions[qi].options[ai].pts, 0);
+  const result = results.find(r => score >= r.min && score <= r.max) || results[results.length - 1];
+
+  document.getElementById('quizSection').style.display = 'none';
+  const rs = document.getElementById('resultsSection');
+  rs.style.display = 'block'; rs.classList.add('active');
+
+  // Item 9 (index 8) is the self-harm ideation item — if answered above "never", show the crisis box prominently.
+  const item9Answered = answers[8];
+  if (item9Answered !== null && item9Answered > 0) {
+    document.getElementById('crisisBox').style.display = 'block';
+  }
+
+  const tagEl = document.getElementById('resultTag');
+  tagEl.textContent = result.tag; tagEl.style.background = result.tagColor;
+  tagEl.style.color = (result.tagColor === 'var(--alert)') ? '#fff' : 'var(--ink)';
+  document.getElementById('resultTitle').textContent = result.title;
+  document.getElementById('resultDesc').textContent = result.desc;
+  const meterFill = document.getElementById('meterFill');
+  meterFill.style.background = result.meterColor;
+  setTimeout(() => { meterFill.style.width = result.meterPct + '%'; }, 50);
+  const pointsList = document.getElementById('resultPoints');
+  pointsList.innerHTML = '';
+  result.points.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<b>' + (i + 1) + '.</b><span>' + p + '</span>';
+    pointsList.appendChild(li);
+  });
+  const relatedHost = document.getElementById('relatedLinks');
+  relatedHost.innerHTML = '';
+  Object.keys(articleTitles).forEach(href => {
+    const a = document.createElement('a');
+    a.href = href; a.textContent = articleTitles[href];
+    relatedHost.appendChild(a);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.getElementById('retakeBtn').addEventListener('click', (e) => {
+  e.preventDefault(); current = 0; answers.fill(null);
+  document.getElementById('crisisBox').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('quizSection').style.display = 'block';
+  renderQuestions(); updateNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+renderQuestions(); updateNav();
+</script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

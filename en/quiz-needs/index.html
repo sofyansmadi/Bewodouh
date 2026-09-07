@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Are Your Core Relationship Needs? — Bewoduh</title>
+<meta name="description" content="Everyone needs something different to feel loved and safe in their relationship. Discover your core need with ten simple questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  nav{ position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); text-decoration:none; }
+  .brand span{ color:var(--clarity); }
+  .nav-links{ display:flex; align-items:center; gap:28px; }
+  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
+  .nav-links a:hover{ color:var(--fog); }
+  a.nav-cta{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px; padding:9px 20px; border-radius:100px; transition:.2s; }
+  a.nav-cta:hover{ background:var(--clarity-soft); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 48px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; justify-content:center; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(28px,4.4vw,42px); font-weight:900; max-width:20ch; margin:0 auto; line-height:1.4; }
+  .page-head p{ color:var(--text-muted-dark); font-size:15.5px; max-width:48ch; margin:14px auto 0; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--clarity-soft); margin-bottom:22px; text-decoration:none; }
+
+  main{ padding:48px 0 90px; }
+  .quiz-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:38px 34px; box-shadow:0 24px 50px -30px rgba(36,29,46,.25); }
+  @media (max-width:600px){ .quiz-card{ padding:28px 20px; } }
+
+  .progress-row{ display:flex; align-items:center; gap:14px; margin-bottom:30px; }
+  .progress-track{ flex:1; height:6px; background:var(--fog-dim); border-radius:100px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--clarity); border-radius:100px; width:10%; transition:width .4s ease; }
+  .progress-label{ font-size:12.5px; color:var(--text-muted-light); font-weight:600; white-space:nowrap; }
+
+  .q-block{ display:none; }
+  .q-block.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+  .q-text{ font-family:'Noto Kufi Arabic',sans-serif; font-size:19px; font-weight:700; line-height:1.7; margin-bottom:22px; max-width:40ch; }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{ display:flex; align-items:center; gap:12px; text-align:left; border:1.5px solid var(--fog-dim); border-radius:12px; padding:14px 16px; background:var(--fog); cursor:pointer; font-size:14.5px; color:var(--text-on-light); transition:.15s; width:100%; font-family:inherit; }
+  .opt:hover{ border-color:var(--clarity); background:#fff; }
+  .opt.selected{ border-color:var(--clarity); background:rgba(201,161,95,.1); }
+  .opt-dot{ width:18px; height:18px; border-radius:50%; border:1.5px solid var(--rose); flex-shrink:0; position:relative; }
+  .opt.selected .opt-dot{ border-color:var(--clarity); }
+  .opt.selected .opt-dot::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--clarity); }
+
+  .nav-row{ display:flex; justify-content:space-between; align-items:center; margin-top:30px; }
+  .btn-ghost{ background:none; border:none; color:var(--text-muted-light); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; padding:10px 6px; }
+  .btn-ghost:disabled{ opacity:0; pointer-events:none; }
+  .btn-next{ background:var(--ink); color:var(--fog); font-weight:700; font-size:14.5px; padding:13px 28px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; }
+  .btn-next:hover{ background:var(--ink-soft); }
+  .btn-next:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .result-block{ display:none; }
+  .result-block.active{ display:block; animation:fadeIn .4s ease; }
+  .result-icon{ width:56px; height:56px; border-radius:50%; background:var(--ink); display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  .result-icon svg{ width:26px; height:26px; }
+  .result-title{ font-family:'Noto Kufi Arabic',sans-serif; font-size:25px; font-weight:900; margin-bottom:6px; color:var(--ink); }
+  .result-sub{ font-size:13.5px; color:var(--clarity); font-weight:700; margin-bottom:18px; }
+  .result-desc{ font-size:15.5px; color:var(--text-muted-light); margin-bottom:26px; max-width:58ch; }
+
+  .bars{ margin:26px 0 30px; display:flex; flex-direction:column; gap:14px; }
+  .bar-row{ display:flex; align-items:center; gap:12px; }
+  .bar-label{ font-size:13.5px; width:130px; flex-shrink:0; color:var(--text-on-light); font-weight:600; }
+  .bar-track{ flex:1; height:10px; background:var(--fog-dim); border-radius:100px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:100px; background:var(--clarity-soft); transition:width 1s ease; }
+  .bar-pct{ font-size:12.5px; color:var(--text-muted-light); width:34px; text-align:right; }
+
+  .result-points{ display:flex; flex-direction:column; gap:12px; margin:24px 0; }
+  .result-points li{ list-style:none; display:flex; gap:10px; font-size:14.5px; color:var(--text-on-light); align-items:flex-start; }
+  .result-points b{ flex-shrink:0; color:var(--clarity); font-family:'Noto Kufi Arabic',sans-serif; }
+  .related-articles{ margin-top:28px; padding-top:24px; border-top:1px solid var(--fog-dim); }
+  .related-articles h4{ font-size:14px; color:var(--text-muted-light); margin-bottom:14px; font-weight:600; }
+  .related-articles a{ display:block; text-decoration:none; color:var(--text-on-light); font-weight:600; font-size:14.5px; padding:12px 0; border-bottom:1px solid var(--fog-dim); }
+  .related-articles a:last-child{ border-bottom:none; }
+  .cta-box{ margin-top:30px; background:var(--ink); border-radius:18px; padding:30px 28px; text-align:center; background:radial-gradient(140% 140% at 50% 0%, var(--ink-soft), var(--ink)); }
+  .cta-box h3{ color:var(--fog); font-size:19px; margin-bottom:8px; }
+  .cta-box p{ color:var(--text-muted-dark); font-size:14px; max-width:44ch; margin:0 auto 20px; }
+  .btn-primary{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14.5px; padding:13px 26px; border-radius:100px; display:inline-block; text-decoration:none; }
+  .retake{ display:block; text-align:center; margin-top:22px; font-size:13.5px; color:var(--text-muted-light); text-decoration:none; }
+  .retake:hover{ color:var(--text-on-light); }
+  .disclaimer{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:18px 20px; font-size:13px; color:var(--text-muted-light); margin-top:30px; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+</style>
+</head>
+<body>
+
+<site-nav active="quizzes"></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <a href="/en/quizzes/" class="back-link">← All Quizzes</a><br>
+    <div class="eyebrow">Interactive Quiz · Three Minutes</div>
+    <h1>What Are Your Core Relationship Needs?</h1>
+    <p>Everyone feels loved in a different way. Ten questions to help you discover the core need that makes you feel safe and loved in your relationship.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="quiz-card">
+
+      <div id="quizSection">
+        <div class="progress-row">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <span class="progress-label" id="progressLabel">1 / 10</span>
+        </div>
+        <div id="questionsHost"></div>
+        <div class="nav-row">
+          <button class="btn-ghost" id="btnBack">Back</button>
+          <button class="btn-next" id="btnNext" disabled>Next</button>
+        </div>
+      </div>
+
+      <div id="resultsSection" style="display:none;">
+        <div class="result-icon" id="resultIcon"></div>
+        <h2 class="result-title" id="resultTitle"></h2>
+        <p class="result-sub" id="resultSub"></p>
+        <p class="result-desc" id="resultDesc"></p>
+
+        <div class="bars" id="barsHost"></div>
+
+        <ul class="result-points" id="resultPoints"></ul>
+        <div class="related-articles">
+          <h4>Articles you might find helpful</h4>
+          <div id="relatedLinks"></div>
+        </div>
+        <div class="cta-box">
+          <h3>Want to understand your needs more deeply?</h3>
+          <p>A consultation with a mental health professional can help you understand why some of your needs get overlooked in certain relationships, and how to protect them.</p>
+          <a href="/en/sales-page/" class="btn-primary">Book Your First Consultation</a>
+        </div>
+        <a href="#" class="retake" id="retakeBtn">Retake the Quiz</a>
+        <div class="disclaimer">This quiz is general awareness content and is not an official diagnostic tool or a substitute for consultation with a licensed mental health professional.</div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<script>
+const CATEGORIES = {
+  quality_time: { label: 'Quality Time', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>' },
+  words: { label: 'Words of Affirmation', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' },
+  touch: { label: 'Physical Touch', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>' },
+  acts: { label: 'Acts of Service', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11"/></svg>' },
+  security: { label: 'Security & Stability', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--clarity-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>' },
+};
+
+const questions = [
+  { text: "When I feel happiest in my relationship, it's usually...", options: [
+    { label: "A long stretch of time we spend together without interruptions", cat: "quality_time" },
+    { label: "Them openly telling me in words how much they appreciate me", cat: "words" },
+    { label: "A moment of hugging or simple physical closeness", cat: "touch" },
+    { label: "Them standing by me in a practical situation where I need help", cat: "acts" },
+    { label: "A feeling that they're steady and present no matter what happens", cat: "security" },
+  ]},
+  { text: "What hurts me most in my relationship is...", options: [
+    { label: "When they're distracted from me even while physically present", cat: "quality_time" },
+    { label: "When they don't put their feelings or appreciation for me into words", cat: "words" },
+    { label: "When they stay physically distant from me for a long time", cat: "touch" },
+    { label: "When they don't help me in a situation where it's clear I need help", cat: "acts" },
+    { label: "When I feel they're unsteady or might suddenly change", cat: "security" },
+  ]},
+  { text: "If I want to express my love to my partner, I usually...", options: [
+    { label: "Plan special time for us to spend together", cat: "quality_time" },
+    { label: "Tell them in words how much I love and appreciate them", cat: "words" },
+    { label: "Hug them or touch them affectionately", cat: "touch" },
+    { label: "Help them with something they need without being asked", cat: "acts" },
+    { label: "Reassure them that I'm here and I'm not going anywhere", cat: "security" },
+  ]},
+  { text: "On a hard day, what comforts me most from my partner is...", options: [
+    { label: "Just sitting with me, even in silence", cat: "quality_time" },
+    { label: "Saying words that reassure and encourage me", cat: "words" },
+    { label: "Hugging me", cat: "touch" },
+    { label: "Helping me with practical tasks so I can rest", cat: "acts" },
+    { label: "Assuring me they'll stay with me no matter what", cat: "security" },
+  ]},
+  { text: "I feel most distant from my partner when...", options: [
+    { label: "We don't spend real time together", cat: "quality_time" },
+    { label: "They don't say kind or encouraging words to me", cat: "words" },
+    { label: "There's no physical connection between us", cat: "touch" },
+    { label: "They don't help me with everyday things", cat: "acts" },
+    { label: "I feel instability in the relationship", cat: "security" },
+  ]},
+  { text: "The gesture that makes me happiest from my partner is...", options: [
+    { label: "A whole block of time dedicated just to me", cat: "quality_time" },
+    { label: "A heartfelt message or word", cat: "words" },
+    { label: "A surprise hug", cat: "touch" },
+    { label: "Help with something I needed", cat: "acts" },
+    { label: "Reassurance about the future of our relationship", cat: "security" },
+  ]},
+  { text: "During disagreements, what fixes my mood most is...", options: [
+    { label: "Time where we sit together and work it out face to face", cat: "quality_time" },
+    { label: "A clear, sincere spoken apology", cat: "words" },
+    { label: "An affectionate touch after the disagreement", cat: "touch" },
+    { label: "A practical action that shows they're sorry", cat: "acts" },
+    { label: "Reassurance that the disagreement won't affect the stability of our relationship", cat: "security" },
+  ]},
+  { text: "If I could ask my partner for just one thing, I would ask for...", options: [
+    { label: "More time together", cat: "quality_time" },
+    { label: "More verbal expression", cat: "words" },
+    { label: "More physical closeness", cat: "touch" },
+    { label: "More help with everyday life", cat: "acts" },
+    { label: "More steadiness and security in the relationship", cat: "security" },
+  ]},
+  { text: "I feel proud of my relationship when...", options: [
+    { label: "We create activities and memories together", cat: "quality_time" },
+    { label: "They speak proudly of me in front of others", cat: "words" },
+    { label: "We're physically comfortable with each other in front of others", cat: "touch" },
+    { label: "They support me in my life decisions", cat: "acts" },
+    { label: "We plan a stable future together", cat: "security" },
+  ]},
+  { text: "If my partner is away for a while, what I miss most is...", options: [
+    { label: "The time we used to spend together", cat: "quality_time" },
+    { label: "Hearing their voice and words", cat: "words" },
+    { label: "Their physical closeness", cat: "touch" },
+    { label: "Their everyday help", cat: "acts" },
+    { label: "The sense of security they give me", cat: "security" },
+  ]},
+];
+
+const RESULTS_INFO = {
+  quality_time: {
+    title: "Your Core Need: Quality Time",
+    desc: "You feel most loved when there's real, dedicated time set aside for you, away from screens and distractions. Full presence means more to you than any words or gifts.",
+    points: ["Set a fixed weekly time you spend together without phones or interruptions.", "If your partner is often busy, tell them clearly that focused time together is your primary love language.", "Quality of time matters more than quantity — thirty minutes of full presence beats two hours with a phone in each person's hand."],
+  },
+  words: {
+    title: "Your Core Need: Words of Affirmation",
+    desc: "Words carry real weight for you — hearing explicit appreciation or love reassures you more than any silent action. The absence of verbal expression can make you doubt your partner's feelings, even when their actions say otherwise.",
+    points: ["Tell your partner clearly that words matter to you — not everyone realizes this on their own.", "Try asking specifically: \"I'd love it if you told me how you feel about me every now and then\" — that's clearer than an unspoken expectation.", "Keep in mind: your partner's silence doesn't always mean an absence of feelings — it's just a different language from yours."],
+  },
+  touch: {
+    title: "Your Core Need: Physical Touch",
+    desc: "Physical connection — a hug, holding hands, simple closeness — delivers a sense of safety and love to you very directly. The absence of this connection can make you feel distant even if the relationship is good in other ways.",
+    points: ["Express this need clearly — many people don't realize its importance until they hear it stated outright.", "Physical closeness doesn't have to be grand — a simple daily touch makes a big difference over time.", "If your partner is naturally less inclined toward physical touch, talk together about how to find a balance that's comfortable for both of you."],
+  },
+  acts: {
+    title: "Your Core Need: Acts of Service",
+    desc: "For you, actions speak louder than words. When your partner helps you with something practical without being asked, it sends you a stronger message of love than any words could.",
+    points: ["State clearly which kinds of practical help you value most — everyone has different priorities.", "Notice the small things your partner does on their own initiative — that's often their way of expressing love.", "Help that's asked for doesn't always carry the same sense of spontaneous initiative — point out the difference if you feel it."],
+  },
+  security: {
+    title: "Your Core Need: Security and Stability",
+    desc: "A sense of stability and steadiness is the most important thing to you in a relationship. Inconsistency or unclear expectations about the relationship's future affects you more than anything else, even when everything else is going well.",
+    points: ["Speak openly about your need for clarity — ambiguity about the relationship's future affects you more than it does others.", "Needing repeated reassurance isn't \"weakness\" — it's a real need, and you have every right to ask for it clearly.", "If you keep feeling instability, that deserves an honest conversation about where the relationship is headed, not being ignored."],
+  },
+};
+
+const RELATED_MAP = {
+  quality_time: ["/en/article-healthy-first-date/"],
+  words: ["/en/article-silent-treatment/"],
+  touch: ["/en/article-love-bombing/"],
+  acts: ["/en/article-codependency/"],
+  security: ["/en/article-jealousy-vs-control/"],
+};
+const articleTitles = {
+  "/en/article-healthy-first-date/": "How to Build a Healthy Relationship From the First Date",
+  "/en/article-silent-treatment/": "The Silent Treatment: Why It Hurts More Than It Seems",
+  "/en/article-love-bombing/": "Love Bombing: Why a Too-Intense Start Isn't Always a Good Sign",
+  "/en/article-codependency/": "Emotional Codependency: When 'I Love You' Becomes 'I Can't Live Without You'",
+  "/en/article-jealousy-vs-control/": "The Difference Between Natural Jealousy and Jealousy That Turns Into Control",
+};
+
+let current = 0;
+const answers = new Array(questions.length).fill(null);
+const host = document.getElementById('questionsHost');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const btnNext = document.getElementById('btnNext');
+const btnBack = document.getElementById('btnBack');
+
+function renderQuestions(){
+  host.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'q-block' + (qi === current ? ' active' : '');
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = q.text;
+    block.appendChild(qt);
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    q.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt' + (answers[qi] === oi ? ' selected' : '');
+      btn.innerHTML = '<span class="opt-dot"></span><span>' + opt.label + '</span>';
+      btn.addEventListener('click', () => { answers[qi] = oi; renderQuestions(); updateNav(); });
+      opts.appendChild(btn);
+    });
+    block.appendChild(opts);
+    host.appendChild(block);
+  });
+}
+function updateNav(){
+  progressFill.style.width = ((current + 1) / questions.length * 100) + '%';
+  progressLabel.textContent = (current + 1) + ' / ' + questions.length;
+  btnBack.disabled = current === 0;
+  btnNext.disabled = answers[current] === null;
+  btnNext.textContent = current === questions.length - 1 ? 'See Result' : 'Next';
+}
+btnNext.addEventListener('click', () => {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) { current++; renderQuestions(); updateNav(); }
+  else { showResults(); }
+});
+btnBack.addEventListener('click', () => { if (current > 0) { current--; renderQuestions(); updateNav(); } });
+
+function showResults(){
+  const tally = { quality_time: 0, words: 0, touch: 0, acts: 0, security: 0 };
+  answers.forEach((ai, qi) => { tally[questions[qi].options[ai].cat]++; });
+
+  const sortedCats = Object.keys(tally).sort((a, b) => tally[b] - tally[a]);
+  const topCat = sortedCats[0];
+  const info = RESULTS_INFO[topCat];
+
+  document.getElementById('quizSection').style.display = 'none';
+  const rs = document.getElementById('resultsSection');
+  rs.style.display = 'block'; rs.classList.add('active');
+
+  document.getElementById('resultIcon').innerHTML = CATEGORIES[topCat].icon;
+  document.getElementById('resultTitle').textContent = info.title;
+  document.getElementById('resultSub').textContent = 'Out of ' + questions.length + ' questions';
+  document.getElementById('resultDesc').textContent = info.desc;
+
+  const barsHost = document.getElementById('barsHost');
+  barsHost.innerHTML = '';
+  sortedCats.forEach(cat => {
+    const pct = Math.round((tally[cat] / questions.length) * 100);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <span class="bar-label">${CATEGORIES[cat].label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-pct">${pct}%</span>
+    `;
+    barsHost.appendChild(row);
+    setTimeout(() => { row.querySelector('.bar-fill').style.width = pct + '%'; }, 80);
+  });
+
+  const pointsList = document.getElementById('resultPoints');
+  pointsList.innerHTML = '';
+  info.points.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<b>' + (i + 1) + '.</b><span>' + p + '</span>';
+    pointsList.appendChild(li);
+  });
+
+  const relatedHost = document.getElementById('relatedLinks');
+  relatedHost.innerHTML = '';
+  RELATED_MAP[topCat].forEach(href => {
+    const a = document.createElement('a');
+    a.href = href; a.textContent = articleTitles[href] || href;
+    relatedHost.appendChild(a);
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('retakeBtn').addEventListener('click', (e) => {
+  e.preventDefault(); current = 0; answers.fill(null);
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('quizSection').style.display = 'block';
+  renderQuestions(); updateNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+renderQuestions(); updateNav();
+</script>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

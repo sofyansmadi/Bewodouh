@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Stress Meter — Bewoduh</title>
+<meta name="description" content="Record your voice for 30 seconds and get an approximate indicator of your stress level, based on your tone, volume, and speech pace.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:640px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:52px 0 40px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(24px,4vw,32px); font-weight:900; }
+  .page-head p{ color:var(--text-muted-dark); font-size:14.5px; max-width:46ch; margin:12px auto 0; }
+
+  main{ padding:40px 0 90px; }
+  .card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:32px 28px; box-shadow:0 24px 50px -30px rgba(36,29,46,.2); }
+  @media (max-width:600px){ .card{ padding:24px 20px; } }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- intro screen ---------- */
+  .intro-icon{ width:64px; height:64px; border-radius:50%; background:var(--ink); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+  .intro-icon svg{ width:28px; height:28px; color:var(--clarity-soft); }
+  .card h2{ text-align:center; font-size:20px; margin-bottom:10px; }
+  .intro-text{ text-align:center; color:var(--text-muted-light); font-size:14.5px; margin-bottom:26px; }
+  .steps{ display:flex; flex-direction:column; gap:14px; margin-bottom:28px; }
+  .step-row{ display:flex; align-items:flex-start; gap:12px; }
+  .step-num{ width:26px; height:26px; border-radius:50%; background:var(--fog); color:var(--clarity); font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step-row p{ font-size:14px; color:var(--text-on-light); }
+
+  .btn-primary{
+    background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:15px; border-radius:100px;
+    border:none; cursor:pointer; font-family:inherit; width:100%; transition:.2s; display:block; text-align:center;
+  }
+  .btn-primary:hover{ background:var(--ink-soft); }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-ghost{
+    background:none; color:var(--text-muted-light); font-weight:600; font-size:13.5px; padding:10px; border-radius:100px;
+    border:none; cursor:pointer; font-family:inherit; width:100%; margin-top:10px;
+  }
+
+  .mic-error{ display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13px; padding:12px 14px; border-radius:10px; margin-top:16px; text-align:center; }
+  .mic-error.active{ display:block; }
+
+  /* ---------- recording screen ---------- */
+  #recordScreen{ text-align:center; }
+  .rec-ring-wrap{ position:relative; width:180px; height:180px; margin:0 auto 24px; }
+  .rec-ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .rec-ring-bg{ fill:none; stroke:var(--fog-dim); stroke-width:8; }
+  .rec-ring-fill{ fill:none; stroke:var(--clarity); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .2s linear; }
+  .rec-time{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:34px; color:var(--ink); }
+  .rec-status{ font-size:14px; color:var(--text-muted-light); margin-bottom:18px; }
+  .rec-status.live{ color:var(--alert); font-weight:700; }
+  #liveCanvas{ width:100%; height:70px; display:block; border-radius:12px; background:var(--fog); margin-bottom:22px; }
+  .rec-prompt{ font-size:13px; color:var(--text-muted-light); margin-bottom:24px; }
+
+  /* ---------- analyzing screen ---------- */
+  #analyzingScreen{ text-align:center; padding:50px 0; }
+  .spinner{
+    width:52px; height:52px; border-radius:50%; margin:0 auto 22px;
+    border:3px solid var(--fog-dim); border-top-color:var(--clarity); animation:spin .9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #analyzingScreen p{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:16px; }
+
+  /* ---------- result screen ---------- */
+  #resultScreen{ text-align:center; }
+  .stress-gauge{ position:relative; width:190px; height:190px; margin:0 auto 8px; }
+  .stress-gauge svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .gauge-bg{ fill:none; stroke:var(--fog-dim); stroke-width:14; }
+  .gauge-fill{ fill:none; stroke-width:14; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+  .gauge-label{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .gauge-pct{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:38px; color:var(--ink); }
+  .gauge-word{ font-size:12.5px; color:var(--text-muted-light); margin-top:2px; }
+  .result-title{ font-size:19px; margin:18px 0 8px; }
+  .result-desc{ font-size:14px; color:var(--text-muted-light); max-width:44ch; margin:0 auto 26px; }
+
+  .signals{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:26px; text-align:left; }
+  @media (max-width:520px){ .signals{ grid-template-columns:1fr; } }
+  .signal-card{ background:var(--fog); border-radius:14px; padding:14px 16px; }
+  .signal-card .signal-label{ font-size:12px; color:var(--text-muted-light); margin-bottom:6px; }
+  .signal-card canvas{ width:100%; height:44px; display:block; }
+
+  .recs{ text-align:left; background:var(--fog); border-radius:14px; padding:18px 20px; margin-bottom:24px; }
+  .recs h3{ font-size:14px; margin-bottom:10px; }
+  .recs ul{ padding-inline-start:20px; display:flex; flex-direction:column; gap:8px; }
+  .recs li{ font-size:13.5px; color:var(--text-on-light); }
+
+  .disclaimer{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:14px 16px; font-size:12px; color:var(--text-muted-light); margin-top:20px; text-align:center; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; margin-top:50px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+</style>
+</head>
+<body>
+
+<site-nav active="quizzes"></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">Experimental Tool</div>
+    <h1>Voice Stress Meter</h1>
+    <p>Record your voice for 30 seconds, and we'll analyze your tone, volume, and speech pace to give you an approximate indicator of your stress level right now.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="card">
+
+      <!-- ---- intro screen ---- -->
+      <div class="screen active" id="introScreen">
+        <div class="intro-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
+        <h2>Ready to try it?</h2>
+        <p class="intro-text">All you need is a microphone and a relatively quiet space.</p>
+        <div class="steps">
+          <div class="step-row"><span class="step-num">1</span><p>Press "Start Recording" and allow the site to access your microphone.</p></div>
+          <div class="step-row"><span class="step-num">2</span><p>Speak naturally about anything you like for 30 seconds — the content doesn't matter, your voice does.</p></div>
+          <div class="step-row"><span class="step-num">3</span><p>Instantly get an approximate indicator of your stress level along with a few recommendations.</p></div>
+        </div>
+        <button class="btn-primary" id="startBtn">Start Recording</button>
+        <div class="mic-error" id="micError">Couldn't access the microphone. Make sure you've granted the site/app permission in your device settings, then try again.</div>
+      </div>
+
+      <!-- ---- recording screen ---- -->
+      <div class="screen" id="recordScreen">
+        <div class="rec-ring-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="rec-ring-bg" cx="50" cy="50" r="44"/>
+            <circle class="rec-ring-fill" id="recRing" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="0"/>
+          </svg>
+          <div class="rec-time" id="recTime">0:30</div>
+        </div>
+        <div class="rec-status live" id="recStatus">Recording now...</div>
+        <canvas id="liveCanvas" width="600" height="140"></canvas>
+        <p class="rec-prompt">Speak naturally — about your day, or anything on your mind.</p>
+        <button class="btn-ghost" id="stopEarlyBtn">Finish Now</button>
+      </div>
+
+      <!-- ---- analyzing screen ---- -->
+      <div class="screen" id="analyzingScreen">
+        <div class="spinner"></div>
+        <p>Analyzing your voice...</p>
+      </div>
+
+      <!-- ---- result screen ---- -->
+      <div class="screen" id="resultScreen">
+        <div class="stress-gauge">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="42"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+          </svg>
+          <div class="gauge-label">
+            <span class="gauge-pct" id="gaugePct"></span>
+            <span class="gauge-word">Stress Index</span>
+          </div>
+        </div>
+        <h2 class="result-title" id="resultTitle"></h2>
+        <p class="result-desc" id="resultDesc"></p>
+
+        <div class="signals">
+          <div class="signal-card">
+            <div class="signal-label">Voice Pitch Over Time</div>
+            <canvas id="pitchChart" width="260" height="88"></canvas>
+          </div>
+          <div class="signal-card">
+            <div class="signal-label">Voice Volume Over Time</div>
+            <canvas id="volumeChart" width="260" height="88"></canvas>
+          </div>
+        </div>
+
+        <div class="recs">
+          <h3>Recommendations Based on Your Result</h3>
+          <ul id="recsList"></ul>
+        </div>
+
+        <button class="btn-primary" id="retryBtn">Try Again</button>
+        <div class="disclaimer">This quiz is general awareness content and is not an official diagnostic tool or a substitute for consultation with a licensed mental health professional. The recording is analyzed entirely on your own device and is never uploaded to any server.</div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+<app-bottom-nav active="quizzes"></app-bottom-nav>
+
+<script>
+/* ============================================================
+   Bewoduh — Voice Stress Meter.
+   ------------------------------------------------------------
+   All analysis happens entirely locally inside the user's
+   browser via the Web Audio API — the recorded audio is never
+   stored or sent anywhere.
+
+   Methodology (approximate and non-clinical, clearly disclosed
+   to the user): from the recorded audio we compute three simple
+   voice properties roughly every ~150ms:
+   - Fundamental pitch frequency (Pitch/F0) via the autocorrelation
+     algorithm — a standard, well-known DSP technique.
+   - Volume (RMS).
+   - The ratio of time that actually contains voiced speech
+     (voiced ratio), as an approximate indicator of speech
+     pace/flow versus pauses.
+   We then convert each property into a 0-100 score using
+   approximate ranges for normal human speech, and combine them
+   with a simple weighted formula into a single stress index.
+   This is not a scientifically validated model for measuring
+   stress — it's an interactive self-reflection tool, and this is
+   made clear in the disclaimer below the result.
+   ============================================================ */
+
+const introScreen = document.getElementById('introScreen');
+const recordScreen = document.getElementById('recordScreen');
+const analyzingScreen = document.getElementById('analyzingScreen');
+const resultScreen = document.getElementById('resultScreen');
+const screens = [introScreen, recordScreen, analyzingScreen, resultScreen];
+
+function showScreen(screen) {
+  screens.forEach(s => s.classList.remove('active'));
+  screen.classList.add('active');
+}
+
+const RECORD_SECONDS = 30;
+const RING_CIRCUMFERENCE = 2 * Math.PI * 44;
+document.getElementById('recRing').setAttribute('stroke-dasharray', RING_CIRCUMFERENCE.toFixed(1));
+
+let audioContext, analyser, micStream, sourceNode;
+let sampleFrames = []; // { t, pitch, rms } roughly every ~150ms
+let recordTimer = null, sampleTimer = null, elapsedMs = 0;
+let liveCanvasCtx = document.getElementById('liveCanvas').getContext('2d');
+
+// ---- pitch detection via autocorrelation, based on a realistic
+// human voice frequency range (70-400 Hz) to speed up computation ----
+function detectPitch(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.012) return { pitch: -1, rms }; // silence or very faint background noise
+
+  const minLag = Math.floor(sampleRate / 400);
+  const maxLag = Math.floor(sampleRate / 70);
+  let bestLag = -1, bestCorr = 0;
+
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let corr = 0;
+    for (let i = 0; i < SIZE - lag; i++) corr += buf[i] * buf[i + lag];
+    if (corr > bestCorr) { bestCorr = corr; bestLag = lag; }
+  }
+
+  if (bestLag <= 0) return { pitch: -1, rms };
+  return { pitch: sampleRate / bestLag, rms };
+}
+
+async function startRecording() {
+  document.getElementById('micError').classList.remove('active');
+  document.getElementById('startBtn').disabled = true;
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    console.error('getUserMedia error:', err);
+    document.getElementById('micError').classList.add('active');
+    document.getElementById('startBtn').disabled = false;
+    return;
+  }
+
+  document.getElementById('startBtn').disabled = false;
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  sourceNode = audioContext.createMediaStreamSource(micStream);
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 2048;
+  sourceNode.connect(analyser);
+
+  sampleFrames = [];
+  elapsedMs = 0;
+  showScreen(recordScreen);
+  drawLiveVisualizer();
+
+  const timeBuf = new Float32Array(analyser.fftSize);
+  sampleTimer = setInterval(() => {
+    analyser.getFloatTimeDomainData(timeBuf);
+    const { pitch, rms } = detectPitch(timeBuf, audioContext.sampleRate);
+    sampleFrames.push({ t: elapsedMs, pitch, rms });
+  }, 150);
+
+  recordTimer = setInterval(() => {
+    elapsedMs += 100;
+    const remaining = Math.max(0, RECORD_SECONDS - elapsedMs / 1000);
+    document.getElementById('recTime').textContent = '0:' + String(Math.ceil(remaining)).padStart(2, '0');
+    const progress = Math.min(1, elapsedMs / (RECORD_SECONDS * 1000));
+    document.getElementById('recRing').style.strokeDashoffset = (RING_CIRCUMFERENCE * (1 - progress)).toFixed(1);
+    if (remaining <= 0) finishRecording();
+  }, 100);
+}
+
+function drawLiveVisualizer() {
+  if (!analyser) return;
+  const freqData = new Uint8Array(analyser.frequencyBinCount);
+  const canvas = document.getElementById('liveCanvas');
+  const ctx = liveCanvasCtx;
+
+  function draw() {
+    if (!analyser) return; // recording stopped
+    requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(freqData);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barCount = 40;
+    const step = Math.floor(freqData.length / barCount);
+    const barWidth = canvas.width / barCount;
+    for (let i = 0; i < barCount; i++) {
+      const v = freqData[i * step] / 255;
+      const barHeight = Math.max(3, v * canvas.height);
+      ctx.fillStyle = 'rgba(201,161,95,' + (0.4 + v * 0.6).toFixed(2) + ')';
+      ctx.fillRect(i * barWidth + 1, canvas.height - barHeight, barWidth - 2, barHeight);
+    }
+  }
+  draw();
+}
+
+function stopMic() {
+  clearInterval(recordTimer);
+  clearInterval(sampleTimer);
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  if (audioContext) audioContext.close();
+  analyser = null;
+}
+
+function finishRecording() {
+  stopMic();
+  showScreen(analyzingScreen);
+  setTimeout(() => analyzeAndShowResults(), 1600);
+}
+
+document.getElementById('startBtn').addEventListener('click', startRecording);
+document.getElementById('stopEarlyBtn').addEventListener('click', () => {
+  if (elapsedMs < 8000) return; // need at least 8 seconds for a reasonable analysis
+  finishRecording();
+});
+
+// ---- analysis after recording ends ----
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function analyzeAndShowResults() {
+  const voiced = sampleFrames.filter(f => f.pitch > 0);
+  const voicedRatio = sampleFrames.length ? voiced.length / sampleFrames.length : 0;
+
+  let avgPitch = 0, pitchStd = 0, avgRmsDb = -50;
+  if (voiced.length >= 3) {
+    avgPitch = voiced.reduce((s, f) => s + f.pitch, 0) / voiced.length;
+    const variance = voiced.reduce((s, f) => s + Math.pow(f.pitch - avgPitch, 2), 0) / voiced.length;
+    pitchStd = Math.sqrt(variance);
+  }
+  if (sampleFrames.length) {
+    const avgRms = sampleFrames.reduce((s, f) => s + f.rms, 0) / sampleFrames.length;
+    avgRmsDb = avgRms > 0 ? 20 * Math.log10(avgRms) : -60;
+  }
+
+  // normalize each property to a 0-100 score based on approximate ranges for normal human speech
+  const pitchVariabilityScore = clamp((pitchStd - 5) / (55 - 5), 0, 1) * 100;
+  const volumeScore = clamp((avgRmsDb + 45) / (45 - 15), 0, 1) * 100;
+  const paceScore = clamp((voicedRatio - 0.3) / (0.9 - 0.3), 0, 1) * 100;
+
+  const stressIndex = Math.round(0.4 * pitchVariabilityScore + 0.35 * volumeScore + 0.25 * paceScore);
+  showResults(stressIndex, voiced);
+}
+
+const STRESS_LEVELS = [
+  { max: 35, word: 'Low', color: '#4CAF50',
+    title: 'Your indicator suggests relative calm right now',
+    desc: 'Your tone and pace stayed relatively steady during the recording — that\'s a good sign, but it\'s only a snapshot and doesn\'t reflect your state permanently.',
+    recs: ['Keep up the habits that help you reach this calm — enough sleep, quiet time, daily movement.', 'Try the tool again at different times of your day to see if there\'s a pattern.'] },
+  { max: 65, word: 'Moderate', color: 'var(--clarity)',
+    title: 'Your indicator points to moderate stress',
+    desc: 'There were some fluctuations in your tone and volume — this could be a sign of passing stress or fatigue, not necessarily something concerning.',
+    recs: ['Try a simple deep-breathing exercise before continuing your day.', 'Notice if this stress is linked to a specific situation today.', 'Browse our articles on managing stress and anxiety for more practical tools.'] },
+  { max: 100, word: 'High', color: 'var(--alert)',
+    title: 'Your indicator points to relatively high stress',
+    desc: 'Your voice showed noticeable fluctuations in tone, volume, and speech pace during the recording — this isn\'t a diagnosis, but it\'s worth paying attention to.',
+    recs: ['Take a few minutes now to calm your breathing before continuing.', 'If this feeling continues for days, talking to a licensed mental health professional could help.', 'Try the "Quick Screening Test" (PHQ-2) for more peace of mind about your general mental well-being.'] },
+];
+
+function showResults(stressIndex, voicedFrames) {
+  showScreen(resultScreen);
+
+  const level = STRESS_LEVELS.find(l => stressIndex <= l.max);
+  document.getElementById('gaugePct').textContent = stressIndex + '%';
+  document.getElementById('resultTitle').textContent = level.title;
+  document.getElementById('resultDesc').textContent = level.desc;
+  document.getElementById('recsList').innerHTML = level.recs.map(r => `<li>${r}</li>`).join('');
+
+  const gaugeFill = document.getElementById('gaugeFill');
+  const GAUGE_CIRC = 2 * Math.PI * 42;
+  gaugeFill.style.stroke = level.color;
+  requestAnimationFrame(() => {
+    gaugeFill.style.strokeDashoffset = (GAUGE_CIRC * (1 - stressIndex / 100)).toFixed(1);
+  });
+
+  drawMiniChart('pitchChart', voicedFrames.map(f => f.pitch), '#C9A15F');
+  drawMiniChart('volumeChart', sampleFrames.map(f => f.rms * 400), '#8B6F7E');
+}
+
+function drawMiniChart(canvasId, values, color) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!values.length) return;
+
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const range = Math.max(max - min, 1);
+  const step = canvas.width / Math.max(values.length - 1, 1);
+
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  values.forEach((v, i) => {
+    const x = i * step;
+    const y = canvas.height - ((v - min) / range) * (canvas.height - 8) - 4;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  showScreen(introScreen);
+});
+</script>
+
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>
