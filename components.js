@@ -110,6 +110,34 @@ const styleTag = document.createElement('style');
 styleTag.textContent = STYLE_FIX;
 document.head.appendChild(styleTag);
 
+/* أيقونة الشاشة الرئيسية + اسم "Bewoduh" الثابت عند إضافة أي صفحة
+   (عربي أو إنجليزي) للشاشة الرئيسية من المتصفح — تُضاف هون مرة
+   وحدة بدل تكرارها بكل صفحة */
+(function injectHomeScreenTags(){
+  const head = document.head;
+  const addLink = (rel, href, extra) => {
+    const l = document.createElement('link');
+    l.rel = rel; l.href = href;
+    if (extra) Object.assign(l, extra);
+    head.appendChild(l);
+  };
+  const addMeta = (name, content) => {
+    const m = document.createElement('meta');
+    m.name = name; m.content = content;
+    head.appendChild(m);
+  };
+  addLink('manifest', '/manifest.json');
+  addLink('icon', '/favicon-32.png', { type: 'image/png', sizes: '32x32' });
+  addLink('icon', '/favicon-16.png', { type: 'image/png', sizes: '16x16' });
+  addLink('icon', '/icon-192.png', { type: 'image/png', sizes: '192x192' });
+  addLink('apple-touch-icon', '/apple-touch-icon.png');
+  addMeta('theme-color', '#241D2E');
+  addMeta('apple-mobile-web-app-title', 'Bewoduh');
+  addMeta('apple-mobile-web-app-capable', 'yes');
+  addMeta('mobile-web-app-capable', 'yes');
+  addMeta('apple-mobile-web-app-status-bar-style', 'black-translucent');
+})();
+
 class SiteNav extends HTMLElement {
   connectedCallback() {
     if (isRunningInApp()) {
