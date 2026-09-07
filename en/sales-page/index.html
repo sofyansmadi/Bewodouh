@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>احجز استشارتك — بوضوح</title>
-<meta name="description" content="احجز استشارتك مع مختص نفسي مرخّص من فريق بوضوح — دعم مباشر يناسب وضعك أنت تحديداً.">
+<title>Book Your Consultation — Bewoduh</title>
+<meta name="description" content="Book your consultation with a licensed mental health professional from the Bewoduh team — direct support tailored to your specific situation.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -25,20 +25,9 @@
   .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity); font-weight:600; margin-bottom:14px; }
   .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity); display:inline-block; }
 
-  nav{ position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
-  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; }
-  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); }
-  .brand span{ color:var(--clarity); }
-  .nav-links{ display:flex; align-items:center; gap:28px; }
-  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; transition:color .2s; }
-  .nav-links a:hover{ color:var(--fog); }
-  a.nav-cta{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px; padding:9px 20px; border-radius:100px; transition:.2s; }
-  a.nav-cta:hover{ background:var(--clarity-soft); }
-  @media (max-width:780px){ .nav-links{ display:none; } }
-
-  .hero{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:76px 0 60px; text-align:center; }
+  .hero{ background:radial-gradient(120% 90% at 25% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:76px 0 60px; text-align:center; }
   .hero .eyebrow{ justify-content:center; color:var(--clarity-soft); }
-  .hero h1{ color:var(--fog); font-size:clamp(30px,4.8vw,46px); font-weight:900; max-width:20ch; margin:0 auto; line-height:1.4; }
+  .hero h1{ color:var(--fog); font-size:clamp(30px,4.8vw,46px); font-weight:900; max-width:22ch; margin:0 auto; line-height:1.4; }
   .hero p{ color:var(--text-muted-dark); font-size:16px; max-width:52ch; margin:16px auto 0; }
   .trust-row{ display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin-top:32px; }
   .trust-item{ display:flex; align-items:center; gap:8px; color:var(--text-muted-dark); font-size:13.5px; }
@@ -75,7 +64,7 @@
   .progress-label{ font-size:12px; color:var(--text-muted-light); font-weight:600; white-space:nowrap; }
   .q-text{ font-family:'Noto Kufi Arabic',sans-serif; font-size:18px; font-weight:700; margin-bottom:20px; }
   .q-options{ display:flex; flex-direction:column; gap:10px; }
-  .q-opt{ border:1.5px solid var(--fog-dim); border-radius:12px; padding:13px 16px; background:var(--fog); cursor:pointer; font-size:14.5px; text-align:right; transition:.15s; font-family:inherit; }
+  .q-opt{ border:1.5px solid var(--fog-dim); border-radius:12px; padding:13px 16px; background:var(--fog); cursor:pointer; font-size:14.5px; text-align:left; transition:.15s; font-family:inherit; }
   .q-opt:hover{ border-color:var(--clarity); background:#fff; }
 
   .urgent-note{ background:var(--alert); color:#fff; border-radius:16px; padding:22px 24px; max-width:640px; margin:0 auto; }
@@ -102,7 +91,7 @@
   @media (max-width:560px){ .pkg-grid{ grid-template-columns:1fr; } }
   .pkg-card{ background:#fff; border:1.5px solid var(--fog-dim); border-radius:18px; padding:26px 22px; position:relative; transition:.2s; }
   .pkg-card.recommended{ border-color:var(--clarity); box-shadow:0 20px 40px -24px rgba(201,161,95,.4); }
-  .pkg-badge{ position:absolute; top:-11px; right:20px; background:var(--clarity); color:var(--ink); font-size:11px; font-weight:700; padding:4px 12px; border-radius:100px; }
+  .pkg-badge{ position:absolute; top:-11px; left:20px; background:var(--clarity); color:var(--ink); font-size:11px; font-weight:700; padding:4px 12px; border-radius:100px; }
   .pkg-card h3{ font-size:16px; margin-bottom:6px; }
   .pkg-card .pkg-desc{ font-size:12.5px; color:var(--text-muted-light); margin-bottom:16px; min-height:32px; }
   .pkg-price{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:24px; color:var(--ink); margin-bottom:2px; }
@@ -126,9 +115,6 @@
     font-family:'IBM Plex Sans Arabic', sans-serif; font-size:15px; color:var(--text-on-light); background:var(--fog); transition:.15s;
   }
   .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
-  /* إصلاح مشكلة معروفة بمتصفح Safari بالآيفون: حقل datetime-local
-     بيتجاهل width:100% وبيطلع أعرض من الصندوق الأبيض المحيط فيه إلا
-     إذا ألغينا مظهره الافتراضي بهذا الشكل. */
   .field input[type="datetime-local"]{ -webkit-appearance:none; appearance:none; }
   .field textarea{ min-height:110px; resize:vertical; }
   .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; }
@@ -150,9 +136,6 @@
 
   .disclaimer-note{ background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius); padding:22px 24px; }
   .disclaimer-note p{ font-size:13.5px; color:var(--text-muted-light); }
-
-  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
-  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
 </style>
 </head>
 <body>
@@ -161,53 +144,53 @@
 
 <header class="hero">
   <div class="wrap-narrow">
-    <div class="eyebrow">استشارات فردية</div>
-    <h1>قبل أن تقرر بمفردك، تحدث مع من يفهم</h1>
-    <p>دعم مباشر من مختصين نفسيين مرخّصين، يناسب وضعك أنت تحديداً — وليست وصفة عامة تُطبَّق على الجميع.</p>
+    <div class="eyebrow">Individual Consultations</div>
+    <h1>Before you decide alone, talk to someone who understands</h1>
+    <p>Direct support from licensed mental health professionals, tailored to your specific situation — not a one-size-fits-all prescription applied to everyone.</p>
     <div class="trust-row">
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> مختصون مرخّصون</div>
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> جلسات مرنة عن بُعد</div>
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M9 12l2 2 4-4"/></svg> خصوصية تامة</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> Licensed Professionals</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Flexible Remote Sessions</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M9 12l2 2 4-4"/></svg> Complete Privacy</div>
     </div>
   </div>
 </header>
 
 <section>
   <div class="wrap">
-    <div class="eyebrow" style="justify-content:center;">الخطوة الأولى</div>
-    <h2 class="section-title" style="text-align:center;">ما نوع الاستشارة التي تحتاجها؟</h2>
-    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">اختر الأقرب إلى وضعك، وسنطرح عليك بضعة أسئلة بسيطة لنقترح عليك الخيار الأنسب.</p>
+    <div class="eyebrow" style="justify-content:center;">Step One</div>
+    <h2 class="section-title" style="text-align:center;">What Type of Consultation Do You Need?</h2>
+    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">Choose the one closest to your situation, and we'll ask a few simple questions to suggest the best option for you.</p>
 
     <div class="type-grid" id="typeGrid">
       <div class="type-card" data-type="relationship">
         <div class="type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></div>
-        <h3>علاقتي الحالية</h3>
-        <p>أريد أن أفهم إن كان في علاقتي نمط يستحق الانتباه.</p>
+        <h3>My Current Relationship</h3>
+        <p>I want to understand if there's a pattern in my relationship worth paying attention to.</p>
       </div>
       <div class="type-card" data-type="breakup">
         <div class="type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></div>
-        <h3>التعافي بعد انفصال</h3>
-        <p>أريد دعماً أتجاوز به مرحلة صعبة بعد علاقة انتهت.</p>
+        <h3>Healing After a Breakup</h3>
+        <p>I want support to get through a difficult phase after a relationship ended.</p>
       </div>
       <div class="type-card" data-type="mental-health">
         <div class="type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg></div>
-        <h3>صحتي النفسية عموماً</h3>
-        <p>قلق، توتر، أو أشعر أنني بحاجة إلى التحدث مع أحد فقط.</p>
+        <h3>My Mental Health in General</h3>
+        <p>Anxiety, stress, or I just feel like I need to talk to someone.</p>
       </div>
       <div class="type-card" data-type="urgent">
         <div class="type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L14.7 3.86a2 2 0 0 0-3.4 0z"/></svg></div>
-        <h3>دعم عاجل الآن</h3>
-        <p>أريد التحدث مع أحد خلال الساعات القادمة.</p>
+        <h3>Urgent Support Now</h3>
+        <p>I want to talk to someone within the next few hours.</p>
       </div>
     </div>
 
     <!-- Urgent path: skip straight to crisis note + recommendation -->
     <div class="triage-block" id="urgentBlock">
       <div class="urgent-note">
-        <h3>نحن هنا من أجلك</h3>
-        <p>إذا كنت تحتاج التحدث مع أحد الآن، تواصل فوراً مع أحد جهات الدعم التالية في الأردن، وسنرتّب لك أيضاً استشارة عاجلة بأقرب وقت ممكن.</p>
-        <a href="tel:00962795440416">الخط الساخن لأخصائيي علم النفس العيادي (JCPA) — 00962795440416</a>
-        <a href="tel:911" style="margin-right:8px;">حالات الطوارئ — 911</a>
+        <h3>We're Here for You</h3>
+        <p>If you need to talk to someone right now, contact one of the following support services in Jordan immediately, and we'll also arrange an urgent consultation for you as soon as possible.</p>
+        <a href="tel:00962795440416">Jordanian Clinical Psychologists Association (JCPA) Hotline — 00962795440416</a>
+        <a href="tel:911" style="margin-left:8px;">Emergency — 911</a>
       </div>
     </div>
 
@@ -216,14 +199,14 @@
       <div class="triage-card">
         <div class="progress-row">
           <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:33%;"></div></div>
-          <span class="progress-label" id="progressLabel">١ / ٣</span>
+          <span class="progress-label" id="progressLabel">1 / 3</span>
         </div>
         <div id="questionsHost"></div>
       </div>
     </div>
 
     <div class="reco-banner" id="recoBanner">
-      <span id="recoLabel">التوصية بناءً على إجاباتك</span>
+      <span id="recoLabel">Recommendation Based on Your Answers</span>
       <p id="recoText"></p>
     </div>
   </div>
@@ -231,9 +214,9 @@
 
 <section id="packages" style="background:#fff;">
   <div class="wrap">
-    <div class="eyebrow" style="justify-content:center;">الباقات والأسعار</div>
-    <h2 class="section-title" style="text-align:center;">اختر ما يناسبك</h2>
-    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">يمكنك إلغاء الاشتراك في أي من الباقات في أي وقت. اختر العملة التي تناسبك أدناه.</p>
+    <div class="eyebrow" style="justify-content:center;">Packages & Pricing</div>
+    <h2 class="section-title" style="text-align:center;">Choose What Works for You</h2>
+    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">You can cancel any package at any time. Choose your preferred currency below.</p>
 
     <div class="currency-switcher" id="currencySwitcher">
       <button type="button" class="currency-btn active" data-currency="USD">🇺🇸 USD</button>
@@ -246,7 +229,7 @@
     <pricing-cards class="pkg-grid"></pricing-cards>
 
     <div class="payment-methods">
-      <div class="payment-methods-label">طرق الدفع المقبولة</div>
+      <div class="payment-methods-label">Accepted Payment Methods</div>
       <div class="payment-icons">
         <span style="display:flex; align-items:center; gap:5px;" aria-label="Apple Pay">
           <svg viewBox="0 0 24 24" fill="currentColor" style="height:18px;"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.856 4.42 2.955 4.45z"/></svg>
@@ -262,55 +245,55 @@
 
 <section id="booking-form">
   <div class="wrap-narrow">
-    <div class="eyebrow" style="justify-content:center;">آخر خطوة</div>
-    <h2 class="section-title" style="text-align:center;">أكمل بيانات الحجز</h2>
-    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">سيتواصل معك فريقنا خلال ٢٤ ساعة لتأكيد الموعد وطريقة الدفع.</p>
+    <div class="eyebrow" style="justify-content:center;">Last Step</div>
+    <h2 class="section-title" style="text-align:center;">Complete Your Booking Details</h2>
+    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">Our team will contact you within 24 hours to confirm the appointment and payment method.</p>
 
     <div class="specialist-banner" id="specialistBanner" style="display:none; background:var(--ink); color:var(--clarity-soft); text-align:center; border-radius:14px; padding:14px 18px; margin-bottom:24px; font-size:14px; font-weight:600;"></div>
 
     <div class="booking-card">
       <form id="bookingForm">
         <div class="field">
-          <label for="bkName">الاسم الكامل</label>
+          <label for="bkName">Full Name</label>
           <input type="text" id="bkName" required>
         </div>
         <div class="field">
-          <label for="bkEmail">البريد الإلكتروني</label>
+          <label for="bkEmail">Email Address</label>
           <input type="email" id="bkEmail" required>
         </div>
         <div class="field">
-          <label for="bkPhone">رقم الهاتف / واتساب</label>
+          <label for="bkPhone">Phone Number / WhatsApp</label>
           <input type="tel" id="bkPhone" required>
         </div>
         <div class="field">
-          <label for="bkPackage">الباقة المطلوبة</label>
+          <label for="bkPackage">Requested Package</label>
           <select id="bkPackage" required>
-            <option value="">اختر باقة...</option>
-            <option value="استشارة سريعة">استشارة سريعة — $35</option>
-            <option value="باقة الانطلاقة">باقة الانطلاقة — $150 / شهرياً</option>
-            <option value="باقة المرافقة">باقة المرافقة — $300 / كل ٣ أشهر</option>
-            <option value="دعم فوري">دعم فوري — $70</option>
-            <option value="تجربة - بوضوح">تجربة - بوضوح — $1</option>
+            <option value="">Choose a package...</option>
+            <option value="استشارة سريعة">Quick Consultation — $35</option>
+            <option value="باقة الانطلاقة">Launch Package — $150 / monthly</option>
+            <option value="باقة المرافقة">Companion Package — $300 / every 3 months</option>
+            <option value="دعم فوري">Immediate Support — $70</option>
+            <option value="تجربة - بوضوح">Test - Bewoduh — $1</option>
           </select>
         </div>
         <div class="field">
-          <label for="bkDateTime">الموعد المفضّل للجلسة</label>
-          <input type="datetime-local" id="bkDateTime" required style="direction:ltr; text-align:right;">
-          <div class="hint" id="dateTimeHint" style="font-size:12.5px; color:var(--text-muted-light); margin-top:6px;">يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن.</div>
+          <label for="bkDateTime">Preferred Appointment Time</label>
+          <input type="datetime-local" id="bkDateTime" required style="text-align:left;">
+          <div class="hint" id="dateTimeHint" style="font-size:12.5px; color:var(--text-muted-light); margin-top:6px;">The appointment must be at least 24 hours from now.</div>
         </div>
         <div class="field">
-          <label for="bkMessage">أي شيء تودّ إخبارنا به قبل الجلسة؟ (اختياري)</label>
-          <textarea id="bkMessage" placeholder="لا حاجة لكتابة تفاصيل كثيرة — فقط أي شيء يساعد المختص على فهم وضعك أكثر."></textarea>
+          <label for="bkMessage">Anything you'd like to tell us before the session? (optional)</label>
+          <textarea id="bkMessage" placeholder="No need to write a lot of detail — just anything that helps the specialist understand your situation better."></textarea>
         </div>
-        <button type="submit" class="btn-primary">إرسال طلب الحجز</button>
+        <button type="submit" class="btn-primary">Send Booking Request</button>
       </form>
 
       <div class="success-box" id="successBox">
         <div class="check">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h2>تم استلام طلب حجزك</h2>
-        <p>خطوة أخيرة فقط — أكمل الدفع بالأسفل لتأكيد موعدك.</p>
+        <h2>Your Booking Request Has Been Received</h2>
+        <p>Just one last step — complete the payment below to confirm your appointment.</p>
         <div id="paypal-button-container" style="max-width:340px; margin:20px auto 0;"></div>
       </div>
     </div>
@@ -319,32 +302,32 @@
 
 <section style="background:#fff;">
   <div class="wrap-narrow">
-    <div class="eyebrow" style="justify-content:center;">قبل أن تحجز</div>
-    <h2 class="section-title" style="text-align:center;">أسئلة شائعة</h2>
+    <div class="eyebrow" style="justify-content:center;">Before You Book</div>
+    <h2 class="section-title" style="text-align:center;">Frequently Asked Questions</h2>
 
     <div class="faq-item">
-      <div class="faq-q">هل الاستشارات تُعقد عن بُعد أم حضورياً؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
-      <div class="faq-a"><div class="faq-a-inner">جميع الاستشارات تُعقد عن بُعد (مكالمة صوتية أو فيديو) عبر رابط آمن يصلك بعد تأكيد الحجز، بما يناسب وقتك ويحافظ على خصوصيتك.</div></div>
+      <div class="faq-q">Are consultations held remotely or in person?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="faq-a"><div class="faq-a-inner">All consultations are held remotely (voice or video call) via a secure link sent to you after your booking is confirmed, fitting your schedule and protecting your privacy.</div></div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">من هم المختصون الذين سأتحدث معهم؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
-      <div class="faq-a"><div class="faq-a-inner">مختصون نفسيون مرخّصون نتحقق من مؤهلاتهم قبل انضمامهم إلى فريق بوضوح. بعد الحجز، نحدد لك المختص الأنسب حسب نوع الاستشارة التي اخترتها.</div></div>
+      <div class="faq-q">Who are the specialists I'll be talking to?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="faq-a"><div class="faq-a-inner">Licensed mental health professionals whose qualifications we verify before they join the Bewoduh team. After booking, we assign you the most suitable specialist based on the type of consultation you chose.</div></div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">ماذا لو لم يناسبني المختص الأول؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
-      <div class="faq-a"><div class="faq-a-inner">يمكنك طلب تغيير المختص في أي وقت دون أي تعقيد — هدفنا أن تشعر بالراحة الكافية لتكون الاستشارة مفيدة فعلاً.</div></div>
+      <div class="faq-q">What if the first specialist isn't the right fit for me?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="faq-a"><div class="faq-a-inner">You can request to change specialists at any time without any hassle — our goal is for you to feel comfortable enough for the consultation to actually be helpful.</div></div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">هل بياناتي وحديثي مع المختص سري؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
-      <div class="faq-a"><div class="faq-a-inner">نعم. كل جلساتك سرية بينك وبين المختص، وبياناتك الشخصية محمية ولا تُشارك مع أي طرف ثالث. راجع سياسة الخصوصية لمزيد من التفاصيل.</div></div>
+      <div class="faq-q">Is my data and my conversation with the specialist confidential?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="faq-a"><div class="faq-a-inner">Yes. All your sessions are confidential between you and the specialist, and your personal data is protected and never shared with any third party. See our Privacy Policy for more details.</div></div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">هل يمكنني إلغاء موعدي أو إعادة جدولته؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
-      <div class="faq-a"><div class="faq-a-inner">نعم، يمكنك إعادة جدولة موعدك حتى ٢٤ ساعة قبل الجلسة دون أي رسوم إضافية.</div></div>
+      <div class="faq-q">Can I cancel or reschedule my appointment?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="faq-a"><div class="faq-a-inner">Yes, you can reschedule your appointment up to 24 hours before the session at no extra charge.</div></div>
     </div>
 
     <div class="disclaimer-note" style="margin-top:32px;">
-      <p><b>تنويه مهم:</b> الاستشارات المقدمة من فريق بوضوح مكملة للرعاية الطبية وليست بديلاً عنها في الحالات التي تتطلب تشخيصاً أو علاجاً طبياً متخصصاً. إذا كانت سلامتك الجسدية أو النفسية مهددة بشكل مباشر، توجّه فوراً لجهة دعم مختصة أو أقرب طوارئ.</p>
+      <p><b>Important note:</b> Consultations provided by the Bewoduh team complement medical care and are not a substitute for it in cases requiring specialized medical diagnosis or treatment. If your physical or psychological safety is directly at risk, seek immediate help from a specialized support service or the nearest emergency service.</p>
     </div>
   </div>
 </section>
@@ -353,50 +336,47 @@
 
 <script>
 /* ============================================================
-   بوضوح — صفحة حجز الاستشارات (نسخة تجريبية أولية).
+   بوضوح — صفحة حجز الاستشارات، النسخة الإنجليزية.
    ------------------------------------------------------------
-   هذه الصفحة الآن واجهة كاملة لتدفق الحجز (اختيار النوع، أسئلة
-   فرز بسيطة، توصية بباقة، ونموذج حجز)، لكن لا يوجد خلفها بعد:
-   - نظام دفع حقيقي (Stripe / PayTabs / HyperPay وغيرها).
-   - نظام حجز مواعيد فعلي يربط بتقويم المختصين.
-   - قاعدة بيانات تُخزَّن فيها طلبات الحجز.
-   حالياً، الإرسال يعرض رسالة تأكيد فقط دون أي معالجة حقيقية.
-   لتفعيلها فعلياً، تحتاج ربط نموذج الحجز بخادم خاص يتعامل مع
-   الدفع والجدولة الحقيقية.
+   نفس منطق النسخة العربية بالضبط. ملاحظة مهمة: قيم الباقات
+   (data-pkg-name، بيانات bkPackage، PACKAGE_RECOMMENDATIONS.name)
+   تبقى بالعربي دائماً حتى لو النص المعروض إنجليزي — لأنها لازم
+   تتطابق مع القيم المخزّنة فعلياً بقاعدة البيانات وبجدول bookings،
+   ومع قائمة PACKAGE_PRICES_USD يلي بتحدد مبلغ الدفع عبر PayPal.
    ============================================================ */
 
 // ---------- Type selection + triage questions ----------
 const TRIAGE_QUESTIONS = {
   relationship: [
-    { text: "هل تشعر أن أنماطاً معينة في علاقتك تتكرر وتقلقك؟", options: [
-      { label: "نادراً", pts: 0 }, { label: "أحياناً", pts: 1 }, { label: "بشكل متكرر ومستمر", pts: 2 } ]},
-    { text: "هل حاولت التحدث عن هذا القلق مع شريكك من قبل؟", options: [
-      { label: "نعم وتحسن الوضع", pts: 0 }, { label: "حاولت لكن لم يتغير شيء", pts: 1 }, { label: "لم أستطع المحاولة بعد", pts: 2 } ]},
-    { text: "كم من الوقت وأنت تشعر بهذا القلق؟", options: [
-      { label: "أقل من شهر", pts: 0 }, { label: "بضعة أشهر", pts: 1 }, { label: "أكثر من سنة", pts: 2 } ]},
+    { text: "Do you feel that certain patterns in your relationship keep repeating and worrying you?", options: [
+      { label: "Rarely", pts: 0 }, { label: "Sometimes", pts: 1 }, { label: "Frequently and continuously", pts: 2 } ]},
+    { text: "Have you tried talking about this concern with your partner before?", options: [
+      { label: "Yes, and things improved", pts: 0 }, { label: "I tried, but nothing changed", pts: 1 }, { label: "I haven't been able to try yet", pts: 2 } ]},
+    { text: "How long have you been feeling this concern?", options: [
+      { label: "Less than a month", pts: 0 }, { label: "A few months", pts: 1 }, { label: "More than a year", pts: 2 } ]},
   ],
   breakup: [
-    { text: "متى انتهت العلاقة؟", options: [
-      { label: "منذ أكثر من سنة", pts: 0 }, { label: "خلال الأشهر الماضية", pts: 1 }, { label: "خلال الأسابيع الماضية", pts: 2 } ]},
-    { text: "هل ما زلت على تواصل متكرر مع الشخص السابق؟", options: [
-      { label: "لا إطلاقاً", pts: 0 }, { label: "أحياناً", pts: 1 }, { label: "نعم بشكل متكرر", pts: 2 } ]},
-    { text: "كيف تصف تأثير هذا الانفصال على حياتك اليومية؟", options: [
-      { label: "محدود", pts: 0 }, { label: "ملحوظ أحياناً", pts: 1 }, { label: "يؤثر بشكل كبير", pts: 2 } ]},
+    { text: "When did the relationship end?", options: [
+      { label: "More than a year ago", pts: 0 }, { label: "In the past few months", pts: 1 }, { label: "In the past few weeks", pts: 2 } ]},
+    { text: "Are you still in frequent contact with your ex?", options: [
+      { label: "Not at all", pts: 0 }, { label: "Sometimes", pts: 1 }, { label: "Yes, frequently", pts: 2 } ]},
+    { text: "How would you describe this breakup's impact on your daily life?", options: [
+      { label: "Limited", pts: 0 }, { label: "Noticeable at times", pts: 1 }, { label: "Significantly affects it", pts: 2 } ]},
   ],
   "mental-health": [
-    { text: "هل يؤثر القلق أو التوتر على حياتك اليومية؟", options: [
-      { label: "نادراً", pts: 0 }, { label: "أحياناً", pts: 1 }, { label: "بشكل متكرر", pts: 2 } ]},
-    { text: "كيف كان نومك خلال الأسبوعين الماضيين؟", options: [
-      { label: "طبيعي", pts: 0 }, { label: "متقطع أحياناً", pts: 1 }, { label: "مضطرب بشكل واضح", pts: 2 } ]},
-    { text: "هل جربت من قبل التحدث مع مختص نفسي؟", options: [
-      { label: "نعم وأفادني", pts: 0 }, { label: "لا، هذه أول مرة", pts: 1 }, { label: "جربت لكن لم أكمل", pts: 2 } ]},
+    { text: "Does anxiety or stress affect your daily life?", options: [
+      { label: "Rarely", pts: 0 }, { label: "Sometimes", pts: 1 }, { label: "Frequently", pts: 2 } ]},
+    { text: "How has your sleep been over the past two weeks?", options: [
+      { label: "Normal", pts: 0 }, { label: "Occasionally disrupted", pts: 1 }, { label: "Clearly disturbed", pts: 2 } ]},
+    { text: "Have you tried talking to a mental health professional before?", options: [
+      { label: "Yes, and it helped me", pts: 0 }, { label: "No, this would be my first time", pts: 1 }, { label: "I tried but didn't continue", pts: 2 } ]},
   ],
 };
 
 const PACKAGE_RECOMMENDATIONS = [
-  { min: 0, max: 2, name: "استشارة سريعة", text: "بناءً على إجاباتك، قد تكون جلسة واحدة كافية حالياً للبدء والتعرف على المختص." },
-  { min: 3, max: 4, name: "باقة الانطلاقة", text: "بناءً على إجاباتك، باقة الانطلاقة (٤ جلسات شهرياً) تمنحك متابعة حقيقية وبداية جيدة." },
-  { min: 5, max: 6, name: "باقة المرافقة", text: "بناءً على إجاباتك، باقة المرافقة (٨ جلسات) تناسب وضعك أكثر لأنها تسمح بمتابعة أعمق." },
+  { min: 0, max: 2, name: "استشارة سريعة", text: "Based on your answers, a single session might be enough for now to get started and meet a specialist." },
+  { min: 3, max: 4, name: "باقة الانطلاقة", text: "Based on your answers, the Launch Package (4 sessions a month) gives you real follow-up and a good start." },
+  { min: 5, max: 6, name: "باقة المرافقة", text: "Based on your answers, the Companion Package (8 sessions) suits your situation better because it allows for deeper follow-up." },
 ];
 
 let currentType = null;
@@ -411,8 +391,6 @@ const progressFill = document.getElementById('progressFill');
 const progressLabel = document.getElementById('progressLabel');
 const recoBanner = document.getElementById('recoBanner');
 const recoText = document.getElementById('recoText');
-const arabicNums = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-function toArabicNum(n){ return String(n).split('').map(d => arabicNums[+d]).join(''); }
 
 typeCards.forEach(card => {
   card.addEventListener('click', () => {
@@ -444,7 +422,7 @@ function renderQuestion(){
   const questions = TRIAGE_QUESTIONS[currentType];
   const q = questions[currentQ];
   progressFill.style.width = ((currentQ + 1) / questions.length * 100) + '%';
-  progressLabel.textContent = toArabicNum(currentQ + 1) + ' / ' + toArabicNum(questions.length);
+  progressLabel.textContent = (currentQ + 1) + ' / ' + questions.length;
 
   questionsHost.innerHTML = '';
   const qt = document.createElement('div');
@@ -483,7 +461,7 @@ function showRecommendation(){
   recoBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// ---------- Currency switcher (تحويل تقريبي، <pricing-cards> هو اللي بيعمل التحويل الفعلي) ----------
+// ---------- Currency switcher (approximate conversion; <pricing-cards> does the actual conversion) ----------
 document.querySelectorAll('.currency-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
@@ -500,19 +478,18 @@ window.addEventListener('package-selected', (e) => {
 
 // ---------- Booking form ----------
 
-// لو المستخدم إجت من صفحة أخصائي محدد، نوريها بانر تأكيد ونحفظ الاسم لاستخدامه بالحجز
+// If the user came from a specific specialist's page, show a confirmation banner and save the name for the booking
 const urlParams = new URLSearchParams(window.location.search);
 const chosenSpecialist = urlParams.get('specialist');
 if (chosenSpecialist) {
   const banner = document.getElementById('specialistBanner');
-  banner.textContent = `ستحجز مع: ${chosenSpecialist}`;
+  banner.textContent = `You'll be booking with: ${chosenSpecialist}`;
   banner.style.display = 'block';
 }
 
 // نحدد أقل تاريخ/وقت مسموح (بعد ٢٤ ساعة من الآن بالضبط) ونحطه كحد أدنى لحقل الاختيار
 function setMinDateTime(){
   const min = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  // تنسيق YYYY-MM-DDTHH:mm المطلوب لحقل datetime-local، حسب توقيت جهاز المستخدم
   const pad = (n) => String(n).padStart(2, '0');
   const formatted = `${min.getFullYear()}-${pad(min.getMonth()+1)}-${pad(min.getDate())}T${pad(min.getHours())}:${pad(min.getMinutes())}`;
   document.getElementById('bkDateTime').min = formatted;
@@ -529,16 +506,16 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (selectedDate < minAllowed) {
     dateTimeHint.style.color = 'var(--alert)';
-    dateTimeHint.textContent = 'يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن. عدّل الوقت واختر موعداً آخر.';
+    dateTimeHint.textContent = 'The appointment must be at least 24 hours from now. Adjust the time and choose another slot.';
     document.getElementById('bkDateTime').focus();
     return;
   }
   dateTimeHint.style.color = 'var(--text-muted-light)';
-  dateTimeHint.textContent = 'يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن.';
+  dateTimeHint.textContent = 'The appointment must be at least 24 hours from now.';
 
   const submitBtn = document.querySelector('#bookingForm button[type="submit"]');
   submitBtn.disabled = true;
-  submitBtn.textContent = 'جارٍ الإرسال...';
+  submitBtn.textContent = 'Sending...';
 
   const payload = {
     full_name: document.getElementById('bkName').value.trim(),
@@ -552,9 +529,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'إرسال طلب الحجز';
+    submitBtn.textContent = 'Send Booking Request';
     dateTimeHint.style.color = 'var(--alert)';
-    dateTimeHint.textContent = 'تعذّر إرسال الحجز — لم يتم إعداد الاتصال بقاعدة البيانات بعد.';
+    dateTimeHint.textContent = 'Unable to send the booking — the database connection hasn\'t been set up yet.';
     return;
   }
 
@@ -562,9 +539,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (error) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'إرسال طلب الحجز';
+    submitBtn.textContent = 'Send Booking Request';
     dateTimeHint.style.color = 'var(--alert)';
-    dateTimeHint.textContent = 'حدث خطأ أثناء إرسال الحجز. حاول مرة أخرى.';
+    dateTimeHint.textContent = 'An error occurred while sending the booking. Please try again.';
     console.error('booking submit:', error);
     return;
   }
@@ -574,7 +551,6 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   // نعرض زر دفع PayPal مباشرة داخل الصفحة بمبلغ الباقة الفعلي، وعند
   // نجاح الدفع (onApprove) نعلّم الحجز كمدفوع عبر دالة mark_booking_paid
-  // — بدون أي تحويل إلى موقع خارجي، وبدون منح الزائر صلاحية تعديل الحجوزات مباشرة
   const PACKAGE_PRICES_USD = {
     'استشارة سريعة': 35,
     'باقة الانطلاقة': 150,
@@ -599,11 +575,11 @@ document.getElementById('bookingForm').addEventListener('submit', async function
           order_id: details.id,
         });
         if (markError) console.error('mark_booking_paid error:', markError);
-        paypalContainer.innerHTML = '<p style="text-align:center; color:var(--clarity); font-weight:700;">تم الدفع بنجاح ✓</p>';
+        paypalContainer.innerHTML = '<p style="text-align:center; color:var(--clarity); font-weight:700;">Payment successful ✓</p>';
       },
       onError: function (err) {
         console.error('PayPal error:', err);
-        paypalContainer.insertAdjacentHTML('afterend', '<p style="text-align:center; color:var(--alert); font-size:13px; margin-top:10px;">حدث خطأ أثناء الدفع. حاول مرة أخرى أو تواصل معنا.</p>');
+        paypalContainer.insertAdjacentHTML('afterend', '<p style="text-align:center; color:var(--alert); font-size:13px; margin-top:10px;">An error occurred during payment. Please try again or contact us.</p>');
       },
     }).render('#paypal-button-container');
   }

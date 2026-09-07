@@ -264,6 +264,18 @@ const CURRENCY_RATES = {
   EGP: { rate: 49, symbol: 'ج.م' },
 };
 
+/* ============================================================
+   ترجمة عرض الباقات للصفحة الإنجليزية فقط — راجع الملاحظة داخل
+   PricingCards.renderCards() لسبب وجود هذا الجدول بدل تخزين
+   ترجمة بقاعدة البيانات مباشرة.
+   ============================================================ */
+const PACKAGE_TRANSLATIONS_EN = {
+  'استشارة سريعة': { name: 'Quick Consultation', description: 'One session, ideal if you want to try it out before committing.', price_unit: 'One session (45 minutes)' },
+  'باقة الانطلاقة': { name: 'Launch Package', description: 'Four sessions a month, a good start for real follow-up.', price_unit: 'Monthly — 4 sessions' },
+  'باقة المرافقة': { name: 'Companion Package', description: 'Eight sessions every 3 months, for deeper follow-up and real impact.', price_unit: 'Every 3 months — 8 sessions' },
+  'دعم فوري': { name: 'Immediate Support', description: 'An urgent session within 24 hours, if your situation needs faster action.', price_unit: 'Urgent session' },
+};
+
 function convertPackagePrice(usdPrice, currencyCode) {
   const currency = CURRENCY_RATES[currencyCode] || CURRENCY_RATES.USD;
   const converted = Number(usdPrice) * currency.rate;
@@ -304,15 +316,24 @@ class PricingCards extends HTMLElement {
   }
 
   renderCards() {
+    const en = isEnglish();
     this.innerHTML = this._packages.map(pkg => {
       const { amount, symbol } = convertPackagePrice(pkg.price, this._currentCurrency);
+      // الباقات مخزّنة بالعربي فقط بقاعدة البيانات (name/description/price_unit).
+      // على الصفحة الإنجليزية، نعرض ترجمة جاهزة لهذه النصوص فقط للعرض —
+      // القيمة الفعلية المُرسَلة مع الحجز (data-pkg-name) تضل بالعربي دائماً،
+      // حتى تتطابق مع PACKAGE_PRICES_USD وسجلات لوحة التحكم.
+      const t = en ? (PACKAGE_TRANSLATIONS_EN[pkg.name] || {}) : {};
+      const displayName = t.name || pkg.name;
+      const displayDesc = t.description || pkg.description || '';
+      const displayUnit = t.price_unit || pkg.price_unit;
       return `
       <div class="pkg-card${pkg.is_recommended ? ' recommended' : ''}" data-pkg-id="${pkg.id}">
-        ${pkg.is_recommended ? '<span class="pkg-badge">الأكثر طلباً</span>' : ''}
-        <h3>${pkg.name}</h3>
-        <p class="pkg-desc">${pkg.description || ''}</p>
-        <div class="pkg-price">${amount} ${symbol} <span>${pkg.price_unit}</span></div>
-        <button class="pkg-select-btn" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
+        ${pkg.is_recommended ? `<span class="pkg-badge">${en ? 'Most Popular' : 'الأكثر طلباً'}</span>` : ''}
+        <h3>${displayName}</h3>
+        <p class="pkg-desc">${displayDesc}</p>
+        <div class="pkg-price">${amount} ${symbol} <span>${displayUnit}</span></div>
+        <button class="pkg-select-btn" data-pkg-name="${pkg.name}">${en ? 'Choose This Package' : 'اختر هذه الباقة'}</button>
       </div>
     `;
     }).join('');
