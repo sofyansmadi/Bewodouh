@@ -209,8 +209,8 @@ class SiteFooter extends HTMLElement {
     const h = (p) => appHref(localizedHref(p));
     const brandName = en ? 'Bewoduh' : 'بوضوح';
     const tagline = en
-      ? 'Educational content about relationships and personality patterns, for anyone who wants to see their relationship more clearly.'
-      : 'محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.';
+      ? 'Educational content about mental health, relationships, and personality patterns, for anyone who wants to see themselves and their relationships more clearly.'
+      : 'محتوى توعوي حول الصحة النفسية والعلاقات وأنماط الشخصية، لكل من يريد أن يرى نفسه وعلاقاته بوضوح أكبر.';
 
     if (variant === 'rich') {
       this.innerHTML = `
