@@ -540,7 +540,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   submitBtn.disabled = true;
   submitBtn.textContent = 'جارٍ الإرسال...';
 
+  const bookingId = crypto.randomUUID();
   const payload = {
+    id: bookingId,
     full_name: document.getElementById('bkName').value.trim(),
     email: document.getElementById('bkEmail').value.trim(),
     phone: document.getElementById('bkPhone').value.trim(),
@@ -558,7 +560,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     return;
   }
 
-  const { data: newBooking, error } = await supabaseClient.from('bookings').insert(payload).select().single();
+  const { error } = await supabaseClient.from('bookings').insert(payload);
 
   if (error) {
     submitBtn.disabled = false;
@@ -595,7 +597,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
       onApprove: async function (data, actions) {
         const details = await actions.order.capture();
         const { error: markError } = await supabaseClient.rpc('mark_booking_paid', {
-          booking_id: newBooking.id,
+          booking_id: bookingId,
           order_id: details.id,
         });
         if (markError) console.error('mark_booking_paid error:', markError);

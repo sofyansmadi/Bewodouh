@@ -56,6 +56,7 @@
     background:none; color:var(--text-muted-light); font-weight:600; font-size:13.5px; padding:10px; border-radius:100px;
     border:none; cursor:pointer; font-family:inherit; width:100%; margin-top:10px;
   }
+  .btn-ghost:disabled{ opacity:.4; cursor:not-allowed; }
 
   .mic-error{ display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13px; padding:12px 14px; border-radius:10px; margin-top:16px; text-align:center; }
   .mic-error.active{ display:block; }
@@ -152,7 +153,7 @@
         <div class="rec-status live" id="recStatus">Recording now...</div>
         <canvas id="liveCanvas" width="600" height="140"></canvas>
         <p class="rec-prompt">Speak naturally — about your day, or anything on your mind.</p>
-        <button class="btn-ghost" id="stopEarlyBtn">Finish Now</button>
+        <button class="btn-ghost" id="stopEarlyBtn" disabled>Finish Now (available in 8s)</button>
       </div>
 
       <!-- ---- analyzing screen ---- -->
@@ -240,6 +241,7 @@ function showScreen(screen) {
 }
 
 const RECORD_SECONDS = 30;
+const MIN_RECORD_MS = 8000;
 const RING_CIRCUMFERENCE = 2 * Math.PI * 44;
 document.getElementById('recRing').setAttribute('stroke-dasharray', RING_CIRCUMFERENCE.toFixed(1));
 
@@ -293,6 +295,9 @@ async function startRecording() {
 
   sampleFrames = [];
   elapsedMs = 0;
+  const stopBtn = document.getElementById('stopEarlyBtn');
+  stopBtn.disabled = true;
+  stopBtn.textContent = 'Finish Now (available in 8s)';
   showScreen(recordScreen);
   drawLiveVisualizer();
 
@@ -309,6 +314,16 @@ async function startRecording() {
     document.getElementById('recTime').textContent = '0:' + String(Math.ceil(remaining)).padStart(2, '0');
     const progress = Math.min(1, elapsedMs / (RECORD_SECONDS * 1000));
     document.getElementById('recRing').style.strokeDashoffset = (RING_CIRCUMFERENCE * (1 - progress)).toFixed(1);
+
+    const stopBtn = document.getElementById('stopEarlyBtn');
+    if (elapsedMs >= MIN_RECORD_MS && stopBtn.disabled) {
+      stopBtn.disabled = false;
+      stopBtn.textContent = 'Finish Now';
+    } else if (elapsedMs < MIN_RECORD_MS) {
+      const secsLeft = Math.ceil((MIN_RECORD_MS - elapsedMs) / 1000);
+      stopBtn.textContent = 'Finish Now (available in ' + secsLeft + 's)';
+    }
+
     if (remaining <= 0) finishRecording();
   }, 100);
 }
@@ -353,7 +368,7 @@ function finishRecording() {
 
 document.getElementById('startBtn').addEventListener('click', startRecording);
 document.getElementById('stopEarlyBtn').addEventListener('click', () => {
-  if (elapsedMs < 8000) return; // need at least 8 seconds for a reasonable analysis
+  if (elapsedMs < MIN_RECORD_MS) return; // need at least 8 seconds for a reasonable analysis
   finishRecording();
 });
 

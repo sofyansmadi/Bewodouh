@@ -619,7 +619,7 @@ if (isRunningInApp()) {
 
     #bwd-ai-composer{ flex-shrink:0; border-top:1px solid #E6DFDA; background:#F3EEEA; padding:10px 10px 6px; display:flex; gap:8px; align-items:flex-end; }
     #bwd-ai-input{
-      flex:1; border:1px solid #E6DFDA; outline:none; resize:none; font-family:inherit; font-size:13.5px;
+      flex:1; border:1px solid #E6DFDA; outline:none; resize:none; font-family:inherit; font-size:16px;
       background:#fff; border-radius:14px; padding:9px 12px; max-height:80px; line-height:1.5; color:#2A2130;
     }
     #bwd-ai-input:focus{ border-color:#C9A15F; }
@@ -815,7 +815,6 @@ if (isRunningInApp()) {
         ? "Hi! I'm Bewoduh AI — ask me anything about your relationships or feelings."
         : 'أهلاً! أنا بوضوح AI — اسألني عن أي شيء يخص علاقاتك أو مشاعرك.');
     }
-    inputEl.focus();
   }
   function closePanel(){
     panel.classList.remove('open');
