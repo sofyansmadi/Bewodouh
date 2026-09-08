@@ -158,17 +158,8 @@
     background:#fff; border:1px solid var(--fog-dim); border-radius:22px; overflow:hidden;
     box-shadow:0 30px 60px -35px rgba(36,29,46,.3);
   }
-  .feature-visual{
-    background:radial-gradient(120% 120% at 20% 0%, var(--ink-soft), var(--ink));
-    display:flex; align-items:center; justify-content:center; padding:50px; position:relative; overflow:hidden;
-  }
-  .feature-visual .book{
-    width:180px; height:240px; background:linear-gradient(160deg, var(--plum), var(--ink));
-    border-radius:6px; box-shadow:0 25px 50px -15px rgba(0,0,0,.6);
-    display:flex; align-items:center; justify-content:center; text-align:center; padding:20px;
-    border:1px solid rgba(201,161,95,.35);
-  }
-  .feature-visual .book span{ color:var(--clarity-soft); font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; line-height:1.7; }
+  .feature-visual{ position:relative; overflow:hidden; min-height:340px; }
+  .feature-visual img{ width:100%; height:100%; object-fit:cover; display:block; }
   .feature-body{ padding:46px 40px; display:flex; flex-direction:column; justify-content:center; }
   .feature-badge{
     display:inline-block; background:rgba(201,161,95,.15); color:#8a6a2e;
@@ -244,9 +235,8 @@
   <div class="hero-blob"></div>
   <div class="hero-blob2"></div>
   <div class="wrap">
-    <div class="eyebrow hero-eyebrow">محتوى عربي عن العلاقات وأنماط الشخصية</div>
-    <h1 class="hero-title">نرى علاقاتنا <em>بوضوح</em></h1>
-    <p class="hero-sub">بوضوح مساحة عربية تساعدك على فهم علاقاتك وأنماط الشخصية من حولك، من خلال محتوى مباشر مبني على أساس واضح.</p>
+    <h1 class="hero-title"><em>بوضوح</em></h1>
+    <p class="hero-sub">منصة تساعدك على فهم نفسك، علاقاتك وأنماط الشخصية من حولك، من خلال استشارة مختصين ومحتوى مباشر مبني على أساس واضح.</p>
     <div class="hero-actions">
       <a href="#booking" class="btn-primary">احجز استشارتك الأولى</a>
       <a href="#pillars" class="btn-ghost">عن ماذا نتحدث؟</a>
@@ -282,12 +272,12 @@
   <div class="wrap reveal center">
     <div class="eyebrow hero-eyebrow" style="justify-content:center;">المواضيع التي نتناولها</div>
     <h2 class="section-title" style="color:var(--fog)">أربع زوايا، رحلة وحدة متكاملة</h2>
-    <p class="section-lede text-muted">من أول لحظة تلاحظ فيها أن شيئاً ما غير صحيح، وصولاً إلى بناء علاقات صحية من الأساس.</p>
+    <p class="section-lede text-muted">من فهم نفسك ودوافعك، إلى ملاحظة الأنماط في علاقاتك، وصولاً إلى بناء علاقات صحية من الأساس.</p>
     <div class="pillars-grid">
       <div class="pillar-card">
         <span class="pillar-tag">الزاوية الأولى</span>
-        <h3>التعرف المبكر على العلامات</h3>
-        <p>كيف تلاحظ نمطاً سامّاً قبل أن يكبر ويصبح هو "المعتاد" الجديد في حياتك.</p>
+        <h3>فهم نفسك أولاً</h3>
+        <p>الوعي بمشاعرك ودوافعك وأنماطك الشخصية هو نقطة البداية لأي تغيير حقيقي، قبل حتى الحديث عن علاقاتك مع الآخرين.</p>
       </div>
       <div class="pillar-card">
         <span class="pillar-tag">الزاوية الثانية</span>
@@ -315,7 +305,7 @@
     <p class="section-lede">دعم مباشر من مختصين نفسيين مرخّصين، يناسب وضعك أنت تحديداً — وليس وصفة عامة تناسب الجميع.</p>
     <div class="feature-card">
       <div class="feature-visual">
-        <div class="book"><span>بوضوح<br>—<br>استشارة<br>مع مختص مرخّص</span></div>
+        <img src="https://images.pexels.com/photos/16269026/pexels-photo-16269026.jpeg?auto=compress&cs=tinysrgb&w=1000" alt="كرسي مريح في ركن هادئ ودافئ يرمز لجلسة استشارة مع مختص مرخّص" loading="lazy">
       </div>
       <div class="feature-body">
         <span class="feature-badge">استشارة فردية أو باقة متكاملة</span>
@@ -334,7 +324,7 @@
     <h2 class="section-title" style="color:var(--fog); margin:0 auto;">المحتوى اليومي على وسائل التواصل الاجتماعي</h2>
     <p class="section-lede text-muted">قبل أن تشترك في النشرة أو تشتري أي دليل، يمكنك التعرف علينا أكثر من خلال المحتوى اليومي.</p>
     <div class="follow-grid">
-      <a href="https://instagram.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> إنستغرام</a>
+      <a href="https://www.instagram.com/Bewoduh" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> إنستغرام</a>
       <a href="https://tiktok.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> تيك توك</a>
       <a href="https://youtube.com" target="_blank" rel="noopener" class="follow-chip"><span class="follow-dot"></span> يوتيوب</a>
     </div>

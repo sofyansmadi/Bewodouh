@@ -233,7 +233,7 @@ class SiteFooter extends HTMLElement {
         </div>
         <div class="footer-col">
           <h4>${en ? 'Contact' : 'تواصل'}</h4>
-          <a href="https://instagram.com" target="_blank" rel="noopener">${en ? 'Instagram' : 'إنستغرام'}</a>
+          <a href="https://www.instagram.com/Bewoduh" target="_blank" rel="noopener">${en ? 'Instagram' : 'إنستغرام'}</a>
           <a href="https://tiktok.com" target="_blank" rel="noopener">${en ? 'TikTok' : 'تيك توك'}</a>
           <a href="${h('/contact/')}">${en ? 'Contact Us' : 'راسلنا'}</a>
         </div>
@@ -546,3 +546,283 @@ if (isRunningInApp()) {
     }
   });
 }
+
+/* ============================================================
+   زر بوضوح AI العائم — بوب أب محادثة سريع بدون مغادرة الصفحة.
+   ------------------------------------------------------------
+   يظهر بكل صفحات الموقع (تطبيق + ويب لابتوب + ويب موبايل) ما عدا
+   صفحة /ai/ نفسها (لأنها أصلاً المحادثة الكاملة). يفتح نافذة
+   محادثة صغيرة فوق الصفحة الحالية، بنفس منطق الاتصال بـEdge
+   Function المستخدم بصفحة /ai/ — بدون أي تنقّل لصفحة جديدة، تماماً
+   متل نافذة محادثة ماسنجر.
+   ============================================================ */
+(function initAIWidget(){
+  if (window.location.pathname.includes('/ai/')) return;
+
+  const en = isEnglish();
+  const WIDGET_ANON_KEY = 'sb_publishable_x9K72kDpiGOXcCG2uNqXJg_I80x7-Mb';
+  const AI_ENDPOINT = 'https://vhsdhskynuwfloonjfec.supabase.co/functions/v1/ai-chat';
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #bwd-ai-btn{
+      position:fixed; bottom:24px; inset-inline-end:24px; z-index:300;
+      width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+      background:conic-gradient(from 0deg, #E4C98A, #C9A15F, #8B6F7E, #E4C98A);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 14px 30px -10px rgba(36,29,46,.5);
+      transition:transform .2s ease;
+    }
+    #bwd-ai-btn:hover{ transform:scale(1.06); }
+    #bwd-ai-btn::before{ content:""; position:absolute; inset:2.5px; border-radius:50%; background:#241D2E; }
+    #bwd-ai-btn svg{ position:relative; z-index:1; width:24px; height:24px; }
+    body.bwd-app-mode #bwd-ai-btn{ bottom:88px; }
+
+    #bwd-ai-panel{
+      position:fixed; bottom:92px; inset-inline-end:24px; z-index:300;
+      width:min(370px, 92vw); height:min(560px, 74vh);
+      background:#F3EEEA; border-radius:20px; overflow:hidden;
+      box-shadow:0 30px 70px -20px rgba(36,29,46,.5);
+      display:none; flex-direction:column;
+      border:1px solid #E6DFDA;
+    }
+    body.bwd-app-mode #bwd-ai-panel{ bottom:156px; }
+    #bwd-ai-panel.open{ display:flex; animation:bwdPanelIn .25s ease; }
+    @keyframes bwdPanelIn{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+
+    #bwd-ai-head{ background:#241D2E; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    #bwd-ai-head .bwd-brand{ display:flex; align-items:center; gap:10px; }
+    #bwd-ai-head .bwd-orb{ width:30px; height:30px; border-radius:50%; position:relative; background:conic-gradient(from 0deg, #E4C98A, #C9A15F, #8B6F7E, #E4C98A); flex-shrink:0; }
+    #bwd-ai-head .bwd-orb::before{ content:""; position:absolute; inset:2px; border-radius:50%; background:#241D2E; }
+    #bwd-ai-head .bwd-orb svg{ position:relative; z-index:1; width:14px; height:14px; }
+    #bwd-ai-head .bwd-title{ color:#F3EEEA; font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:14.5px; }
+    #bwd-ai-head .bwd-sub{ color:#B7ACC4; font-size:10.5px; margin-top:1px; }
+    #bwd-ai-close{ background:none; border:none; color:#B7ACC4; cursor:pointer; padding:4px; }
+    #bwd-ai-close:hover{ color:#F3EEEA; }
+    #bwd-ai-close svg{ width:18px; height:18px; }
+
+    #bwd-ai-msgs{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; font-family:'IBM Plex Sans Arabic', sans-serif; }
+    .bwd-msg{ display:flex; gap:8px; max-width:88%; }
+    .bwd-msg.bot{ align-self:flex-start; }
+    .bwd-msg.user{ align-self:flex-end; flex-direction:row-reverse; }
+    .bwd-bubble{ padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.7; }
+    .bwd-msg.bot .bwd-bubble{ background:#fff; border:1px solid #E6DFDA; color:#2A2130; }
+    .bwd-msg.user .bwd-bubble{ background:#241D2E; color:#EDE7E3; }
+    .bwd-bubble p{ margin:0 0 8px; } .bwd-bubble p:last-child{ margin-bottom:0; }
+    .bwd-bubble ul,.bwd-bubble ol{ margin:0 0 8px; padding-inline-start:18px; } .bwd-bubble li{ margin-bottom:4px; }
+    .bwd-bubble strong{ color:#241D2E; }
+    .bwd-msg.user .bwd-bubble strong{ color:#F3EEEA; }
+    .bwd-typing{ display:inline-flex; gap:4px; padding:12px 13px; }
+    .bwd-dot{ width:6px; height:6px; border-radius:50%; background:#8B6F7E; opacity:.5; animation:bwdBlink 1.2s infinite; }
+    .bwd-dot:nth-child(2){ animation-delay:.2s; } .bwd-dot:nth-child(3){ animation-delay:.4s; }
+    @keyframes bwdBlink{ 0%,80%,100%{ opacity:.3; } 40%{ opacity:1; } }
+
+    #bwd-ai-composer{ flex-shrink:0; border-top:1px solid #E6DFDA; background:#F3EEEA; padding:10px 10px 6px; display:flex; gap:8px; align-items:flex-end; }
+    #bwd-ai-input{
+      flex:1; border:1px solid #E6DFDA; outline:none; resize:none; font-family:inherit; font-size:13.5px;
+      background:#fff; border-radius:14px; padding:9px 12px; max-height:80px; line-height:1.5; color:#2A2130;
+    }
+    #bwd-ai-input:focus{ border-color:#C9A15F; }
+    #bwd-ai-send{
+      width:36px; height:36px; border-radius:50%; background:#241D2E; border:none; cursor:pointer; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #bwd-ai-send:disabled{ opacity:.35; cursor:not-allowed; }
+    #bwd-ai-send svg{ width:15px; height:15px; }
+    #bwd-ai-disclaimer{ font-size:10px; color:#6B6072; text-align:center; padding:0 12px 10px; background:#F3EEEA; flex-shrink:0; }
+
+    @media (max-width:480px){
+      #bwd-ai-panel{ width:94vw; inset-inline-end:3vw; height:min(560px, 78vh); }
+      #bwd-ai-btn{ inset-inline-end:18px; bottom:18px; }
+      body.bwd-app-mode #bwd-ai-btn{ bottom:84px; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  if (isRunningInApp()) document.body.classList.add('bwd-app-mode');
+
+  const sparkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#E4C98A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>';
+  const closeSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  const sendSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="6 11 12 5 18 11"></polyline></svg>';
+
+  const btn = document.createElement('button');
+  btn.id = 'bwd-ai-btn';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', en ? 'Chat with Bewoduh AI' : 'تحدث مع بوضوح AI');
+  btn.innerHTML = sparkSVG;
+  document.body.appendChild(btn);
+
+  const panel = document.createElement('div');
+  panel.id = 'bwd-ai-panel';
+  panel.innerHTML = `
+    <div id="bwd-ai-head">
+      <div class="bwd-brand">
+        <div class="bwd-orb">${sparkSVG}</div>
+        <div>
+          <div class="bwd-title">${en ? 'Bewoduh AI' : 'بوضوح AI'}</div>
+          <div class="bwd-sub">${en ? 'Relationships & emotions only' : 'متخصص بالعلاقات والمشاعر فقط'}</div>
+        </div>
+      </div>
+      <button id="bwd-ai-close" type="button" aria-label="${en ? 'Close' : 'إغلاق'}">${closeSVG}</button>
+    </div>
+    <div id="bwd-ai-msgs"></div>
+    <div id="bwd-ai-composer">
+      <textarea id="bwd-ai-input" rows="1" placeholder="${en ? "Write what you're feeling..." : 'اكتب ما تشعر به...'}"></textarea>
+      <button id="bwd-ai-send" type="button" aria-label="${en ? 'Send' : 'إرسال'}">${sendSVG}</button>
+    </div>
+    <div id="bwd-ai-disclaimer">${en ? 'General support — not a substitute for a licensed professional.' : 'دعم عام، وليس بديلاً عن استشارة مختص مرخّص.'}</div>
+  `;
+  document.body.appendChild(panel);
+
+  const msgsEl = panel.querySelector('#bwd-ai-msgs');
+  const inputEl = panel.querySelector('#bwd-ai-input');
+  const sendBtn = panel.querySelector('#bwd-ai-send');
+  const closeBtn = panel.querySelector('#bwd-ai-close');
+
+  let history = [];
+  let isThinking = false;
+  let opened = false;
+
+  function ensureMarked(){
+    return new Promise((resolve) => {
+      if (typeof window.marked !== 'undefined') { resolve(); return; }
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+      s.onload = () => resolve();
+      document.head.appendChild(s);
+    });
+  }
+
+  function renderMarkdown(text){
+    return (typeof window.marked !== 'undefined') ? window.marked.parse(text) : text.replace(/\n/g, '<br>');
+  }
+
+  function scrollToBottom(){ msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+  function appendMessage(role, text){
+    const msg = document.createElement('div');
+    msg.className = 'bwd-msg ' + role;
+    const bubble = document.createElement('div');
+    bubble.className = 'bwd-bubble';
+    if (role === 'bot') bubble.innerHTML = renderMarkdown(text);
+    else bubble.textContent = text;
+    msg.appendChild(bubble);
+    msgsEl.appendChild(msg);
+    scrollToBottom();
+    return bubble;
+  }
+
+  function appendTyping(){
+    const msg = document.createElement('div');
+    msg.className = 'bwd-msg bot';
+    msg.id = 'bwdTyping';
+    msg.innerHTML = '<div class="bwd-bubble bwd-typing"><span class="bwd-dot"></span><span class="bwd-dot"></span><span class="bwd-dot"></span></div>';
+    msgsEl.appendChild(msg);
+    scrollToBottom();
+  }
+  function removeTyping(){ const t = document.getElementById('bwdTyping'); if (t) t.remove(); }
+
+  async function streamAIResponse(userText, historyList, onFirstChunk, onUpdate){
+    const body = { message: userText, history: historyList.map(h => ({ role: h.role, text: h.text })) };
+    if (en) body.lang = 'en';
+    const res = await fetch(AI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + WIDGET_ANON_KEY },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok || !res.body) throw new Error('bad response');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', fullText = '', startedReply = false;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop();
+      for (const part of parts) {
+        const line = part.trim();
+        if (!line || !line.startsWith('data:')) continue;
+        const jsonStr = line.slice(5).trim();
+        if (!jsonStr) continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const deltaText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (!deltaText) continue;
+          if (!startedReply) { startedReply = true; onFirstChunk(); }
+          fullText += deltaText;
+          onUpdate(fullText);
+        } catch (e) {}
+      }
+    }
+    if (!fullText) {
+      fullText = en ? "Sorry, I couldn't reply right now. Please try again shortly." : 'عذراً، لم أستطع الردّ الآن. حاول مرة أخرى بعد قليل.';
+      if (!startedReply) onFirstChunk();
+      onUpdate(fullText);
+    }
+    return fullText;
+  }
+
+  function autoResize(){
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 80) + 'px';
+  }
+
+  async function sendMessage(text){
+    const trimmed = text.trim();
+    if (!trimmed || isThinking) return;
+    await ensureMarked();
+    appendMessage('user', trimmed);
+    inputEl.value = '';
+    autoResize();
+    isThinking = true;
+    sendBtn.disabled = true;
+    appendTyping();
+
+    let bubble = null;
+    try {
+      const fullText = await streamAIResponse(
+        trimmed, history,
+        () => { removeTyping(); bubble = appendMessage('bot', ''); },
+        (accumulated) => { if (bubble) { bubble.innerHTML = renderMarkdown(accumulated); scrollToBottom(); } }
+      );
+      history.push({ role: 'user', text: trimmed });
+      history.push({ role: 'bot', text: fullText });
+    } catch (err) {
+      removeTyping();
+      const errText = en ? 'A connection error occurred. Please check your internet and try again.' : 'حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مرة أخرى.';
+      if (bubble) bubble.innerHTML = renderMarkdown(errText);
+      else appendMessage('bot', errText);
+    }
+    isThinking = false;
+    sendBtn.disabled = false;
+  }
+
+  inputEl.addEventListener('input', autoResize);
+  sendBtn.addEventListener('click', () => sendMessage(inputEl.value));
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputEl.value); }
+  });
+
+  function openPanel(){
+    panel.classList.add('open');
+    btn.innerHTML = closeSVG;
+    if (!opened) {
+      opened = true;
+      appendMessage('bot', en
+        ? "Hi! I'm Bewoduh AI — ask me anything about your relationships or feelings."
+        : 'أهلاً! أنا بوضوح AI — اسألني عن أي شيء يخص علاقاتك أو مشاعرك.');
+    }
+    inputEl.focus();
+  }
+  function closePanel(){
+    panel.classList.remove('open');
+    btn.innerHTML = sparkSVG;
+  }
+  btn.addEventListener('click', () => {
+    if (panel.classList.contains('open')) closePanel(); else openPanel();
+  });
+  closeBtn.addEventListener('click', closePanel);
+})();
