@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مكتبة التمارين — بوضوح</title>
+<meta name="description" content="كل التمارين والفيديوهات والكورسات المتاحة إلك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); }
+  .brand span{ color:var(--clarity); }
+  .nav-links{ display:flex; align-items:center; gap:30px; }
+  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; transition:color .2s; }
+  .nav-links a:hover{ color:var(--fog); }
+  .nav-links a.active{ color:var(--clarity-soft); }
+  a.nav-cta{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px;
+    padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
+  }
+  .nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  .page-head{ background:var(--ink); padding:56px 0 40px; }
+  .page-head h1{ color:var(--fog); font-size:clamp(26px,3.6vw,36px); font-weight:900; }
+  .page-head p{ color:var(--text-muted-dark); font-size:14.5px; margin-top:10px; max-width:56ch; }
+
+  main{ padding:40px 0 100px; }
+
+  .filter-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px; }
+  .filter-btn{
+    background:#fff; border:1.5px solid var(--fog-dim); border-radius:100px; padding:9px 18px;
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--text-muted-light); cursor:pointer; transition:.2s;
+  }
+  .filter-btn.active{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
+
+  .content-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; }
+  @media (max-width:900px){ .content-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:600px){ .content-grid{ grid-template-columns:1fr; } }
+
+  .content-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:18px; overflow:hidden; transition:.2s; display:block; }
+  .content-card:hover{ transform:translateY(-3px); box-shadow:0 20px 40px -30px rgba(36,29,46,.25); }
+  .content-thumb{ width:100%; height:160px; object-fit:cover; display:block; background:var(--fog-dim); }
+  .content-body{ padding:18px 18px 20px; }
+  .content-type-tag{ display:inline-block; font-size:11px; font-weight:700; color:var(--clarity); background:var(--fog); padding:4px 10px; border-radius:100px; margin-bottom:10px; }
+  .content-card h3{ font-size:15.5px; font-weight:700; margin-bottom:6px; }
+  .content-card p{ font-size:13px; color:var(--text-muted-light); margin-bottom:10px; }
+  .content-duration{ font-size:12px; color:var(--text-muted-light); }
+
+  .empty-state{ text-align:center; padding:60px 0; color:var(--text-muted-light); grid-column:1/-1; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+  footer a{ text-decoration:none; }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <h1>مكتبة التمارين</h1>
+    <p>كل التمارين والفيديوهات والكورسات المتاحة إلك — فلتري حسب النوع يلي بدك ياه.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn active" data-filter="all">الكل</button>
+      <button class="filter-btn" data-filter="exercise">تمارين</button>
+      <button class="filter-btn" data-filter="video">فيديوهات</button>
+      <button class="filter-btn" data-filter="course">كورسات</button>
+    </div>
+
+    <div class="content-grid" id="contentGrid">
+      <p class="empty-state">جارٍ تحميل المحتوى...</p>
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<app-bottom-nav></app-bottom-nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+const TYPE_LABELS = { exercise: 'تمرين', video: 'فيديو', course: 'كورس' };
+let allExercises = [];
+
+async function loadExercises(){
+  const grid = document.getElementById('contentGrid');
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+    grid.innerHTML = '<p class="empty-state">تعذّر تحميل المحتوى حالياً.</p>';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('exercises')
+    .select('*')
+    .eq('is_published', true)
+    .order('sort_order', { ascending: true });
+
+  if (error || !data || !data.length) {
+    grid.innerHTML = '<p class="empty-state">ما في محتوى مضاف بعد.</p>';
+    return;
+  }
+
+  allExercises = data;
+  renderGrid('all');
+}
+
+function renderGrid(filterType){
+  const grid = document.getElementById('contentGrid');
+  const filtered = filterType === 'all' ? allExercises : allExercises.filter(ex => ex.content_type === filterType);
+
+  if (!filtered.length) {
+    grid.innerHTML = '<p class="empty-state">ما في محتوى بهاد التصنيف بعد.</p>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(ex => `
+    <a href="${ex.content_url || '#'}" class="content-card" target="${ex.content_url ? '_blank' : '_self'}" rel="noopener">
+      <img class="content-thumb" src="${ex.thumbnail_url || ''}" alt="${ex.title}" loading="lazy">
+      <div class="content-body">
+        <span class="content-type-tag">${TYPE_LABELS[ex.content_type] || ex.content_type}</span>
+        <h3>${ex.title}</h3>
+        <p>${ex.description || ''}</p>
+        ${ex.duration ? `<span class="content-duration">${ex.duration}</span>` : ''}
+      </div>
+    </a>
+  `).join('');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid(btn.dataset.filter);
+  });
+});
+
+loadExercises();
+</script>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

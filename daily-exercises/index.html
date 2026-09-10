@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تمارين يومية — بوضوح</title>
+<meta name="description" content="تمارين يومية بسيطة لتقليل التوتر وضغوط العمل — لك شخصياً أو لفريقك بالكامل.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); }
+  .brand span{ color:var(--clarity); }
+  .nav-links{ display:flex; align-items:center; gap:30px; }
+  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; transition:color .2s; }
+  .nav-links a:hover{ color:var(--fog); }
+  .nav-links a.active{ color:var(--clarity-soft); }
+  a.nav-cta{
+    background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px;
+    padding:9px 20px; border-radius:100px; transition:transform .15s ease, background .2s ease;
+  }
+  .nav-cta:hover{ background:var(--clarity-soft); transform:translateY(-1px); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:72px 0 60px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; justify-content:center; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(28px,4.6vw,44px); font-weight:900; max-width:16ch; margin:0 auto; }
+  .page-head p{ color:var(--text-muted-dark); font-size:16px; max-width:52ch; margin:16px auto 0; }
+
+  main{ padding:64px 0 100px; }
+  .section-title{ font-size:24px; font-weight:900; text-align:center; margin-bottom:10px; }
+  .section-sub{ text-align:center; color:var(--text-muted-light); font-size:14.5px; max-width:56ch; margin:0 auto 40px; }
+
+  /* ---- Individual pricing ---- */
+  .individual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; max-width:640px; margin:0 auto 90px; }
+  @media (max-width:640px){ .individual-grid{ grid-template-columns:1fr; } }
+  .price-card{ background:#fff; border:1.5px solid var(--fog-dim); border-radius:20px; padding:30px 26px; text-align:center; position:relative; }
+  .price-card.featured{ border-color:var(--clarity); box-shadow:0 20px 40px -28px rgba(201,161,95,.4); }
+  .price-badge{ position:absolute; top:-13px; right:50%; transform:translateX(50%); background:var(--clarity); color:var(--ink); font-size:11.5px; font-weight:700; padding:5px 14px; border-radius:100px; white-space:nowrap; }
+  .price-card h3{ font-size:16px; font-weight:700; margin-bottom:14px; }
+  .price-amount{ font-size:36px; font-weight:900; font-family:'Noto Kufi Arabic',sans-serif; margin-bottom:4px; }
+  .price-amount span{ font-size:14px; font-weight:500; color:var(--text-muted-light); font-family:'IBM Plex Sans Arabic',sans-serif; }
+  .price-save{ font-size:12.5px; color:var(--clarity); font-weight:600; margin-bottom:20px; }
+  .price-card .btn-primary{ width:100%; margin-top:6px; }
+
+  .btn-primary{
+    background:var(--ink); color:var(--fog); font-weight:700; font-size:14.5px; padding:13px 20px; border-radius:100px;
+    border:none; cursor:pointer; font-family:inherit; display:inline-block;
+  }
+  .btn-primary:hover{ background:var(--ink-soft); }
+
+  /* ---- Business calculator ---- */
+  .biz-box{ max-width:640px; margin:0 auto; background:#fff; border:1.5px solid var(--fog-dim); border-radius:22px; padding:36px 30px; }
+  .biz-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:6px; }
+  .biz-row label{ font-size:14.5px; font-weight:700; }
+  #employeeCountDisplay{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:20px; color:var(--clarity); min-width:50px; text-align:left; }
+  input[type="range"]{ width:100%; accent-color:var(--clarity); margin:14px 0 6px; }
+  .biz-range-labels{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted-light); margin-bottom:28px; }
+
+  .biz-result{ background:var(--fog); border-radius:16px; padding:22px; text-align:center; }
+  .biz-result .total{ font-family:'Noto Kufi Arabic',sans-serif; font-size:32px; font-weight:900; color:var(--ink); }
+  .biz-result .per-employee{ font-size:13px; color:var(--text-muted-light); margin-top:4px; }
+  .biz-result .discount-note{ font-size:12.5px; color:var(--clarity); font-weight:600; margin-top:8px; }
+
+  .biz-enterprise{ display:none; text-align:center; }
+  .biz-enterprise.active{ display:block; }
+  .biz-enterprise h4{ font-size:17px; font-weight:700; margin-bottom:8px; }
+  .biz-enterprise p{ font-size:13.5px; color:var(--text-muted-light); margin-bottom:18px; }
+
+  footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
+  footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
+  footer a{ text-decoration:none; }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">صحتك النفسية اليومية</div>
+    <h1>تمارين يومية لتقليل التوتر وضغوط العمل</h1>
+    <p>خمس دقايق باليوم كافية — لك شخصياً، أو لفريق العمل كامل.</p>
+    <a href="/daily-exercises/library/" style="display:inline-block; margin-top:18px; color:var(--clarity-soft); font-size:13.5px; text-decoration:underline;">تصفّحي مكتبة التمارين ←</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h2 class="section-title">للأفراد</h2>
+    <p class="section-sub">اشتراك بسيط، إلغاء في أي وقت.</p>
+
+    <div class="individual-grid">
+      <div class="price-card">
+        <h3>اشتراك شهري</h3>
+        <div class="price-amount">$7 <span>/ شهرياً</span></div>
+        <div class="price-save">&nbsp;</div>
+        <button class="btn-primary">اشتركي الآن</button>
+      </div>
+      <div class="price-card featured">
+        <span class="price-badge">الأكثر توفيراً</span>
+        <h3>اشتراك سنوي</h3>
+        <div class="price-amount">$39.99 <span>/ سنوياً</span></div>
+        <div class="price-save">توفير أكتر من ٥٢٪ مقارنة بالشهري</div>
+        <button class="btn-primary">اشتركي الآن</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">للشركات</h2>
+    <p class="section-sub">سعر يقل كل ما زاد عدد فريقك — دفع سنوي، وإلغاء في أي وقت.</p>
+
+    <div class="biz-box">
+      <div class="biz-row">
+        <label for="employeeSlider">عدد الموظفين</label>
+        <span id="employeeCountDisplay">5</span>
+      </div>
+      <input type="range" id="employeeSlider" min="5" max="500" value="5" step="1">
+      <div class="biz-range-labels"><span>٥</span><span>٥٠٠+</span></div>
+
+      <div class="biz-result" id="bizResult">
+        <div class="total" id="bizTotal">$150</div>
+        <div class="per-employee" id="bizPerEmployee">$30.00 للموظف سنوياً</div>
+        <div class="discount-note" id="bizDiscountNote" style="display:none;"></div>
+      </div>
+
+      <div class="biz-enterprise" id="bizEnterprise">
+        <h4>عندك فريق أكبر من ٥٠٠ موظف؟</h4>
+        <p>تواصلي معنا لعرض سعر مخصص يناسب حجم فريقك.</p>
+        <a href="/sales-page/" class="btn-primary">تواصلي معنا</a>
+      </div>
+
+      <button class="btn-primary" id="bizSubscribeBtn" style="width:100%; margin-top:20px;">اشتركي لفريقك الآن</button>
+    </div>
+
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<app-bottom-nav></app-bottom-nav>
+<script>
+const BASE_PRICE_PER_EMPLOYEE = 30; // بالسنة، قبل أي خصم
+const DISCOUNT_STEP = 25; // كل ما زاد العدد بهاد الرقم
+const DISCOUNT_PERCENT_PER_STEP = 3;
+const MAX_CALCULATED = 500;
+
+const slider = document.getElementById('employeeSlider');
+const countDisplay = document.getElementById('employeeCountDisplay');
+const bizResult = document.getElementById('bizResult');
+const bizTotal = document.getElementById('bizTotal');
+const bizPerEmployee = document.getElementById('bizPerEmployee');
+const bizDiscountNote = document.getElementById('bizDiscountNote');
+const bizEnterprise = document.getElementById('bizEnterprise');
+const bizSubscribeBtn = document.getElementById('bizSubscribeBtn');
+
+function updateBizPricing(){
+  const count = parseInt(slider.value, 10);
+  countDisplay.textContent = count;
+
+  if (count > MAX_CALCULATED) {
+    bizResult.style.display = 'none';
+    bizSubscribeBtn.style.display = 'none';
+    bizEnterprise.classList.add('active');
+    return;
+  }
+
+  bizResult.style.display = 'block';
+  bizSubscribeBtn.style.display = 'block';
+  bizEnterprise.classList.remove('active');
+
+  const tier = Math.floor(count / DISCOUNT_STEP);
+  const discountPercent = tier * DISCOUNT_PERCENT_PER_STEP;
+  const pricePerEmployee = BASE_PRICE_PER_EMPLOYEE * (1 - discountPercent / 100);
+  const total = count * pricePerEmployee;
+
+  bizTotal.textContent = '$' + total.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  bizPerEmployee.textContent = '$' + pricePerEmployee.toFixed(2) + ' للموظف سنوياً';
+
+  if (discountPercent > 0) {
+    bizDiscountNote.style.display = 'block';
+    bizDiscountNote.textContent = 'خصم ' + discountPercent + '٪ مطبّق';
+  } else {
+    bizDiscountNote.style.display = 'none';
+  }
+}
+
+slider.addEventListener('input', updateBizPricing);
+updateBizPricing();
+</script>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>
