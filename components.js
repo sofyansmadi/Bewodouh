@@ -107,6 +107,15 @@ class SiteNav extends HTMLElement {
 }
 
 class SiteFooter extends HTMLElement {
+  // سطر بيانات الشركة المالكة (بلغة الصفحة)
+  companyLine() {
+    const isEn = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+    const text = isEn
+      ? 'Bewodouh is operated by LAMSA LTD, a company registered in England and Wales (Company No. 17517932). Registered office: 128 City Road, London, EC1V 2NX, United Kingdom.'
+      : 'بوضوح منصة تابعة لشركة لمسة المحدودة، المسجلة في إنجلترا وويلز برقم 17517932. العنوان المسجل: 128 سيتي رود، لندن، <bdi dir="ltr">EC1V 2NX</bdi>، المملكة المتحدة.';
+    return `<p class="footer-company" style="margin-top:10px; font-size:11.5px; opacity:.8;">${text}</p>`;
+  }
+
   connectedCallback() {
     const variant = this.getAttribute('variant') || 'simple';
     const h = appHref; // اختصار محلي
@@ -144,6 +153,7 @@ class SiteFooter extends HTMLElement {
         </div>
       </div>
       <p class="footer-bottom">©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.</p>
+      ${this.companyLine()}
     </div>`;
       return;
     }
@@ -165,6 +175,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/terms/')}" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
         <a href="${h('/privacy/')}" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
       </div>
+      ${this.companyLine()}
     </div>`;
   }
 }
