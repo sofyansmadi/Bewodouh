@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>انضم إلى بوضوح كمختص أو مدرب</title>
+<meta name="description" content="سجّل في بوضوح كأخصائي نفسي أو مدرب حياة (Life Coach): قدّم بياناتك وشهاداتك وصورتك الشخصية ليراجعها فريقنا.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:14px; --max:720px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,legend,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:22px; color:var(--fog); text-decoration:none; }
+  .brand span{ color:var(--clarity); }
+  .nav-links{ display:flex; align-items:center; gap:28px; }
+  .nav-links a{ color:var(--text-muted-dark); font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
+  .nav-links a:hover{ color:var(--fog); }
+  a.nav-cta{ background:var(--clarity); color:var(--ink); font-weight:700; font-size:14px; padding:9px 20px; border-radius:100px; transition:.2s; }
+  a.nav-cta:hover{ background:var(--clarity-soft); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 48px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:14px; justify-content:center; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity-soft); display:inline-block; }
+  .page-head h1{ color:var(--fog); font-size:clamp(26px,4vw,36px); font-weight:900; }
+  .page-head p{ color:var(--text-muted-dark); font-size:15px; max-width:46ch; margin:12px auto 0; }
+
+  main{ padding:48px 0 90px; }
+  .form-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:36px 32px; box-shadow:0 24px 50px -30px rgba(36,29,46,.25); }
+  @media (max-width:600px){ .form-card{ padding:26px 20px; } }
+
+  fieldset{ border:none; margin-block-end:34px; min-inline-size:0; }
+  legend{ font-weight:900; font-size:17px; color:var(--ink); padding:0; margin-block-end:16px; }
+  .section-note{ font-size:13px; color:var(--text-muted-light); margin-block:-8px 16px; }
+
+  .field{ margin-block-end:20px; }
+  .field > label, .field-label{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-block-end:8px; }
+  .req{ color:var(--alert); margin-inline-start:4px; }
+  .opt{ color:var(--text-muted-light); font-weight:500; font-size:12px; margin-inline-start:6px; }
+  .field input:not([type="radio"]):not([type="checkbox"]):not([type="file"]), .field textarea{
+    width:100%; min-height:48px; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 15px;
+    font-family:'IBM Plex Sans Arabic', sans-serif; font-size:1rem; color:var(--text-on-light); background:var(--fog); transition:.15s;
+  }
+  .field textarea{ min-height:140px; resize:vertical; }
+  .field input:focus-visible, .field textarea:focus-visible{ outline:3px solid rgba(201,161,95,.45); outline-offset:1px; border-color:var(--clarity); background:#fff; }
+  .field input:user-invalid, .field textarea:user-invalid{ border-color:var(--alert); background:rgba(181,85,91,.05); }
+  .field input[type="file"]{ width:100%; font-family:inherit; font-size:.95rem; color:var(--text-muted-light); }
+  .field input[type="file"]::file-selector-button{
+    font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:.9rem; background:var(--ink); color:var(--fog);
+    border:none; border-radius:100px; padding:10px 20px; margin-inline-end:14px; cursor:pointer; min-height:44px;
+  }
+  .hint{ font-size:12.5px; color:var(--text-muted-light); margin-block-start:6px; }
+  .counter{ text-align:end; }
+  .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:600px){ .row-2{ grid-template-columns:1fr; } }
+
+  .visually-hidden{ position:absolute; clip-path:inset(50%); overflow:hidden; width:1px; height:1px; margin:-1px; padding:0; border:0; white-space:nowrap; }
+  .type-options{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:600px){ .type-options{ grid-template-columns:1fr; } }
+  .type-option{ position:relative; }
+  .type-option label{ display:block; height:100%; border:1.5px solid var(--fog-dim); background:var(--fog); border-radius:16px; padding:18px 18px; cursor:pointer; transition:.15s; }
+  .type-option label strong{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-size:15.5px; color:var(--ink); margin-block-end:4px; }
+  .type-option label span{ font-size:13px; color:var(--text-muted-light); line-height:1.7; display:block; }
+  .type-option label:hover{ border-color:var(--clarity); }
+  .type-option input:checked + label{ border-color:var(--clarity); background:rgba(201,161,95,.1); }
+  .type-option input:focus-visible + label{ outline:3px solid rgba(201,161,95,.45); outline-offset:2px; }
+
+  .photo-row{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .photo-preview{ width:96px; height:96px; border-radius:50%; background:var(--fog); border:1.5px dashed var(--fog-dim); object-fit:cover; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted-light); overflow:hidden; }
+  .photo-preview img{ width:100%; height:100%; object-fit:cover; }
+  .photo-preview svg{ width:34px; height:34px; }
+  .photo-row .field-inputs{ flex:1; min-width:220px; }
+
+  .file-list{ list-style:none; margin-block-start:12px; display:flex; flex-direction:column; gap:8px; }
+  .file-list li{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--fog); border:1px solid var(--fog-dim); border-radius:10px; padding:8px 14px; font-size:13.5px; }
+  .file-list .fname{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:start; min-width:0; }
+  .file-list .fsize{ color:var(--text-muted-light); font-size:12px; white-space:nowrap; }
+  .file-list button{ background:none; border:none; color:var(--alert); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:10px 6px; min-height:44px; }
+
+  .privacy-note{ display:flex; gap:10px; align-items:flex-start; background:rgba(201,161,95,.1); border-radius:12px; padding:12px 14px; font-size:13px; color:var(--text-muted-light); margin-block-start:6px; }
+  .privacy-note svg{ width:18px; height:18px; flex-shrink:0; color:var(--clarity); margin-block-start:4px; }
+
+  .consent{ display:flex; gap:12px; align-items:flex-start; font-size:14px; }
+  .consent input{ width:22px; height:22px; margin-block-start:5px; accent-color:var(--ink); flex-shrink:0; }
+  .consent a{ color:var(--clarity); font-weight:700; text-decoration:underline; }
+
+  .form-error-box{ display:none; background:rgba(181,85,91,.1); color:var(--alert); font-size:13.5px; font-weight:600; padding:12px 14px; border-radius:10px; margin-block-end:18px; }
+  .form-error-box.active{ display:block; }
+  .field-error{ color:var(--alert); font-size:13px; font-weight:600; margin-block-start:8px; display:none; }
+  .field-error.active{ display:block; }
+
+  .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:1rem; padding:14px 30px; min-height:52px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; margin-block-start:8px; }
+  .btn-primary:hover{ background:var(--ink-soft); }
+  .btn-primary:focus-visible{ outline:3px solid rgba(201,161,95,.6); outline-offset:3px; }
+  .btn-primary:disabled{ opacity:.65; cursor:progress; }
+  .upload-status{ text-align:center; font-size:13.5px; color:var(--text-muted-light); margin-block-start:12px; min-height:1.5em; }
+
+  .hp{ position:absolute; inset-inline-start:-9999px; width:1px; height:1px; overflow:hidden; }
+
+  .success-box{ display:none; text-align:center; padding:24px 0; }
+  .success-box.active{ display:block; }
+  .success-box .check{ width:60px; height:60px; border-radius:50%; background:var(--clarity); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
+  .success-box h2{ font-size:21px; color:var(--ink); margin-block-end:10px; }
+  .success-box p{ font-size:14.5px; color:var(--text-muted-light); max-width:44ch; margin-inline:auto; }
+  .success-box a.back{ display:inline-block; margin-block-start:22px; background:var(--ink); color:var(--fog); font-weight:700; font-size:14px; padding:12px 28px; border-radius:100px; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<site-nav active="join"></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">انضم إلى فريق بوضوح</div>
+    <h1>سجّل كأخصائي نفسي أو مدرب حياة</h1>
+    <p>قدّم بياناتك ومستنداتك وصورتك الشخصية، وسيراجعها فريقنا قبل أي ظهور لك على المنصة.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="form-card">
+
+      <form id="joinForm" method="post" action="#" autocomplete="on">
+        <div class="form-error-box" id="formError" role="alert" tabindex="-1"></div>
+
+        <fieldset>
+          <legend>نوع التسجيل</legend>
+          <div class="type-options">
+            <div class="type-option">
+              <input type="radio" class="visually-hidden" id="typeSpecialist" name="applicant_type" value="specialist" required>
+              <label for="typeSpecialist">
+                <strong>أخصائي نفسي</strong>
+                <span>مرخّص لمزاولة المهنة. رفع الشهادات إلزامي.</span>
+              </label>
+            </div>
+            <div class="type-option">
+              <input type="radio" class="visually-hidden" id="typeCoach" name="applicant_type" value="coach" required>
+              <label for="typeCoach">
+                <strong>مدرب حياة (Life Coach)</strong>
+                <span>مدرب أو مستشار تطوير ذاتي. الشهادات مطلوبة إن وُجدت.</span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>بياناتك الأساسية</legend>
+          <div class="field">
+            <label for="fullName">الاسم الكامل<span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="fullName" name="full_name" required minlength="2" maxlength="120" autocomplete="name">
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="email">البريد الإلكتروني<span class="req" aria-hidden="true">*</span></label>
+              <input type="email" id="email" name="email" required maxlength="254" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" style="direction:ltr; text-align:right;">
+            </div>
+            <div class="field">
+              <label for="phone">رقم الهاتف / واتساب<span class="req" aria-hidden="true">*</span></label>
+              <input type="tel" id="phone" name="phone" required inputmode="tel" autocomplete="tel" pattern="[+0-9\s\-\(\)]{7,25}" maxlength="30" style="direction:ltr; text-align:right;">
+              <div class="hint">مع رمز الدولة، مثال: 962790000000+</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="country">بلد الإقامة<span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="country" name="country" required list="countryList" maxlength="80" autocomplete="country-name">
+            <datalist id="countryList">
+              <option value="الأردن"><option value="السعودية"><option value="الإمارات"><option value="مصر"><option value="الكويت">
+              <option value="قطر"><option value="البحرين"><option value="عُمان"><option value="العراق"><option value="سوريا">
+              <option value="لبنان"><option value="فلسطين"><option value="اليمن"><option value="ليبيا"><option value="تونس">
+              <option value="الجزائر"><option value="المغرب"><option value="السودان"><option value="موريتانيا"><option value="الصومال">
+            </datalist>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>خبرتك المهنية</legend>
+          <div class="row-2">
+            <div class="field">
+              <label for="specialty">التخصص الدقيق<span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="specialty" name="specialty" required minlength="2" maxlength="200" placeholder="مثال: العلاقات الزوجية، التعافي بعد الانفصال">
+            </div>
+            <div class="field">
+              <label for="years">سنوات الخبرة<span class="req" aria-hidden="true">*</span></label>
+              <input type="number" id="years" name="years_experience" required min="0" max="60" step="1" inputmode="numeric">
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="licenseNumber"><span id="licenseLabel">رقم الترخيص</span><span class="opt">اختياري</span></label>
+              <input type="text" id="licenseNumber" name="license_number" maxlength="100" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="licensingBody"><span id="bodyLabel">جهة الترخيص</span><span class="opt">اختياري</span></label>
+              <input type="text" id="licensingBody" name="licensing_body" maxlength="150" autocomplete="off" placeholder="مثال: نقابة الأخصائيين النفسيين">
+            </div>
+          </div>
+          <div class="field">
+            <label for="bio">نبذة عنك<span class="req" aria-hidden="true">*</span></label>
+            <textarea id="bio" name="bio" required minlength="30" maxlength="2000" aria-describedby="bioHint"></textarea>
+            <div class="hint counter" id="bioHint"><span id="bioCount">٠</span> / ٢٠٠٠ — ٣٠ حرفاً على الأقل. اكتب عن خبرتك ومجالات عملك وأسلوبك في الجلسات.</div>
+          </div>
+          <div class="field">
+            <label for="profileLink">رابط حساب مهني أو موقع<span class="opt">اختياري</span></label>
+            <input type="url" id="profileLink" name="profile_link" maxlength="300" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://" style="direction:ltr; text-align:right;">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>المستندات والصورة</legend>
+
+          <div class="field">
+            <span class="field-label" id="photoLabel">صورة شخصية<span class="req" aria-hidden="true">*</span></span>
+            <div class="photo-row">
+              <div class="photo-preview" id="photoPreview" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+              </div>
+              <div class="field-inputs">
+                <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp" required aria-labelledby="photoLabel" aria-describedby="photoHint">
+                <div class="hint" id="photoHint">صورة واضحة للوجه بخلفية بسيطة، بصيغة JPG أو PNG أو WebP.</div>
+                <div class="field-error" id="photoError" role="alert"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label" id="certLabel">الشهادات والمؤهلات<span class="req" id="certReq" aria-hidden="true">*</span><span class="opt" id="certOpt" hidden>اختياري</span></span>
+            <input type="file" id="certificates" accept="image/jpeg,image/png,image/webp,application/pdf" multiple aria-labelledby="certLabel" aria-describedby="certHint">
+            <div class="hint" id="certHint">صور أو ملفات PDF، حتى ٥ ملفات، وكل ملف بحجم أقصاه ١٠ ميغابايت.</div>
+            <ul class="file-list" id="certList" aria-live="polite"></ul>
+            <div class="field-error" id="certError" role="alert"></div>
+          </div>
+
+          <div class="privacy-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <span>تُحفظ مستنداتك في مساحة خاصة، ولا يطّلع عليها سوى فريق بوضوح لأغراض المراجعة.</span>
+          </div>
+        </fieldset>
+
+        <div class="hp" aria-hidden="true">
+          <label>اترك هذا الحقل فارغاً <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="field">
+          <div class="consent">
+            <input type="checkbox" id="consent" name="consent" required>
+            <label for="consent">أقرّ بأن المعلومات والمستندات المقدَّمة صحيحة، وأوافق على <a href="/terms/" target="_blank" rel="noopener">شروط الاستخدام</a> و<a href="/privacy/" target="_blank" rel="noopener">سياسة الخصوصية</a>.</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">إرسال طلب الانضمام</button>
+        <div class="upload-status" id="uploadStatus" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="success-box" id="successBox" tabindex="-1">
+        <div class="check">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>تم استلام طلبك</h2>
+        <p>شكراً لاهتمامك بالانضمام إلى بوضوح. سيراجع فريقنا بياناتك ومستنداتك ويتواصل معك عبر البريد الإلكتروني الذي أدخلته.</p>
+        <a class="back" href="/">العودة إلى الرئيسية</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<site-footer></site-footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+const BUCKET = 'specialist-applications';
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_CERTS = 5;
+const CERT_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+const form = document.getElementById('joinForm');
+const formError = document.getElementById('formError');
+const submitBtn = document.getElementById('submitBtn');
+const uploadStatus = document.getElementById('uploadStatus');
+const photoInput = document.getElementById('photo');
+const photoError = document.getElementById('photoError');
+const photoPreview = document.getElementById('photoPreview');
+const certInput = document.getElementById('certificates');
+const certList = document.getElementById('certList');
+const certError = document.getElementById('certError');
+const bio = document.getElementById('bio');
+
+const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+const toArabic = (n) => String(n).replace(/\d/g, d => arabicDigits[d]);
+const formatSize = (bytes) => bytes >= 1048576 ? toArabic((bytes / 1048576).toFixed(1)) + ' MB' : toArabic(Math.max(1, Math.round(bytes / 1024))) + ' KB';
+
+function showFieldError(el, msg){ el.textContent = msg; el.classList.toggle('active', !!msg); }
+function showFormError(msg){
+  formError.textContent = msg;
+  formError.classList.add('active');
+  formError.focus();
+}
+
+// ---------- نوع التسجيل: يغيّر الحقول الإلزامية ----------
+function applyType(){
+  const type = form.elements['applicant_type'].value;
+  const isSpecialist = type === 'specialist';
+  document.getElementById('licenseLabel').textContent = isSpecialist ? 'رقم الترخيص' : 'رقم الاعتماد';
+  document.getElementById('bodyLabel').textContent = isSpecialist ? 'جهة الترخيص' : 'جهة الاعتماد';
+  document.getElementById('certReq').hidden = !isSpecialist;
+  document.getElementById('certOpt').hidden = isSpecialist;
+  showFieldError(certError, '');
+}
+form.querySelectorAll('input[name="applicant_type"]').forEach(r => r.addEventListener('change', applyType));
+applyType();
+
+// ---------- عدّاد النبذة ----------
+bio.addEventListener('input', () => { document.getElementById('bioCount').textContent = toArabic(bio.value.length); });
+
+// ---------- الصورة الشخصية ----------
+let photoFile = null;
+photoInput.addEventListener('change', () => {
+  showFieldError(photoError, '');
+  photoFile = null;
+  const file = photoInput.files[0];
+  photoPreview.replaceChildren();
+  if (!file) return;
+  if (!PHOTO_TYPES.includes(file.type)) {
+    showFieldError(photoError, 'صيغة الصورة غير مدعومة. استخدم JPG أو PNG أو WebP.');
+    photoInput.value = '';
+    return;
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    showFieldError(photoError, 'حجم الصورة أكبر من ١٠ ميغابايت.');
+    photoInput.value = '';
+    return;
+  }
+  photoFile = file;
+  const img = document.createElement('img');
+  img.alt = '';
+  img.src = URL.createObjectURL(file);
+  img.onload = () => URL.revokeObjectURL(img.src);
+  photoPreview.appendChild(img);
+});
+
+// نصغّر الصورة (حد أقصى ١٢٠٠ بكسل) ونعيد ترميزها JPEG، وهذا يخفّف الحجم ويحذف بيانات الموقع من الصورة
+async function prepareProfilePhoto(file){
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('encode failed')), 'image/jpeg', 0.9);
+  });
+}
+
+// ---------- الشهادات (قائمة ملفات قابلة للحذف) ----------
+let certFiles = [];
+function renderCerts(){
+  certList.replaceChildren();
+  certFiles.forEach((file, i) => {
+    const li = document.createElement('li');
+    const name = document.createElement('span');
+    name.className = 'fname';
+    name.textContent = file.name;
+    const size = document.createElement('span');
+    size.className = 'fsize';
+    size.textContent = formatSize(file.size);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'إزالة';
+    remove.setAttribute('aria-label', 'إزالة الملف ' + file.name);
+    remove.addEventListener('click', () => { certFiles.splice(i, 1); renderCerts(); });
+    li.append(name, size, remove);
+    certList.appendChild(li);
+  });
+}
+
+certInput.addEventListener('change', () => {
+  showFieldError(certError, '');
+  const problems = [];
+  for (const file of certInput.files) {
+    if (!(file.type in CERT_TYPES)) { problems.push(`«${file.name}» صيغته غير مدعومة (المسموح: صور أو PDF).`); continue; }
+    if (file.size > MAX_FILE_BYTES) { problems.push(`«${file.name}» أكبر من ١٠ ميغابايت.`); continue; }
+    if (certFiles.some(f => f.name === file.name && f.size === file.size)) continue;
+    if (certFiles.length >= MAX_CERTS) { problems.push('الحد الأقصى ٥ ملفات.'); break; }
+    certFiles.push(file);
+  }
+  certInput.value = '';
+  renderCerts();
+  if (problems.length) showFieldError(certError, problems.join(' '));
+});
+
+// ---------- الإرسال ----------
+async function uploadFile(path, blob, contentType){
+  const { error } = await supabaseClient.storage.from(BUCKET).upload(path, blob, { contentType, upsert: false });
+  if (error) throw error;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  formError.classList.remove('active');
+
+  if (document.getElementById('website').value) { showSuccess(); return; }
+
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+    showFormError('تعذّر الاتصال بالخدمة حالياً. حاول مرة أخرى بعد قليل.');
+    return;
+  }
+
+  const type = form.elements['applicant_type'].value;
+  const bioText = bio.value.trim();
+  if (bioText.length < 30) { bio.setCustomValidity('النبذة قصيرة جداً'); bio.reportValidity(); bio.addEventListener('input', () => bio.setCustomValidity(''), { once: true }); return; }
+  if (type === 'specialist' && certFiles.length === 0) {
+    showFieldError(certError, 'رفع الشهادات إلزامي للأخصائيين النفسيين. أرفق شهادة واحدة على الأقل.');
+    certInput.focus();
+    return;
+  }
+  if (!photoFile) { showFieldError(photoError, 'الصورة الشخصية مطلوبة.'); photoInput.focus(); return; }
+
+  submitBtn.disabled = true;
+  const applicationId = crypto.randomUUID();
+  const totalFiles = 1 + certFiles.length;
+  let done = 0;
+  const progress = () => { uploadStatus.textContent = `جارٍ رفع الملفات (${toArabic(done)} / ${toArabic(totalFiles)})...`; };
+
+  try {
+    progress();
+    let photoBlob;
+    try { photoBlob = await prepareProfilePhoto(photoFile); }
+    catch { throw Object.assign(new Error('photo'), { userMessage: 'تعذّرت قراءة الصورة الشخصية. جرّب صورة بصيغة JPG أو PNG.' }); }
+
+    const photoPath = `${applicationId}/photo.jpg`;
+    await uploadFile(photoPath, photoBlob, 'image/jpeg');
+    done++; progress();
+
+    const certificatePaths = [];
+    for (let i = 0; i < certFiles.length; i++) {
+      const file = certFiles[i];
+      const path = `${applicationId}/cert-${i + 1}.${CERT_TYPES[file.type]}`;
+      await uploadFile(path, file, file.type);
+      certificatePaths.push(path);
+      done++; progress();
+    }
+
+    uploadStatus.textContent = 'جارٍ إرسال الطلب...';
+    const value = (id) => document.getElementById(id).value.trim();
+    const { error } = await supabaseClient.from('specialist_applications').insert({
+      id: applicationId,
+      applicant_type: type,
+      full_name: value('fullName'),
+      email: value('email'),
+      phone: value('phone'),
+      country: value('country'),
+      specialty: value('specialty'),
+      years_experience: Number(document.getElementById('years').value),
+      license_number: value('licenseNumber') || null,
+      licensing_body: value('licensingBody') || null,
+      bio: bioText,
+      profile_link: value('profileLink') || null,
+      photo_path: photoPath,
+      certificate_paths: certificatePaths,
+    });
+    if (error) throw error;
+
+    showSuccess();
+  } catch (err) {
+    console.error('join submit:', err);
+    uploadStatus.textContent = '';
+    submitBtn.disabled = false;
+    if (err.userMessage) showFormError(err.userMessage);
+    else if (err.code === '23505') showFormError('يوجد طلب قيد المراجعة بهذا البريد الإلكتروني بالفعل. سنتواصل معك فور الانتهاء من مراجعته.');
+    else showFormError('حدث خطأ أثناء إرسال طلبك. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+  }
+});
+
+function showSuccess(){
+  form.style.display = 'none';
+  const box = document.getElementById('successBox');
+  box.classList.add('active');
+  box.focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

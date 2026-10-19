@@ -87,6 +87,20 @@
   .checkbox-row label{ margin-bottom:0; }
   .form-actions{ display:flex; gap:10px; margin-top:20px; }
   .btn-secondary{ background:var(--fog); color:var(--ink); font-weight:700; font-size:14px; padding:11px 20px; border-radius:100px; border:1px solid var(--fog-dim); cursor:pointer; font-family:inherit; }
+  .app-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:14px; margin-bottom:12px; box-shadow:0 12px 30px -24px rgba(36,29,46,.25); }
+  .app-card summary{ list-style:none; cursor:pointer; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .app-card summary::-webkit-details-marker{ display:none; }
+  .app-card .app-name{ font-weight:700; flex:1; min-width:160px; }
+  .app-card .app-meta{ font-size:12.5px; color:var(--text-muted-light); }
+  .app-body{ padding:4px 18px 18px; border-top:1px solid var(--fog-dim); }
+  .app-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; margin:14px 0; font-size:13.5px; }
+  @media (max-width:600px){ .app-grid{ grid-template-columns:1fr; } }
+  .app-grid b{ color:var(--ink); }
+  .app-bio{ white-space:pre-wrap; background:var(--fog); border-radius:10px; padding:12px 14px; font-size:13.5px; }
+  .app-docs{ margin-top:14px; display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .app-docs img{ width:88px; height:88px; border-radius:50%; object-fit:cover; border:1px solid var(--fog-dim); }
+  .app-docs a{ font-size:13px; font-weight:700; color:#8a6a2e; text-decoration:underline; }
+  .app-actions{ display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap; }
   .status-msg{ font-size:13px; margin-top:12px; display:none; }
   .status-msg.active{ display:block; }
   .status-msg.success{ color:#5a7a4f; }
@@ -130,6 +144,7 @@
         <button class="admin-tab" data-tab="articles">المقالات</button>
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
         <button class="admin-tab" data-tab="team">الفريق</button>
+        <button class="admin-tab" data-tab="applications">طلبات الانضمام</button>
         <button class="admin-tab" data-tab="users">المستخدمين</button>
         <button class="admin-tab" data-tab="static-pages">الصفحات الثابتة</button>
         <button class="admin-tab" data-tab="exercises">تمارين يومية</button>
@@ -390,6 +405,12 @@
           <div class="status-msg" id="specialistFormStatus"></div>
         </form>
       </div>
+      </div>
+
+      <div id="tab-applications" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">طلبات الانضمام</h2>
+      <p class="section-sub">طلبات الأخصائيين والمدربين الواصلة من صفحة "انضم إلى بوضوح"، بالأحدث أولاً. المستندات خاصة وتُعرض عبر روابط مؤقتة تنتهي بعد ٥ دقائق.</p>
+      <div id="applicationsList">جارٍ التحميل...</div>
       </div>
 
       <div id="tab-users" class="admin-tab-panel" style="display:none;">
@@ -701,6 +722,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     if (tab.dataset.tab === 'articles') loadArticles();
     if (tab.dataset.tab === 'bookings') loadBookings();
     if (tab.dataset.tab === 'team') loadTeam();
+    if (tab.dataset.tab === 'applications') loadApplications();
     if (tab.dataset.tab === 'users') loadUsers();
     if (tab.dataset.tab === 'static-pages') loadStaticPage('privacy');
     if (tab.dataset.tab === 'exercises') loadExercisesAdmin();
@@ -762,6 +784,107 @@ async function loadBookings(){
       if (!confirm('متأكدة تريدين حذف هذا الحجز؟')) return;
       await supabaseClient.from('bookings').delete().eq('id', btn.dataset.deleteBookingId);
       loadBookings();
+    });
+  });
+}
+
+// ---------- Specialist applications ----------
+// نصوص الطلبات يكتبها زوار مجهولون، فنهرّبها دائماً قبل عرضها داخل HTML
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const APP_BUCKET = 'specialist-applications';
+const APP_STATUS_LABELS = { pending: 'قيد المراجعة', approved: 'مقبول', rejected: 'مرفوض' };
+
+async function loadApplications(){
+  const list = document.getElementById('applicationsList');
+  list.textContent = 'جارٍ التحميل...';
+
+  const { data, error } = await supabaseClient
+    .from('specialist_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { list.textContent = 'تعذّر تحميل الطلبات.'; console.error('applications:', error); return; }
+  if (!data.length) { list.textContent = 'ما في طلبات انضمام بعد.'; return; }
+
+  list.innerHTML = data.map(a => {
+    const typeLabel = a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب حياة';
+    const date = new Date(a.created_at).toLocaleDateString('ar-EG', { dateStyle: 'medium' });
+    const link = /^https?:\/\//i.test(a.profile_link || '') ? `<a href="${esc(a.profile_link)}" target="_blank" rel="noopener noreferrer">${esc(a.profile_link)}</a>` : '—';
+    const statusOptions = Object.entries(APP_STATUS_LABELS).map(([v, l]) => `<option value="${v}"${v === a.status ? ' selected' : ''}>${l}</option>`).join('');
+    return `
+    <details class="app-card" data-app-id="${esc(a.id)}">
+      <summary>
+        <span class="app-name">${esc(a.full_name)}</span>
+        <span class="badge-yes">${typeLabel}</span>
+        <span class="app-meta">${esc(a.specialty)} · ${esc(a.country)} · ${date}</span>
+        <span class="badge-yes">${APP_STATUS_LABELS[a.status] || esc(a.status)}</span>
+      </summary>
+      <div class="app-body">
+        <div class="app-grid">
+          <div><b>البريد:</b> <span dir="ltr">${esc(a.email)}</span></div>
+          <div><b>الهاتف:</b> <span dir="ltr">${esc(a.phone)}</span></div>
+          <div><b>سنوات الخبرة:</b> ${esc(a.years_experience)}</div>
+          <div><b>رقم الترخيص / الاعتماد:</b> ${esc(a.license_number) || '—'}</div>
+          <div><b>الجهة:</b> ${esc(a.licensing_body) || '—'}</div>
+          <div><b>الرابط:</b> ${link}</div>
+        </div>
+        <div class="app-bio">${esc(a.bio)}</div>
+        <div class="app-docs" data-docs-for="${esc(a.id)}"><button type="button" class="btn-secondary" data-show-docs="${esc(a.id)}">عرض المستندات</button></div>
+        <div class="app-actions">
+          <select class="app-status-select" data-app-id="${esc(a.id)}" style="border:1px solid var(--fog-dim); border-radius:8px; padding:8px 10px; font-family:inherit;">${statusOptions}</select>
+          <button type="button" class="btn-secondary" data-delete-app="${esc(a.id)}" style="color:var(--alert);">حذف الطلب وملفاته</button>
+        </div>
+      </div>
+    </details>`;
+  }).join('');
+
+  const byId = Object.fromEntries(data.map(a => [a.id, a]));
+
+  list.querySelectorAll('[data-show-docs]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const app = byId[btn.dataset.showDocs];
+      const box = btn.parentElement;
+      const paths = [app.photo_path, ...app.certificate_paths];
+      const { data: signed, error: signError } = await supabaseClient.storage.from(APP_BUCKET).createSignedUrls(paths, 300);
+      if (signError) { box.textContent = 'تعذّر فتح المستندات.'; console.error(signError); return; }
+      box.replaceChildren();
+      signed.forEach((item, i) => {
+        if (!item.signedUrl) return;
+        if (i === 0) {
+          const img = document.createElement('img');
+          img.src = item.signedUrl;
+          img.alt = 'الصورة الشخصية';
+          box.appendChild(img);
+        } else {
+          const a = document.createElement('a');
+          a.href = item.signedUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = 'شهادة ' + i;
+          box.appendChild(a);
+        }
+      });
+    });
+  });
+
+  list.querySelectorAll('.app-status-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const { error } = await supabaseClient.from('specialist_applications')
+        .update({ status: sel.value, reviewed_at: new Date().toISOString() })
+        .eq('id', sel.dataset.appId);
+      if (error) { alert('تعذّر حفظ الحالة.'); console.error(error); }
+      else loadApplications();
+    });
+  });
+
+  list.querySelectorAll('[data-delete-app]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('سيُحذف الطلب وكل ملفاته نهائياً. متأكد؟')) return;
+      const app = byId[btn.dataset.deleteApp];
+      const { error: removeError } = await supabaseClient.storage.from(APP_BUCKET).remove([app.photo_path, ...app.certificate_paths]);
+      if (removeError) { alert('تعذّر حذف الملفات، لم يُحذف الطلب.'); console.error(removeError); return; }
+      await supabaseClient.from('specialist_applications').delete().eq('id', app.id);
+      loadApplications();
     });
   });
 }

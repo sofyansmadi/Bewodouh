@@ -68,8 +68,8 @@ class SiteNav extends HTMLElement {
       { href: '/#pillars', label: 'المواضيع', key: '' },
       { href: '/blog/', label: 'المدونة', key: 'blog' },
       { href: '/quizzes/', label: 'الاختبارات', key: 'quizzes' },
-      { href: '/ai/', label: 'بوضوح AI', key: 'ai' },
       { href: '/about/', label: 'من نحن', key: 'about' },
+      { href: '/join/', label: 'انضم إلينا', key: 'join' },
     ];
 
     const linksHtml = links.map(l => {
@@ -132,10 +132,10 @@ class SiteFooter extends HTMLElement {
           <h4>الموقع</h4>
           <a href="${h('/#pillars')}">المواضيع</a>
           <a href="${h('/blog/')}">المدونة</a>
-          <a href="${h('/ai/')}">بوضوح AI</a>
           <a href="${h('/quizzes/')}">الاختبارات</a>
           <a href="${h('/about/')}">من نحن</a>
           <a href="${h('/team/')}">فريق بوضوح</a>
+          <a href="${h('/join/')}">انضم إلينا</a>
           <a href="${h('/faq/')}">الأسئلة الأكثر شيوعاً</a>
           <a href="${h('/daily-exercises/')}">تمارين يومية</a>
           <a href="${h('/sales-page/')}">احجز استشارة</a>
@@ -166,9 +166,9 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/')}" style="color:var(--text-muted-dark);">الرئيسية</a>
         <a href="${h('/blog/')}" style="color:var(--text-muted-dark);">المدونة</a>
         <a href="${h('/quizzes/')}" style="color:var(--text-muted-dark);">الاختبارات</a>
-        <a href="${h('/ai/')}" style="color:var(--text-muted-dark);">بوضوح AI</a>
         <a href="${h('/about/')}" style="color:var(--text-muted-dark);">من نحن</a>
         <a href="${h('/team/')}" style="color:var(--text-muted-dark);">فريق بوضوح</a>
+        <a href="${h('/join/')}" style="color:var(--text-muted-dark);">انضم إلينا</a>
         <a href="${h('/faq/')}" style="color:var(--text-muted-dark);">الأسئلة الأكثر شيوعاً</a>
         <a href="${h('/daily-exercises/')}" style="color:var(--text-muted-dark);">تمارين يومية</a>
         <a href="${h('/sales-page/')}" style="color:var(--text-muted-dark);">احجز استشارة</a>
@@ -194,10 +194,29 @@ customElements.define('site-footer', SiteFooter);
 
    ويستمع لحدث 'recommend-package' على window (تفاصيله { name })
    عشان يعلّم بصرياً الباقة الموصى فيها من تدفّق الأسئلة.
+
+   ويستمع أيضاً لحدث 'currency-changed' (تفاصيله { code }) اللي
+   يُطلقه مبدّل العملة بصفحة الحجز، ويحوّل الأسعار المعروضة فعلياً
+   من الدولار (المخزّن بقاعدة البيانات) للعملة المختارة.
+
+   أسعار الصرف: الدينار الأردني، الريال السعودي، والدرهم الإماراتي
+   مربوطة رسمياً بسعر ثابت مقابل الدولار (تقريباً لا يتغيّر)، لذا
+   قيمها هنا دقيقة وموثوقة. الجنيه المصري عملة عائمة وسعرها يتغيّر
+   فعلياً بمرور الوقت — القيمة هنا تقريبية ويجب تحديثها يدوياً بين
+   فترة وأخرى لتبقى واقعية.
    ============================================================ */
+const CURRENCY_CONFIG = {
+  USD: { rate: 1,       decimals: 0, format: v => `$${v}` },
+  JOD: { rate: 0.709,   decimals: 2, format: v => `${v} د.أ` },
+  SAR: { rate: 3.75,    decimals: 0, format: v => `${v} ر.س` },
+  AED: { rate: 3.6725,  decimals: 0, format: v => `${v} د.إ` },
+  EGP: { rate: 49,      decimals: 0, format: v => `${v} ج.م` }, // تقريبي — عملة عائمة، يحتاج تحديث دوري
+};
+
 class PricingCards extends HTMLElement {
   async connectedCallback() {
     this.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); grid-column:1/-1;">جارٍ تحميل الباقات...</p>';
+    this._currency = this._currency || 'USD';
 
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       this.innerHTML = '<p style="text-align:center; color:var(--alert); grid-column:1/-1;">تعذّر تحميل الباقات — لم يتم إعداد الاتصال بقاعدة البيانات بعد.</p>';
@@ -215,15 +234,31 @@ class PricingCards extends HTMLElement {
       return;
     }
 
-    this.innerHTML = data.map(pkg => `
+    this._data = data;
+    this.renderCards();
+
+    window.addEventListener('recommend-package', (e) => this.markChosen(e.detail.name));
+    window.addEventListener('currency-changed', (e) => {
+      this._currency = e.detail.code;
+      this.renderCards();
+    });
+  }
+
+  renderCards() {
+    const cfg = CURRENCY_CONFIG[this._currency] || CURRENCY_CONFIG.USD;
+
+    this.innerHTML = this._data.map(pkg => {
+      const converted = (Number(pkg.price) * cfg.rate).toFixed(cfg.decimals);
+      return `
       <div class="pkg-card${pkg.is_recommended ? ' recommended' : ''}" data-pkg-id="${pkg.id}">
         ${pkg.is_recommended ? '<span class="pkg-badge">الأكثر طلباً</span>' : ''}
         <h3>${pkg.name}</h3>
         <p class="pkg-desc">${pkg.description || ''}</p>
-        <div class="pkg-price">$${pkg.price} <span>${pkg.price_unit}</span></div>
-        <button class="pkg-select-btn" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
+        <div class="pkg-price">${cfg.format(converted)} <span>${pkg.price_unit}</span></div>
+        <button class="pkg-select-btn${pkg.name === this._chosenName ? ' chosen' : ''}" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     this.querySelectorAll('.pkg-select-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -231,11 +266,10 @@ class PricingCards extends HTMLElement {
         window.dispatchEvent(new CustomEvent('package-selected', { detail: { name: btn.dataset.pkgName } }));
       });
     });
-
-    window.addEventListener('recommend-package', (e) => this.markChosen(e.detail.name));
   }
 
   markChosen(name) {
+    this._chosenName = name;
     this.querySelectorAll('.pkg-select-btn').forEach(b => {
       b.classList.toggle('chosen', b.dataset.pkgName === name);
     });
@@ -335,8 +369,6 @@ class AppBottomNav extends HTMLElement {
         icon: '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/>' },
       { key: 'quizzes', href: '/quizzes/', label: 'الاختبارات',
         icon: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>' },
-      { key: 'ai', href: '/ai/', label: 'بوضوح AI',
-        icon: '<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1.2 2.4 2 4 2s3-.8 4-2"/>' },
       { key: 'account', href: '/account/', label: 'حسابي',
         icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
     ];

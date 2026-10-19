@@ -242,6 +242,7 @@
       <button type="button" class="currency-btn" data-currency="AED">🇦🇪 AED</button>
       <button type="button" class="currency-btn" data-currency="EGP">🇪🇬 EGP</button>
     </div>
+    <p style="text-align:center; font-size:12px; color:var(--text-muted-light); margin-top:10px;">الأسعار بعملتك تقريبية لتسهيل المقارنة — الدفع الفعلي عبر PayPal يتم بالدولار الأمريكي.</p>
 
     <pricing-cards class="pkg-grid"></pricing-cards>
 
@@ -290,7 +291,7 @@
             <option value="باقة الانطلاقة">باقة الانطلاقة — $150 / شهرياً</option>
             <option value="باقة المرافقة">باقة المرافقة — $300 / كل ٣ أشهر</option>
             <option value="دعم فوري">دعم فوري — $70</option>
-            <option value="تجربة - بوضوح">تجربة - بوضوح — $1</option>
+            <option value="ادعم بوضوح">ادعم بوضوح — $1</option>
           </select>
         </div>
         <div class="field">
@@ -402,6 +403,19 @@ const PACKAGE_RECOMMENDATIONS = [
 let currentType = null;
 let currentQ = 0;
 let answers = [];
+
+// أسعار احتياطية بالدولار تُستخدم فقط إذا تعذّر تحميل الباقات
+// الفعلية من Supabase. بعد تحميل الصفحة، سكريبت المزامنة بالأسفل
+// (بعد تحميل supabase-config.js) يستبدل هذا الكائن وقائمة الباقات
+// بالبيانات الحقيقية من جدول packages، حتى يبقى اسم وسعر كل باقة
+// متطابقاً دائماً بين لوحة التحكم ونموذج الحجز وزر الدفع.
+let PACKAGE_PRICES_USD = {
+  'استشارة سريعة': 35,
+  'باقة الانطلاقة': 150,
+  'باقة المرافقة': 300,
+  'دعم فوري': 70,
+  'ادعم بوضوح': 1,
+};
 
 const typeCards = document.querySelectorAll('.type-card');
 const urgentBlock = document.getElementById('urgentBlock');
@@ -577,13 +591,6 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   // نعرض زر دفع PayPal مباشرة داخل الصفحة بمبلغ الباقة الفعلي، وعند
   // نجاح الدفع (onApprove) نعلّم الحجز كمدفوع عبر دالة mark_booking_paid
   // — بدون أي تحويل إلى موقع خارجي، وبدون منح الزائر صلاحية تعديل الحجوزات مباشرة
-  const PACKAGE_PRICES_USD = {
-    'استشارة سريعة': 35,
-    'باقة الانطلاقة': 150,
-    'باقة المرافقة': 300,
-    'دعم فوري': 70,
-    'تجربة - بوضوح': 1,
-  };
   const amount = PACKAGE_PRICES_USD[payload.package_name];
   const paypalContainer = document.getElementById('paypal-button-container');
 
@@ -608,6 +615,11 @@ document.getElementById('bookingForm').addEventListener('submit', async function
         paypalContainer.insertAdjacentHTML('afterend', '<p style="text-align:center; color:var(--alert); font-size:13px; margin-top:10px;">حدث خطأ أثناء الدفع. حاول مرة أخرى أو تواصل معنا.</p>');
       },
     }).render('#paypal-button-container');
+  } else if (typeof paypal !== 'undefined') {
+    // ما قدرنا نحدد سعر الباقة (مثلاً تأخّر تحميل الباقات من قاعدة
+    // البيانات) — نوضّح للزائر إنه حجزه استُلم، وما يحتاج يعتبرها خطأ،
+    // وإنه فريقنا سيتواصل معه لإتمام الدفع بدل ما يبقى الزر فاضياً بصمت.
+    paypalContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">تم استلام حجزك بنجاح. سيتواصل معك فريقنا خلال ٢٤ ساعة لإتمام الدفع.</p>';
   }
 });
 
@@ -625,6 +637,47 @@ document.querySelectorAll('.faq-q').forEach(q => {
 <script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=buttons&disable-funding=venmo&currency=USD"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script>
+/* ============================================================
+   نزامن قائمة الباقات بنموذج الحجز (bkPackage) وأسعارها الفعلية
+   (PACKAGE_PRICES_USD) مباشرة مع جدول packages في Supabase — نفس
+   المصدر اللي يعتمد عليه <pricing-cards> بالأعلى. هذا يمنع مشكلة
+   حصلت فعلياً: لو تغيّر اسم أو سعر باقة من لوحة التحكم، كانت قائمة
+   الحجز وزر الدفع (PayPal) يضلّوا على الاسم/السعر القديم المكتوب
+   يدوياً بهذا الملف، فيصير السعر غير موجود ("undefined")، وزر الدفع
+   ما يظهر، ويبدو للزائر إنه صار "خطأ" أثناء الحجز.
+   ============================================================ */
+(async function syncPackagesIntoBookingForm(){
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+
+  const { data, error } = await supabaseClient
+    .from('packages')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error || !data || !data.length) {
+    console.error('sync packages into booking form:', error);
+    return; // نبقى على القائمة الاحتياطية الثابتة بدل ما نكسر النموذج
+  }
+
+  const select = document.getElementById('bkPackage');
+  const previousValue = select.value;
+
+  select.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
+  PACKAGE_PRICES_USD = {};
+
+  data.forEach(pkg => {
+    const opt = document.createElement('option');
+    opt.value = pkg.name;
+    opt.textContent = `${pkg.name} — $${pkg.price}${pkg.price_unit ? ' / ' + pkg.price_unit : ''}`;
+    select.appendChild(opt);
+    PACKAGE_PRICES_USD[pkg.name] = Number(pkg.price);
+  });
+
+  // نحافظ على اختيار الزائر لو كان اختار باقة قبل ما تخلص المزامنة
+  if (data.some(p => p.name === previousValue)) select.value = previousValue;
+})();
+</script>
 <app-bottom-nav></app-bottom-nav>
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
