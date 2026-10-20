@@ -91,7 +91,7 @@ async function loadTeam(){
   }
 
   grid.innerHTML = data.map(sp => `
-    <a href="/specialist/?slug=${encodeURIComponent(sp.slug)}" class="specialist-card">
+    <a href="/en/specialist/?slug=${encodeURIComponent(sp.slug)}" class="specialist-card">
       <img class="specialist-photo" src="${sp.photo_url}" alt="${sp.full_name}" loading="lazy">
       <div class="specialist-body">
         <div class="specialist-name">${sp.full_name}</div>

@@ -66,6 +66,8 @@ const STYLE_FIX = `
   site-nav .nav-links a:hover, site-nav .nav-links a.active{ color:#F3EEEA; }
   site-nav .nav-links a.nav-cta{ background:#C9A15F; color:#241D2E; font-weight:700; padding:9px 20px; border-radius:100px; transition:.2s; }
   site-nav .nav-links a.nav-cta:hover{ background:#E4C98A; color:#241D2E; }
+  site-nav .lang-switch{ border:1.5px solid rgba(255,255,255,.18); color:#B7ACC4; border-radius:100px; padding:5px 13px; font-size:12.5px; font-weight:700; text-decoration:none; transition:.2s; line-height:1.6; flex-shrink:0; }
+  site-nav .lang-switch:hover{ border-color:#C9A15F; color:#F3EEEA; }
   @media (max-width:780px){ site-nav .nav-links{ display:none; } }
 `;
 const styleTag = document.createElement('style');
@@ -96,6 +98,15 @@ class SiteNav extends HTMLElement {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </a>`;
 
+    // زر تبديل اللغة: يفتح نفس الصفحة بالنسخة الأخرى (وإذا لم تكن موجودة يرجع للرئيسية)
+    const counterpart = (() => {
+      const { pathname, search, hash } = window.location;
+      const p = IS_EN ? pathname.replace(/^\/en(\/|$)/, '/') : '/en' + pathname;
+      return p + search + hash;
+    })();
+    const langSwitchHtml = isRunningInApp() ? '' : `
+        <a href="${counterpart}" class="lang-switch" id="langSwitch" lang="${IS_EN ? 'ar' : 'en'}" hreflang="${IS_EN ? 'ar' : 'en'}" aria-label="${IS_EN ? 'التبديل إلى العربية' : 'Switch to English'}">${IS_EN ? 'عربي' : 'EN'}</a>`;
+
     this.innerHTML = `
     <div class="wrap">
       <a href="${appHref(lp('/'))}" class="brand">${t('بوضوح', 'Bewoduh')}<span>.</span></a>
@@ -104,9 +115,15 @@ class SiteNav extends HTMLElement {
           ${linksHtml}
           <a href="${appHref(lp('/sales-page/'))}" class="nav-cta">${t('احجز استشارة', 'Book a Consultation')}</a>
         </div>
+        ${langSwitchHtml}
         ${accountIconHtml}
       </div>
     </div>`;
+
+    const langLink = document.getElementById('langSwitch');
+    if (langLink) {
+      fetch(counterpart, { method: 'HEAD' }).then(r => { if (!r.ok) langLink.href = IS_EN ? '/' : '/en/'; }).catch(() => {});
+    }
 
     // لو الزائر مسجّل دخول أصلاً، وجّهي الأيقونة لصفحة حسابه بدل صفحة التسجيل
     if (!isRunningInApp() && typeof supabaseClient !== 'undefined' && supabaseClient) {
