@@ -225,6 +225,7 @@
       <button type="button" class="currency-btn" data-currency="AED">🇦🇪 AED</button>
       <button type="button" class="currency-btn" data-currency="EGP">🇪🇬 EGP</button>
     </div>
+    <p style="text-align:center; font-size:12px; color:var(--text-muted-light); margin-top:10px;">Prices in your currency are approximate, for comparison only. Actual payment through PayPal is made in US dollars.</p>
 
     <pricing-cards class="pkg-grid"></pricing-cards>
 
@@ -273,7 +274,7 @@
             <option value="باقة الانطلاقة">Launch Package — $150 / monthly</option>
             <option value="باقة المرافقة">Companion Package — $300 / every 3 months</option>
             <option value="دعم فوري">Immediate Support — $70</option>
-            <option value="تجربة - بوضوح">Test - Bewoduh — $1</option>
+            <option value="ادعم بوضوح">Support Bewoduh — $1</option>
           </select>
         </div>
         <div class="field">
@@ -383,6 +384,17 @@ const PACKAGE_RECOMMENDATIONS = [
 let currentType = null;
 let currentQ = 0;
 let answers = [];
+
+// Fallback USD prices, used only if loading the real packages from Supabase fails.
+// The sync script at the bottom replaces this object and the booking-form options with
+// the real data from the packages table, so names and prices always match the dashboard.
+let PACKAGE_PRICES_USD = {
+  'استشارة سريعة': 35,
+  'باقة الانطلاقة': 150,
+  'باقة المرافقة': 300,
+  'دعم فوري': 70,
+  'ادعم بوضوح': 1,
+};
 
 const typeCards = document.querySelectorAll('.type-card');
 const urgentBlock = document.getElementById('urgentBlock');
@@ -554,13 +566,6 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   // نعرض زر دفع PayPal مباشرة داخل الصفحة بمبلغ الباقة الفعلي، وعند
   // نجاح الدفع (onApprove) نعلّم الحجز كمدفوع عبر دالة mark_booking_paid
-  const PACKAGE_PRICES_USD = {
-    'استشارة سريعة': 35,
-    'باقة الانطلاقة': 150,
-    'باقة المرافقة': 300,
-    'دعم فوري': 70,
-    'تجربة - بوضوح': 1,
-  };
   const amount = PACKAGE_PRICES_USD[payload.package_name];
   const paypalContainer = document.getElementById('paypal-button-container');
 
@@ -585,6 +590,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
         paypalContainer.insertAdjacentHTML('afterend', '<p style="text-align:center; color:var(--alert); font-size:13px; margin-top:10px;">An error occurred during payment. Please try again or contact us.</p>');
       },
     }).render('#paypal-button-container');
+  } else if (typeof paypal !== 'undefined') {
+    // Could not determine the package price (e.g. packages failed to load): tell the visitor the booking was received
+    paypalContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">Your booking was received. Our team will contact you within 24 hours to complete the payment.</p>';
   }
 });
 
@@ -602,6 +610,32 @@ document.querySelectorAll('.faq-q').forEach(q => {
 <script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=buttons&disable-funding=venmo&currency=USD"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script>
+/* Sync the booking form's package list and the real prices (PACKAGE_PRICES_USD) with the
+   packages table in Supabase, the same source <pricing-cards> uses. Without this, renaming
+   or repricing a package in the dashboard left the form and the PayPal button on the old
+   hard-coded values, so the price lookup failed and the payment button never appeared. */
+(async function syncPackagesIntoBookingForm(){
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+  const { data, error } = await supabaseClient.from('packages').select('*').order('sort_order', { ascending: true });
+  if (error || !data || !data.length) { console.error('sync packages into booking form:', error); return; }
+
+  const select = document.getElementById('bkPackage');
+  const previousValue = select.value;
+  select.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
+  PACKAGE_PRICES_USD = {};
+
+  data.forEach(pkg => {
+    const en = (typeof PKG_EN !== 'undefined' && PKG_EN[pkg.name]) || null;
+    const opt = document.createElement('option');
+    opt.value = pkg.name; // stays Arabic: must match the stored package name
+    opt.textContent = `${en ? en.name : pkg.name} — $${pkg.price}${en ? ' / ' + en.unit : ''}`;
+    select.appendChild(opt);
+    PACKAGE_PRICES_USD[pkg.name] = Number(pkg.price);
+  });
+  if (data.some(p => p.name === previousValue)) select.value = previousValue;
+})();
+</script>
 <app-bottom-nav></app-bottom-nav>
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');

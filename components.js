@@ -43,6 +43,12 @@ function appHref(path){
   return base + frag;
 }
 
+/* لغة الصفحة: الصفحات الإنجليزية (<html lang="en">) تستخدم نفس المكوّنات لكن
+   بنصوص إنجليزية وروابط تبدأ بـ /en، حتى لا تظهر القائمة العلوية والفوتر بالعربي. */
+const IS_EN = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+const t = (ar, en) => (IS_EN ? en : ar);
+const lp = (path) => (IS_EN ? '/en' + path : path);
+
 const STYLE_FIX = `
   site-nav{ display:block; position:sticky; top:0; z-index:50; background:rgba(36,29,46,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
   site-nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; }
@@ -53,6 +59,14 @@ const STYLE_FIX = `
   .nav-account-icon svg{ width:16px; height:16px; }
   .nav-account-icon:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
+  site-nav .brand{ font-family:'Noto Kufi Arabic','IBM Plex Sans',sans-serif; font-weight:900; font-size:22px; color:#F3EEEA; text-decoration:none; }
+  site-nav .brand span{ color:#C9A15F; }
+  site-nav .nav-links{ display:flex; align-items:center; gap:28px; }
+  site-nav .nav-links a{ color:#B7ACC4; font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
+  site-nav .nav-links a:hover, site-nav .nav-links a.active{ color:#F3EEEA; }
+  site-nav .nav-links a.nav-cta{ background:#C9A15F; color:#241D2E; font-weight:700; padding:9px 20px; border-radius:100px; transition:.2s; }
+  site-nav .nav-links a.nav-cta:hover{ background:#E4C98A; color:#241D2E; }
+  @media (max-width:780px){ site-nav .nav-links{ display:none; } }
 `;
 const styleTag = document.createElement('style');
 styleTag.textContent = STYLE_FIX;
@@ -65,30 +79,30 @@ class SiteNav extends HTMLElement {
     }
     const active = this.getAttribute('active') || '';
     const links = [
-      { href: '/#pillars', label: 'المواضيع', key: '' },
-      { href: '/blog/', label: 'المدونة', key: 'blog' },
-      { href: '/quizzes/', label: 'الاختبارات', key: 'quizzes' },
-      { href: '/about/', label: 'من نحن', key: 'about' },
-      { href: '/join/', label: 'انضم إلينا', key: 'join' },
+      { href: '/#pillars', label: t('المواضيع', 'Topics'), key: '' },
+      { href: '/blog/', label: t('المدونة', 'Blog'), key: 'blog' },
+      { href: '/quizzes/', label: t('الاختبارات', 'Quizzes'), key: 'quizzes' },
+      { href: '/about/', label: t('من نحن', 'About'), key: 'about' },
     ];
+    if (!IS_EN) links.push({ href: '/join/', label: 'انضم إلينا', key: 'join' });
 
     const linksHtml = links.map(l => {
       const cls = l.key && l.key === active ? ' class="active"' : '';
-      return `<a href="${appHref(l.href)}"${cls}>${l.label}</a>`;
+      return `<a href="${appHref(lp(l.href))}"${cls}>${l.label}</a>`;
     }).join('\n      ');
 
     const accountIconHtml = isRunningInApp() ? '' : `
-        <a href="${appHref('/signup/')}" class="nav-account-icon" id="navAccountIcon" aria-label="حسابي">
+        <a href="${appHref(lp('/signup/'))}" class="nav-account-icon" id="navAccountIcon" aria-label="${t('حسابي', 'My account')}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </a>`;
 
     this.innerHTML = `
     <div class="wrap">
-      <a href="${appHref('/')}" class="brand">بوضوح<span>.</span></a>
+      <a href="${appHref(lp('/'))}" class="brand">${t('بوضوح', 'Bewoduh')}<span>.</span></a>
       <div class="nav-actions">
         <div class="nav-links">
           ${linksHtml}
-          <a href="${appHref('/sales-page/')}" class="nav-cta">احجز استشارة</a>
+          <a href="${appHref(lp('/sales-page/'))}" class="nav-cta">${t('احجز استشارة', 'Book a Consultation')}</a>
         </div>
         ${accountIconHtml}
       </div>
@@ -99,7 +113,7 @@ class SiteNav extends HTMLElement {
       supabaseClient.auth.getSession().then(({ data }) => {
         if (data.session) {
           const icon = document.getElementById('navAccountIcon');
-          if (icon) icon.href = appHref('/account/');
+          if (icon) icon.href = appHref(lp('/account/'));
         }
       });
     }
@@ -109,71 +123,79 @@ class SiteNav extends HTMLElement {
 class SiteFooter extends HTMLElement {
   // سطر بيانات الشركة المالكة (بلغة الصفحة)
   companyLine() {
-    const isEn = (document.documentElement.lang || '').toLowerCase().startsWith('en');
-    const text = isEn
-      ? 'Bewodouh is operated by LAMSA LTD, a company registered in England and Wales (Company No. 17517932). Registered office: 128 City Road, London, EC1V 2NX, United Kingdom.'
+    const text = IS_EN
+      ? 'Bewoduh is operated by LAMSA LTD, a company registered in England and Wales (Company No. 17517932). Registered office: 128 City Road, London, EC1V 2NX, United Kingdom.'
       : 'بوضوح منصة تابعة لشركة لمسة المحدودة، المسجلة في إنجلترا وويلز برقم 17517932. العنوان المسجل: 128 سيتي رود، لندن، <bdi dir="ltr">EC1V 2NX</bdi>، المملكة المتحدة.';
     return `<p class="footer-company" style="margin-top:10px; font-size:11.5px; opacity:.8;">${text}</p>`;
   }
 
   connectedCallback() {
     const variant = this.getAttribute('variant') || 'simple';
-    const h = appHref; // اختصار محلي
+    const h = (path) => appHref(lp(path)); // اختصار محلي: يضيف /en للصفحات الإنجليزية
+    const brand = t('بوضوح', 'Bewoduh');
+    const blurb = t(
+      'محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.',
+      'Educational content about relationships and personality patterns, for anyone who wants to see their relationships more clearly.'
+    );
 
     if (variant === 'rich') {
       this.innerHTML = `
     <div class="wrap">
       <div class="footer-grid">
         <div class="footer-brand">
-          <span class="brand kufi" style="font-size:20px;">بوضوح<span style="color:var(--clarity);">.</span></span>
-          <p>محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.</p>
+          <span class="brand kufi" style="font-size:20px;">${brand}<span style="color:var(--clarity);">.</span></span>
+          <p>${blurb}</p>
         </div>
         <div class="footer-col">
-          <h4>الموقع</h4>
-          <a href="${h('/#pillars')}">المواضيع</a>
-          <a href="${h('/blog/')}">المدونة</a>
-          <a href="${h('/quizzes/')}">الاختبارات</a>
-          <a href="${h('/about/')}">من نحن</a>
-          <a href="${h('/team/')}">فريق بوضوح</a>
-          <a href="${h('/join/')}">انضم إلينا</a>
-          <a href="${h('/faq/')}">الأسئلة الأكثر شيوعاً</a>
-          <a href="${h('/daily-exercises/')}">تمارين يومية</a>
-          <a href="${h('/sales-page/')}">احجز استشارة</a>
+          <h4>${t('الموقع', 'Site')}</h4>
+          <a href="${h('/#pillars')}">${t('المواضيع', 'Topics')}</a>
+          <a href="${h('/blog/')}">${t('المدونة', 'Blog')}</a>
+          <a href="${h('/quizzes/')}">${t('الاختبارات', 'Quizzes')}</a>
+          <a href="${h('/about/')}">${t('من نحن', 'About')}</a>
+          <a href="${h('/team/')}">${t('فريق بوضوح', 'Our Team')}</a>
+          ${IS_EN ? '' : `<a href="${h('/join/')}">انضم إلينا</a>`}
+          <a href="${h('/faq/')}">${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
+          ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}">تمارين يومية</a>`}
+          <a href="${h('/sales-page/')}">${t('احجز استشارة', 'Book a Consultation')}</a>
         </div>
         <div class="footer-col">
-          <h4>تواصل</h4>
-          <a href="https://instagram.com" target="_blank" rel="noopener">إنستغرام</a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener">تيك توك</a>
-          <a href="${h('/contact/')}">راسلنا</a>
+          <h4>${t('تواصل', 'Connect')}</h4>
+          <a href="https://instagram.com" target="_blank" rel="noopener">${t('إنستغرام', 'Instagram')}</a>
+          <a href="https://tiktok.com" target="_blank" rel="noopener">${t('تيك توك', 'TikTok')}</a>
+          <a href="${h('/contact/')}">${t('راسلنا', 'Contact us')}</a>
         </div>
         <div class="footer-col">
-          <h4>قانوني</h4>
-          <a href="${h('/terms/')}">شروط الاستخدام</a>
-          <a href="${h('/privacy/')}">سياسة الخصوصية</a>
+          <h4>${t('قانوني', 'Legal')}</h4>
+          <a href="${h('/terms/')}">${t('شروط الاستخدام', 'Terms of Use')}</a>
+          <a href="${h('/privacy/')}">${t('سياسة الخصوصية', 'Privacy Policy')}</a>
         </div>
       </div>
-      <p class="footer-bottom">©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.</p>
+      <p class="footer-bottom">${t(
+        '©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.',
+        '©Bewoduh 2026 — All content is educational and is not a substitute for consultation or treatment by a mental health professional.'
+      )}</p>
       ${this.companyLine()}
     </div>`;
       return;
     }
 
+    const linkStyle = 'style="color:var(--text-muted-dark);"';
     this.innerHTML = `
     <div class="wrap">
-      <span class="brand kufi">بوضوح<span style="color:var(--clarity);">.</span></span>
-      محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.
+      <span class="brand kufi">${brand}<span style="color:var(--clarity);">.</span></span>
+      ${blurb}
       <div style="margin-top:18px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; font-size:12.5px;">
-        <a href="${h('/')}" style="color:var(--text-muted-dark);">الرئيسية</a>
-        <a href="${h('/blog/')}" style="color:var(--text-muted-dark);">المدونة</a>
-        <a href="${h('/quizzes/')}" style="color:var(--text-muted-dark);">الاختبارات</a>
-        <a href="${h('/about/')}" style="color:var(--text-muted-dark);">من نحن</a>
-        <a href="${h('/team/')}" style="color:var(--text-muted-dark);">فريق بوضوح</a>
-        <a href="${h('/join/')}" style="color:var(--text-muted-dark);">انضم إلينا</a>
-        <a href="${h('/faq/')}" style="color:var(--text-muted-dark);">الأسئلة الأكثر شيوعاً</a>
-        <a href="${h('/daily-exercises/')}" style="color:var(--text-muted-dark);">تمارين يومية</a>
-        <a href="${h('/sales-page/')}" style="color:var(--text-muted-dark);">احجز استشارة</a>
-        <a href="${h('/terms/')}" style="color:var(--text-muted-dark);">شروط الاستخدام</a>
-        <a href="${h('/privacy/')}" style="color:var(--text-muted-dark);">سياسة الخصوصية</a>
+        <a href="${h('/')}" ${linkStyle}>${t('الرئيسية', 'Home')}</a>
+        <a href="${h('/blog/')}" ${linkStyle}>${t('المدونة', 'Blog')}</a>
+        <a href="${h('/quizzes/')}" ${linkStyle}>${t('الاختبارات', 'Quizzes')}</a>
+        <a href="${h('/about/')}" ${linkStyle}>${t('من نحن', 'About')}</a>
+        <a href="${h('/team/')}" ${linkStyle}>${t('فريق بوضوح', 'Our Team')}</a>
+        ${IS_EN ? '' : `<a href="${h('/join/')}" ${linkStyle}>انضم إلينا</a>`}
+        <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
+        ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}" ${linkStyle}>تمارين يومية</a>`}
+        <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>
+        <a href="${h('/terms/')}" ${linkStyle}>${t('شروط الاستخدام', 'Terms of Use')}</a>
+        <a href="${h('/privacy/')}" ${linkStyle}>${t('سياسة الخصوصية', 'Privacy Policy')}</a>
       </div>
       ${this.companyLine()}
     </div>`;
@@ -213,13 +235,24 @@ const CURRENCY_CONFIG = {
   EGP: { rate: 49,      decimals: 0, format: v => `${v} ج.م` }, // تقريبي — عملة عائمة، يحتاج تحديث دوري
 };
 
+// الباقات مخزّنة بالعربي بقاعدة البيانات، فنعرض ترجمة إنجليزية للصفحات الإنجليزية فقط
+// (القيمة الفعلية data-pkg-name تبقى بالعربي لتتطابق مع قاعدة البيانات والحجوزات)
+const PKG_EN = {
+  'استشارة سريعة': { name: 'Quick Consultation', desc: 'A single session, suitable if you want to try before committing.', unit: 'Single session (45 min)' },
+  'باقة الانطلاقة': { name: 'Launch Package', desc: 'Four sessions a month, a good start for real follow-up.', unit: 'Monthly — 4 sessions' },
+  'باقة المرافقة': { name: 'Companion Package', desc: 'Eight sessions a month, for deeper follow-up and real impact.', unit: 'Monthly — 8 sessions' },
+  'دعم فوري': { name: 'Immediate Support', desc: 'An urgent session within 24 hours, if the situation needs faster action.', unit: 'Urgent session' },
+  'ادعم بوضوح': { name: 'Support Bewoduh', desc: 'Support the company to keep providing content.', unit: '$1 to support Bewoduh' },
+};
+const CURRENCY_CODE_EN = { JOD: 'JOD', SAR: 'SAR', AED: 'AED', EGP: 'EGP' };
+
 class PricingCards extends HTMLElement {
   async connectedCallback() {
-    this.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); grid-column:1/-1;">جارٍ تحميل الباقات...</p>';
+    this.innerHTML = `<p style="text-align:center; color:var(--text-muted-light); grid-column:1/-1;">${t('جارٍ تحميل الباقات...', 'Loading packages...')}</p>`;
     this._currency = this._currency || 'USD';
 
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-      this.innerHTML = '<p style="text-align:center; color:var(--alert); grid-column:1/-1;">تعذّر تحميل الباقات — لم يتم إعداد الاتصال بقاعدة البيانات بعد.</p>';
+      this.innerHTML = `<p style="text-align:center; color:var(--alert); grid-column:1/-1;">${t('تعذّر تحميل الباقات — لم يتم إعداد الاتصال بقاعدة البيانات بعد.', 'Could not load packages.')}</p>`;
       return;
     }
 
@@ -229,7 +262,7 @@ class PricingCards extends HTMLElement {
       .order('sort_order', { ascending: true });
 
     if (error || !data || !data.length) {
-      this.innerHTML = '<p style="text-align:center; color:var(--alert); grid-column:1/-1;">تعذّر تحميل الباقات حالياً. حاول تحديث الصفحة.</p>';
+      this.innerHTML = `<p style="text-align:center; color:var(--alert); grid-column:1/-1;">${t('تعذّر تحميل الباقات حالياً. حاول تحديث الصفحة.', 'Could not load packages right now. Please refresh the page.')}</p>`;
       console.error('pricing-cards:', error);
       return;
     }
@@ -249,13 +282,15 @@ class PricingCards extends HTMLElement {
 
     this.innerHTML = this._data.map(pkg => {
       const converted = (Number(pkg.price) * cfg.rate).toFixed(cfg.decimals);
+      const en = IS_EN ? PKG_EN[pkg.name] : null;
+      const priceText = IS_EN && CURRENCY_CODE_EN[this._currency] ? `${converted} ${CURRENCY_CODE_EN[this._currency]}` : cfg.format(converted);
       return `
       <div class="pkg-card${pkg.is_recommended ? ' recommended' : ''}" data-pkg-id="${pkg.id}">
-        ${pkg.is_recommended ? '<span class="pkg-badge">الأكثر طلباً</span>' : ''}
-        <h3>${pkg.name}</h3>
-        <p class="pkg-desc">${pkg.description || ''}</p>
-        <div class="pkg-price">${cfg.format(converted)} <span>${pkg.price_unit}</span></div>
-        <button class="pkg-select-btn${pkg.name === this._chosenName ? ' chosen' : ''}" data-pkg-name="${pkg.name}">اختر هذه الباقة</button>
+        ${pkg.is_recommended ? `<span class="pkg-badge">${t('الأكثر طلباً', 'Most requested')}</span>` : ''}
+        <h3>${en ? en.name : pkg.name}</h3>
+        <p class="pkg-desc">${en ? en.desc : (pkg.description || '')}</p>
+        <div class="pkg-price">${priceText} <span>${en ? en.unit : pkg.price_unit}</span></div>
+        <button class="pkg-select-btn${pkg.name === this._chosenName ? ' chosen' : ''}" data-pkg-name="${pkg.name}">${t('اختر هذه الباقة', 'Choose this package')}</button>
       </div>
     `;
     }).join('');
@@ -363,13 +398,13 @@ class AppBottomNav extends HTMLElement {
 
     const active = this.getAttribute('active') || '';
     const items = [
-      { key: 'home', href: '/', label: 'الرئيسية',
+      { key: 'home', href: lp('/'), label: t('الرئيسية', 'Home'),
         icon: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>' },
-      { key: 'blog', href: '/blog/', label: 'المدونة',
+      { key: 'blog', href: lp('/blog/'), label: t('المدونة', 'Blog'),
         icon: '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/>' },
-      { key: 'quizzes', href: '/quizzes/', label: 'الاختبارات',
+      { key: 'quizzes', href: lp('/quizzes/'), label: t('الاختبارات', 'Quizzes'),
         icon: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>' },
-      { key: 'account', href: '/account/', label: 'حسابي',
+      { key: 'account', href: lp('/account/'), label: t('حسابي', 'Account'),
         icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
     ];
 
