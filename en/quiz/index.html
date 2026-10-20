@@ -114,6 +114,20 @@
   footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
   footer a{ text-decoration:none; }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/en/quiz/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/quiz/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/quiz/">
+<link rel="alternate" hreflang="x-default" href="https://bewoduh.com/quiz/">
+<meta property="og:site_name" content="Bewoduh">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Quiz: What Is Your Relationship Pattern? — Bewoduh">
+<meta property="og:description" content="A short eight-question quiz that helps you notice the patterns in your relationship — healthy, worth your attention, or worth a serious pause.">
+<meta property="og:url" content="https://bewoduh.com/en/quiz/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -170,7 +184,7 @@
         <div class="cta-box" id="ctaBox">
           <h3 id="ctaTitle">Do you need real support?</h3>
           <p id="ctaDesc">A consultation with a licensed psychology specialist can help you understand your situation more deeply.</p>
-          <a href="/en/sales-page/" class="btn-primary">Book Your First Consultation</a>
+          <a href="/en/sales-page/" class="btn-primary" id="ctaLink">Book Your First Consultation</a>
         </div>
 
         <a href="#" class="retake" id="retakeBtn">Retake the quiz</a>
@@ -283,6 +297,7 @@ const results = [
     ],
     meterColor: "var(--clarity)",
     meterPct: 15,
+    package: "استشارة سريعة",
     articles: ["/en/article-healthy-first-date/"],
     ctaTitle: "Would you like to strengthen this foundation further?",
     ctaDesc: "A short consultation with a specialist can help you keep these same healthy patterns and build on them."
@@ -300,6 +315,7 @@ const results = [
     ],
     meterColor: "var(--clarity-soft)",
     meterPct: 45,
+    package: "استشارة سريعة",
     articles: ["/en/article-early-signs/", "/en/article-healthy-first-date/"],
     ctaTitle: "Would you like to understand these signs better?",
     ctaDesc: "A consultation with a specialist can help you tell a passing situation from a recurring pattern more clearly."
@@ -317,6 +333,7 @@ const results = [
     ],
     meterColor: "var(--alert)",
     meterPct: 75,
+    package: "باقة الانطلاقة",
     articles: ["/en/article-gaslighting/", "/en/article-early-signs/", "/en/article-narcissist-vs-confident/"],
     ctaTitle: "Would you like to understand these patterns more deeply?",
     ctaDesc: "A consultation with a psychology specialist can help you understand these patterns in depth and build practical steps with direct support."
@@ -334,6 +351,7 @@ const results = [
     ],
     meterColor: "var(--alert)",
     meterPct: 95,
+    package: "باقة الانطلاقة",
     articles: ["/en/article-gaslighting/", "/en/article-narcissist-vs-confident/"],
     ctaTitle: "A first step that may help",
     ctaDesc: "A consultation with a licensed psychology specialist is a very important step here — do not hesitate to ask for support."
@@ -433,6 +451,7 @@ function showResults(){
   tagEl.style.color = (result.tagColor === 'var(--alert)') ? '#fff' : 'var(--ink)';
 
   document.getElementById('resultTitle').textContent = result.title;
+  document.getElementById('ctaLink').href = '/en/sales-page/?package=' + encodeURIComponent(result.package) + '#booking-form';
   document.getElementById('resultDesc').textContent = result.desc;
 
   const meterFill = document.getElementById('meterFill');
