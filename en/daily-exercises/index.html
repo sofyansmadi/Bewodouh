@@ -94,114 +94,27 @@
   <div class="wrap">
     <div class="eyebrow">Your daily mental wellbeing</div>
     <h1>Daily exercises to reduce stress and work pressure</h1>
-    <p>Five minutes a day is enough — for you personally, or for your whole team.</p>
-    <a href="/en/daily-exercises/library/" style="display:inline-block; margin-top:18px; color:var(--clarity-soft); font-size:13.5px; text-decoration:underline;">Browse the exercise library →</a>
+    <p>Five minutes a day to ease stress and work pressure.</p>
   </div>
 </header>
 
 <main>
   <div class="wrap">
-
-    <h2 class="section-title">For individuals</h2>
-    <p class="section-sub">A simple subscription, cancel any time.</p>
-
-    <div class="individual-grid">
-      <div class="price-card">
-        <h3>Monthly subscription</h3>
-        <div class="price-amount">$7 <span>/ month</span></div>
-        <div class="price-save">&nbsp;</div>
-        <button class="btn-primary">Subscribe now</button>
-      </div>
-      <div class="price-card featured">
-        <span class="price-badge">Best value</span>
-        <h3>Annual subscription</h3>
-        <div class="price-amount">$39.99 <span>/ year</span></div>
-        <div class="price-save">Save more than 52% compared with monthly</div>
-        <button class="btn-primary">Subscribe now</button>
+    <div style="background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:48px 32px; text-align:center; max-width:640px; margin:0 auto; box-shadow:0 24px 50px -30px rgba(36,29,46,.2);">
+      <span style="display:inline-block; background:rgba(201,161,95,.15); color:#8a6a2e; font-weight:700; font-size:13px; padding:5px 16px; border-radius:100px; margin-bottom:18px;">Coming soon</span>
+      <h2 class="section-title" style="margin-bottom:12px;">We're preparing simple daily exercises</h2>
+      <p style="color:var(--text-muted-light); font-size:15.5px; max-width:46ch; margin:0 auto 28px;">We're working on short daily exercises to ease stress and work pressure, for individuals and for teams. We'll announce them here as soon as they're ready.</p>
+      <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+        <a href="/en/quizzes/" class="btn-primary">Try one of our quizzes</a>
+        <a href="/en/blog/" class="btn-primary" style="background:var(--fog); color:var(--ink); border:1px solid var(--fog-dim);">Read the blog</a>
       </div>
     </div>
-
-    <h2 class="section-title">For companies</h2>
-    <p class="section-sub">The price per employee goes down as your team grows — annual payment, cancel any time.</p>
-
-    <div class="biz-box">
-      <div class="biz-row">
-        <label for="employeeSlider">Number of employees</label>
-        <span id="employeeCountDisplay">5</span>
-      </div>
-      <input type="range" id="employeeSlider" min="5" max="500" value="5" step="1">
-      <div class="biz-range-labels"><span>5</span><span>500+</span></div>
-
-      <div class="biz-result" id="bizResult">
-        <div class="total" id="bizTotal">$150</div>
-        <div class="per-employee" id="bizPerEmployee">$30.00 per employee per year</div>
-        <div class="discount-note" id="bizDiscountNote" style="display:none;"></div>
-      </div>
-
-      <div class="biz-enterprise" id="bizEnterprise">
-        <h4>Have a team of more than 500 employees?</h4>
-        <p>Contact us for a custom quote that fits your team size.</p>
-        <a href="/en/contact/" class="btn-primary">Contact us</a>
-      </div>
-
-      <button class="btn-primary" id="bizSubscribeBtn" style="width:100%; margin-top:20px;">Subscribe your team now</button>
-    </div>
-
   </div>
 </main>
 
 <site-footer></site-footer>
 
 <app-bottom-nav></app-bottom-nav>
-<script>
-const BASE_PRICE_PER_EMPLOYEE = 30; // بالسنة، قبل أي خصم
-const DISCOUNT_STEP = 25; // كل ما زاد العدد بهاد الرقم
-const DISCOUNT_PERCENT_PER_STEP = 3;
-const MAX_CALCULATED = 500;
-
-const slider = document.getElementById('employeeSlider');
-const countDisplay = document.getElementById('employeeCountDisplay');
-const bizResult = document.getElementById('bizResult');
-const bizTotal = document.getElementById('bizTotal');
-const bizPerEmployee = document.getElementById('bizPerEmployee');
-const bizDiscountNote = document.getElementById('bizDiscountNote');
-const bizEnterprise = document.getElementById('bizEnterprise');
-const bizSubscribeBtn = document.getElementById('bizSubscribeBtn');
-
-function updateBizPricing(){
-  const count = parseInt(slider.value, 10);
-  countDisplay.textContent = count;
-
-  if (count > MAX_CALCULATED) {
-    bizResult.style.display = 'none';
-    bizSubscribeBtn.style.display = 'none';
-    bizEnterprise.classList.add('active');
-    return;
-  }
-
-  bizResult.style.display = 'block';
-  bizSubscribeBtn.style.display = 'block';
-  bizEnterprise.classList.remove('active');
-
-  const tier = Math.floor(count / DISCOUNT_STEP);
-  const discountPercent = tier * DISCOUNT_PERCENT_PER_STEP;
-  const pricePerEmployee = BASE_PRICE_PER_EMPLOYEE * (1 - discountPercent / 100);
-  const total = count * pricePerEmployee;
-
-  bizTotal.textContent = '$' + total.toLocaleString('en-US', { maximumFractionDigits: 0 });
-  bizPerEmployee.textContent = '$' + pricePerEmployee.toFixed(2) + ' per employee per year';
-
-  if (discountPercent > 0) {
-    bizDiscountNote.style.display = 'block';
-    bizDiscountNote.textContent = discountPercent + '% discount applied';
-  } else {
-    bizDiscountNote.style.display = 'none';
-  }
-}
-
-slider.addEventListener('input', updateBizPricing);
-updateBizPricing();
-</script>
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
 </script>
