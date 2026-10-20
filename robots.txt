@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /account/
+Disallow: /signup/
+Disallow: /en/account/
+Disallow: /en/signup/
+
+Sitemap: https://bewoduh.com/sitemap.xml

@@ -60,6 +60,20 @@
   footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; margin-top:60px; }
   footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/en/specialist/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/specialist/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/specialist/">
+<link rel="alternate" hreflang="x-default" href="https://bewoduh.com/specialist/">
+<meta property="og:site_name" content="Bewoduh">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Specialist — Bewoduh">
+<meta property="og:description" content="Meet one of the Bewoduh team specialists.">
+<meta property="og:url" content="https://bewoduh.com/en/specialist/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -80,6 +94,7 @@
       <div class="profile-body">
         <h1 class="profile-name" id="profileName"></h1>
         <div class="profile-role" id="profileRole"></div>
+        <ul class="profile-facts" id="profileFacts" style="list-style:none; display:flex; flex-wrap:wrap; gap:8px 18px; margin:-8px 0 20px; padding:0; font-size:13.5px; color:var(--text-muted-light);"></ul>
         <p class="profile-bio" id="profileBio"></p>
 
         <div class="book-box">
@@ -131,6 +146,10 @@ async function loadSpecialist(){
   document.getElementById('profileName').textContent = data.full_name;
   document.getElementById('profileRole').textContent = data.specialty;
   document.getElementById('profileBio').textContent = data.bio;
+  const facts = document.getElementById('profileFacts');
+  const addFact = (text) => { const li = document.createElement('li'); li.textContent = '• ' + text; facts.appendChild(li); };
+  if (data.years_experience != null) addFact(data.years_experience + ' ' + (data.years_experience === 1 ? 'year of experience' : 'years of experience'));
+  if (data.credentials_verified) addFact('Credentials verified by Bewoduh');
   document.getElementById('bookName').textContent = data.full_name;
   document.getElementById('bookLink').href = '/en/sales-page/?specialist=' + encodeURIComponent(data.full_name);
 

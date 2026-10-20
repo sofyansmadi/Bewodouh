@@ -147,6 +147,20 @@
   .disclaimer-note{ background:#fff; border:1px solid var(--fog-dim); border-radius:var(--radius); padding:22px 24px; }
   .disclaimer-note p{ font-size:13.5px; color:var(--text-muted-light); }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/en/sales-page/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/sales-page/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/sales-page/">
+<link rel="alternate" hreflang="x-default" href="https://bewoduh.com/sales-page/">
+<meta property="og:site_name" content="Bewoduh">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Book Your Consultation — Bewoduh">
+<meta property="og:description" content="Book your consultation with a licensed mental health professional from the Bewoduh team — direct support tailored to your specific situation.">
+<meta property="og:url" content="https://bewoduh.com/en/sales-page/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -743,6 +757,13 @@ document.querySelectorAll('.faq-q').forEach(q => {
     PACKAGE_PRICES_USD[pkg.name] = Number(pkg.price);
   });
   if (data.some(p => p.name === previousValue)) select.value = previousValue;
+
+  // ?package=<name>: preselect a package (used by the quiz result buttons)
+  const wanted = new URLSearchParams(window.location.search).get('package');
+  if (wanted && data.some(p => p.name === wanted)) {
+    select.value = wanted;
+    window.dispatchEvent(new CustomEvent('recommend-package', { detail: { name: wanted } }));
+  }
 })();
 </script>
 <app-bottom-nav></app-bottom-nav>

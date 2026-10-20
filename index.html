@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
+  /* Remember the language the visitor chose with the header switch: the home page opens in that language. */
+  try {
+    var __lang = localStorage.getItem('bw_lang'), __p = location.pathname;
+    if (typeof window.Capacitor === 'undefined') {
+      if (__lang === 'en' && (__p === '/' || __p === '/index.html')) location.replace('/en/');
+      if (__lang === 'ar' && (__p === '/en/' || __p === '/en/index.html')) location.replace('/');
+    }
+  } catch (e) {}
+</script>
+<script>
   /* إذا كان التطبيق (لا الموقع عبر المتصفح) يُفتح لأول مرة ولم
      يُكمل مسار الترحيب بعد، حوّله فوراً إلى شاشة البداية قبل أن
      تظهر الصفحة الرئيسية العادية. */
@@ -250,6 +260,19 @@
     *{ animation:none !important; transition:none !important; }
   }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://bewoduh.com/">
+<meta property="og:site_name" content="بوضوح">
+<meta property="og:type" content="website">
+<meta property="og:title" content="بوضوح — نرى علاقاتنا بوضوح">
+<meta property="og:url" content="https://bewoduh.com/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -333,6 +356,30 @@
         <span class="pillar-tag">الزاوية الرابعة</span>
         <h3>بناء علاقات صحية</h3>
         <p>ليس فقط كيف تتجنب السام، بل كيف تبني علاقة يسودها الأمان والاحترام منذ البداية.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal center">
+    <div class="eyebrow" style="justify-content:center;">كيف تعمل الخدمة</div>
+    <h2 class="section-title">ثلاث خطوات فقط</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <span class="value-num">١</span>
+        <h3>اختر نوع استشارتك</h3>
+        <p>أجب عن أسئلة بسيطة، ونقترح عليك الباقة الأنسب لوضعك.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-num">٢</span>
+        <h3>احجز موعداً</h3>
+        <p>اختر وقتاً مناسباً من المواعيد المتاحة وأكمل الدفع بأمان.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-num">٣</span>
+        <h3>تحدّث مع مختص</h3>
+        <p>جلسة عن بُعد بسرية تامة، وإعادة جدولة مجانية حتى ٢٤ ساعة قبل الموعد.</p>
       </div>
     </div>
   </div>

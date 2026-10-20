@@ -114,6 +114,20 @@
   footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
   footer a{ text-decoration:none; }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/quiz/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/quiz/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/quiz/">
+<link rel="alternate" hreflang="x-default" href="https://bewoduh.com/quiz/">
+<meta property="og:site_name" content="بوضوح">
+<meta property="og:type" content="website">
+<meta property="og:title" content="اختبار: ما نمط علاقتك؟ — بوضوح">
+<meta property="og:description" content="اختبار قصير من ثمانية أسئلة يساعدك على ملاحظة أنماط علاقتك — صحية، تستحق انتباهاً، أو تستحق وقفة جدية.">
+<meta property="og:url" content="https://bewoduh.com/quiz/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -170,7 +184,7 @@
         <div class="cta-box" id="ctaBox">
           <h3 id="ctaTitle">هل تحتاج دعماً حقيقياً؟</h3>
           <p id="ctaDesc">استشارة مع مختص نفسي مرخّص ممكن تساعدك تفهم وضعك بعمق أكبر.</p>
-          <a href="/sales-page/" class="btn-primary">احجز استشارتك الأولى</a>
+          <a href="/sales-page/" class="btn-primary" id="ctaLink">احجز استشارتك الأولى</a>
         </div>
 
         <a href="#" class="retake" id="retakeBtn">أعد الاختبار من جديد</a>
@@ -283,6 +297,7 @@ const results = [
     ],
     meterColor: "var(--clarity)",
     meterPct: 15,
+    package: "استشارة سريعة",
     articles: ["/article-healthy-first-date/"],
     ctaTitle: "هل تريد تعزيز هذا الأساس أكثر؟",
     ctaDesc: "استشارة قصيرة مع مختص ممكن تساعدك تحافظ على نفس هذه الأنماط الصحية وتبنيها أكثر."
@@ -300,6 +315,7 @@ const results = [
     ],
     meterColor: "var(--clarity-soft)",
     meterPct: 45,
+    package: "استشارة سريعة",
     articles: ["/article-early-signs/", "/article-healthy-first-date/"],
     ctaTitle: "هل تريد فهم هذه العلامات أكثر؟",
     ctaDesc: "استشارة مع مختص ممكن تساعدك تفرّق بين الموقف العابر والنمط المتكرر بوضوح أكبر."
@@ -317,6 +333,7 @@ const results = [
     ],
     meterColor: "var(--alert)",
     meterPct: 75,
+    package: "باقة الانطلاقة",
     articles: ["/article-gaslighting/", "/article-early-signs/", "/article-narcissist-vs-confident/"],
     ctaTitle: "هل تريد فهم هذه الأنماط بعمق أكثر؟",
     ctaDesc: "استشارة مع مختص نفسي ممكن تساعدك تفهم هذه الأنماط بعمق، وتبني خطوات عملية بدعم مباشر."
@@ -334,6 +351,7 @@ const results = [
     ],
     meterColor: "var(--alert)",
     meterPct: 95,
+    package: "باقة الانطلاقة",
     articles: ["/article-gaslighting/", "/article-narcissist-vs-confident/"],
     ctaTitle: "خطوة أولى قد تساعدك",
     ctaDesc: "استشارة مع مختص نفسي مرخّص خطوة مهمة جداً هنا — لا تتردد في طلب الدعم."
@@ -433,6 +451,7 @@ function showResults(){
   tagEl.style.color = (result.tagColor === 'var(--alert)') ? '#fff' : 'var(--ink)';
 
   document.getElementById('resultTitle').textContent = result.title;
+  document.getElementById('ctaLink').href = '/sales-page/?package=' + encodeURIComponent(result.package) + '#booking-form';
   document.getElementById('resultDesc').textContent = result.desc;
 
   const meterFill = document.getElementById('meterFill');
