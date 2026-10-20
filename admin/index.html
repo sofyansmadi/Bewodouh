@@ -145,6 +145,7 @@
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
         <button class="admin-tab" data-tab="team">الفريق</button>
         <button class="admin-tab" data-tab="applications">طلبات الانضمام</button>
+        <button class="admin-tab" data-tab="slots">المواعيد المتاحة</button>
         <button class="admin-tab" data-tab="users">المستخدمين</button>
         <button class="admin-tab" data-tab="static-pages">الصفحات الثابتة</button>
         <button class="admin-tab" data-tab="exercises">تمارين يومية</button>
@@ -411,6 +412,35 @@
       <h2 class="section-title">طلبات الانضمام</h2>
       <p class="section-sub">طلبات الأخصائيين والمدربين الواصلة من صفحة "انضم إلى بوضوح"، بالأحدث أولاً. المستندات خاصة وتُعرض عبر روابط مؤقتة تنتهي بعد ٥ دقائق.</p>
       <div id="applicationsList">جارٍ التحميل...</div>
+      </div>
+
+      <div id="tab-slots" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">المواعيد المتاحة للحجز</h2>
+      <p class="section-sub">أضف أوقاتاً يختار منها الزبائن عند الحجز. الموعد المحجوز يختفي للآخرين تلقائياً، ولا يظهر أي موعد يقل عن ٢٤ ساعة من الآن. الأوقات بتوقيت جهازك.</p>
+
+      <div class="form-card" style="margin-bottom:28px;">
+        <h3>إضافة مواعيد</h3>
+        <form id="slotForm">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="slotSpecialist">الأخصائي</label>
+              <select id="slotSpecialist" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"></select>
+            </div>
+            <div class="field"><label for="slotDate">التاريخ</label><input type="date" id="slotDate" required></div>
+            <div class="field"><label for="slotLength">مدة الجلسة (دقيقة)</label><input type="number" id="slotLength" value="45" min="15" max="180" step="5" required></div>
+            <div class="field"><label for="slotStart">من الساعة</label><input type="time" id="slotStart" value="10:00" required></div>
+            <div class="field"><label for="slotEnd">إلى الساعة</label><input type="time" id="slotEnd" value="14:00" required></div>
+            <div class="field"><label for="slotBreak">استراحة بين الجلسات (دقيقة)</label><input type="number" id="slotBreak" value="15" min="0" max="120" step="5" required></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn-primary" style="width:auto; padding:12px 28px;">إضافة المواعيد</button></div>
+          <div class="status-msg" id="slotFormStatus"></div>
+        </form>
+      </div>
+
+      <table>
+        <thead><tr><th>الموعد</th><th>الأخصائي</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="slotsTableBody"><tr><td colspan="4">جارٍ التحميل...</td></tr></tbody>
+      </table>
       </div>
 
       <div id="tab-users" class="admin-tab-panel" style="display:none;">
@@ -723,6 +753,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     if (tab.dataset.tab === 'bookings') loadBookings();
     if (tab.dataset.tab === 'team') loadTeam();
     if (tab.dataset.tab === 'applications') loadApplications();
+    if (tab.dataset.tab === 'slots') loadSlots();
     if (tab.dataset.tab === 'users') loadUsers();
     if (tab.dataset.tab === 'static-pages') loadStaticPage('privacy');
     if (tab.dataset.tab === 'exercises') loadExercisesAdmin();
@@ -949,6 +980,74 @@ async function approveAndPublish(app, trigger){
   }
   loadApplications();
 }
+
+// ---------- Availability slots ----------
+async function loadSlots(){
+  const tbody = document.getElementById('slotsTableBody');
+  const specSelect = document.getElementById('slotSpecialist');
+
+  const { data: specs } = await supabaseClient.from('specialists').select('id, full_name').order('sort_order', { ascending: true });
+  const keep = specSelect.value;
+  specSelect.innerHTML = '<option value="">فريق بوضوح (أي مختص)</option>' + (specs || []).map(sp => `<option value="${esc(sp.id)}">${esc(sp.full_name)}</option>`).join('');
+  specSelect.value = keep;
+
+  const { data, error } = await supabaseClient
+    .from('availability_slots')
+    .select('id, starts_at, duration_min, booking_id, specialists(full_name), bookings(full_name)')
+    .gte('starts_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
+    .order('starts_at', { ascending: true })
+    .limit(300);
+
+  if (error) { tbody.innerHTML = '<tr><td colspan="4">تعذّر تحميل المواعيد.</td></tr>'; console.error('slots:', error); return; }
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="4">ما في مواعيد مضافة بعد.</td></tr>'; return; }
+
+  tbody.innerHTML = data.map(sl => {
+    const when = new Date(sl.starts_at).toLocaleString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    const who = sl.specialists ? esc(sl.specialists.full_name) : 'فريق بوضوح';
+    const state = sl.booking_id ? `<span class="badge-yes">محجوز${sl.bookings ? ' — ' + esc(sl.bookings.full_name) : ''}</span>` : 'متاح';
+    const del = sl.booking_id ? '' : `<button class="icon-btn danger" title="حذف" data-delete-slot="${esc(sl.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button>`;
+    return `<tr><td>${when} <span style="font-size:12px; color:var(--text-muted-light);">(${esc(sl.duration_min)} د)</span></td><td>${who}</td><td>${state}</td><td>${del}</td></tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('[data-delete-slot]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await supabaseClient.from('availability_slots').delete().eq('id', btn.dataset.deleteSlot);
+      loadSlots();
+    });
+  });
+}
+
+document.getElementById('slotForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = document.getElementById('slotFormStatus');
+  status.classList.remove('active', 'success', 'error');
+
+  const date = document.getElementById('slotDate').value;
+  const start = document.getElementById('slotStart').value;
+  const end = document.getElementById('slotEnd').value;
+  const length = parseInt(document.getElementById('slotLength').value, 10);
+  const gap = parseInt(document.getElementById('slotBreak').value, 10) || 0;
+  const specialistId = document.getElementById('slotSpecialist').value || null;
+
+  const rows = [];
+  let t = new Date(date + 'T' + start);
+  const last = new Date(date + 'T' + end);
+  while (t.getTime() + length * 60000 <= last.getTime()) {
+    rows.push({ specialist_id: specialistId, starts_at: t.toISOString(), duration_min: length });
+    t = new Date(t.getTime() + (length + gap) * 60000);
+  }
+  if (!rows.length) { status.textContent = 'الوقت المحدد لا يتّسع لأي جلسة. عدّل الساعات أو مدة الجلسة.'; status.classList.add('active', 'error'); return; }
+
+  const { error } = await supabaseClient.from('availability_slots').insert(rows);
+  if (error) {
+    status.textContent = error.code === '23505' ? 'بعض هذه المواعيد مضافة مسبقاً لنفس الأخصائي.' : 'تعذّرت الإضافة: ' + error.message;
+    status.classList.add('active', 'error');
+    return;
+  }
+  status.textContent = 'تمت إضافة ' + rows.length + ' موعد.';
+  status.classList.add('active', 'success');
+  loadSlots();
+});
 
 // ---------- Articles table ----------
 async function loadArticles(){

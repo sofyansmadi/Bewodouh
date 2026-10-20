@@ -131,6 +131,16 @@
      إذا ألغينا مظهره الافتراضي بهذا الشكل. */
   .field input[type="datetime-local"]{ -webkit-appearance:none; appearance:none; }
   .field textarea{ min-height:110px; resize:vertical; }
+  .slot-title{ display:block; font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; }
+  .slot-title .req{ color:var(--alert); margin-inline-start:4px; }
+  .slot-day{ font-weight:700; font-size:13px; color:var(--text-muted-light); margin:14px 0 8px; }
+  .slot-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .slot-btn{ border:1.5px solid var(--fog-dim); background:var(--fog); color:var(--text-on-light); border-radius:100px; padding:9px 16px; min-height:44px; font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:.15s; }
+  .slot-btn small{ display:block; font-size:11px; font-weight:500; color:var(--text-muted-light); line-height:1.2; }
+  .slot-btn:hover{ border-color:var(--clarity); background:#fff; }
+  .slot-btn[aria-pressed="true"]{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
+  .slot-btn[aria-pressed="true"] small{ color:var(--clarity-soft); }
+  .slot-btn:focus-visible{ outline:3px solid rgba(201,161,95,.6); outline-offset:2px; }
   .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; }
   .btn-primary:hover{ background:var(--ink-soft); }
   .success-box{ display:none; text-align:center; padding:20px 0; }
@@ -295,8 +305,14 @@
           </select>
         </div>
         <div class="field">
-          <label for="bkDateTime">الموعد المفضّل للجلسة</label>
-          <input type="datetime-local" id="bkDateTime" required style="direction:ltr; text-align:right;">
+          <div id="dtField">
+            <label for="bkDateTime">الموعد المفضّل للجلسة</label>
+            <input type="datetime-local" id="bkDateTime" required style="direction:ltr; text-align:right;">
+          </div>
+          <div id="slotField" style="display:none;">
+            <span class="slot-title">اختر الموعد المناسب<span class="req">*</span></span>
+            <div id="slotPicker" role="group" aria-label="اختر الموعد المناسب"></div>
+          </div>
           <div class="hint" id="dateTimeHint" style="font-size:12.5px; color:var(--text-muted-light); margin-top:6px;">يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن.</div>
         </div>
         <div class="field">
@@ -401,6 +417,10 @@ const PACKAGE_RECOMMENDATIONS = [
   { min: 5, max: 6, name: "باقة المرافقة", text: "بناءً على إجاباتك، باقة المرافقة (٨ جلسات) تناسب وضعك أكثر لأنها تسمح بمتابعة أعمق." },
 ];
 
+const ORIGINAL_SUBMIT_TEXT = 'إرسال طلب الحجز';
+window.__slotMode = false;
+window.__selectedSlot = null;
+window.__slotHintText = "الأوقات المعروضة بتوقيت جهازك. إعادة الجدولة مجاناً حتى ٢٤ ساعة قبل الجلسة.";
 let currentType = null;
 let currentQ = 0;
 let answers = [];
@@ -537,19 +557,26 @@ setMinDateTime();
 document.getElementById('bookingForm').addEventListener('submit', async function(e){
   e.preventDefault();
 
+  const slotMode = window.__slotMode === true;
   const dateTimeValue = document.getElementById('bkDateTime').value;
-  const selectedDate = new Date(dateTimeValue);
+  const selectedDate = slotMode && window.__selectedSlot ? new Date(window.__selectedSlot.starts_at) : new Date(dateTimeValue);
   const minAllowed = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const dateTimeHint = document.getElementById('dateTimeHint');
 
-  if (selectedDate < minAllowed) {
+  if (slotMode && !window.__selectedSlot) {
+    dateTimeHint.style.color = 'var(--alert)';
+    dateTimeHint.textContent = 'اختر موعداً من المواعيد المتاحة أعلاه.';
+    document.getElementById('slotPicker').querySelector('button')?.focus();
+    return;
+  }
+  if (!slotMode && selectedDate < minAllowed) {
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن. عدّل الوقت واختر موعداً آخر.';
     document.getElementById('bkDateTime').focus();
     return;
   }
   dateTimeHint.style.color = 'var(--text-muted-light)';
-  dateTimeHint.textContent = 'يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن.';
+  dateTimeHint.textContent = slotMode ? window.__slotHintText : 'يجب أن يكون الموعد بعد ٢٤ ساعة على الأقل من الآن.';
 
   const submitBtn = document.querySelector('#bookingForm button[type="submit"]');
   submitBtn.disabled = true;
@@ -565,6 +592,8 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     preferred_datetime: selectedDate.toISOString(),
     message: document.getElementById('bkMessage').value.trim() || null,
     specialist_name: chosenSpecialist || null,
+    lang: 'ar',
+    client_tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; } })(),
   };
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
@@ -575,7 +604,21 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     return;
   }
 
-  const { error } = await supabaseClient.from('bookings').insert(payload);
+  let error;
+  if (slotMode) {
+    ({ error } = await supabaseClient.rpc('book_with_slot', { p_slot_id: window.__selectedSlot.id, p_booking: payload }));
+    if (error && /slot_unavailable/.test(error.message || '')) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = ORIGINAL_SUBMIT_TEXT;
+      dateTimeHint.style.color = 'var(--alert)';
+      dateTimeHint.textContent = 'هذا الموعد حُجز للتو. اختر موعداً آخر من القائمة.';
+      window.__selectedSlot = null;
+      if (window.reloadSlots) window.reloadSlots();
+      return;
+    }
+  } else {
+    ({ error } = await supabaseClient.from('bookings').insert(payload));
+  }
 
   if (error) {
     submitBtn.disabled = false;
@@ -638,6 +681,72 @@ document.querySelectorAll('.faq-q').forEach(q => {
 <script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=buttons&disable-funding=venmo&currency=USD"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script>
+/* Available time slots: when the team has added slots (admin > Available slots), show them as
+   buttons instead of the free date-time field. Each slot is booked atomically through the
+   book_with_slot function, so the same slot can never be booked twice. */
+(async function setupSlotPicker(){
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+  const dtField = document.getElementById('dtField');
+  const slotField = document.getElementById('slotField');
+  const picker = document.getElementById('slotPicker');
+  const hint = document.getElementById('dateTimeHint');
+  const dtInput = document.getElementById('bkDateTime');
+  const originalHint = hint.textContent;
+  const LOCALE = 'ar-JO';
+  const TEAM = 'فريق بوضوح';
+
+  async function loadSlots(){
+    const { data, error } = await supabaseClient
+      .from('availability_slots')
+      .select('id, starts_at, duration_min, specialists(full_name)')
+      .order('starts_at', { ascending: true })
+      .limit(300);
+    let slots = !error && data ? data : [];
+    if (typeof chosenSpecialist !== 'undefined' && chosenSpecialist) slots = slots.filter(s => s.specialists && s.specialists.full_name === chosenSpecialist);
+    const cutoff = Date.now() + 14 * 24 * 3600 * 1000;
+    slots = slots.filter(s => new Date(s.starts_at).getTime() < cutoff);
+
+    window.__slotMode = slots.length > 0;
+    window.__selectedSlot = null;
+    dtField.style.display = window.__slotMode ? 'none' : '';
+    slotField.style.display = window.__slotMode ? '' : 'none';
+    dtInput.required = !window.__slotMode;
+    hint.style.color = 'var(--text-muted-light)';
+    hint.textContent = window.__slotMode ? window.__slotHintText : originalHint;
+    picker.replaceChildren();
+    if (!window.__slotMode) return;
+
+    const showSpecialist = !(typeof chosenSpecialist !== 'undefined' && chosenSpecialist);
+    let currentDay = '';
+    let row = null;
+    slots.forEach(sl => {
+      const d = new Date(sl.starts_at);
+      const dayLabel = d.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
+      if (dayLabel !== currentDay) {
+        currentDay = dayLabel;
+        const h = document.createElement('div'); h.className = 'slot-day'; h.textContent = dayLabel;
+        row = document.createElement('div'); row.className = 'slot-row';
+        picker.append(h, row);
+      }
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'slot-btn'; btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = d.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
+      if (showSpecialist) { const sm = document.createElement('small'); sm.textContent = sl.specialists ? sl.specialists.full_name : TEAM; btn.appendChild(sm); }
+      btn.addEventListener('click', () => {
+        picker.querySelectorAll('.slot-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        window.__selectedSlot = sl;
+        hint.style.color = 'var(--text-muted-light)';
+        hint.textContent = window.__slotHintText;
+      });
+      row.appendChild(btn);
+    });
+  }
+  window.reloadSlots = loadSlots;
+  loadSlots();
+})();
+</script>
 <script>
 /* ============================================================
    نزامن قائمة الباقات بنموذج الحجز (bkPackage) وأسعارها الفعلية

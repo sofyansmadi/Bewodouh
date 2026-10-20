@@ -68,7 +68,19 @@ const STYLE_FIX = `
   site-nav .nav-links a.nav-cta:hover{ background:#E4C98A; color:#241D2E; }
   site-nav .lang-switch{ border:1.5px solid rgba(255,255,255,.18); color:#B7ACC4; border-radius:100px; padding:5px 13px; font-size:12.5px; font-weight:700; text-decoration:none; transition:.2s; line-height:1.6; flex-shrink:0; }
   site-nav .lang-switch:hover{ border-color:#C9A15F; color:#F3EEEA; }
-  @media (max-width:780px){ site-nav .nav-links{ display:none; } }
+  site-nav .nav-burger{ display:none; width:38px; height:38px; border-radius:50%; border:1.5px solid rgba(255,255,255,.18); background:none; cursor:pointer; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:0; flex-shrink:0; }
+  site-nav .nav-burger span{ display:block; width:16px; height:1.5px; background:#B7ACC4; border-radius:2px; transition:transform .2s, opacity .2s; }
+  site-nav .nav-burger[aria-expanded="true"] span:nth-child(1){ transform:translateY(5.5px) rotate(45deg); }
+  site-nav .nav-burger[aria-expanded="true"] span:nth-child(2){ opacity:0; }
+  site-nav .nav-burger[aria-expanded="true"] span:nth-child(3){ transform:translateY(-5.5px) rotate(-45deg); }
+  site-nav .nav-burger:focus-visible, site-nav .lang-switch:focus-visible, site-nav .nav-links a:focus-visible{ outline:2px solid #C9A15F; outline-offset:2px; }
+  site-nav .mobile-menu{ display:none; position:absolute; top:100%; inset-inline:0; background:rgba(26,21,34,.98); border-bottom:1px solid rgba(255,255,255,.08); padding:8px 24px 22px; box-shadow:0 24px 40px -20px rgba(0,0,0,.5); }
+  site-nav .mobile-menu.open{ display:block; }
+  site-nav .mobile-menu a{ display:block; padding:14px 4px; color:#EDE7E3; font-size:16px; font-weight:600; border-bottom:1px solid rgba(255,255,255,.07); text-decoration:none; }
+  site-nav .mobile-menu a.active{ color:#E4C98A; }
+  site-nav .mobile-menu a.mm-cta{ margin-top:18px; text-align:center; background:#C9A15F; color:#241D2E; border-radius:100px; border:none; padding:13px; }
+  @media (max-width:780px){ site-nav .nav-links{ display:none; } site-nav .nav-burger{ display:flex; } }
+  @media (min-width:781px){ site-nav .mobile-menu{ display:none !important; } }
 `;
 const styleTag = document.createElement('style');
 styleTag.textContent = STYLE_FIX;
@@ -107,6 +119,15 @@ class SiteNav extends HTMLElement {
     const langSwitchHtml = isRunningInApp() ? '' : `
         <a href="${counterpart}" class="lang-switch" id="langSwitch" lang="${IS_EN ? 'ar' : 'en'}" hreflang="${IS_EN ? 'ar' : 'en'}" aria-label="${IS_EN ? 'التبديل إلى العربية' : 'Switch to English'}">${IS_EN ? 'عربي' : 'EN'}</a>`;
 
+    // قائمة الموبايل (همبرغر): تظهر تحت عرض 780px بدل الروابط المخفية
+    const burgerHtml = isRunningInApp() ? '' : `
+        <button type="button" class="nav-burger" id="navBurger" aria-label="${t('القائمة', 'Menu')}" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>`;
+    const menuHtml = isRunningInApp() ? '' : `
+    <nav class="mobile-menu" id="mobileMenu" aria-label="${t('القائمة الرئيسية', 'Main menu')}">
+      ${links.map(l => `<a href="${appHref(lp(l.href))}"${l.key && l.key === active ? ' class="active"' : ''}>${l.label}</a>`).join('')}
+      <a href="${appHref(lp('/sales-page/'))}" class="mm-cta">${t('احجز استشارة', 'Book a Consultation')}</a>
+    </nav>`;
+
     this.innerHTML = `
     <div class="wrap">
       <a href="${appHref(lp('/'))}" class="brand">${t('بوضوح', 'Bewoduh')}<span>.</span></a>
@@ -117,8 +138,23 @@ class SiteNav extends HTMLElement {
         </div>
         ${langSwitchHtml}
         ${accountIconHtml}
+        ${burgerHtml}
       </div>
-    </div>`;
+    </div>
+    ${menuHtml}`;
+
+    const burger = this.querySelector('#navBurger');
+    const menu = this.querySelector('#mobileMenu');
+    if (burger && menu) {
+      const setOpen = (open) => {
+        menu.classList.toggle('open', open);
+        burger.setAttribute('aria-expanded', String(open));
+      };
+      burger.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+      menu.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setOpen(false); burger.focus(); } });
+      window.matchMedia('(min-width: 781px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+    }
 
     const langLink = document.getElementById('langSwitch');
     if (langLink) {
