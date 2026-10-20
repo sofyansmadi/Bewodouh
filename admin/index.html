@@ -966,6 +966,7 @@ async function approveAndPublish(app, trigger){
     const { error: insertError } = await supabaseClient.from('specialists').insert({
       slug, full_name: app.full_name, specialty: app.specialty, bio: app.bio,
       photo_url: pub.publicUrl, is_published: true, sort_order: nextOrder, application_id: app.id,
+      years_experience: app.years_experience, credentials_verified: true,
     });
     if (insertError) throw insertError;
 

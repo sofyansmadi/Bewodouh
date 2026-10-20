@@ -100,6 +100,18 @@
   footer{ background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
   footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/account/">
+<meta property="og:site_name" content="بوضوح">
+<meta property="og:type" content="website">
+<meta property="og:title" content="حسابي — بوضوح">
+<meta property="og:description" content="صفحة حسابك في بوضوح.">
+<meta property="og:url" content="https://bewoduh.com/account/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex, follow">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -159,6 +171,13 @@
           <button type="button" class="btn-cancel" id="cancelEditBtn">إلغاء</button>
         </div>
       </form>
+    </div>
+
+    <div class="card" id="bookingsCard" style="display:none;">
+      <div class="card-head">
+        <h3>حجوزاتي</h3>
+      </div>
+      <div id="bookingsList"></div>
     </div>
 
     <div class="card" id="goalsCard" style="display:none;">
@@ -240,6 +259,43 @@ async function initAccount(){
   }
 
   renderInfo();
+  loadMyBookings(sessionData.session.user.email);
+}
+
+
+// ---------- حجوزاتي ----------
+async function loadMyBookings(email){
+  if (!email) return;
+  const { data, error } = await supabaseClient
+    .from('bookings')
+    .select('id, package_name, preferred_datetime, status, paid, specialist_name')
+    .ilike('email', email)
+    .order('preferred_datetime', { ascending: false })
+    .limit(20);
+  if (error || !data || !data.length) return;
+
+  const STATUS = { 'قيد المراجعة': 'قيد المراجعة', 'مؤكّد': 'مؤكّد', 'تم التواصل': 'تم التواصل', 'ملغى': 'ملغى' };
+  const pkgName = (n) => n;
+  const list = document.getElementById('bookingsList');
+  list.replaceChildren();
+  data.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'info-row';
+    row.style.cssText = 'flex-wrap:wrap; gap:6px 14px; align-items:center;';
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = pkgName(b.package_name);
+    const value = document.createElement('span');
+    value.className = 'value';
+    const when = new Date(b.preferred_datetime).toLocaleString('ar-JO', { dateStyle: 'medium', timeStyle: 'short' });
+    value.textContent = when + (b.specialist_name ? ' · ' + b.specialist_name : '');
+    const badge = document.createElement('span');
+    badge.style.cssText = 'font-size:12px; font-weight:700; padding:3px 12px; border-radius:100px; background:rgba(201,161,95,.15); color:#7D5F27;';
+    badge.textContent = (STATUS[b.status] || b.status) + ' · ' + (b.paid ? 'مدفوع' : 'بانتظار الدفع');
+    row.append(label, value, badge);
+    list.appendChild(row);
+  });
+  document.getElementById('bookingsCard').style.display = 'block';
 }
 
 function renderAvatar(){

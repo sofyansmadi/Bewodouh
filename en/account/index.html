@@ -86,6 +86,18 @@
 
   .disclaimer{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:var(--radius); padding:14px 16px; font-size:12px; color:var(--text-muted-light); margin-top:24px; text-align:center; }
 </style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/en/account/">
+<meta property="og:site_name" content="Bewoduh">
+<meta property="og:type" content="website">
+<meta property="og:title" content="My Account — Bewoduh">
+<meta property="og:description" content="Your Bewoduh account page.">
+<meta property="og:url" content="https://bewoduh.com/en/account/">
+<meta property="og:image" content="https://bewoduh.com/images/og-cover.jpg">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex, follow">
+<!-- seo:end -->
 </head>
 <body>
 
@@ -145,6 +157,13 @@
           <button type="button" class="btn-cancel" id="cancelEditBtn">Cancel</button>
         </div>
       </form>
+    </div>
+
+    <div class="card" id="bookingsCard" style="display:none;">
+      <div class="card-head">
+        <h3>My bookings</h3>
+      </div>
+      <div id="bookingsList"></div>
     </div>
 
     <div class="card" id="goalsCard" style="display:none;">
@@ -228,6 +247,43 @@ async function initAccount(){
   }
 
   renderInfo();
+  loadMyBookings(sessionData.session.user.email);
+}
+
+
+// ---------- My bookings ----------
+async function loadMyBookings(email){
+  if (!email) return;
+  const { data, error } = await supabaseClient
+    .from('bookings')
+    .select('id, package_name, preferred_datetime, status, paid, specialist_name')
+    .ilike('email', email)
+    .order('preferred_datetime', { ascending: false })
+    .limit(20);
+  if (error || !data || !data.length) return;
+
+  const STATUS = { 'قيد المراجعة': 'Under review', 'مؤكّد': 'Confirmed', 'تم التواصل': 'Contacted', 'ملغى': 'Cancelled' };
+  const pkgName = (n) => ({ 'استشارة سريعة': 'Quick Consultation', 'باقة الانطلاقة': 'Launch Package', 'باقة المرافقة': 'Companion Package', 'دعم فوري': 'Immediate Support', 'ادعم بوضوح': 'Support Bewoduh' }[n] || n);
+  const list = document.getElementById('bookingsList');
+  list.replaceChildren();
+  data.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'info-row';
+    row.style.cssText = 'flex-wrap:wrap; gap:6px 14px; align-items:center;';
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = pkgName(b.package_name);
+    const value = document.createElement('span');
+    value.className = 'value';
+    const when = new Date(b.preferred_datetime).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+    value.textContent = when + (b.specialist_name ? ' · ' + b.specialist_name : '');
+    const badge = document.createElement('span');
+    badge.style.cssText = 'font-size:12px; font-weight:700; padding:3px 12px; border-radius:100px; background:rgba(201,161,95,.15); color:#7D5F27;';
+    badge.textContent = (STATUS[b.status] || b.status) + ' · ' + (b.paid ? 'Paid' : 'Awaiting payment');
+    row.append(label, value, badge);
+    list.appendChild(row);
+  });
+  document.getElementById('bookingsCard').style.display = 'block';
 }
 
 function renderAvatar(){

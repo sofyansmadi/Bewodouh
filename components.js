@@ -59,6 +59,9 @@ const STYLE_FIX = `
   .nav-account-icon svg{ width:16px; height:16px; }
   .nav-account-icon:hover{ border-color:#C9A15F; color:#F3EEEA; }
   site-nav .nav-actions{ display:flex; align-items:center; gap:16px; }
+  /* gold text on light backgrounds fails contrast (2:1) — use a darker gold there */
+  main .eyebrow:not(.hero-eyebrow), section:not(.dark) .eyebrow:not(.hero-eyebrow){ color:#7D5F27; }
+  :focus-visible{ outline-color:#C9A15F; }
   site-nav .brand{ font-family:'Noto Kufi Arabic','IBM Plex Sans',sans-serif; font-weight:900; font-size:22px; color:#F3EEEA; text-decoration:none; }
   site-nav .brand span{ color:#C9A15F; }
   site-nav .nav-links{ display:flex; align-items:center; gap:28px; }
@@ -158,6 +161,7 @@ class SiteNav extends HTMLElement {
 
     const langLink = document.getElementById('langSwitch');
     if (langLink) {
+      langLink.addEventListener('click', () => { try { localStorage.setItem('bw_lang', IS_EN ? 'ar' : 'en'); } catch (e) {} });
       fetch(counterpart, { method: 'HEAD' }).then(r => { if (!r.ok) langLink.href = IS_EN ? '/' : '/en/'; }).catch(() => {});
     }
 
@@ -174,6 +178,14 @@ class SiteNav extends HTMLElement {
 }
 
 class SiteFooter extends HTMLElement {
+  // سطر الطوارئ: بوضوح ليست خدمة طوارئ، فنوجّه من هو بخطر مباشر لجهات الطوارئ
+  emergencyLine() {
+    const text = IS_EN
+      ? 'If you or someone you know is in immediate danger, contact your local emergency services right away (Jordan: 911). Bewoduh is not an emergency service.'
+      : 'إذا كنت أنت أو شخص تعرفه في خطر مباشر، تواصل فوراً مع جهات الطوارئ في بلدك (الأردن: 911). بوضوح ليست خدمة طوارئ.';
+    return `<p class="footer-emergency" style="margin-top:18px; font-size:12.5px; color:#E4C98A;">${text}</p>`;
+  }
+
   // سطر بيانات الشركة المالكة (بلغة الصفحة)
   companyLine() {
     const text = IS_EN
@@ -227,6 +239,7 @@ class SiteFooter extends HTMLElement {
         '©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.',
         '©Bewoduh 2026 — All content is educational and is not a substitute for consultation or treatment by a mental health professional.'
       )}</p>
+      ${this.emergencyLine()}
       ${this.companyLine()}
     </div>`;
       return;
@@ -250,6 +263,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/terms/')}" ${linkStyle}>${t('شروط الاستخدام', 'Terms of Use')}</a>
         <a href="${h('/privacy/')}" ${linkStyle}>${t('سياسة الخصوصية', 'Privacy Policy')}</a>
       </div>
+      ${this.emergencyLine()}
       ${this.companyLine()}
     </div>`;
   }
