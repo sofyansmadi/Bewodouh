@@ -806,11 +806,19 @@ async function loadApplications(){
   if (error) { list.textContent = 'تعذّر تحميل الطلبات.'; console.error('applications:', error); return; }
   if (!data.length) { list.textContent = 'ما في طلبات انضمام بعد.'; return; }
 
+  // الأخصائيون المنشورون من هذه الطلبات (لمعرفة من تم قبوله ونشره بالفريق)
+  const { data: linked } = await supabaseClient.from('specialists').select('id, application_id, is_published').in('application_id', data.map(a => a.id));
+  const linkedByApp = Object.fromEntries((linked || []).map(sp => [sp.application_id, sp]));
+
   list.innerHTML = data.map(a => {
     const typeLabel = a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب حياة';
     const date = new Date(a.created_at).toLocaleDateString('ar-EG', { dateStyle: 'medium' });
     const link = /^https?:\/\//i.test(a.profile_link || '') ? `<a href="${esc(a.profile_link)}" target="_blank" rel="noopener noreferrer">${esc(a.profile_link)}</a>` : '—';
     const statusOptions = Object.entries(APP_STATUS_LABELS).map(([v, l]) => `<option value="${v}"${v === a.status ? ' selected' : ''}>${l}</option>`).join('');
+    const sp = linkedByApp[a.id];
+    const publishHtml = sp
+      ? `<span class="badge-yes">${sp.is_published ? 'منشور في الفريق ✓' : 'في الفريق (مخفي)'}</span>`
+      : `<button type="button" class="btn-primary" style="width:auto; margin:0; padding:9px 20px;" data-approve-app="${esc(a.id)}">قبول ونشر في الفريق</button>`;
     return `
     <details class="app-card" data-app-id="${esc(a.id)}">
       <summary>
@@ -831,6 +839,7 @@ async function loadApplications(){
         <div class="app-bio">${esc(a.bio)}</div>
         <div class="app-docs" data-docs-for="${esc(a.id)}"><button type="button" class="btn-secondary" data-show-docs="${esc(a.id)}">عرض المستندات</button></div>
         <div class="app-actions">
+          ${publishHtml}
           <select class="app-status-select" data-app-id="${esc(a.id)}" style="border:1px solid var(--fog-dim); border-radius:8px; padding:8px 10px; font-family:inherit;">${statusOptions}</select>
           <button type="button" class="btn-secondary" data-delete-app="${esc(a.id)}" style="color:var(--alert);">حذف الطلب وملفاته</button>
         </div>
@@ -867,13 +876,27 @@ async function loadApplications(){
     });
   });
 
+  list.querySelectorAll('[data-approve-app]').forEach(btn => {
+    btn.addEventListener('click', () => approveAndPublish(byId[btn.dataset.approveApp], btn));
+  });
+
   list.querySelectorAll('.app-status-select').forEach(sel => {
     sel.addEventListener('change', async () => {
+      const app = byId[sel.dataset.appId];
+      const sp = linkedByApp[app.id];
+      if (sel.value === 'approved' && !sp) { approveAndPublish(app, sel); return; }
+
       const { error } = await supabaseClient.from('specialist_applications')
         .update({ status: sel.value, reviewed_at: new Date().toISOString() })
-        .eq('id', sel.dataset.appId);
-      if (error) { alert('تعذّر حفظ الحالة.'); console.error(error); }
-      else loadApplications();
+        .eq('id', app.id);
+      if (error) { alert('تعذّر حفظ الحالة.'); console.error(error); return; }
+
+      // إذا كان لهذا الطلب بروفايل بالفريق: الموافقة تُظهره، وغيرها تُخفيه
+      if (sp) {
+        const { error: spError } = await supabaseClient.from('specialists').update({ is_published: sel.value === 'approved' }).eq('id', sp.id);
+        if (spError) { alert('تم حفظ الحالة لكن تعذّر تحديث ظهور البروفايل بالفريق.'); console.error(spError); }
+      }
+      loadApplications();
     });
   });
 
@@ -887,6 +910,44 @@ async function loadApplications(){
       loadApplications();
     });
   });
+}
+
+// قبول الطلب ونشره: ننسخ الصورة من المساحة الخاصة إلى مساحة الصور العامة، وننشئ
+// بروفايل بجدول specialists (يظهر بتبويب الفريق وبصفحة "فريق بوضوح" للجميع)،
+// ثم نعلّم الطلب كمقبول. يمكن تعديل البروفايل أو إخفاؤه لاحقاً من تبويب الفريق.
+async function approveAndPublish(app, trigger){
+  if (!confirm('سيُنشر "' + app.full_name + '" بصفحة فريق بوضوح ويظهر للجميع. متابعة؟')) { loadApplications(); return; }
+  if (trigger) trigger.disabled = true;
+  try {
+    const latin = (app.full_name.match(/[A-Za-z0-9]+/g) || []).join('-').toLowerCase();
+    const slug = (latin || 'sp') + '-' + app.id.slice(0, 6);
+
+    const { data: blob, error: downloadError } = await supabaseClient.storage.from(APP_BUCKET).download(app.photo_path);
+    if (downloadError) throw downloadError;
+    const publicPath = slug + '.jpg';
+    const { error: uploadError } = await supabaseClient.storage.from('specialist-photos').upload(publicPath, blob, { contentType: 'image/jpeg', upsert: true });
+    if (uploadError) throw uploadError;
+    const { data: pub } = supabaseClient.storage.from('specialist-photos').getPublicUrl(publicPath);
+
+    const { data: last } = await supabaseClient.from('specialists').select('sort_order').order('sort_order', { ascending: false }).limit(1);
+    const nextOrder = last && last.length ? last[0].sort_order + 1 : 1;
+
+    const { error: insertError } = await supabaseClient.from('specialists').insert({
+      slug, full_name: app.full_name, specialty: app.specialty, bio: app.bio,
+      photo_url: pub.publicUrl, is_published: true, sort_order: nextOrder, application_id: app.id,
+    });
+    if (insertError) throw insertError;
+
+    const { error: statusError } = await supabaseClient.from('specialist_applications')
+      .update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', app.id);
+    if (statusError) throw statusError;
+
+    alert('تم قبول ' + app.full_name + ' ونشره بصفحة الفريق.');
+  } catch (err) {
+    console.error('approveAndPublish:', err);
+    alert('تعذّر نشر الأخصائي: ' + (err.message || 'خطأ غير معروف'));
+  }
+  loadApplications();
 }
 
 // ---------- Articles table ----------
@@ -1043,9 +1104,9 @@ async function loadTeam(){
 
   tbody.innerHTML = data.map(sp => `
     <tr>
-      <td><img src="${sp.photo_url}" alt="${sp.full_name}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
-      <td>${sp.full_name}</td>
-      <td>${sp.specialty}</td>
+      <td><img src="${esc(sp.photo_url)}" alt="${esc(sp.full_name)}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
+      <td>${esc(sp.full_name)}</td>
+      <td>${esc(sp.specialty)}</td>
       <td>${sp.is_published ? '<span class="badge-yes">نعم</span>' : '—'}</td>
       <td>
         <div class="row-actions">

@@ -72,6 +72,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
 <script>
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 async function loadTeam(){
   const grid = document.getElementById('teamGrid');
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
@@ -92,11 +93,11 @@ async function loadTeam(){
 
   grid.innerHTML = data.map(sp => `
     <a href="/en/specialist/?slug=${encodeURIComponent(sp.slug)}" class="specialist-card">
-      <img class="specialist-photo" src="${sp.photo_url}" alt="${sp.full_name}" loading="lazy">
+      <img class="specialist-photo" src="${esc(sp.photo_url)}" alt="${esc(sp.full_name)}" loading="lazy">
       <div class="specialist-body">
-        <div class="specialist-name">${sp.full_name}</div>
-        <div class="specialist-role">${sp.specialty}</div>
-        <p class="specialist-bio">${sp.short_bio || (sp.bio.length > 90 ? sp.bio.slice(0, 90) + '…' : sp.bio)}</p>
+        <div class="specialist-name">${esc(sp.full_name)}</div>
+        <div class="specialist-role">${esc(sp.specialty)}</div>
+        <p class="specialist-bio">${esc(sp.short_bio || (sp.bio.length > 90 ? sp.bio.slice(0, 90) + '…' : sp.bio))}</p>
       </div>
     </a>
   `).join('');
