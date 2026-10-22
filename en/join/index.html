@@ -252,7 +252,7 @@
           <div class="field">
             <span class="field-label" id="certLabel">Certificates and qualifications<span class="req" id="certReq" aria-hidden="true">*</span><span class="opt" id="certOpt" hidden>Optional</span></span>
             <input type="file" id="certificates" accept="image/jpeg,image/png,image/webp,application/pdf" multiple aria-labelledby="certLabel" aria-describedby="certHint">
-            <div class="hint" id="certHint">Images or PDF files, up to 5 files, each up to 10 MB.</div>
+            <div class="hint" id="certHint">Images or PDF files. Upload as many as you need, each up to 10 MB.</div>
             <ul class="file-list" id="certList" aria-live="polite"></ul>
             <div class="field-error" id="certError" role="alert"></div>
           </div>
@@ -298,7 +298,6 @@
 <script>
 const BUCKET = 'specialist-applications';
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const MAX_CERTS = 5;
 const CERT_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -410,7 +409,6 @@ certInput.addEventListener('change', () => {
     if (!(file.type in CERT_TYPES)) { problems.push(`“${file.name}” has an unsupported format (allowed: images or PDF).`); continue; }
     if (file.size > MAX_FILE_BYTES) { problems.push(`“${file.name}” is larger than 10 MB.`); continue; }
     if (certFiles.some(f => f.name === file.name && f.size === file.size)) continue;
-    if (certFiles.length >= MAX_CERTS) { problems.push('Maximum 5 files.'); break; }
     certFiles.push(file);
   }
   certInput.value = '';
