@@ -281,6 +281,20 @@ async function loadMyBookings(email){
     badge.style.cssText = 'font-size:12px; font-weight:700; padding:3px 12px; border-radius:100px; background:rgba(201,161,95,.15); color:#7D5F27;';
     badge.textContent = (STATUS[b.status] || b.status) + ' · ' + (b.paid ? 'Paid' : 'Awaiting payment');
     row.append(label, value, badge);
+    // حجز غير مدفوع ولم يُلغَ: زر لإكمال الدفع
+    if (!b.paid && b.status !== 'ملغى') {
+      const pay = document.createElement('button');
+      pay.type = 'button';
+      pay.textContent = 'Pay now';
+      pay.style.cssText = 'font-family:inherit; font-weight:700; font-size:12.5px; padding:5px 16px; border-radius:100px; border:none; cursor:pointer; background:var(--ink,#241D2E); color:#fff;';
+      pay.addEventListener('click', async () => {
+        pay.disabled = true;
+        const { data: res, error: payErr } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: b.id } });
+        if (payErr || !res || !res.url) { pay.disabled = false; alert('Could not open the payment page. Please try again later.'); return; }
+        window.location.href = res.url;
+      });
+      row.appendChild(pay);
+    }
     list.appendChild(row);
   });
   document.getElementById('bookingsCard').style.display = 'block';

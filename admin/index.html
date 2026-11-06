@@ -333,6 +333,7 @@
             <th>الباقة</th>
             <th>الموعد المطلوب</th>
             <th>الهاتف</th>
+            <th>الدفع</th>
             <th>الحالة</th>
             <th></th>
           </tr>
@@ -824,7 +825,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
 // ---------- Bookings table ----------
 async function loadBookings(){
   const tbody = document.getElementById('bookingsTableBody');
-  tbody.innerHTML = '<tr><td colspan="6">جارٍ التحميل...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7">جارٍ التحميل...</td></tr>';
 
   const { data, error } = await supabaseClient
     .from('bookings')
@@ -832,12 +833,12 @@ async function loadBookings(){
     .order('created_at', { ascending: false });
 
   if (error) {
-    tbody.innerHTML = '<tr><td colspan="6">تعذّر تحميل البيانات.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7">تعذّر تحميل البيانات.</td></tr>';
     return;
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="6">ما في طلبات حجز بعد.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7">ما في طلبات حجز بعد.</td></tr>';
     return;
   }
 
@@ -847,19 +848,26 @@ async function loadBookings(){
     const dt = new Date(b.preferred_datetime);
     const formatted = dt.toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' });
     const options = statusOptions.map(s => `<option value="${s}"${s === b.status ? ' selected' : ''}>${s}</option>`).join('');
+    // الحجز غير المدفوع: لا يُؤكَّد ولا يُتواصل معه، وبينلغي تلقائياً بعد ٩٠ دقيقة
+    const payCell = b.paid
+      ? '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">مدفوع</span>'
+      : (b.status === 'ملغى'
+          ? '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">غير مدفوع (ملغى)</span>'
+          : '<span class="badge-yes" style="background:rgba(181,85,93,.14); color:#9C3F47;">غير مدفوع</span><br><button type="button" class="btn-secondary" data-mark-paid-id="' + esc(b.id) + '" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">تعليم كمدفوع (دفع خارجي)</button>');
     return `
     <tr>
-      <td>${b.full_name}<br><span style="font-size:12px; color:var(--text-muted-light);">${b.email}</span></td>
-      <td>${b.package_name}</td>
+      <td>${esc(b.full_name)}<br><span style="font-size:12px; color:var(--text-muted-light);">${esc(b.email)}</span></td>
+      <td>${esc(b.package_name)}</td>
       <td>${formatted}</td>
-      <td>${b.phone}</td>
+      <td>${esc(b.phone)}</td>
+      <td>${payCell}</td>
       <td>
-        <select data-booking-id="${b.id}" class="status-select" style="border:1px solid var(--fog-dim); border-radius:8px; padding:6px 8px; font-size:12.5px; font-family:inherit;">
+        <select data-booking-id="${esc(b.id)}" data-paid="${b.paid ? '1' : '0'}" data-prev="${esc(b.status)}" class="status-select" style="border:1px solid var(--fog-dim); border-radius:8px; padding:6px 8px; font-size:12.5px; font-family:inherit;">
           ${options}
         </select>
       </td>
       <td>
-        <button class="icon-btn danger" title="حذف" data-delete-booking-id="${b.id}">
+        <button class="icon-btn danger" title="حذف" data-delete-booking-id="${esc(b.id)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
         </button>
       </td>
@@ -868,7 +876,28 @@ async function loadBookings(){
 
   tbody.querySelectorAll('.status-select').forEach(sel => {
     sel.addEventListener('change', async () => {
-      await supabaseClient.from('bookings').update({ status: sel.value }).eq('id', sel.dataset.bookingId);
+      // ممنوع تأكيد حجز غير مدفوع (القاعدة مفروضة أيضاً من قاعدة البيانات)
+      if (sel.dataset.paid !== '1' && (sel.value === 'مؤكّد' || sel.value === 'تم التواصل')) {
+        alert('هذا الحجز غير مدفوع. لا يمكن تأكيده ولا التواصل مع العميل قبل إتمام الدفع.');
+        sel.value = sel.dataset.prev;
+        return;
+      }
+      const { error: upError } = await supabaseClient.from('bookings').update({ status: sel.value }).eq('id', sel.dataset.bookingId);
+      if (upError) {
+        console.error('booking status:', upError);
+        alert(/booking_not_paid/.test(upError.message || '') ? 'هذا الحجز غير مدفوع، لا يمكن تأكيده.' : 'تعذّر تحديث الحالة.');
+        sel.value = sel.dataset.prev;
+        return;
+      }
+      sel.dataset.prev = sel.value;
+    });
+  });
+  tbody.querySelectorAll('[data-mark-paid-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('سيُعلَّم هذا الحجز كمدفوع (دفع خارج الموقع مثل حوالة)، وسيصل العميل إيصال. تأكدي أنك استلمتِ المبلغ فعلاً. متابعة؟')) return;
+      const { error: payError } = await supabaseClient.from('bookings').update({ paid: true }).eq('id', btn.dataset.markPaidId);
+      if (payError) { alert('تعذّر تعليم الحجز كمدفوع.'); console.error(payError); return; }
+      loadBookings();
     });
   });
   tbody.querySelectorAll('[data-delete-booking-id]').forEach(btn => {

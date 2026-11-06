@@ -323,8 +323,8 @@
         <div class="check">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h2>Your Booking Request Has Been Received</h2>
-        <p>Just one last step — complete the payment below to confirm your appointment.</p>
+        <h2>Your booking is awaiting payment</h2>
+        <p>We are taking you to the secure payment page now. If nothing happens, press the button. Your slot is held for 90 minutes, then cancelled automatically if the payment is not completed.</p>
         <div id="pay-container" style="max-width:340px; margin:20px auto 0;"></div>
       </div>
     </div>
@@ -620,40 +620,44 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
 
-  // نعرض زر "ادفع الآن" بمبلغ الباقة الفعلي. عند الضغط عليه ننشئ جلسة Stripe Checkout
-  // من الخادم (دالة create-checkout-session تقرأ السعر من قاعدة البيانات، لا من المتصفح).
-  // تأكيد الدفع يصل لدالة stripe-webhook التي تعلّم الحجز كمدفوع، فلا نعتمد على عودة الزائر لهذه الصفحة.
+  // بعد الحجز نحوّل الزبون مباشرة إلى صفحة الدفع (Stripe Checkout) بدل أن يضطر للنزول بالصفحة.
+  // دالة create-checkout-session تقرأ السعر من قاعدة البيانات لا من المتصفح، وتأكيد الدفع يصل لدالة stripe-webhook.
   const amount = PACKAGE_PRICES_USD[payload.package_name];
   const payContainer = document.getElementById('pay-container');
+  document.getElementById('successBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  if (amount) {
-    const payLabel = `Pay now — $${amount}`;
-    const payBtn = document.createElement('button');
-    payBtn.type = 'button';
-    payBtn.className = 'btn-primary';
-    payBtn.textContent = payLabel;
-    const payError = document.createElement('p');
-    payError.style.cssText = 'text-align:center; color:var(--alert); font-size:13px; margin-top:10px;';
-    payError.setAttribute('role', 'alert');
-    payBtn.addEventListener('click', async () => {
-      payBtn.disabled = true;
-      payError.textContent = '';
-      payBtn.textContent = 'Taking you to the payment page...';
-      const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bookingId } });
-      if (error || !data || !data.url) {
-        console.error('create-checkout-session:', error, data);
-        payError.textContent = 'Could not open the payment page. Please try again or contact us.';
-        payBtn.disabled = false;
-        payBtn.textContent = payLabel;
-        return;
-      }
-      window.location.href = data.url;
-    });
-    payContainer.append(payBtn, payError);
-  } else {
+  if (!amount) {
     // ما قدرنا نحدد سعر الباقة (مثلاً تأخّر تحميل الباقات): نوضّح أن الحجز استُلم وأن الفريق سيتواصل.
     payContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">Your booking was received. Our team will contact you within 24 hours to complete the payment.</p>';
+    return;
   }
+
+  const payLabel = `Pay now — $${amount}`;
+  const payBtn = document.createElement('button');
+  payBtn.type = 'button';
+  payBtn.className = 'btn-primary';
+  payBtn.textContent = payLabel;
+  const payError = document.createElement('p');
+  payError.style.cssText = 'text-align:center; color:var(--alert); font-size:13px; margin-top:10px;';
+  payError.setAttribute('role', 'alert');
+
+  async function goToPayment() {
+    payBtn.disabled = true;
+    payError.textContent = '';
+    payBtn.textContent = 'Taking you to the payment page...';
+    const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bookingId } });
+    if (error || !data || !data.url) {
+      console.error('create-checkout-session:', error, data);
+      payError.textContent = 'Could not open the payment page. Please try again or contact us.';
+      payBtn.disabled = false;
+      payBtn.textContent = payLabel;
+      return;
+    }
+    window.location.href = data.url;
+  }
+  payBtn.addEventListener('click', goToPayment);
+  payContainer.append(payBtn, payError);
+  goToPayment();
 });
 
 // ---------- Return from the payment page ----------
@@ -664,10 +668,32 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   if (!paid && !canceled) return;
   const note = document.createElement('div');
   note.setAttribute('role', 'status');
-  note.style.cssText = 'text-align:center; padding:16px 20px; font-weight:700; font-size:15px; color:' + (paid ? 'var(--ink)' : 'var(--alert)') + '; background:' + (paid ? 'var(--clarity-soft)' : 'rgba(181,85,91,.1)') + ';';
-  note.textContent = paid
-    ? 'Payment received. Thank you — our team will contact you to confirm your session.'
-    : 'Payment was not completed. Your booking is saved; you can try again or contact us.';
+  note.style.cssText = 'text-align:center; padding:16px 20px; font-weight:700; font-size:15px; color:' + (paid ? 'var(--ink)' : 'var(--alert)') + '; background:' + (paid ? 'var(--clarity-soft)' : 'rgba(181,85,93,.1)') + ';';
+  const msg = document.createElement('div');
+  msg.textContent = paid ? 'Payment received. Thank you — our team will contact you to confirm your session.' : 'Payment was not completed. Your slot is held for 90 minutes from the time of booking, then cancelled automatically.';
+  note.appendChild(msg);
+
+  // رجع الزبون من صفحة الدفع بدون ما يدفع: نعطيه زر لإكمال الدفع مباشرة (الحجز موجود ومحجوز له)
+  const bid = params.get('b');
+  if (canceled && bid && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bid)) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-primary';
+    btn.style.cssText = 'width:auto; margin:12px auto 0; display:block; padding:12px 28px;';
+    btn.textContent = 'Complete payment now';
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bid } });
+      if (error || !data || !data.url) {
+        btn.disabled = false;
+        msg.textContent = 'This booking expired and was cancelled because it was not paid. You can book a new appointment.';
+        btn.remove();
+        return;
+      }
+      window.location.href = data.url;
+    });
+    note.appendChild(btn);
+  }
   document.querySelector('header.hero').before(note);
 })();
 

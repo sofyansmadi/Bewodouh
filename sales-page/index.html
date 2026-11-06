@@ -340,8 +340,8 @@
         <div class="check">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h2>تم استلام طلب حجزك</h2>
-        <p>خطوة أخيرة فقط — أكمل الدفع بالأسفل لتأكيد موعدك.</p>
+        <h2>حجزك بانتظار الدفع</h2>
+        <p>نحوّلك الآن إلى صفحة الدفع الآمنة. إن لم يتم التحويل اضغط الزر. موعدك محجوز لمدة ٩٠ دقيقة، وبعدها يُلغى تلقائياً إذا لم يكتمل الدفع.</p>
         <div id="pay-container" style="max-width:340px; margin:20px auto 0;"></div>
       </div>
     </div>
@@ -645,40 +645,44 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
 
-  // نعرض زر "ادفع الآن" بمبلغ الباقة الفعلي. عند الضغط عليه ننشئ جلسة Stripe Checkout
-  // من الخادم (دالة create-checkout-session تقرأ السعر من قاعدة البيانات، لا من المتصفح).
-  // تأكيد الدفع يصل لدالة stripe-webhook التي تعلّم الحجز كمدفوع، فلا نعتمد على عودة الزائر لهذه الصفحة.
+  // بعد الحجز نحوّل الزبون مباشرة إلى صفحة الدفع (Stripe Checkout) بدل أن يضطر للنزول بالصفحة.
+  // دالة create-checkout-session تقرأ السعر من قاعدة البيانات لا من المتصفح، وتأكيد الدفع يصل لدالة stripe-webhook.
   const amount = PACKAGE_PRICES_USD[payload.package_name];
   const payContainer = document.getElementById('pay-container');
+  document.getElementById('successBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  if (amount) {
-    const payLabel = `ادفع الآن — $${amount}`;
-    const payBtn = document.createElement('button');
-    payBtn.type = 'button';
-    payBtn.className = 'btn-primary';
-    payBtn.textContent = payLabel;
-    const payError = document.createElement('p');
-    payError.style.cssText = 'text-align:center; color:var(--alert); font-size:13px; margin-top:10px;';
-    payError.setAttribute('role', 'alert');
-    payBtn.addEventListener('click', async () => {
-      payBtn.disabled = true;
-      payError.textContent = '';
-      payBtn.textContent = 'جارٍ تحويلك إلى صفحة الدفع...';
-      const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bookingId } });
-      if (error || !data || !data.url) {
-        console.error('create-checkout-session:', error, data);
-        payError.textContent = 'تعذّر فتح صفحة الدفع. حاول مرة أخرى أو تواصل معنا.';
-        payBtn.disabled = false;
-        payBtn.textContent = payLabel;
-        return;
-      }
-      window.location.href = data.url;
-    });
-    payContainer.append(payBtn, payError);
-  } else {
+  if (!amount) {
     // ما قدرنا نحدد سعر الباقة (مثلاً تأخّر تحميل الباقات): نوضّح أن الحجز استُلم وأن الفريق سيتواصل.
-    payContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">تم استلام حجزك بنجاح. سيتواصل معك فريقنا خلال ٢٤ ساعة لإتمام الدفع.</p>';
+    payContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">تم استلام حجزك. سيتواصل معك فريقنا خلال ٢٤ ساعة لإتمام الدفع.</p>';
+    return;
   }
+
+  const payLabel = `ادفع الآن — $${amount}`;
+  const payBtn = document.createElement('button');
+  payBtn.type = 'button';
+  payBtn.className = 'btn-primary';
+  payBtn.textContent = payLabel;
+  const payError = document.createElement('p');
+  payError.style.cssText = 'text-align:center; color:var(--alert); font-size:13px; margin-top:10px;';
+  payError.setAttribute('role', 'alert');
+
+  async function goToPayment() {
+    payBtn.disabled = true;
+    payError.textContent = '';
+    payBtn.textContent = 'جارٍ تحويلك إلى صفحة الدفع...';
+    const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bookingId } });
+    if (error || !data || !data.url) {
+      console.error('create-checkout-session:', error, data);
+      payError.textContent = 'تعذّر فتح صفحة الدفع. حاول مرة أخرى أو تواصل معنا.';
+      payBtn.disabled = false;
+      payBtn.textContent = payLabel;
+      return;
+    }
+    window.location.href = data.url;
+  }
+  payBtn.addEventListener('click', goToPayment);
+  payContainer.append(payBtn, payError);
+  goToPayment();
 });
 
 // ---------- Return from the payment page ----------
@@ -689,10 +693,32 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   if (!paid && !canceled) return;
   const note = document.createElement('div');
   note.setAttribute('role', 'status');
-  note.style.cssText = 'text-align:center; padding:16px 20px; font-weight:700; font-size:15px; color:' + (paid ? 'var(--ink)' : 'var(--alert)') + '; background:' + (paid ? 'var(--clarity-soft)' : 'rgba(181,85,91,.1)') + ';';
-  note.textContent = paid
-    ? 'تم الدفع بنجاح. شكراً لك، وسيتواصل معك فريقنا لتأكيد موعدك.'
-    : 'لم تكتمل عملية الدفع. حجزك محفوظ، ويمكنك إعادة المحاولة أو التواصل معنا.';
+  note.style.cssText = 'text-align:center; padding:16px 20px; font-weight:700; font-size:15px; color:' + (paid ? 'var(--ink)' : 'var(--alert)') + '; background:' + (paid ? 'var(--clarity-soft)' : 'rgba(181,85,93,.1)') + ';';
+  const msg = document.createElement('div');
+  msg.textContent = paid ? 'تم الدفع بنجاح. شكراً لك، وسيتواصل معك فريقنا لتأكيد موعدك.' : 'لم يكتمل الدفع. موعدك محجوز لمدة ٩٠ دقيقة من وقت الحجز، وبعدها يُلغى تلقائياً.';
+  note.appendChild(msg);
+
+  // رجع الزبون من صفحة الدفع بدون ما يدفع: نعطيه زر لإكمال الدفع مباشرة (الحجز موجود ومحجوز له)
+  const bid = params.get('b');
+  if (canceled && bid && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bid)) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-primary';
+    btn.style.cssText = 'width:auto; margin:12px auto 0; display:block; padding:12px 28px;';
+    btn.textContent = 'أكمل الدفع الآن';
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bid } });
+      if (error || !data || !data.url) {
+        btn.disabled = false;
+        msg.textContent = 'انتهت مهلة هذا الحجز وأُلغي لعدم الدفع. يمكنك حجز موعد جديد.';
+        btn.remove();
+        return;
+      }
+      window.location.href = data.url;
+    });
+    note.appendChild(btn);
+  }
   document.querySelector('header.hero').before(note);
 })();
 
