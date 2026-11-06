@@ -384,8 +384,17 @@
               <input type="number" id="spOrder" value="0">
             </div>
             <div class="field full">
-              <label for="spPhoto">رابط الصورة الشخصية</label>
-              <input type="url" id="spPhoto" required>
+              <label>الصورة الشخصية</label>
+              <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                <img id="spPhotoPreview" alt="" style="width:88px; height:88px; border-radius:50%; object-fit:cover; background:var(--fog-dim); border:1px solid var(--fog-dim);">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                  <label class="btn-secondary" for="spPhotoFile" style="display:inline-block;">رفع / تغيير الصورة</label>
+                  <input type="file" id="spPhotoFile" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                  <button type="button" class="btn-secondary" id="spPhotoRemove" style="color:var(--alert);">حذف الصورة</button>
+                </div>
+              </div>
+              <input type="hidden" id="spPhoto" value="">
+              <p id="spPhotoStatus" style="font-size:12.5px; color:var(--text-muted-light); margin-top:8px;">بدون صورة، يظهر رمز افتراضي في صفحة الفريق. تُحفظ الصورة عند الضغط على «حفظ».</p>
             </div>
             <div class="field full">
               <label for="spShortBio">جملة قصيرة (تظهر بالبطاقة بقائمة الفريق، اختياري)</label>
@@ -1348,7 +1357,7 @@ async function loadTeam(){
 
   tbody.innerHTML = data.map(sp => `
     <tr>
-      <td><img src="${esc(sp.photo_url)}" alt="${esc(sp.full_name)}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
+      <td><img src="${esc(sp.photo_url || SP_PLACEHOLDER)}" alt="${esc(sp.full_name)}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
       <td>${esc(sp.full_name)}</td>
       <td>${esc(sp.specialty)}</td>
       <td>${sp.is_published ? '<span class="badge-yes">نعم</span>' : '—'}</td>
@@ -1373,6 +1382,90 @@ async function loadTeam(){
   });
 }
 
+
+// ---------- صورة الأخصائي: رفع / تغيير / حذف ----------
+const SP_PHOTO_BUCKET = 'specialist-photos';
+const SP_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
+let spOriginalPhoto = '';      // الصورة المحفوظة وقت بدء التعديل
+let spUploadedUrls = [];       // صور رُفعت بهذه الجلسة ولم تُحفظ بعد
+const spPhotoInput = document.getElementById('spPhoto');
+const spPhotoPreview = document.getElementById('spPhotoPreview');
+const spPhotoFile = document.getElementById('spPhotoFile');
+const spPhotoStatus = document.getElementById('spPhotoStatus');
+
+function setSpecialistPhoto(url){
+  spPhotoInput.value = url || '';
+  spPhotoPreview.src = url || SP_PLACEHOLDER;
+}
+
+// مسار الملف داخل البكت من رابطه العام (نتجاهل أي رابط خارجي)
+function spPhotoPath(url){
+  const marker = '/storage/v1/object/public/' + SP_PHOTO_BUCKET + '/';
+  const i = (url || '').indexOf(marker);
+  return i === -1 ? null : decodeURIComponent(url.slice(i + marker.length).split('?')[0]);
+}
+async function removeSpecialistPhotoFiles(urls){
+  const paths = urls.map(spPhotoPath).filter(Boolean);
+  if (!paths.length) return;
+  const { error } = await supabaseClient.storage.from(SP_PHOTO_BUCKET).remove(paths);
+  if (error) console.error('remove specialist photo:', error);
+}
+// تُستدعى فقط عند الإلغاء أو بدء نموذج جديد: بعد الحفظ الناجح تكون القائمة فارغة أصلاً
+function discardUnsavedSpecialistUploads(){
+  const orphans = spUploadedUrls;
+  spUploadedUrls = [];
+  if (orphans.length) removeSpecialistPhotoFiles(orphans);
+}
+
+function resizeToJpeg(file, maxDim = 900, quality = 0.86){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objUrl);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('encode failed')), 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('bad image')); };
+    img.src = objUrl;
+  });
+}
+
+spPhotoFile.addEventListener('change', async () => {
+  const file = spPhotoFile.files[0];
+  if (!file) return;
+  spPhotoStatus.style.color = 'var(--text-muted-light)';
+  spPhotoStatus.textContent = 'جارٍ رفع الصورة...';
+  try {
+    const blob = await resizeToJpeg(file);
+    const path = 'team/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+    const { error } = await supabaseClient.storage.from(SP_PHOTO_BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (error) throw error;
+    const { data: pub } = supabaseClient.storage.from(SP_PHOTO_BUCKET).getPublicUrl(path);
+    spUploadedUrls.push(pub.publicUrl);
+    setSpecialistPhoto(pub.publicUrl);
+    spPhotoStatus.textContent = 'تم رفع الصورة. اضغط «حفظ» لتثبيتها.';
+  } catch (err) {
+    console.error('specialist photo upload:', err);
+    spPhotoStatus.style.color = 'var(--alert)';
+    spPhotoStatus.textContent = 'تعذّر رفع الصورة. جرّب صورة أخرى (JPG أو PNG أو WebP).';
+  } finally {
+    spPhotoFile.value = '';
+  }
+});
+
+document.getElementById('spPhotoRemove').addEventListener('click', () => {
+  setSpecialistPhoto('');
+  spPhotoStatus.style.color = 'var(--text-muted-light)';
+  spPhotoStatus.textContent = 'ستُحذف الصورة عند الضغط على «حفظ».';
+});
+
 const specialistForm = document.getElementById('specialistForm');
 const specialistFormTitle = document.getElementById('specialistFormTitle');
 const cancelSpecialistEditBtn = document.getElementById('cancelSpecialistEditBtn');
@@ -1384,7 +1477,8 @@ function startEditSpecialist(sp){
   document.getElementById('spName').value = sp.full_name;
   document.getElementById('spSpecialty').value = sp.specialty;
   document.getElementById('spOrder').value = sp.sort_order;
-  document.getElementById('spPhoto').value = sp.photo_url;
+  setSpecialistPhoto(sp.photo_url || '');
+  spOriginalPhoto = sp.photo_url || '';
   document.getElementById('spShortBio').value = sp.short_bio || '';
   document.getElementById('spBio').value = sp.bio;
   document.getElementById('spPublished').checked = sp.is_published;
@@ -1394,7 +1488,10 @@ function startEditSpecialist(sp){
 }
 
 function resetSpecialistForm(){
+  discardUnsavedSpecialistUploads();
   specialistForm.reset();
+  setSpecialistPhoto('');
+  spOriginalPhoto = '';
   document.getElementById('spId').value = '';
   document.getElementById('spPublished').checked = true;
   specialistFormTitle.textContent = 'إضافة أخصائي جديد';
@@ -1412,7 +1509,7 @@ specialistForm.addEventListener('submit', async (e) => {
     full_name: document.getElementById('spName').value.trim(),
     specialty: document.getElementById('spSpecialty').value.trim(),
     sort_order: parseInt(document.getElementById('spOrder').value) || 0,
-    photo_url: document.getElementById('spPhoto').value.trim(),
+    photo_url: document.getElementById('spPhoto').value.trim(),  // '' = no photo (placeholder shown)
     short_bio: document.getElementById('spShortBio').value.trim() || null,
     bio: document.getElementById('spBio').value.trim(),
     is_published: document.getElementById('spPublished').checked,
@@ -1431,6 +1528,11 @@ specialistForm.addEventListener('submit', async (e) => {
     return;
   }
 
+  // نحذف من التخزين الصورة القديمة (إن استُبدلت أو حُذفت) وأي صور رُفعت ولم تُستخدم
+  const finalPhoto = payload.photo_url;
+  const stale = [spOriginalPhoto, ...spUploadedUrls].filter(u => u && u !== finalPhoto);
+  await removeSpecialistPhotoFiles(stale);
+  spUploadedUrls = [];
   specialistFormStatus.textContent = 'تم الحفظ بنجاح.';
   specialistFormStatus.classList.add('active', 'success');
   resetSpecialistForm();
@@ -1439,8 +1541,12 @@ specialistForm.addEventListener('submit', async (e) => {
 
 async function deleteSpecialist(id){
   if (!confirm('متأكدة تريدين حذف هذا الأخصائي؟')) return;
+  const { data: row } = await supabaseClient.from('specialists').select('photo_url').eq('id', id).maybeSingle();
   const { error } = await supabaseClient.from('specialists').delete().eq('id', id);
-  if (!error) loadTeam();
+  if (!error) {
+    if (row && row.photo_url) await removeSpecialistPhotoFiles([row.photo_url]);
+    loadTeam();
+  }
 }
 
 // ---------- Users table ----------

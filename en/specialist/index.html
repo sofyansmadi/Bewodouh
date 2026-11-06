@@ -141,7 +141,7 @@ async function loadSpecialist(){
 
   document.getElementById('pageTitle').textContent = data.full_name + ' — Bewoduh';
   document.getElementById('pageDesc').setAttribute('content', data.short_bio || data.bio.slice(0, 150));
-  document.getElementById('profilePhoto').src = data.photo_url;
+  document.getElementById('profilePhoto').src = data.photo_url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
   document.getElementById('profilePhoto').alt = data.full_name;
   document.getElementById('profileName').textContent = data.full_name;
   document.getElementById('profileRole').textContent = data.specialty;

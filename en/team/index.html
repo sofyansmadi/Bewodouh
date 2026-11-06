@@ -86,6 +86,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
 <script>
+const AVATAR_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 async function loadTeam(){
   const grid = document.getElementById('teamGrid');
@@ -107,7 +109,7 @@ async function loadTeam(){
 
   grid.innerHTML = data.map(sp => `
     <a href="/en/specialist/?slug=${encodeURIComponent(sp.slug)}" class="specialist-card">
-      <img class="specialist-photo" src="${esc(sp.photo_url)}" alt="${esc(sp.full_name)}" loading="lazy">
+      <img class="specialist-photo" src="${esc(sp.photo_url || AVATAR_PLACEHOLDER)}" alt="${esc(sp.full_name)}" loading="lazy">
       <div class="specialist-body">
         <div class="specialist-name">${esc(sp.full_name)}</div>
         <div class="specialist-role">${esc(sp.specialty)}</div>
