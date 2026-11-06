@@ -266,7 +266,7 @@
       <button type="button" class="currency-btn" data-currency="AED">🇦🇪 AED</button>
       <button type="button" class="currency-btn" data-currency="EGP">🇪🇬 EGP</button>
     </div>
-    <p style="text-align:center; font-size:12px; color:var(--text-muted-light); margin-top:10px;">الأسعار بعملتك تقريبية لتسهيل المقارنة — الدفع الفعلي عبر PayPal يتم بالدولار الأمريكي.</p>
+    <p style="text-align:center; font-size:12px; color:var(--text-muted-light); margin-top:10px;">الأسعار بعملتك تقريبية لتسهيل المقارنة — الدفع الفعلي يتم بالدولار الأمريكي عبر بوابة دفع آمنة (Stripe).</p>
 
     <pricing-cards class="pkg-grid"></pricing-cards>
 
@@ -277,7 +277,6 @@
           <svg viewBox="0 0 24 24" fill="currentColor" style="height:18px;"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.856 4.42 2.955 4.45z"/></svg>
           <span class="pm-wordmark">Pay</span>
         </span>
-        <span class="pm-wordmark" style="font-style:italic;" aria-label="PayPal">PayPal</span>
         <span class="pm-wordmark" style="font-style:italic;" aria-label="Visa">VISA</span>
         <svg viewBox="0 0 24 14" aria-label="Mastercard"><circle cx="9" cy="7" r="6.5" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="15" cy="7" r="6.5" fill="currentColor" opacity=".55"/></svg>
       </div>
@@ -343,7 +342,7 @@
         </div>
         <h2>تم استلام طلب حجزك</h2>
         <p>خطوة أخيرة فقط — أكمل الدفع بالأسفل لتأكيد موعدك.</p>
-        <div id="paypal-button-container" style="max-width:340px; margin:20px auto 0;"></div>
+        <div id="pay-container" style="max-width:340px; margin:20px auto 0;"></div>
       </div>
     </div>
   </div>
@@ -646,40 +645,56 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
 
-  // نعرض زر دفع PayPal مباشرة داخل الصفحة بمبلغ الباقة الفعلي، وعند
-  // نجاح الدفع (onApprove) نعلّم الحجز كمدفوع عبر دالة mark_booking_paid
-  // — بدون أي تحويل إلى موقع خارجي، وبدون منح الزائر صلاحية تعديل الحجوزات مباشرة
+  // نعرض زر "ادفع الآن" بمبلغ الباقة الفعلي. عند الضغط عليه ننشئ جلسة Stripe Checkout
+  // من الخادم (دالة create-checkout-session تقرأ السعر من قاعدة البيانات، لا من المتصفح).
+  // تأكيد الدفع يصل لدالة stripe-webhook التي تعلّم الحجز كمدفوع، فلا نعتمد على عودة الزائر لهذه الصفحة.
   const amount = PACKAGE_PRICES_USD[payload.package_name];
-  const paypalContainer = document.getElementById('paypal-button-container');
+  const payContainer = document.getElementById('pay-container');
 
-  if (amount && typeof paypal !== 'undefined') {
-    paypal.Buttons({
-      createOrder: function (data, actions) {
-        return actions.order.create({
-          purchase_units: [{ amount: { value: amount.toFixed(2) } }],
-        });
-      },
-      onApprove: async function (data, actions) {
-        const details = await actions.order.capture();
-        const { error: markError } = await supabaseClient.rpc('mark_booking_paid', {
-          booking_id: bookingId,
-          order_id: details.id,
-        });
-        if (markError) console.error('mark_booking_paid error:', markError);
-        paypalContainer.innerHTML = '<p style="text-align:center; color:var(--clarity); font-weight:700;">تم الدفع بنجاح ✓</p>';
-      },
-      onError: function (err) {
-        console.error('PayPal error:', err);
-        paypalContainer.insertAdjacentHTML('afterend', '<p style="text-align:center; color:var(--alert); font-size:13px; margin-top:10px;">حدث خطأ أثناء الدفع. حاول مرة أخرى أو تواصل معنا.</p>');
-      },
-    }).render('#paypal-button-container');
-  } else if (typeof paypal !== 'undefined') {
-    // ما قدرنا نحدد سعر الباقة (مثلاً تأخّر تحميل الباقات من قاعدة
-    // البيانات) — نوضّح للزائر إنه حجزه استُلم، وما يحتاج يعتبرها خطأ،
-    // وإنه فريقنا سيتواصل معه لإتمام الدفع بدل ما يبقى الزر فاضياً بصمت.
-    paypalContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">تم استلام حجزك بنجاح. سيتواصل معك فريقنا خلال ٢٤ ساعة لإتمام الدفع.</p>';
+  if (amount) {
+    const payLabel = `ادفع الآن — $${amount}`;
+    const payBtn = document.createElement('button');
+    payBtn.type = 'button';
+    payBtn.className = 'btn-primary';
+    payBtn.textContent = payLabel;
+    const payError = document.createElement('p');
+    payError.style.cssText = 'text-align:center; color:var(--alert); font-size:13px; margin-top:10px;';
+    payError.setAttribute('role', 'alert');
+    payBtn.addEventListener('click', async () => {
+      payBtn.disabled = true;
+      payError.textContent = '';
+      payBtn.textContent = 'جارٍ تحويلك إلى صفحة الدفع...';
+      const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { booking_id: bookingId } });
+      if (error || !data || !data.url) {
+        console.error('create-checkout-session:', error, data);
+        payError.textContent = 'تعذّر فتح صفحة الدفع. حاول مرة أخرى أو تواصل معنا.';
+        payBtn.disabled = false;
+        payBtn.textContent = payLabel;
+        return;
+      }
+      window.location.href = data.url;
+    });
+    payContainer.append(payBtn, payError);
+  } else {
+    // ما قدرنا نحدد سعر الباقة (مثلاً تأخّر تحميل الباقات): نوضّح أن الحجز استُلم وأن الفريق سيتواصل.
+    payContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted-light); font-size:13.5px;">تم استلام حجزك بنجاح. سيتواصل معك فريقنا خلال ٢٤ ساعة لإتمام الدفع.</p>';
   }
 });
+
+// ---------- Return from the payment page ----------
+(function showPaymentReturnNote(){
+  const params = new URLSearchParams(window.location.search);
+  const paid = params.get('paid') === '1';
+  const canceled = params.get('canceled') === '1';
+  if (!paid && !canceled) return;
+  const note = document.createElement('div');
+  note.setAttribute('role', 'status');
+  note.style.cssText = 'text-align:center; padding:16px 20px; font-weight:700; font-size:15px; color:' + (paid ? 'var(--ink)' : 'var(--alert)') + '; background:' + (paid ? 'var(--clarity-soft)' : 'rgba(181,85,91,.1)') + ';';
+  note.textContent = paid
+    ? 'تم الدفع بنجاح. شكراً لك، وسيتواصل معك فريقنا لتأكيد موعدك.'
+    : 'لم تكتمل عملية الدفع. حجزك محفوظ، ويمكنك إعادة المحاولة أو التواصل معنا.';
+  document.querySelector('header.hero').before(note);
+})();
 
 // ---------- FAQ accordion ----------
 document.querySelectorAll('.faq-q').forEach(q => {
@@ -692,7 +707,6 @@ document.querySelectorAll('.faq-q').forEach(q => {
 });
 </script>
 
-<script src="https://www.paypal.com/sdk/js?client-id=BAAm9zDOweHnmLnZ44IoPZgahKavweS1cO_ssG9Z9C8htvdAfEClnx3VIdjLowjupFZNHgglzT9xuDWirQ&components=buttons&disable-funding=venmo&currency=USD"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
 <script>
@@ -767,7 +781,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
    (PACKAGE_PRICES_USD) مباشرة مع جدول packages في Supabase — نفس
    المصدر اللي يعتمد عليه <pricing-cards> بالأعلى. هذا يمنع مشكلة
    حصلت فعلياً: لو تغيّر اسم أو سعر باقة من لوحة التحكم، كانت قائمة
-   الحجز وزر الدفع (PayPal) يضلّوا على الاسم/السعر القديم المكتوب
+   الحجز وزر الدفع (Stripe) يضلّوا على الاسم/السعر القديم المكتوب
    يدوياً بهذا الملف، فيصير السعر غير موجود ("undefined")، وزر الدفع
    ما يظهر، ويبدو للزائر إنه صار "خطأ" أثناء الحجز.
    ============================================================ */
