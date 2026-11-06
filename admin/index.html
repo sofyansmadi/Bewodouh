@@ -843,6 +843,10 @@ async function loadBookings(){
   }
 
   const statusOptions = ['قيد المراجعة', 'مؤكّد', 'تم التواصل', 'ملغى'];
+  // أسعار الباقات لحساب المبلغ المتوقع بالدينار لحوالات كليك
+  const { data: pk } = await supabaseClient.from('packages').select('name, price');
+  const priceByName = Object.fromEntries((pk || []).map(p => [p.name, Number(p.price)]));
+  const cliqRef = (id) => 'BW-' + String(id).replace(/-/g, '').slice(0, 6).toUpperCase();
 
   tbody.innerHTML = data.map(b => {
     const dt = new Date(b.preferred_datetime);
@@ -853,7 +857,11 @@ async function loadBookings(){
       ? '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">مدفوع</span>'
       : (b.status === 'ملغى'
           ? '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">غير مدفوع (ملغى)</span>'
-          : '<span class="badge-yes" style="background:rgba(181,85,93,.14); color:#9C3F47;">غير مدفوع</span><br><button type="button" class="btn-secondary" data-mark-paid-id="' + esc(b.id) + '" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">تعليم كمدفوع (دفع خارجي)</button>');
+          : (b.payment_method === 'cliq'
+              ? '<span class="badge-yes" style="background:rgba(201,161,95,.2); color:#7D5F27;">كليك — ' + (b.cliq_reported_at ? 'العميل أبلغ بالتحويل، تحقق من البنك' : 'بانتظار التحويل') + '</span>'
+                + '<div style="font-size:11.5px; margin-top:6px; direction:ltr; text-align:right;">' + esc(cliqRef(b.id)) + (priceByName[b.package_name] ? ' · ' + (Math.round(priceByName[b.package_name] * 0.709 * 100) / 100).toFixed(2) + ' JOD' : '') + '</div>'
+                + '<button type="button" class="btn-secondary" data-mark-paid-id="' + esc(b.id) + '" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">تأكيد استلام الحوالة</button>'
+              : '<span class="badge-yes" style="background:rgba(181,85,93,.14); color:#9C3F47;">غير مدفوع</span><br><button type="button" class="btn-secondary" data-mark-paid-id="' + esc(b.id) + '" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">تعليم كمدفوع (دفع خارجي)</button>'));
     return `
     <tr>
       <td>${esc(b.full_name)}<br><span style="font-size:12px; color:var(--text-muted-light);">${esc(b.email)}</span></td>
@@ -894,7 +902,7 @@ async function loadBookings(){
   });
   tbody.querySelectorAll('[data-mark-paid-id]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('سيُعلَّم هذا الحجز كمدفوع (دفع خارج الموقع مثل حوالة)، وسيصل العميل إيصال. تأكدي أنك استلمتِ المبلغ فعلاً. متابعة؟')) return;
+      if (!confirm('سيُعلَّم هذا الحجز كمدفوع، وسيصل العميل إيصال. تأكدي أن المبلغ وصل فعلاً إلى حسابك (BEWODUH) وأن المرجع مطابق. متابعة؟')) return;
       const { error: payError } = await supabaseClient.from('bookings').update({ paid: true }).eq('id', btn.dataset.markPaidId);
       if (payError) { alert('تعذّر تعليم الحجز كمدفوع.'); console.error(payError); return; }
       loadBookings();

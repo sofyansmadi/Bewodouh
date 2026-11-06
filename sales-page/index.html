@@ -143,6 +143,18 @@
   .slot-btn:focus-visible{ outline:3px solid rgba(201,161,95,.6); outline-offset:2px; }
   .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; }
   .btn-primary:hover{ background:var(--ink-soft); }
+  .pm-title{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; }
+  .pm-group{ display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+  .pm-opt{ display:flex; align-items:center; gap:12px; border:1.5px solid var(--fog-dim); border-radius:14px; padding:14px 16px; cursor:pointer; background:var(--fog); font-size:14.5px; font-weight:600; color:var(--ink); }
+  .pm-opt input{ width:auto; margin:0; accent-color:var(--clarity); }
+  .pm-opt small{ display:block; font-weight:500; font-size:12px; color:var(--text-muted-light); margin-top:2px; }
+  .pm-opt:has(input:checked){ border-color:var(--clarity); background:#fff; }
+  .cliq-card{ text-align:start; background:var(--fog); border:1.5px solid var(--fog-dim); border-radius:16px; padding:18px 20px; margin-top:6px; }
+  .cliq-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--fog-dim); font-size:14px; }
+  .cliq-row:last-of-type{ border-bottom:none; }
+  .cliq-row b{ font-family:'IBM Plex Sans Arabic',sans-serif; font-size:16px; letter-spacing:.5px; direction:ltr; }
+  .cliq-copy{ border:1px solid var(--fog-dim); background:#fff; border-radius:100px; padding:4px 12px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+  .cliq-steps{ margin:12px 0 4px; padding-inline-start:20px; font-size:13px; line-height:1.9; color:var(--text-muted-light); }
   .success-box{ display:none; text-align:center; padding:20px 0; }
   .success-box.active{ display:block; }
   .success-box .check{ width:56px; height:56px; border-radius:50%; background:var(--clarity); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
@@ -288,7 +300,7 @@
   <div class="wrap-narrow">
     <div class="eyebrow" style="justify-content:center;">آخر خطوة</div>
     <h2 class="section-title" style="text-align:center;">أكمل بيانات الحجز</h2>
-    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">سيتواصل معك فريقنا خلال ٢٤ ساعة لتأكيد الموعد وطريقة الدفع.</p>
+    <p class="section-lede" style="text-align:center; margin-left:auto; margin-right:auto;">اختر طريقة الدفع بعد تعبئة البيانات. يُؤكَّد موعدك بعد إتمام الدفع، ولا يتواصل معك الفريق قبله.</p>
 
     <div class="specialist-banner" id="specialistBanner" style="display:none; background:var(--ink); color:var(--clarity-soft); text-align:center; border-radius:14px; padding:14px 18px; margin-bottom:24px; font-size:14px; font-weight:600;"></div>
 
@@ -331,6 +343,11 @@
         <div class="field">
           <label for="bkMessage">أي شيء تودّ إخبارنا به قبل الجلسة؟ (اختياري)</label>
           <textarea id="bkMessage" placeholder="لا حاجة لكتابة تفاصيل كثيرة — فقط أي شيء يساعد المختص على فهم وضعك أكثر."></textarea>
+        </div>
+        <div class="pm-title">طريقة الدفع</div>
+        <div class="pm-group" role="radiogroup" aria-label="طريقة الدفع">
+          <label class="pm-opt"><input type="radio" name="bkPayMethod" value="card" checked><span>بطاقة بنكية<small>Visa / Mastercard / Apple Pay — فوري</small></span></label>
+          <label class="pm-opt"><input type="radio" name="bkPayMethod" value="cliq"><span>كليك (CliQ) — للدفع من الأردن<small>حوالة فورية من تطبيق بنكك بالدينار الأردني</small></span></label>
         </div>
         <button type="submit" class="btn-primary">إرسال طلب الحجز</button>
         <p style="text-align:center; font-size:12.5px; color:var(--text-muted-light); margin-top:14px;">بإرسال الطلب فإنك توافق على <a href="/terms/" target="_blank" rel="noopener" style="color:var(--clarity); font-weight:700; text-decoration:underline;">شروط الاستخدام وسياسة الإلغاء والاسترجاع</a> و<a href="/privacy/" target="_blank" rel="noopener" style="color:var(--clarity); font-weight:700; text-decoration:underline;">سياسة الخصوصية</a>.</p>
@@ -645,6 +662,13 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
 
+  const payMethod = (document.querySelector('input[name="bkPayMethod"]:checked') || {}).value || 'card';
+  if (payMethod === 'cliq') {
+    document.getElementById('successBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showCliqPayment(bookingId, payload.package_name);
+    return;
+  }
+
   // بعد الحجز نحوّل الزبون مباشرة إلى صفحة الدفع (Stripe Checkout) بدل أن يضطر للنزول بالصفحة.
   // دالة create-checkout-session تقرأ السعر من قاعدة البيانات لا من المتصفح، وتأكيد الدفع يصل لدالة stripe-webhook.
   const amount = PACKAGE_PRICES_USD[payload.package_name];
@@ -684,6 +708,76 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   payContainer.append(payBtn, payError);
   goToPayment();
 });
+
+// ---------- Manual CliQ payment (Jordan) ----------
+const CLIQ_ALIAS = 'BEWODUH';
+const JOD_PER_USD = 0.709; // الدينار مربوط بالدولار (١ دولار = ٠٫٧٠٩ دينار)
+
+async function showCliqPayment(bookingId, pkg) {
+  const box = document.getElementById('successBox');
+  box.querySelector('h2').textContent = 'حوّل المبلغ عبر كليك لتأكيد حجزك';
+  box.querySelector('p').textContent = 'موعدك محجوز لمدة ٢٤ ساعة. لن يُؤكَّد ولن يتواصل معك الفريق قبل أن نتأكد من وصول الحوالة.';
+  const c = document.getElementById('pay-container');
+  c.style.maxWidth = '460px';
+  c.replaceChildren();
+
+  const { data: ref, error } = await supabaseClient.rpc('choose_cliq_payment', { p_booking: bookingId });
+  if (error || !ref) {
+    console.error('choose_cliq_payment:', error);
+    const e = document.createElement('p');
+    e.style.cssText = 'color:var(--alert); font-size:13px; text-align:center;';
+    e.textContent = 'تعذّر تجهيز الدفع بكليك. حاول مرة أخرى أو اختر البطاقة.';
+    c.appendChild(e);
+    return;
+  }
+  const usd = PACKAGE_PRICES_USD[pkg];
+  const jod = usd ? (Math.round(usd * JOD_PER_USD * 100) / 100).toFixed(2) : null;
+
+  const card = document.createElement('div');
+  card.className = 'cliq-card';
+  const row = (label, value, copyable) => {
+    const r = document.createElement('div');
+    r.className = 'cliq-row';
+    const l = document.createElement('span'); l.textContent = label;
+    const right = document.createElement('span'); right.style.cssText = 'display:flex; align-items:center; gap:10px;';
+    const b = document.createElement('b'); b.textContent = value;
+    right.appendChild(b);
+    if (copyable) {
+      const cp = document.createElement('button');
+      cp.type = 'button'; cp.className = 'cliq-copy'; cp.textContent = 'نسخ';
+      cp.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(value); cp.textContent = 'تم النسخ'; setTimeout(() => cp.textContent = 'نسخ', 1500); } catch (_) {}
+      });
+      right.appendChild(cp);
+    }
+    r.append(l, right);
+    return r;
+  };
+  card.appendChild(row('عنوان كليك (الاسم المستعار)', CLIQ_ALIAS, true));
+  if (jod) card.appendChild(row('المبلغ بالدينار الأردني', jod + ' JOD', true));
+  card.appendChild(row('ملاحظة الحوالة (المرجع)', ref, true));
+  const ol = document.createElement('ol');
+  ol.className = 'cliq-steps';
+  ['افتح تطبيق بنكك واختر «كليك».', 'حوّل إلى العنوان أعلاه بالمبلغ نفسه، وتأكد أن اسم المستفيد يظهر قبل التأكيد.', 'اكتب المرجع في ملاحظة الحوالة، ثم اضغط الزر أدناه.'].forEach(t => { const li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+  card.appendChild(ol);
+  c.appendChild(card);
+
+  const done = document.createElement('button');
+  done.type = 'button'; done.className = 'btn-primary'; done.style.marginTop = '14px';
+  done.textContent = 'حوّلت المبلغ';
+  done.addEventListener('click', async () => {
+    done.disabled = true; done.textContent = 'جارٍ الإرسال...';
+    const { error: repErr } = await supabaseClient.rpc('report_cliq_transfer', { p_booking: bookingId });
+    if (repErr) { console.error('report_cliq_transfer:', repErr); done.disabled = false; done.textContent = 'حوّلت المبلغ'; return; }
+    done.remove();
+    const ok = document.createElement('p');
+    ok.setAttribute('role', 'status');
+    ok.style.cssText = 'color:var(--ink); font-weight:700; font-size:14px; text-align:center; margin-top:14px; line-height:1.8;';
+    ok.textContent = 'وصلنا إبلاغك، وسنتأكد من الحوالة ونؤكد موعدك قريباً. إن تأخر التأكيد تواصل معنا على hello@bewoduh.com وأرفق إيصال التحويل.';
+    c.appendChild(ok);
+  });
+  c.appendChild(done);
+}
 
 // ---------- Return from the payment page ----------
 (function showPaymentReturnNote(){
