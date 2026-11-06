@@ -199,8 +199,8 @@ class SiteFooter extends HTMLElement {
     const h = (path) => appHref(lp(path)); // اختصار محلي: يضيف /en للصفحات الإنجليزية
     const brand = t('بوضوح', 'Bewoduh');
     const blurb = t(
-      'محتوى توعوي حول العلاقات وأنماط الشخصية، باللغة العربية، لكل من يريد أن يرى علاقته بوضوح أكبر.',
-      'Educational content about relationships and personality patterns, for anyone who wants to see their relationships more clearly.'
+      'محتوى توعوي وجلسات نفسية حول العلاقات وفهم الذات، باللغة العربية، لكل من يريد أن يفهم نفسه بوضوح أكبر.',
+      'Educational content and therapy sessions about relationships and self-understanding, in Arabic, for anyone who wants to understand themselves more clearly.'
     );
 
     if (variant === 'rich') {
