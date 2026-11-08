@@ -334,6 +334,7 @@
             <th>الموعد المطلوب</th>
             <th>الهاتف</th>
             <th>الدفع</th>
+            <th>الأخصائي</th>
             <th>الحالة</th>
             <th></th>
           </tr>
@@ -396,6 +397,11 @@
               </div>
               <input type="hidden" id="spPhoto" value="">
               <p id="spPhotoStatus" style="font-size:12.5px; color:var(--text-muted-light); margin-top:8px;">بدون صورة، يظهر رمز افتراضي في صفحة الفريق. تُحفظ الصورة عند الضغط على «حفظ».</p>
+            </div>
+            <div class="field full">
+              <label for="spLoginEmail">بريد دخول الأخصائي لبوابة الأخصائيين (اختياري)</label>
+              <input type="email" id="spLoginEmail" placeholder="نفس البريد الذي سيسجّل به حسابه في الموقع" style="direction:ltr; text-align:left;">
+              <p style="font-size:12px; color:var(--text-muted-light); margin-top:6px;">عند ربطه، يسجّل الأخصائي حساباً بنفس البريد من صفحة التسجيل ثم يدخل من /specialist-portal/ ليدير صفحته وجدوله وجلساته. اتركه فارغاً لإلغاء الربط.</p>
             </div>
             <div class="field full">
               <label for="spShortBio">جملة قصيرة (تظهر بالبطاقة بقائمة الفريق، اختياري)</label>
@@ -825,7 +831,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
 // ---------- Bookings table ----------
 async function loadBookings(){
   const tbody = document.getElementById('bookingsTableBody');
-  tbody.innerHTML = '<tr><td colspan="7">جارٍ التحميل...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8">جارٍ التحميل...</td></tr>';
 
   const { data, error } = await supabaseClient
     .from('bookings')
@@ -833,16 +839,17 @@ async function loadBookings(){
     .order('created_at', { ascending: false });
 
   if (error) {
-    tbody.innerHTML = '<tr><td colspan="7">تعذّر تحميل البيانات.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8">تعذّر تحميل البيانات.</td></tr>';
     return;
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="7">ما في طلبات حجز بعد.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8">ما في طلبات حجز بعد.</td></tr>';
     return;
   }
 
   const statusOptions = ['قيد المراجعة', 'مؤكّد', 'تم التواصل', 'ملغى'];
+  const { data: specList } = await supabaseClient.from('specialists').select('id, full_name').order('sort_order', { ascending: true });
   // أسعار الباقات لحساب المبلغ المتوقع بالدينار لحوالات كليك
   const { data: pk } = await supabaseClient.from('packages').select('name, price');
   const priceByName = Object.fromEntries((pk || []).map(p => [p.name, Number(p.price)]));
@@ -869,6 +876,7 @@ async function loadBookings(){
       <td>${formatted}</td>
       <td>${esc(b.phone)}</td>
       <td>${payCell}</td>
+      <td><select data-assign-booking="${esc(b.id)}" style="border:1px solid var(--fog-dim); border-radius:8px; padding:6px 8px; font-size:12.5px; font-family:inherit; max-width:150px;"><option value="">— غير محدد —</option>${(specList || []).map(sp => `<option value="${esc(sp.id)}"${sp.id === b.specialist_id ? ' selected' : ''}>${esc(sp.full_name)}</option>`).join('')}</select></td>
       <td>
         <select data-booking-id="${esc(b.id)}" data-paid="${b.paid ? '1' : '0'}" data-prev="${esc(b.status)}" class="status-select" style="border:1px solid var(--fog-dim); border-radius:8px; padding:6px 8px; font-size:12.5px; font-family:inherit;">
           ${options}
@@ -898,6 +906,13 @@ async function loadBookings(){
         return;
       }
       sel.dataset.prev = sel.value;
+    });
+  });
+  tbody.querySelectorAll('[data-assign-booking]').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const spec = (specList || []).find(x => x.id === sel.value);
+      const { error: asError } = await supabaseClient.from('bookings').update({ specialist_id: sel.value || null, specialist_name: spec ? spec.full_name : null }).eq('id', sel.dataset.assignBooking);
+      if (asError) { console.error(asError); alert('تعذّر تعيين الأخصائي.'); loadBookings(); }
     });
   });
   tbody.querySelectorAll('[data-mark-paid-id]').forEach(btn => {
@@ -1061,12 +1076,15 @@ async function approveAndPublish(app, trigger){
     const { data: last } = await supabaseClient.from('specialists').select('sort_order').order('sort_order', { ascending: false }).limit(1);
     const nextOrder = last && last.length ? last[0].sort_order + 1 : 1;
 
-    const { error: insertError } = await supabaseClient.from('specialists').insert({
+    const { data: created, error: insertError } = await supabaseClient.from('specialists').insert({
       slug, full_name: app.full_name, specialty: app.specialty, bio: app.bio,
       photo_url: pub.publicUrl, is_published: true, sort_order: nextOrder, application_id: app.id,
       years_experience: app.years_experience, credentials_verified: true,
-    });
+    }).select('id').single();
     if (insertError) throw insertError;
+    // يستطيع الأخصائي الدخول لبوابته ببريد طلب الانضمام نفسه بعد أن ينشئ حساباً ويؤكد بريده
+    const { error: linkError } = await supabaseClient.from('specialist_accounts').insert({ specialist_id: created.id, email: String(app.email).trim().toLowerCase() });
+    if (linkError) console.error('specialist_accounts link:', linkError);
 
     const { error: statusError } = await supabaseClient.from('specialist_applications')
       .update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', app.id);
@@ -1516,6 +1534,9 @@ function startEditSpecialist(sp){
   document.getElementById('spOrder').value = sp.sort_order;
   setSpecialistPhoto(sp.photo_url || '');
   spOriginalPhoto = sp.photo_url || '';
+  document.getElementById('spLoginEmail').value = '';
+  supabaseClient.from('specialist_accounts').select('email').eq('specialist_id', sp.id).maybeSingle()
+    .then(({ data }) => { if (data) document.getElementById('spLoginEmail').value = data.email; });
   document.getElementById('spShortBio').value = sp.short_bio || '';
   document.getElementById('spBio').value = sp.bio;
   document.getElementById('spPublished').checked = sp.is_published;
@@ -1552,11 +1573,21 @@ specialistForm.addEventListener('submit', async (e) => {
     is_published: document.getElementById('spPublished').checked,
   };
 
-  let error;
+  let error, savedId = id;
   if (id) {
     ({ error } = await supabaseClient.from('specialists').update(payload).eq('id', id));
   } else {
-    ({ error } = await supabaseClient.from('specialists').insert(payload));
+    const ins = await supabaseClient.from('specialists').insert(payload).select('id').single();
+    error = ins.error; savedId = ins.data && ins.data.id;
+  }
+
+  // ربط بريد الدخول لبوابة الأخصائيين (أو إلغاؤه إذا فُرّغ الحقل)
+  if (!error && savedId) {
+    const loginEmail = document.getElementById('spLoginEmail').value.trim().toLowerCase();
+    const linkRes = loginEmail
+      ? await supabaseClient.from('specialist_accounts').upsert({ specialist_id: savedId, email: loginEmail }, { onConflict: 'specialist_id' })
+      : await supabaseClient.from('specialist_accounts').delete().eq('specialist_id', savedId);
+    error = linkRes.error;
   }
 
   if (error) {

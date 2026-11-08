@@ -219,6 +219,7 @@ class SiteFooter extends HTMLElement {
           <a href="${h('/about/')}">${t('من نحن', 'About')}</a>
           <a href="${h('/team/')}">${t('فريق بوضوح', 'Our Team')}</a>
           ${IS_EN ? '' : `<a href="${h('/join/')}">انضم إلينا</a>`}
+          ${IS_EN ? '' : `<a href="/specialist-portal/">دخول الأخصائيين</a>`}
           <a href="${h('/faq/')}">${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
           ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}">تمارين يومية</a>`}
           <a href="${h('/sales-page/')}">${t('احجز استشارة', 'Book a Consultation')}</a>
@@ -257,6 +258,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/about/')}" ${linkStyle}>${t('من نحن', 'About')}</a>
         <a href="${h('/team/')}" ${linkStyle}>${t('فريق بوضوح', 'Our Team')}</a>
         ${IS_EN ? '' : `<a href="${h('/join/')}" ${linkStyle}>انضم إلينا</a>`}
+        ${IS_EN ? '' : `<a href="/specialist-portal/" ${linkStyle}>دخول الأخصائيين</a>`}
         <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
         ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}" ${linkStyle}>تمارين يومية</a>`}
         <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>
