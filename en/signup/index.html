@@ -210,7 +210,17 @@
    ============================================================ */
 
 const inApp = typeof window.Capacitor !== 'undefined';
-function accountUrl(){ return inApp ? '/en/account/index.html' : '/en/account/'; }
+// دعوة بوابة الأخصائيين: ?email=&name=&next=portal يعبّئ الاسم والبريد (البريد مقفل) ويحوّل بعد التأكيد إلى البوابة
+const INVITE = new URLSearchParams(location.search);
+const NEXT_PORTAL = INVITE.get('next') === 'portal';
+function accountUrl(){ if (NEXT_PORTAL && !inApp) return '/en/specialist-portal/'; return inApp ? '/en/account/index.html' : '/en/account/'; }
+(function prefillInvite(){
+  const em = (INVITE.get('email') || '').trim().slice(0, 254), nm = (INVITE.get('name') || '').trim().slice(0, 120);
+  if (!NEXT_PORTAL || !em) return;
+  const set = (id, v, lock) => { const el = document.getElementById(id); if (el) { el.value = v; if (lock) el.readOnly = true; } };
+  set('signupEmail', em, true); set('loginEmail', em, false);
+  if (nm) set('fullName', nm, false);
+})();
 
 const tabSignup = document.getElementById('tabSignup');
 const tabLogin = document.getElementById('tabLogin');

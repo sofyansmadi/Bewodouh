@@ -6,7 +6,7 @@
 <title>بوابة الأخصائيين — بوضوح</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#241D2E; --ink-soft:#372C46; --fog:#F3EEEA; --fog-dim:#E6DFDA;
@@ -14,8 +14,10 @@
     --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4; --text-on-light:#2A2130; --text-muted-light:#6B6072;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{ font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.8; -webkit-font-smoothing:antialiased; }
+  body{ font-family:'IBM Plex Sans Arabic','Inter',sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.8; -webkit-font-smoothing:antialiased; }
+  html[lang="en"] body{ font-family:'Inter','IBM Plex Sans Arabic',sans-serif; line-height:1.65; }
   h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic',sans-serif; }
+  html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3, html[lang="en"] .kufi, html[lang="en"] .field label, html[lang="en"] .lbl, html[lang="en"] .tab, html[lang="en"] th, html[lang="en"] .brand, html[lang="en"] .stat b, html[lang="en"] .daygrp h4{ font-family:'Inter',sans-serif; }
   a{ color:inherit; text-decoration:none; }
   .wrap{ max-width:1040px; margin:0 auto; padding:0 20px; }
   header{ background:var(--ink); padding:16px 0; position:sticky; top:0; z-index:20; }
@@ -23,6 +25,7 @@
   .brand{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:900; font-size:20px; color:var(--fog); }
   .brand span{ color:var(--clarity); }
   .brand small{ font-weight:500; font-size:12.5px; color:var(--text-muted-dark); margin-inline-start:10px; }
+  .hdr-actions{ display:flex; gap:8px; align-items:center; }
   .ghost-btn{ background:none; border:1px solid rgba(255,255,255,.25); color:var(--text-muted-dark); font-size:13px; padding:8px 16px; border-radius:100px; cursor:pointer; font-family:inherit; }
   .ghost-btn:hover{ color:var(--fog); border-color:var(--clarity); }
   main{ padding:30px 0 90px; }
@@ -36,6 +39,8 @@
   .field input, .field select, .field textarea, .inp{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:11px 14px; font-family:inherit; font-size:14.5px; background:var(--fog); color:var(--text-on-light); }
   .field textarea{ min-height:110px; resize:vertical; }
   .field input:focus, .field select:focus, .field textarea:focus, .inp:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  .field input:disabled, .inp:disabled{ opacity:.7; }
+  .ltr{ direction:ltr; text-align:left; }
   .btn{ background:var(--ink); color:var(--fog); font-weight:700; font-size:14.5px; padding:12px 24px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; }
   .btn:hover{ background:var(--ink-soft); } .btn:disabled{ opacity:.55; cursor:not-allowed; }
   .btn.full{ width:100%; }
@@ -60,7 +65,7 @@
 
   .tbl-wrap{ overflow-x:auto; background:#fff; border-radius:16px; box-shadow:0 12px 30px -20px rgba(36,29,46,.2); }
   table{ width:100%; border-collapse:collapse; min-width:640px; }
-  th,td{ padding:13px 14px; text-align:right; font-size:13.5px; border-bottom:1px solid var(--fog-dim); vertical-align:top; }
+  th,td{ padding:13px 14px; text-align:start; font-size:13.5px; border-bottom:1px solid var(--fog-dim); vertical-align:top; }
   th{ background:var(--ink); color:var(--fog); font-family:'Noto Kufi Arabic',sans-serif; font-size:12.5px; }
   tr:last-child td{ border-bottom:none; }
   .muted{ color:var(--text-muted-light); font-size:12.5px; }
@@ -72,97 +77,94 @@
   .days{ display:flex; gap:8px; flex-wrap:wrap; } .days label{ display:flex; align-items:center; gap:5px; background:var(--fog); border:1.5px solid var(--fog-dim); border-radius:100px; padding:6px 12px; font-size:13px; cursor:pointer; margin:0; font-family:inherit; font-weight:500; }
   .days input{ width:auto; }
   .daygrp{ margin-bottom:16px; } .daygrp h4{ font-family:'Noto Kufi Arabic',sans-serif; font-size:14px; margin-bottom:8px; }
-  .slot{ display:inline-flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--fog-dim); border-radius:100px; padding:6px 8px 6px 14px; margin:0 0 8px 8px; font-size:13px; }
-  .slot.booked{ background:rgba(201,161,95,.15); border-color:var(--clarity); }
+  .slot{ display:inline-flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--fog-dim); border-radius:100px; padding-block:6px; padding-inline:14px 8px; margin-inline-end:8px; margin-bottom:8px; font-size:13px; }
+  .slot.booked{ background:rgba(201,161,95,.15); border-color:var(--clarity); padding-inline:14px; }
   .slot button{ background:none; border:none; color:var(--alert); font-size:15px; cursor:pointer; line-height:1; }
   .note{ background:var(--fog); border-radius:12px; padding:12px 14px; margin-bottom:10px; font-size:13.5px; white-space:pre-wrap; }
   .note .meta{ display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-muted-light); margin-bottom:6px; }
   .privacy{ background:rgba(201,161,95,.12); border:1px solid rgba(201,161,95,.4); border-radius:12px; padding:10px 14px; font-size:13px; margin-bottom:18px; }
   .avatar{ width:96px; height:96px; border-radius:50%; object-fit:cover; background:var(--fog-dim); border:1px solid var(--fog-dim); }
   a.lnk{ color:#7D5F27; text-decoration:underline; font-weight:600; }
+  .section-gap{ margin-top:22px; }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <div class="brand">بوضوح<span>.</span><small>بوابة الأخصائيين</small></div>
-    <button class="ghost-btn hidden" id="logoutBtn" type="button">تسجيل الخروج</button>
+    <div class="brand" id="brand"></div>
+    <div class="hdr-actions">
+      <a class="ghost-btn" id="langLink" href="#"></a>
+      <button class="ghost-btn hidden" id="logoutBtn" type="button"></button>
+    </div>
   </div>
 </header>
-
 <main class="wrap">
-  <!-- Login -->
-  <section id="loginView" class="login card hidden">
-    <h1>دخول الأخصائيين</h1>
-    <p>ادخل بالبريد الإلكتروني الذي سجّلت به طلب الانضمام إلى فريق بوضوح.</p>
-    <form id="loginForm">
-      <div class="field"><label for="lgEmail">البريد الإلكتروني</label><input type="email" id="lgEmail" required autocomplete="email" style="direction:ltr; text-align:left;"></div>
-      <div class="field"><label for="lgPass">كلمة السر</label><input type="password" id="lgPass" required autocomplete="current-password" style="direction:ltr; text-align:left;"></div>
-      <button class="btn full" type="submit">دخول</button>
-      <div class="msg" id="loginMsg"></div>
-    </form>
-    <p style="margin-top:18px; font-size:13px;">ما عندك حساب بعد؟ <a class="lnk" href="/signup/">أنشئ حساباً بنفس البريد</a> وأكّد بريدك، ثم ارجع إلى هنا. لا يظهر لك شيء قبل أن تربط الإدارة حسابك بملفك في الفريق.</p>
-  </section>
-
-  <!-- Signed in but not linked -->
-  <section id="unlinkedView" class="login card hidden">
-    <h1>حسابك غير مرتبط بملف أخصائي</h1>
-    <p>سجّلت الدخول، لكن هذا البريد غير مرتبط بأي ملف في فريق بوضوح. تأكد أنك دخلت بنفس البريد الذي قدّمت به طلب الانضمام، أو تواصل مع الإدارة على hello@bewoduh.com.</p>
-    <button class="btn full" id="unlinkedLogout" type="button">تسجيل الخروج</button>
-  </section>
-
-  <!-- Portal -->
+  <section id="loginView" class="login card hidden"></section>
+  <section id="unlinkedView" class="login card hidden"></section>
   <section id="portalView" class="hidden">
-    <div class="row" style="justify-content:space-between; margin-bottom:18px;">
-      <div><h1 class="kufi" style="font-size:22px;" id="hello"></h1><div class="muted" id="helloSub"></div></div>
-    </div>
-    <nav class="tabs" id="tabs">
-      <button class="tab active" data-tab="overview">نظرة عامة</button>
-      <button class="tab" data-tab="upcoming">القادمة <span class="count" id="cUpcoming">0</span></button>
-      <button class="tab" data-tab="schedule">جدولي المتاح</button>
-      <button class="tab" data-tab="past">الجلسات السابقة</button>
-      <button class="tab" data-tab="cancelled">الملغاة</button>
-      <button class="tab" data-tab="clients">ملفات المراجعين</button>
-      <button class="tab" data-tab="profile">ملفي الشخصي</button>
-    </nav>
-
-    <div id="tab-overview"></div>
-    <div id="tab-upcoming" class="hidden"></div>
-    <div id="tab-schedule" class="hidden"></div>
-    <div id="tab-past" class="hidden"></div>
-    <div id="tab-cancelled" class="hidden"></div>
-    <div id="tab-clients" class="hidden"></div>
-    <div id="tab-profile" class="hidden"></div>
+    <div style="margin-bottom:18px;"><h1 class="kufi" style="font-size:22px;" id="hello"></h1><div class="muted" id="helloSub"></div></div>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="tab-overview"></div><div id="tab-upcoming" class="hidden"></div><div id="tab-schedule" class="hidden"></div>
+    <div id="tab-past" class="hidden"></div><div id="tab-cancelled" class="hidden"></div><div id="tab-clients" class="hidden"></div><div id="tab-profile" class="hidden"></div>
   </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
 <script>
-/* بوابة الأخصائيين. كل الصلاحيات مفروضة من قاعدة البيانات (RLS): الأخصائي يرى حجوزاته المدفوعة والملغاة فقط،
-   ويعدّل جدوله وملفه وملاحظاته فقط. هذه الصفحة واجهة فقط ولا تمنح أي صلاحية. */
+/* بوابة الأخصائيين / Specialists' portal. عربي وإنجليزي من نفس الملف: اللغة من وسم html lang.
+   كل الصلاحيات مفروضة من قاعدة البيانات (RLS): الأخصائي يرى حجوزاته المدفوعة والملغاة فقط، ويعدّل جدوله وملفه وملاحظاته فقط.
+   هذه الصفحة واجهة فقط ولا تمنح أي صلاحية. */
+const EN = document.documentElement.lang === 'en';
+const t = (ar, en) => EN ? en : ar;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const $ = (id) => document.getElementById(id);
 const sb = supabaseClient;
+const LOC = EN ? 'en-GB' : 'ar-JO-u-nu-latn';
 const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ''; } })();
-const fmtDT = (iso) => new Date(iso).toLocaleString('ar-JO-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' });
-const fmtD = (iso) => new Date(iso).toLocaleDateString('ar-JO-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
-const fmtT = (iso) => new Date(iso).toLocaleTimeString('ar-JO-u-nu-latn', { hour: '2-digit', minute: '2-digit' });
+const fmtDT = (iso) => new Date(iso).toLocaleString(LOC, { dateStyle: 'medium', timeStyle: 'short' });
+const fmtD = (iso) => new Date(iso).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' });
+const fmtT = (iso) => new Date(iso).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' });
 const FEE_FIRST = 10, FEE_NEXT = 15; // أتعاب الأخصائي حسب العقد: ١٠$ أول جلسة مع كل عميل، ١٥$ لكل جلسة لاحقة
+const PKG_EN = { 'استشارة سريعة': 'Quick Consultation', 'باقة الانطلاقة': 'Launch Package', 'باقة المرافقة': 'Companion Package', 'دعم فوري': 'Immediate Support', 'ادعم بوضوح': 'Support Bewoduh' };
+const pkg = (n) => EN ? (PKG_EN[n] || n) : n;
 
-let ME = null, BOOKINGS = [], SLOTS = [], PROFILE = null, currentClient = null;
+let ME = null, BOOKINGS = [], SLOTS = [], PROFILE = null, currentClient = null, AUTH_EMAIL = '';
+
+/* ---------- static chrome ---------- */
+document.title = t('بوابة الأخصائيين — بوضوح', "Specialists' Portal — Bewoduh");
+$('brand').innerHTML = t('بوضوح<span>.</span><small>بوابة الأخصائيين</small>', 'Bewoduh<span>.</span><small>Specialists\' portal</small>');
+$('logoutBtn').textContent = t('تسجيل الخروج', 'Sign out');
+$('langLink').textContent = t('English', 'العربية');
+const setLangLink = () => { $('langLink').href = (EN ? '/specialist-portal/' : '/en/specialist-portal/') + location.hash; };
+setLangLink(); window.addEventListener('hashchange', setLangLink);
+$('loginView').innerHTML = `
+  <h1>${t('دخول الأخصائيين', 'Specialists sign in')}</h1>
+  <p>${t('ادخل بالبريد الإلكتروني الذي سجّلت به طلب الانضمام إلى فريق بوضوح.', 'Sign in with the email you used for your application to the Bewoduh team.')}</p>
+  <form id="loginForm">
+    <div class="field"><label for="lgEmail">${t('البريد الإلكتروني', 'Email')}</label><input type="email" id="lgEmail" required autocomplete="email" class="ltr"></div>
+    <div class="field"><label for="lgPass">${t('كلمة السر', 'Password')}</label><input type="password" id="lgPass" required autocomplete="current-password" class="ltr"></div>
+    <button class="btn full" type="submit">${t('دخول', 'Sign in')}</button>
+    <div class="msg" id="loginMsg"></div>
+  </form>
+  <p style="margin-top:18px; font-size:13px;">${t('أول مرة؟ وصلتك دعوة بالبريد؟ ', 'First time? ')}<a class="lnk" href="${EN ? '/en/signup/' : '/signup/'}?next=portal">${t('أنشئ حسابك بنفس البريد', 'Create your account with the same email')}</a>${t(' وأكّد بريدك بالرمز، وبعدها تنتقل إلى هنا تلقائياً. لا يظهر لك شيء قبل أن تربط الإدارة حسابك بملفك في الفريق.', ', confirm it with the code, and you will land here automatically. Nothing is shown until the team links your account to your profile.')}</p>`;
+$('unlinkedView').innerHTML = `
+  <h1>${t('حسابك غير مرتبط بملف أخصائي', 'Your account is not linked to a specialist profile')}</h1>
+  <p>${t('سجّلت الدخول، لكن هذا البريد غير مرتبط بأي ملف في فريق بوضوح. تأكد أنك دخلت بنفس البريد الذي قدّمت به طلب الانضمام، أو تواصل مع الإدارة على hello@bewoduh.com.', 'You are signed in, but this email is not linked to any profile in the Bewoduh team. Make sure you signed in with the email you used for your application, or contact us at hello@bewoduh.com.')}</p>
+  <button class="btn full" id="unlinkedLogout" type="button">${t('تسجيل الخروج', 'Sign out')}</button>`;
+const TABS = [['overview', t('نظرة عامة', 'Overview')], ['upcoming', t('القادمة', 'Upcoming')], ['schedule', t('جدولي المتاح', 'My availability')], ['past', t('الجلسات السابقة', 'Past sessions')], ['cancelled', t('الملغاة', 'Cancelled')], ['clients', t('ملفات المراجعين', 'Client files')], ['profile', t('ملفي وبياناتي', 'My profile & details')]];
+$('tabs').innerHTML = TABS.map(([k, l], i) => `<button class="tab${i ? '' : ' active'}" data-tab="${k}">${l}${k === 'upcoming' ? ' <span class="count" id="cUpcoming">0</span>' : ''}</button>`).join('');
 
 /* ---------- auth ---------- */
 function show(view){ ['loginView','unlinkedView','portalView'].forEach(v => $(v).classList.toggle('hidden', v !== view)); $('logoutBtn').classList.toggle('hidden', view === 'loginView'); }
 async function logout(){ await sb.auth.signOut(); ME = null; show('loginView'); }
 $('logoutBtn').addEventListener('click', logout);
 $('unlinkedLogout').addEventListener('click', logout);
-
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = $('loginMsg'); msg.className = 'msg'; msg.textContent = '';
   const { error } = await sb.auth.signInWithPassword({ email: $('lgEmail').value.trim(), password: $('lgPass').value });
-  if (error) { msg.className = 'msg err'; msg.textContent = 'البريد أو كلمة السر غير صحيحة، أو لم يتم تأكيد البريد.'; return; }
+  if (error) { msg.className = 'msg err'; msg.textContent = t('البريد أو كلمة السر غير صحيحة، أو لم يتم تأكيد البريد.', 'Wrong email or password, or the email has not been confirmed.'); return; }
   start();
 });
 
@@ -170,14 +172,18 @@ async function start(){
   if (!sb) { show('loginView'); return; }
   const { data: sess } = await sb.auth.getSession();
   if (!sess.session) { show('loginView'); return; }
+  AUTH_EMAIL = sess.session.user.email || '';
   const { data: access, error } = await sb.rpc('my_specialist_access');
   if (error || !access) { show('unlinkedView'); return; }
   ME = access;
-  $('hello').textContent = 'مرحباً ' + ME.full_name;
-  $('helloSub').textContent = 'الأوقات تظهر بتوقيت جهازك' + (TZ ? ' (' + TZ + ')' : '') + '.';
+  setHello();
   show('portalView');
   await loadAll();
   openTab(location.hash.slice(1) || 'overview');
+}
+function setHello(){
+  $('hello').textContent = t('مرحباً ', 'Welcome, ') + ME.full_name;
+  $('helloSub').textContent = t('الأوقات تظهر بتوقيت جهازك', 'Times are shown in your device time zone') + (TZ ? ' (' + TZ + ')' : '') + '.';
 }
 
 /* ---------- data ---------- */
@@ -201,17 +207,18 @@ const counted = () => past().filter(b => b.outcome === 'completed' || b.outcome 
 const RENDER = { overview: renderOverview, upcoming: renderUpcoming, schedule: renderSchedule, past: renderPast, cancelled: renderCancelled, clients: renderClients, profile: renderProfile };
 function openTab(name){
   if (!RENDER[name]) name = 'overview';
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
   Object.keys(RENDER).forEach(k => $('tab-' + k).classList.toggle('hidden', k !== name));
   $('cUpcoming').textContent = upcoming().length;
-  history.replaceState(null, '', '#' + name);
+  history.replaceState(null, '', '#' + name); setLangLink();
   currentClient = null;
   RENDER[name]();
 }
-$('tabs').addEventListener('click', (e) => { const t = e.target.closest('.tab'); if (t) openTab(t.dataset.tab); });
+$('tabs').addEventListener('click', (e) => { const x = e.target.closest('.tab'); if (x) openTab(x.dataset.tab); });
 
-const statusBadge = (b) => b.status === 'مؤكّد' ? '<span class="badge ok">مؤكّد</span>' : '<span class="badge">مدفوع — بانتظار تأكيد الإدارة</span>';
+const statusBadge = (b) => b.status === 'مؤكّد' ? `<span class="badge ok">${t('مؤكّد', 'Confirmed')}</span>` : `<span class="badge">${t('مدفوع — بانتظار تأكيد الإدارة', 'Paid — awaiting team confirmation')}</span>`;
 const clientCell = (b) => `<b>${esc(b.full_name)}</b><div class="muted"><a href="tel:${esc(b.phone)}" dir="ltr">${esc(b.phone)}</a> · <a href="mailto:${esc(b.email)}" dir="ltr">${esc(b.email)}</a></div>`;
+const when = (b) => `<b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fmtT(b.preferred_datetime)}</div>`;
 const table = (head, rows) => rows.length ? `<div class="tbl-wrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : '';
 
 /* ---------- overview / statistics ---------- */
@@ -232,73 +239,71 @@ function renderOverview(){
   const paidTotal = BOOKINGS.filter(b => b.paid).length;
   const rate = paidTotal ? Math.round(cancelledPaid / paidTotal * 100) : 0;
   const months = [];
-  for (let i = 5; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); months.push({ key: ym(d), label: d.toLocaleDateString('ar-JO-u-nu-latn', { month: 'short' }), n: 0 }); }
+  for (let i = 5; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); months.push({ key: ym(d), label: d.toLocaleDateString(LOC, { month: 'short' }), n: 0 }); }
   c.forEach(b => { const m = months.find(x => x.key === ym(new Date(b.preferred_datetime))); if (m) m.n++; });
   const max = Math.max(1, ...months.map(m => m.n));
   const stat = (n, l) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`;
   $('tab-overview').innerHTML = `
-    <h2 class="title">نظرة عامة</h2><p class="sub">أرقامك محسوبة من الجلسات المدفوعة التي سجّلت نتيجتها.</p>
-    ${unrecorded ? `<div class="privacy">عندك <b>${unrecorded}</b> جلسة سابقة لم تسجّل نتيجتها. سجّلها من تبويب «الجلسات السابقة» لتظهر في الإحصائيات والأتعاب.</div>` : ''}
+    <h2 class="title">${t('نظرة عامة', 'Overview')}</h2><p class="sub">${t('أرقامك محسوبة من الجلسات المدفوعة التي سجّلت نتيجتها.', 'Your numbers are based on paid sessions whose outcome you recorded.')}</p>
+    ${unrecorded ? `<div class="privacy">${t(`عندك <b>${unrecorded}</b> جلسة سابقة لم تسجّل نتيجتها. سجّلها من تبويب «الجلسات السابقة» لتظهر في الإحصائيات والأتعاب.`, `You have <b>${unrecorded}</b> past session(s) with no recorded outcome. Record them in “Past sessions” so they count in your statistics and fees.`)}</div>` : ''}
     <div class="stats">
-      ${stat(upcoming().length, 'جلسات قادمة')}${stat(thisMonth, 'جلسات هذا الشهر')}${stat(completed, 'جلسات تمت')}
-      ${stat(noShow, 'لم يحضر المراجع')}${stat(clients, 'مراجعون (جلسة واحدة على الأقل)')}${stat(returning, 'مراجعون عادوا لجلسة ثانية')}
-      ${stat(cancelledPaid + ' (' + rate + '٪)', 'ملغاة بعد الدفع')}${stat('$' + earnMonth, 'أتعاب هذا الشهر (تقديري)')}${stat('$' + earn, 'إجمالي الأتعاب (تقديري)')}
+      ${stat(upcoming().length, t('جلسات قادمة', 'Upcoming sessions'))}${stat(thisMonth, t('جلسات هذا الشهر', 'Sessions this month'))}${stat(completed, t('جلسات تمت', 'Sessions held'))}
+      ${stat(noShow, t('لم يحضر المراجع', 'Client no-shows'))}${stat(clients, t('مراجعون (جلسة واحدة على الأقل)', 'Clients (at least one session)'))}${stat(returning, t('مراجعون عادوا لجلسة ثانية', 'Returning clients'))}
+      ${stat(cancelledPaid + ' (' + rate + '%)', t('ملغاة بعد الدفع', 'Cancelled after payment'))}${stat('$' + earnMonth, t('أتعاب هذا الشهر (تقديري)', 'Fees this month (estimate)'))}${stat('$' + earn, t('إجمالي الأتعاب (تقديري)', 'Total fees (estimate)'))}
     </div>
-    <div class="card"><h3 style="font-size:15px; margin-bottom:6px;">الجلسات في آخر ٦ شهور</h3>
+    <div class="card"><h3 style="font-size:15px; margin-bottom:6px;">${t('الجلسات في آخر ٦ شهور', 'Sessions in the last 6 months')}</h3>
       <div class="bars">${months.map(m => `<div class="bar"><em>${m.n}</em><i style="height:${Math.round(m.n / max * 100)}%"></i><span>${esc(m.label)}</span></div>`).join('')}</div>
     </div>
-    <p class="muted" style="margin-top:14px;">الأتعاب تقديرية حسب العقد: ${FEE_FIRST}$ أول جلسة مع كل مراجع و${FEE_NEXT}$ لكل جلسة لاحقة، وتشمل غياب المراجع. الدفع الفعلي يتم بتاريخ الدفع الشهري وكشف الإدارة هو المرجع.</p>`;
+    <p class="muted" style="margin-top:14px;">${t(`الأتعاب تقديرية حسب العقد: ${FEE_FIRST}$ أول جلسة مع كل مراجع و${FEE_NEXT}$ لكل جلسة لاحقة، وتشمل غياب المراجع. الدفع الفعلي يتم بتاريخ الدفع الشهري وكشف الإدارة هو المرجع.`, `Fees are an estimate based on your agreement: $${FEE_FIRST} for the first session with each client and $${FEE_NEXT} for every later one, including client no-shows. Actual payment follows the monthly payment date and the team's statement is the reference.`)}</p>`;
 }
 
 /* ---------- upcoming ---------- */
 function renderUpcoming(){
   const list = upcoming();
-  $('tab-upcoming').innerHTML = `<h2 class="title">جلساتي القادمة</h2><p class="sub">الجلسات المدفوعة فقط. الحجز غير المدفوع لا يظهر لك ولا يُحجز له موعد.</p>` +
-    (list.length ? table(['الموعد', 'المراجع', 'الباقة', 'الحالة', ''], list.map(b => `<tr><td><b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fmtT(b.preferred_datetime)}</div></td><td>${clientCell(b)}</td><td>${esc(b.package_name)}</td><td>${statusBadge(b)}</td><td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">ملف المراجع</button></td></tr>`))
-      : '<div class="empty">لا توجد جلسات قادمة بعد.</div>');
+  $('tab-upcoming').innerHTML = `<h2 class="title">${t('جلساتي القادمة', 'My upcoming sessions')}</h2><p class="sub">${t('الجلسات المدفوعة فقط. الحجز غير المدفوع لا يظهر لك ولا يُحجز له موعد.', 'Paid sessions only. An unpaid booking is not shown to you and holds no slot.')}</p>` +
+    (list.length ? table([t('الموعد', 'Time'), t('المراجع', 'Client'), t('الباقة', 'Package'), t('الحالة', 'Status'), ''], list.map(b => `<tr><td>${when(b)}</td><td>${clientCell(b)}</td><td>${esc(pkg(b.package_name))}</td><td>${statusBadge(b)}</td><td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">${t('ملف المراجع', 'Client file')}</button></td></tr>`))
+      : `<div class="empty">${t('لا توجد جلسات قادمة بعد.', 'No upcoming sessions yet.')}</div>`);
 }
 
 /* ---------- schedule ---------- */
-const WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const WEEKDAYS = EN ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] : ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 function renderSchedule(){
   const todayStr = new Date().toISOString().slice(0, 10);
   const byBooking = Object.fromEntries(BOOKINGS.map(b => [b.id, b]));
   const groups = {};
   SLOTS.forEach(s => { const k = new Date(s.starts_at).toDateString(); (groups[k] = groups[k] || []).push(s); });
   $('tab-schedule').innerHTML = `
-    <h2 class="title">جدولي المتاح</h2>
-    <p class="sub">المراجعون يرون مواعيدك المتاحة على صفحة الحجز، ولا يستطيعون حجز موعد قبل ٢٤ ساعة من وقته.</p>
+    <h2 class="title">${t('جدولي المتاح', 'My availability')}</h2>
+    <p class="sub">${t('المراجعون يرون مواعيدك المتاحة على صفحة الحجز، ولا يستطيعون حجز موعد قبل ٢٤ ساعة من وقته.', 'Clients see your free slots on the booking page, and cannot book a slot less than 24 hours before it starts.')}</p>
     <div class="card" style="margin-bottom:24px;">
-      <h3 style="font-size:16px; margin-bottom:14px;">إضافة مواعيد</h3>
-      <div class="row" style="margin-bottom:14px;">
-        <label class="days" style="gap:8px;"><label><input type="radio" name="slotMode" value="single" checked> موعد واحد</label><label><input type="radio" name="slotMode" value="weekly"> متكرر أسبوعياً</label></label>
-      </div>
+      <h3 style="font-size:16px; margin-bottom:14px;">${t('إضافة مواعيد', 'Add slots')}</h3>
+      <div class="days" style="margin-bottom:14px;"><label><input type="radio" name="slotMode" value="single" checked> ${t('موعد واحد', 'Single slot')}</label><label><input type="radio" name="slotMode" value="weekly"> ${t('متكرر أسبوعياً', 'Repeat weekly')}</label></div>
       <div class="grid2">
-        <div class="field"><label for="slDate">التاريخ (أول يوم)</label><input type="date" id="slDate" min="${todayStr}"></div>
-        <div class="field"><label for="slTime">الوقت</label><input type="time" id="slTime" value="10:00"></div>
-        <div class="field"><label for="slDur">المدة</label><select id="slDur"><option value="30">٣٠ دقيقة</option><option value="45" selected>٤٥ دقيقة</option><option value="60">٦٠ دقيقة</option><option value="90">٩٠ دقيقة</option></select></div>
+        <div class="field"><label for="slDate">${t('التاريخ (أول يوم)', 'Date (first day)')}</label><input type="date" id="slDate" min="${todayStr}"></div>
+        <div class="field"><label for="slTime">${t('الوقت', 'Time')}</label><input type="time" id="slTime" value="10:00"></div>
+        <div class="field"><label for="slDur">${t('المدة', 'Duration')}</label><select id="slDur"><option value="30">${t('٣٠ دقيقة', '30 min')}</option><option value="45" selected>${t('٤٥ دقيقة', '45 min')}</option><option value="60">${t('٦٠ دقيقة', '60 min')}</option><option value="90">${t('٩٠ دقيقة', '90 min')}</option></select></div>
       </div>
       <div id="weeklyBox" class="hidden">
-        <div class="field"><span class="lbl">أيام الأسبوع</span><div class="days">${WEEKDAYS.map((d, i) => `<label><input type="checkbox" class="wd" value="${i}"> ${d}</label>`).join('')}</div></div>
-        <div class="field" style="max-width:240px;"><label for="slWeeks">عدد الأسابيع</label><input type="number" id="slWeeks" min="1" max="12" value="4"></div>
+        <div class="field"><span class="lbl">${t('أيام الأسبوع', 'Days of the week')}</span><div class="days">${WEEKDAYS.map((d, i) => `<label><input type="checkbox" class="wd" value="${i}"> ${d}</label>`).join('')}</div></div>
+        <div class="field" style="max-width:240px;"><label for="slWeeks">${t('عدد الأسابيع', 'Number of weeks')}</label><input type="number" id="slWeeks" min="1" max="12" value="4"></div>
       </div>
-      <button class="btn" id="slAdd" type="button">إضافة</button>
+      <button class="btn" id="slAdd" type="button">${t('إضافة', 'Add')}</button>
       <div class="msg" id="slMsg"></div>
     </div>
-    <h3 style="font-size:16px; margin-bottom:12px;">مواعيدي القادمة</h3>
+    <h3 style="font-size:16px; margin-bottom:12px;">${t('مواعيدي القادمة', 'My upcoming slots')}</h3>
     ${SLOTS.length ? Object.values(groups).map(g => `<div class="daygrp"><h4>${fmtD(g[0].starts_at)}</h4>${g.map(s => {
       const bk = s.booking_id ? byBooking[s.booking_id] : null;
       return s.booking_id
-        ? `<span class="slot booked">${fmtT(s.starts_at)} · محجوز${bk ? ' — ' + esc(bk.full_name) : ''}</span>`
-        : `<span class="slot">${fmtT(s.starts_at)} · ${s.duration_min} د <button type="button" title="حذف" data-del-slot="${esc(s.id)}">×</button></span>`;
-    }).join('')}</div>`).join('') : '<div class="empty">ما أضفت أي موعد بعد.</div>'}`;
+        ? `<span class="slot booked">${fmtT(s.starts_at)} · ${t('محجوز', 'Booked')}${bk ? ' — ' + esc(bk.full_name) : ''}</span>`
+        : `<span class="slot">${fmtT(s.starts_at)} · ${s.duration_min} ${t('د', 'min')} <button type="button" title="${t('حذف', 'Delete')}" data-del-slot="${esc(s.id)}">×</button></span>`;
+    }).join('')}</div>`).join('') : `<div class="empty">${t('ما أضفت أي موعد بعد.', 'You have not added any slots yet.')}</div>`}`;
   document.querySelectorAll('input[name=slotMode]').forEach(r => r.addEventListener('change', () => $('weeklyBox').classList.toggle('hidden', document.querySelector('input[name=slotMode]:checked').value !== 'weekly')));
   $('slAdd').addEventListener('click', addSlots);
 }
 async function addSlots(){
   const msg = $('slMsg'); msg.className = 'msg'; msg.textContent = '';
   const date = $('slDate').value, time = $('slTime').value, dur = parseInt($('slDur').value);
-  if (!date || !time) { msg.className = 'msg err'; msg.textContent = 'اختر التاريخ والوقت.'; return; }
+  if (!date || !time) { msg.className = 'msg err'; msg.textContent = t('اختر التاريخ والوقت.', 'Pick a date and time.'); return; }
   const weekly = document.querySelector('input[name=slotMode]:checked').value === 'weekly';
   const starts = [];
   const [y, mo, d] = date.split('-').map(Number), [h, mi] = time.split(':').map(Number);
@@ -306,36 +311,36 @@ async function addSlots(){
   else {
     const days = [...document.querySelectorAll('.wd:checked')].map(i => +i.value);
     const weeks = Math.min(12, Math.max(1, parseInt($('slWeeks').value) || 1));
-    if (!days.length) { msg.className = 'msg err'; msg.textContent = 'اختر يوماً واحداً على الأقل.'; return; }
+    if (!days.length) { msg.className = 'msg err'; msg.textContent = t('اختر يوماً واحداً على الأقل.', 'Pick at least one day.'); return; }
     for (let i = 0; i < weeks * 7; i++) { const dt = new Date(y, mo - 1, d + i, h, mi); if (days.includes(dt.getDay())) starts.push(dt); }
   }
   const existing = new Set(SLOTS.map(s => new Date(s.starts_at).getTime()));
   const rows = starts.filter(dt => dt > now() && !existing.has(dt.getTime())).slice(0, 60)
     .map(dt => ({ specialist_id: ME.id, starts_at: dt.toISOString(), duration_min: dur }));
-  if (!rows.length) { msg.className = 'msg err'; msg.textContent = 'لا مواعيد جديدة لإضافتها (إما في الماضي أو مضافة مسبقاً).'; return; }
+  if (!rows.length) { msg.className = 'msg err'; msg.textContent = t('لا مواعيد جديدة لإضافتها (إما في الماضي أو مضافة مسبقاً).', 'No new slots to add (they are in the past or already added).'); return; }
   $('slAdd').disabled = true;
   const { error } = await sb.from('availability_slots').insert(rows);
   $('slAdd').disabled = false;
-  if (error) { console.error(error); msg.className = 'msg err'; msg.textContent = 'تعذّرت الإضافة. ربما أحد المواعيد مضاف مسبقاً.'; return; }
+  if (error) { console.error(error); msg.className = 'msg err'; msg.textContent = t('تعذّرت الإضافة. ربما أحد المواعيد مضاف مسبقاً.', 'Could not add. One of the slots may already exist.'); return; }
   await loadAll(); renderSchedule();
-  $('slMsg').className = 'msg ok'; $('slMsg').textContent = 'تمت إضافة ' + rows.length + ' موعد.';
+  $('slMsg').className = 'msg ok'; $('slMsg').textContent = t('تمت إضافة ' + rows.length + ' موعد.', rows.length + ' slot(s) added.');
 }
 
 /* ---------- past sessions ---------- */
-const OUTCOME = { completed: 'جلسة تمت', client_no_show: 'لم يحضر المراجع' };
+const OUTCOME = { completed: t('جلسة تمت', 'Session held'), client_no_show: t('لم يحضر المراجع', 'Client no-show') };
 function renderPast(){
   const list = past();
-  $('tab-past').innerHTML = `<h2 class="title">الجلسات السابقة</h2><p class="sub">سجّل نتيجة كل جلسة بعد انتهائها. غياب المراجع يُحسب في الأتعاب حسب العقد.</p>` +
-    (list.length ? table(['الموعد', 'المراجع', 'الباقة', 'النتيجة', ''], list.map(b => `<tr><td><b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fmtT(b.preferred_datetime)}</div></td><td>${clientCell(b)}</td><td>${esc(b.package_name)}</td>
-      <td><select class="inp" data-outcome="${esc(b.id)}" style="padding:7px 10px; font-size:13px;"><option value="">لم تُسجَّل</option><option value="completed"${b.outcome === 'completed' ? ' selected' : ''}>جلسة تمت</option><option value="client_no_show"${b.outcome === 'client_no_show' ? ' selected' : ''}>لم يحضر المراجع</option></select></td>
-      <td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">ملف المراجع</button></td></tr>`)) : '<div class="empty">لا توجد جلسات سابقة بعد.</div>');
+  $('tab-past').innerHTML = `<h2 class="title">${t('الجلسات السابقة', 'Past sessions')}</h2><p class="sub">${t('سجّل نتيجة كل جلسة بعد انتهائها. غياب المراجع يُحسب في الأتعاب حسب العقد.', 'Record the outcome of each session once it has ended. A client no-show counts towards your fees, as per your agreement.')}</p>` +
+    (list.length ? table([t('الموعد', 'Time'), t('المراجع', 'Client'), t('الباقة', 'Package'), t('النتيجة', 'Outcome'), ''], list.map(b => `<tr><td>${when(b)}</td><td>${clientCell(b)}</td><td>${esc(pkg(b.package_name))}</td>
+      <td><select class="inp" data-outcome="${esc(b.id)}" style="padding:7px 10px; font-size:13px;"><option value="">${t('لم تُسجَّل', 'Not recorded')}</option><option value="completed"${b.outcome === 'completed' ? ' selected' : ''}>${OUTCOME.completed}</option><option value="client_no_show"${b.outcome === 'client_no_show' ? ' selected' : ''}>${OUTCOME.client_no_show}</option></select></td>
+      <td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">${t('ملف المراجع', 'Client file')}</button></td></tr>`)) : `<div class="empty">${t('لا توجد جلسات سابقة بعد.', 'No past sessions yet.')}</div>`);
 }
 
 /* ---------- cancelled ---------- */
 function renderCancelled(){
   const list = cancelled();
-  $('tab-cancelled').innerHTML = `<h2 class="title">المواعيد الملغاة</h2><p class="sub">حجوزات أُلغيت بعد الدفع، أو لم تُدفع وانتهت مهلتها تلقائياً.</p>` +
-    (list.length ? table(['الموعد', 'المراجع', 'الباقة', 'السبب'], list.map(b => `<tr><td><b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fmtT(b.preferred_datetime)}</div></td><td>${clientCell(b)}</td><td>${esc(b.package_name)}</td><td>${b.paid ? '<span class="badge bad">أُلغي بعد الدفع</span>' : '<span class="badge grey">لم يُدفع وانتهت المهلة</span>'}</td></tr>`)) : '<div class="empty">لا توجد مواعيد ملغاة.</div>');
+  $('tab-cancelled').innerHTML = `<h2 class="title">${t('المواعيد الملغاة', 'Cancelled appointments')}</h2><p class="sub">${t('حجوزات أُلغيت بعد الدفع، أو لم تُدفع وانتهت مهلتها تلقائياً.', 'Bookings cancelled after payment, or never paid and expired automatically.')}</p>` +
+    (list.length ? table([t('الموعد', 'Time'), t('المراجع', 'Client'), t('الباقة', 'Package'), t('السبب', 'Reason')], list.map(b => `<tr><td>${when(b)}</td><td>${clientCell(b)}</td><td>${esc(pkg(b.package_name))}</td><td>${b.paid ? `<span class="badge bad">${t('أُلغي بعد الدفع', 'Cancelled after payment')}</span>` : `<span class="badge grey">${t('لم يُدفع وانتهت المهلة', 'Unpaid, expired')}</span>`}</td></tr>`)) : `<div class="empty">${t('لا توجد مواعيد ملغاة.', 'No cancelled appointments.')}</div>`);
 }
 
 /* ---------- client files ---------- */
@@ -352,22 +357,22 @@ function buildClients(){
 }
 function renderClients(){
   const list = buildClients();
-  $('tab-clients').innerHTML = `<h2 class="title">ملفات المراجعين</h2><p class="sub">كل مراجع دفع حجزاً معك. افتح ملفه لتكتب ملاحظاتك وتراجع جلساته.</p>
-    <div class="privacy">ملاحظاتك في ملفات المراجعين خاصة بك فقط، ولا تظهر لأحد غيرك داخل المنصة. لا تكتب فيها رقم بطاقة أو كلمة سر.</div>
-    <div class="field"><input class="inp" id="clientSearch" placeholder="ابحث بالاسم أو البريد أو الهاتف"></div>
+  $('tab-clients').innerHTML = `<h2 class="title">${t('ملفات المراجعين', 'Client files')}</h2><p class="sub">${t('كل مراجع دفع حجزاً معك. افتح ملفه لتكتب ملاحظاتك وتراجع جلساته.', 'Every client who paid for a booking with you. Open a file to write your notes and review their sessions.')}</p>
+    <div class="privacy">${t('ملاحظاتك في ملفات المراجعين خاصة بك فقط، ولا تظهر لأحد غيرك داخل المنصة. لا تكتب فيها رقم بطاقة أو كلمة سر.', 'Your notes in client files are private to you and are not shown to anyone else on the platform. Do not write card numbers or passwords in them.')}</div>
+    <div class="field"><input class="inp" id="clientSearch" placeholder="${t('ابحث بالاسم أو البريد أو الهاتف', 'Search by name, email or phone')}"></div>
     <div id="clientList"></div>`;
   const draw = (q) => {
     const f = list.filter(c => !q || (c.name + c.email + c.phone).toLowerCase().includes(q));
-    $('clientList').innerHTML = f.length ? table(['المراجع', 'الجلسات المنتهية', 'القادمة', 'آخر جلسة', ''], f.map(c => `<tr><td>${clientCell({ full_name: c.name, phone: c.phone, email: c.email })}</td><td>${c.done}</td><td>${c.next ? fmtDT(c.next.preferred_datetime) : '—'}</td><td>${c.last ? fmtDT(c.last.preferred_datetime) : '—'}</td><td><button class="btn2" data-file="${esc(c.email)}">فتح الملف</button></td></tr>`)) : '<div class="empty">لا يوجد مراجعون بعد.</div>';
+    $('clientList').innerHTML = f.length ? table([t('المراجع', 'Client'), t('الجلسات المنتهية', 'Completed sessions'), t('القادمة', 'Next'), t('آخر جلسة', 'Last session'), ''], f.map(c => `<tr><td>${clientCell({ full_name: c.name, phone: c.phone, email: c.email })}</td><td>${c.done}</td><td>${c.next ? fmtDT(c.next.preferred_datetime) : '—'}</td><td>${c.last ? fmtDT(c.last.preferred_datetime) : '—'}</td><td><button class="btn2" data-file="${esc(c.email)}">${t('فتح الملف', 'Open file')}</button></td></tr>`)) : `<div class="empty">${t('لا يوجد مراجعون بعد.', 'No clients yet.')}</div>`;
   };
   draw('');
   $('clientSearch').addEventListener('input', (e) => draw(e.target.value.trim().toLowerCase()));
 }
 async function openClient(email){
   if (!document.querySelector('.tab[data-tab=clients]').classList.contains('active')) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'clients'));
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'clients'));
     Object.keys(RENDER).forEach(k => $('tab-' + k).classList.toggle('hidden', k !== 'clients'));
-    history.replaceState(null, '', '#clients');
+    history.replaceState(null, '', '#clients'); setLangLink();
   }
   const c = buildClients().find(x => x.email === email);
   if (!c) return;
@@ -377,31 +382,31 @@ async function openClient(email){
   const sessOpts = c.sessions.filter(b => !isCancelled(b)).map(b => `<option value="${esc(b.id)}">${fmtDT(b.preferred_datetime)}</option>`).join('');
   const sessLabel = Object.fromEntries(c.sessions.map(b => [b.id, fmtDT(b.preferred_datetime)]));
   $('tab-clients').innerHTML = `
-    <button class="btn2" id="backClients" type="button" style="margin-bottom:16px;">← كل المراجعين</button>
+    <button class="btn2" id="backClients" type="button" style="margin-bottom:16px;">${t('← كل المراجعين', '← All clients')}</button>
     <div class="card" style="margin-bottom:20px;"><h2 class="title">${esc(c.name)}</h2>
       <div class="muted"><a href="tel:${esc(c.phone)}" dir="ltr">${esc(c.phone)}</a> · <a href="mailto:${esc(c.email)}" dir="ltr">${esc(c.email)}</a></div>
-      <div style="margin-top:12px;">${c.sessions.map(b => `<span class="slot ${isCancelled(b) ? '' : 'booked'}">${fmtDT(b.preferred_datetime)} · ${isCancelled(b) ? 'ملغاة' : (new Date(b.preferred_datetime) > now() ? 'قادمة' : (OUTCOME[b.outcome] || 'لم تُسجَّل'))}</span>`).join('')}</div>
+      <div style="margin-top:12px;">${c.sessions.map(b => `<span class="slot ${isCancelled(b) ? '' : 'booked'}">${fmtDT(b.preferred_datetime)} · ${isCancelled(b) ? t('ملغاة', 'Cancelled') : (new Date(b.preferred_datetime) > now() ? t('قادمة', 'Upcoming') : (OUTCOME[b.outcome] || t('لم تُسجَّل', 'Not recorded')))}</span>`).join('')}</div>
     </div>
-    <div class="privacy">هذه الملاحظات خاصة بك فقط. اكتب ما يلزمك مهنياً.</div>
+    <div class="privacy">${t('هذه الملاحظات خاصة بك فقط. اكتب ما يلزمك مهنياً.', 'These notes are private to you. Write only what you need professionally.')}</div>
     <div class="card" style="margin-bottom:20px;">
-      <div class="field"><label for="noteBody">ملاحظة جديدة</label><textarea id="noteBody" maxlength="10000"></textarea></div>
-      <div class="row"><select class="inp" id="noteSession" style="max-width:260px;"><option value="">ملاحظة عامة على الملف</option>${sessOpts}</select><button class="btn" id="noteSave" type="button">حفظ الملاحظة</button></div>
+      <div class="field"><label for="noteBody">${t('ملاحظة جديدة', 'New note')}</label><textarea id="noteBody" maxlength="10000"></textarea></div>
+      <div class="row"><select class="inp" id="noteSession" style="max-width:260px;"><option value="">${t('ملاحظة عامة على الملف', 'General note on the file')}</option>${sessOpts}</select><button class="btn" id="noteSave" type="button">${t('حفظ الملاحظة', 'Save note')}</button></div>
       <div class="msg" id="noteMsg"></div>
     </div>
-    <div id="notesList">${(notes || []).map(n => `<div class="note" data-note="${esc(n.id)}"><div class="meta"><span>${fmtDT(n.created_at)}${n.booking_id && sessLabel[n.booking_id] ? ' · جلسة ' + esc(sessLabel[n.booking_id]) : ''}${n.updated_at !== n.created_at ? ' · عُدّلت' : ''}</span><span><button class="btn2" data-edit-note="${esc(n.id)}" style="padding:3px 12px;">تعديل</button> <button class="btn2 danger" data-del-note="${esc(n.id)}" style="padding:3px 12px;">حذف</button></span></div><div class="nbody">${esc(n.body)}</div></div>`).join('') || '<div class="empty">لا توجد ملاحظات بعد.</div>'}</div>`;
+    <div id="notesList">${(notes || []).map(n => `<div class="note" data-note="${esc(n.id)}"><div class="meta"><span>${fmtDT(n.created_at)}${n.booking_id && sessLabel[n.booking_id] ? ' · ' + t('جلسة ', 'Session ') + esc(sessLabel[n.booking_id]) : ''}${n.updated_at !== n.created_at ? ' · ' + t('عُدّلت', 'edited') : ''}</span><span><button class="btn2" data-edit-note="${esc(n.id)}" style="padding:3px 12px;">${t('تعديل', 'Edit')}</button> <button class="btn2 danger" data-del-note="${esc(n.id)}" style="padding:3px 12px;">${t('حذف', 'Delete')}</button></span></div><div class="nbody">${esc(n.body)}</div></div>`).join('') || `<div class="empty">${t('لا توجد ملاحظات بعد.', 'No notes yet.')}</div>`}</div>`;
   $('backClients').addEventListener('click', () => { currentClient = null; renderClients(); });
   $('noteSave').addEventListener('click', async () => {
     const body = $('noteBody').value.trim(), msg = $('noteMsg');
-    if (!body) { msg.className = 'msg err'; msg.textContent = 'اكتب الملاحظة أولاً.'; return; }
+    if (!body) { msg.className = 'msg err'; msg.textContent = t('اكتب الملاحظة أولاً.', 'Write the note first.'); return; }
     $('noteSave').disabled = true;
     const { error: e } = await sb.from('client_notes').insert({ specialist_id: ME.id, client_email: email, booking_id: $('noteSession').value || null, body });
     $('noteSave').disabled = false;
-    if (e) { console.error(e); msg.className = 'msg err'; msg.textContent = 'تعذّر الحفظ.'; return; }
+    if (e) { console.error(e); msg.className = 'msg err'; msg.textContent = t('تعذّر الحفظ.', 'Could not save.'); return; }
     openClient(email);
   });
 }
 
-/* ---------- profile ---------- */
+/* ---------- profile & my details ---------- */
 let pfPhoto = '', pfOriginal = '', pfUploaded = [];
 const PH_SELF = 'self/';
 const photoPath = (url) => { const m = '/storage/v1/object/public/specialist-photos/'; const i = (url || '').indexOf(m); return i === -1 ? null : decodeURIComponent(url.slice(i + m.length).split('?')[0]); };
@@ -409,24 +414,37 @@ const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/
 function renderProfile(){
   const p = PROFILE || {};
   pfPhoto = p.photo_url || ''; pfOriginal = pfPhoto; pfUploaded = [];
-  $('tab-profile').innerHTML = `<h2 class="title">ملفي الشخصي</h2>
-    <p class="sub">ما تكتبه هنا يظهر مباشرة في صفحة فريق بوضوح. الاسم وسنوات الخبرة والنشر تديرها الإدارة. ${p.is_published ? `<a class="lnk" target="_blank" rel="noopener" href="/specialist/?slug=${encodeURIComponent(p.slug)}">شاهد صفحتك</a>` : '<span class="badge grey">ملفك مخفي حالياً</span>'}</p>
+  $('tab-profile').innerHTML = `<h2 class="title">${t('ملفي وبياناتي', 'My profile & details')}</h2>
+    <p class="sub">${t('ما تكتبه هنا يظهر مباشرة في صفحة فريق بوضوح (باللغة التي تكتب بها). النشر والترتيب والتوثيق تديرها الإدارة.', 'What you write here appears immediately on your public Bewoduh team page (in the language you write it). Publishing, ordering and verification are managed by the team.')} ${p.is_published ? `<a class="lnk" target="_blank" rel="noopener" href="${EN ? '/en/specialist/' : '/specialist/'}?slug=${encodeURIComponent(p.slug)}">${t('شاهد صفحتك', 'View your page')}</a>` : `<span class="badge grey">${t('ملفك مخفي حالياً', 'Your profile is currently hidden')}</span>`}</p>
     <form class="card" id="pfForm">
       <div class="row" style="margin-bottom:18px; gap:18px;">
         <img class="avatar" id="pfImg" alt="" src="${esc(pfPhoto || PLACEHOLDER)}">
-        <div class="row"><label class="btn2" for="pfFile" style="cursor:pointer;">رفع / تغيير الصورة</label><input type="file" id="pfFile" accept="image/jpeg,image/png,image/webp" class="hidden"><button class="btn2 danger" type="button" id="pfRemove">حذف الصورة</button></div>
+        <div class="row"><label class="btn2" for="pfFile" style="cursor:pointer;">${t('رفع / تغيير الصورة', 'Upload / change photo')}</label><input type="file" id="pfFile" accept="image/jpeg,image/png,image/webp" class="hidden"><button class="btn2 danger" type="button" id="pfRemove">${t('حذف الصورة', 'Remove photo')}</button></div>
       </div>
-      <div class="field"><label>الاسم (تغيّره الإدارة)</label><input class="inp" value="${esc(p.full_name || '')}" disabled></div>
-      <div class="field"><label for="pfSpecialty">التخصص</label><input id="pfSpecialty" required maxlength="200" value="${esc(p.specialty || '')}"></div>
-      <div class="field"><label for="pfShort">جملة قصيرة تظهر بالبطاقة (اختياري)</label><input id="pfShort" maxlength="200" value="${esc(p.short_bio || '')}"></div>
-      <div class="field"><label for="pfBio">النبذة التعريفية</label><textarea id="pfBio" required minlength="30" maxlength="2000" style="min-height:180px;">${esc(p.bio || '')}</textarea></div>
-      <button class="btn" type="submit">حفظ التغييرات</button><div class="msg" id="pfMsg"></div>
+      <div class="grid2">
+        <div class="field"><label for="pfName">${t('الاسم كما يظهر للمراجعين', 'Name as shown to clients')}</label><input id="pfName" required minlength="2" maxlength="120" value="${esc(p.full_name || '')}"></div>
+        <div class="field"><label for="pfYears">${t('سنوات الخبرة', 'Years of experience')}</label><input type="number" id="pfYears" min="0" max="60" value="${p.years_experience ?? ''}"></div>
+      </div>
+      <div class="field"><label for="pfSpecialty">${t('التخصص', 'Specialty')}</label><input id="pfSpecialty" required maxlength="200" value="${esc(p.specialty || '')}"></div>
+      <div class="field"><label for="pfShort">${t('جملة قصيرة تظهر بالبطاقة (اختياري)', 'Short line shown on your card (optional)')}</label><input id="pfShort" maxlength="200" value="${esc(p.short_bio || '')}"></div>
+      <div class="field"><label for="pfBio">${t('النبذة التعريفية', 'About you')}</label><textarea id="pfBio" required minlength="30" maxlength="2000" style="min-height:180px;">${esc(p.bio || '')}</textarea></div>
+      <button class="btn" type="submit">${t('حفظ التغييرات', 'Save changes')}</button><div class="msg" id="pfMsg"></div>
+    </form>
+    <form class="card section-gap" id="pwForm">
+      <h3 style="font-size:16px; margin-bottom:6px;">${t('حسابي', 'My account')}</h3>
+      <p class="muted" style="margin-bottom:14px;">${t('بريد الدخول (لا يتغيّر من هنا):', 'Sign-in email (cannot be changed here):')} <b dir="ltr">${esc(AUTH_EMAIL)}</b></p>
+      <div class="grid2">
+        <div class="field"><label for="pwNew">${t('كلمة سر جديدة', 'New password')}</label><input type="password" id="pwNew" minlength="8" autocomplete="new-password" class="ltr"></div>
+        <div class="field"><label for="pwNew2">${t('تأكيد كلمة السر', 'Confirm password')}</label><input type="password" id="pwNew2" minlength="8" autocomplete="new-password" class="ltr"></div>
+      </div>
+      <p class="muted" style="margin-bottom:12px;">${t('٨ أحرف على الأقل، وتضم حرفاً ورقماً.', 'At least 8 characters, with a letter and a number.')}</p>
+      <button class="btn2" type="submit">${t('تغيير كلمة السر', 'Change password')}</button><div class="msg" id="pwMsg"></div>
     </form>`;
   const setPhoto = (u) => { pfPhoto = u || ''; $('pfImg').src = pfPhoto || PLACEHOLDER; };
-  $('pfRemove').addEventListener('click', () => { setPhoto(''); $('pfMsg').className = 'msg'; $('pfMsg').textContent = 'ستُحذف الصورة عند الحفظ.'; });
+  $('pfRemove').addEventListener('click', () => { setPhoto(''); $('pfMsg').className = 'msg'; $('pfMsg').textContent = t('ستُحذف الصورة عند الحفظ.', 'The photo will be removed when you save.'); });
   $('pfFile').addEventListener('change', async () => {
     const file = $('pfFile').files[0]; if (!file) return;
-    $('pfMsg').className = 'msg'; $('pfMsg').textContent = 'جارٍ رفع الصورة...';
+    $('pfMsg').className = 'msg'; $('pfMsg').textContent = t('جارٍ رفع الصورة...', 'Uploading photo...');
     try {
       const blob = await resizeJpeg(file);
       const path = PH_SELF + ME.id + '/' + Date.now() + '.jpg';
@@ -434,21 +452,32 @@ function renderProfile(){
       if (error) throw error;
       const { data: pub } = sb.storage.from('specialist-photos').getPublicUrl(path);
       pfUploaded.push(pub.publicUrl); setPhoto(pub.publicUrl);
-      $('pfMsg').textContent = 'تم رفع الصورة. اضغط «حفظ التغييرات» لتثبيتها.';
-    } catch (err) { console.error(err); $('pfMsg').className = 'msg err'; $('pfMsg').textContent = 'تعذّر رفع الصورة.'; }
+      $('pfMsg').textContent = t('تم رفع الصورة. اضغط «حفظ التغييرات» لتثبيتها.', 'Photo uploaded. Press “Save changes” to apply it.');
+    } catch (err) { console.error(err); $('pfMsg').className = 'msg err'; $('pfMsg').textContent = t('تعذّر رفع الصورة.', 'Could not upload the photo.'); }
     finally { $('pfFile').value = ''; }
   });
   $('pfForm').addEventListener('submit', async (e) => {
     e.preventDefault(); const msg = $('pfMsg'); msg.className = 'msg'; msg.textContent = '';
-    const payload = { specialty: $('pfSpecialty').value.trim(), short_bio: $('pfShort').value.trim() || null, bio: $('pfBio').value.trim(), photo_url: pfPhoto };
+    const yrs = $('pfYears').value === '' ? null : Math.min(60, Math.max(0, parseInt($('pfYears').value) || 0));
+    const payload = { full_name: $('pfName').value.trim(), years_experience: yrs, specialty: $('pfSpecialty').value.trim(), short_bio: $('pfShort').value.trim() || null, bio: $('pfBio').value.trim(), photo_url: pfPhoto };
     const { error } = await sb.from('specialists').update(payload).eq('id', ME.id);
-    if (error) { console.error(error); msg.className = 'msg err'; msg.textContent = 'تعذّر الحفظ.'; return; }
+    if (error) { console.error(error); msg.className = 'msg err'; msg.textContent = t('تعذّر الحفظ.', 'Could not save.'); return; }
     // نحذف من التخزين صورنا القديمة فقط (المسار self/<id>/...)، وأي صورة رُفعت ولم تُستخدم
-    const stale = [pfOriginal, ...pfUploaded].filter(u => u && u !== pfPhoto).map(photoPath).filter(p => p && p.startsWith(PH_SELF + ME.id + '/'));
+    const stale = [pfOriginal, ...pfUploaded].filter(u => u && u !== pfPhoto).map(photoPath).filter(x => x && x.startsWith(PH_SELF + ME.id + '/'));
     if (stale.length) await sb.storage.from('specialist-photos').remove(stale);
     pfOriginal = pfPhoto; pfUploaded = [];
-    PROFILE = { ...PROFILE, ...payload };
-    msg.className = 'msg ok'; msg.textContent = 'تم الحفظ. التغييرات ظاهرة الآن في صفحتك.';
+    PROFILE = { ...PROFILE, ...payload }; ME.full_name = payload.full_name; setHello();
+    msg.className = 'msg ok'; msg.textContent = t('تم الحفظ. التغييرات ظاهرة الآن في صفحتك.', 'Saved. Your changes are now live on your page.');
+  });
+  $('pwForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); const msg = $('pwMsg'); msg.className = 'msg'; msg.textContent = '';
+    const a = $('pwNew').value, b = $('pwNew2').value;
+    if (a.length < 8 || !/[A-Za-z؀-ۿ]/.test(a) || !/\d/.test(a)) { msg.className = 'msg err'; msg.textContent = t('كلمة السر لازم تكون ٨ أحرف على الأقل وتضم حرفاً ورقماً.', 'The password must be at least 8 characters with a letter and a number.'); return; }
+    if (a !== b) { msg.className = 'msg err'; msg.textContent = t('كلمتا السر غير متطابقتين.', 'The two passwords do not match.'); return; }
+    const { error } = await sb.auth.updateUser({ password: a });
+    if (error) { console.error(error); msg.className = 'msg err'; msg.textContent = t('تعذّر تغيير كلمة السر.', 'Could not change the password.'); return; }
+    $('pwNew').value = ''; $('pwNew2').value = '';
+    msg.className = 'msg ok'; msg.textContent = t('تم تغيير كلمة السر.', 'Password changed.');
   });
 }
 function resizeJpeg(file, maxDim = 900, q = 0.86){
@@ -469,27 +498,27 @@ document.addEventListener('click', async (e) => {
   const f = e.target.closest('[data-file]'); if (f) { openClient(f.dataset.file); return; }
   const del = e.target.closest('[data-del-slot]');
   if (del) {
-    if (!confirm('حذف هذا الموعد؟')) return;
+    if (!confirm(t('حذف هذا الموعد؟', 'Delete this slot?'))) return;
     const { error } = await sb.from('availability_slots').delete().eq('id', del.dataset.delSlot);
-    if (error) { alert('تعذّر الحذف. ربما حُجز الموعد للتو.'); }
+    if (error) { alert(t('تعذّر الحذف. ربما حُجز الموعد للتو.', 'Could not delete. The slot may have just been booked.')); }
     await loadAll(); renderSchedule(); return;
   }
   const dn = e.target.closest('[data-del-note]');
-  if (dn) { if (!confirm('حذف هذه الملاحظة نهائياً؟')) return; const { error } = await sb.from('client_notes').delete().eq('id', dn.dataset.delNote); if (error) alert('تعذّر الحذف.'); openClient(currentClient); return; }
+  if (dn) { if (!confirm(t('حذف هذه الملاحظة نهائياً؟', 'Delete this note permanently?'))) return; const { error } = await sb.from('client_notes').delete().eq('id', dn.dataset.delNote); if (error) alert(t('تعذّر الحذف.', 'Could not delete.')); openClient(currentClient); return; }
   const en = e.target.closest('[data-edit-note]');
   if (en) {
     const box = document.querySelector('[data-note="' + CSS.escape(en.dataset.editNote) + '"] .nbody'), old = box.textContent;
-    box.innerHTML = `<textarea class="inp" style="min-height:90px;" maxlength="10000">${esc(old)}</textarea><div class="row" style="margin-top:8px;"><button class="btn2" data-save-note="${esc(en.dataset.editNote)}">حفظ</button><button class="btn2" data-cancel-note>إلغاء</button></div>`;
+    box.innerHTML = `<textarea class="inp" style="min-height:90px;" maxlength="10000">${esc(old)}</textarea><div class="row" style="margin-top:8px;"><button class="btn2" data-save-note="${esc(en.dataset.editNote)}">${t('حفظ', 'Save')}</button><button class="btn2" data-cancel-note>${t('إلغاء', 'Cancel')}</button></div>`;
     return;
   }
   const sn = e.target.closest('[data-save-note]');
-  if (sn) { const body = sn.closest('.nbody').querySelector('textarea').value.trim(); if (!body) return; const { error } = await sb.from('client_notes').update({ body }).eq('id', sn.dataset.saveNote); if (error) alert('تعذّر الحفظ.'); openClient(currentClient); return; }
+  if (sn) { const body = sn.closest('.nbody').querySelector('textarea').value.trim(); if (!body) return; const { error } = await sb.from('client_notes').update({ body }).eq('id', sn.dataset.saveNote); if (error) alert(t('تعذّر الحفظ.', 'Could not save.')); openClient(currentClient); return; }
   if (e.target.closest('[data-cancel-note]')) openClient(currentClient);
 });
 document.addEventListener('change', async (e) => {
   const o = e.target.closest('[data-outcome]'); if (!o) return;
   const { error } = await sb.rpc('set_session_outcome', { p_booking: o.dataset.outcome, p_outcome: o.value || null });
-  if (error) { console.error(error); alert('تعذّر حفظ النتيجة.'); return; }
+  if (error) { console.error(error); alert(t('تعذّر حفظ النتيجة.', 'Could not save the outcome.')); return; }
   const b = BOOKINGS.find(x => x.id === o.dataset.outcome); if (b) b.outcome = o.value || null;
 });
 

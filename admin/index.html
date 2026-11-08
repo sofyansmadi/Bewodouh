@@ -349,6 +349,7 @@
       <h2 class="section-title">إدارة فريق الأخصائيين</h2>
       <p class="section-sub">أي تعديل هنا يظهر مباشرة بصفحة "فريق بوضوح" وصفحة كل أخصائي.</p>
 
+      <div id="teamBulkBox" style="margin-bottom:14px;"></div>
       <table>
         <thead>
           <tr>
@@ -356,6 +357,7 @@
             <th>الاسم</th>
             <th>التخصص</th>
             <th>منشور؟</th>
+            <th>بوابة الأخصائيين</th>
             <th></th>
           </tr>
         </thead>
@@ -932,6 +934,30 @@ async function loadBookings(){
   });
 }
 
+
+// ---------- بوابة الأخصائيين: حالة الربط والدعوات ----------
+async function loadPortalStatus(){
+  const { data, error } = await supabaseClient.rpc('specialist_portal_status');
+  if (error) { console.error('portal status:', error); return {}; }
+  return Object.fromEntries((data || []).map(r => [r.specialist_id, r]));
+}
+function portalBadge(st){
+  if (!st) return '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">غير مربوط بالبوابة</span>';
+  return st.registered
+    ? '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">مربوط وأنشأ حسابه ✓</span>'
+    : '<span class="badge-yes">مربوط — لم ينشئ حسابه بعد</span>';
+}
+async function inviteSpecialist(specialistId){
+  const { data, error } = await supabaseClient.functions.invoke('invite-specialist', { body: { specialist_id: specialistId } });
+  if (error || !data || !data.ok) { console.error('invite-specialist:', error, data); return false; }
+  return true;
+}
+async function linkSpecialistToPortal(specialistId, email){
+  const { error } = await supabaseClient.from('specialist_accounts').upsert({ specialist_id: specialistId, email: String(email).trim().toLowerCase() }, { onConflict: 'specialist_id' });
+  if (error) { console.error('link portal:', error); return false; }
+  return true;
+}
+
 // ---------- Specialist applications ----------
 // نصوص الطلبات يكتبها زوار مجهولون، فنهرّبها دائماً قبل عرضها داخل HTML
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -953,6 +979,7 @@ async function loadApplications(){
   // الأخصائيون المنشورون من هذه الطلبات (لمعرفة من تم قبوله ونشره بالفريق)
   const { data: linked } = await supabaseClient.from('specialists').select('id, application_id, is_published').in('application_id', data.map(a => a.id));
   const linkedByApp = Object.fromEntries((linked || []).map(sp => [sp.application_id, sp]));
+  const portalStatus = canAccess('team') ? await loadPortalStatus() : {};
 
   list.innerHTML = data.map(a => {
     const typeLabel = a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب حياة';
@@ -960,8 +987,14 @@ async function loadApplications(){
     const link = /^https?:\/\//i.test(a.profile_link || '') ? `<a href="${esc(a.profile_link)}" target="_blank" rel="noopener noreferrer">${esc(a.profile_link)}</a>` : '—';
     const statusOptions = Object.entries(APP_STATUS_LABELS).map(([v, l]) => `<option value="${v}"${v === a.status ? ' selected' : ''}>${l}</option>`).join('');
     const sp = linkedByApp[a.id];
+    const st = sp ? portalStatus[sp.id] : null;
+    const portalHtml = (sp && canAccess('team'))
+      ? ` ${portalBadge(st)} ` + (st
+          ? (st.registered ? '' : `<button type="button" class="btn-secondary" data-invite-sp="${esc(sp.id)}">إرسال دعوة للبوابة</button>`)
+          : `<button type="button" class="btn-secondary" data-link-portal="${esc(sp.id)}" data-link-email="${esc(a.email)}">ربط ببوابة الأخصائيين</button>`)
+      : '';
     const publishHtml = sp
-      ? `<span class="badge-yes">${sp.is_published ? 'منشور في الفريق ✓' : 'في الفريق (مخفي)'}</span>`
+      ? `<span class="badge-yes">${sp.is_published ? 'منشور في الفريق ✓' : 'في الفريق (مخفي)'}</span>${portalHtml}`
       : (canAccess('team') ? `<button type="button" class="btn-primary" style="width:auto; margin:0; padding:9px 20px;" data-approve-app="${esc(a.id)}">قبول ونشر في الفريق</button>` : '');
     return `
     <details class="app-card" data-app-id="${esc(a.id)}">
@@ -1020,6 +1053,20 @@ async function loadApplications(){
     });
   });
 
+  list.querySelectorAll('[data-invite-sp]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true; btn.textContent = 'جارٍ الإرسال...';
+      const ok = await inviteSpecialist(btn.dataset.inviteSp);
+      btn.textContent = ok ? 'تم إرسال الدعوة ✓' : 'فشل الإرسال، أعد المحاولة';
+      if (!ok) btn.disabled = false;
+    });
+  });
+  list.querySelectorAll('[data-link-portal]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      if (await linkSpecialistToPortal(btn.dataset.linkPortal, btn.dataset.linkEmail)) loadApplications(); else { btn.disabled = false; alert('تعذّر الربط. ربما البريد مرتبط بأخصائي آخر.'); }
+    });
+  });
   list.querySelectorAll('[data-approve-app]').forEach(btn => {
     btn.addEventListener('click', () => approveAndPublish(byId[btn.dataset.approveApp], btn));
   });
@@ -1397,25 +1444,27 @@ async function deleteArticle(id){
 // ---------- Team table ----------
 async function loadTeam(){
   const tbody = document.getElementById('teamTableBody');
-  tbody.innerHTML = '<tr><td colspan="5">جارٍ التحميل...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6">جارٍ التحميل...</td></tr>';
 
   const { data, error } = await supabaseClient.from('specialists').select('*').order('sort_order', { ascending: true });
   if (error) {
-    tbody.innerHTML = '<tr><td colspan="5">تعذّر تحميل البيانات.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6">تعذّر تحميل البيانات.</td></tr>';
     return;
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="5">ما في أخصائيين بعد. أضيفي أول وحد بالفورم تحت.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6">ما في أخصائيين بعد. أضيفي أول وحد بالفورم تحت.</td></tr>';
     return;
   }
 
+  const portalStatus = await loadPortalStatus();
   tbody.innerHTML = data.map(sp => `
     <tr>
       <td><img src="${esc(sp.photo_url || SP_PLACEHOLDER)}" alt="${esc(sp.full_name)}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
       <td>${esc(sp.full_name)}</td>
       <td>${esc(sp.specialty)}</td>
       <td>${sp.is_published ? '<span class="badge-yes">نعم</span>' : '—'}</td>
+      <td>${portalBadge(portalStatus[sp.id])}${portalStatus[sp.id] && !portalStatus[sp.id].registered ? `<br><button type="button" class="btn-secondary" data-invite-sp="${esc(sp.id)}" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">إرسال دعوة</button>` : ''}${!portalStatus[sp.id] ? '<div style="font-size:11.5px; color:var(--text-muted-light); margin-top:4px;">أضف بريد الدخول من التعديل</div>' : ''}</td>
       <td>
         <div class="row-actions">
           <button class="icon-btn" title="تعديل" data-edit-sp-id="${sp.id}">
@@ -1429,6 +1478,27 @@ async function loadTeam(){
     </tr>
   `).join('');
 
+  const pending = data.filter(sp => portalStatus[sp.id] && !portalStatus[sp.id].registered);
+  const bulk = document.getElementById('teamBulkBox');
+  bulk.innerHTML = pending.length ? `<button type="button" class="btn-secondary" id="bulkInviteBtn">إرسال دعوة لكل من لم ينشئ حسابه (${pending.length})</button>` : '';
+  if (pending.length) document.getElementById('bulkInviteBtn').addEventListener('click', async (ev) => {
+    if (!confirm('سيصل كل واحد من الـ ' + pending.length + ' أخصائي إيميل دعوة لتفعيل حسابه في بوابة الأخصائيين. متابعة؟')) return;
+    const b = ev.currentTarget; b.disabled = true; let okCount = 0;
+    for (let i = 0; i < pending.length; i++) {
+      b.textContent = 'جارٍ الإرسال ' + (i + 1) + ' / ' + pending.length + '...';
+      if (await inviteSpecialist(pending[i].id)) okCount++;
+      await new Promise(r => setTimeout(r, 700));
+    }
+    b.textContent = 'تم إرسال ' + okCount + ' من ' + pending.length + (okCount < pending.length ? ' — أعد المحاولة للباقي' : ' ✓');
+  });
+  tbody.querySelectorAll('[data-invite-sp]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true; btn.textContent = 'جارٍ الإرسال...';
+      const ok = await inviteSpecialist(btn.dataset.inviteSp);
+      btn.textContent = ok ? 'تم الإرسال ✓' : 'فشل، أعد المحاولة';
+      if (!ok) btn.disabled = false;
+    });
+  });
   tbody.querySelectorAll('[data-edit-sp-id]').forEach(btn => {
     btn.addEventListener('click', () => startEditSpecialist(data.find(s => s.id === btn.dataset.editSpId)));
   });

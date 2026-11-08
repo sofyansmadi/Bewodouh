@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /specialist-portal/
+Disallow: /en/specialist-portal/
 Disallow: /account/
 Disallow: /signup/
 Disallow: /en/account/
