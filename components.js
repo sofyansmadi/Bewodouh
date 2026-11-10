@@ -64,7 +64,7 @@ const STYLE_FIX = `
   :focus-visible{ outline-color:#C9A15F; }
   site-nav .brand{ font-family:'Noto Kufi Arabic','IBM Plex Sans',sans-serif; font-weight:900; font-size:22px; color:#F3EEEA; text-decoration:none; }
   site-nav .brand span{ color:#C9A15F; }
-  site-nav .nav-links{ display:flex; align-items:center; gap:28px; }
+  site-nav .nav-links{ display:flex; align-items:center; gap:22px; }
   site-nav .nav-links a{ color:#B7ACC4; font-size:14px; font-weight:500; text-decoration:none; transition:color .2s; }
   site-nav .nav-links a:hover, site-nav .nav-links a.active{ color:#F3EEEA; }
   site-nav .nav-links a.nav-cta{ background:#C9A15F; color:#241D2E; font-weight:700; padding:9px 20px; border-radius:100px; transition:.2s; }
@@ -99,6 +99,7 @@ class SiteNav extends HTMLElement {
       { href: '/#pillars', label: t('المواضيع', 'Topics'), key: '' },
       { href: '/blog/', label: t('المدونة', 'Blog'), key: 'blog' },
       { href: '/quizzes/', label: t('الاختبارات', 'Quizzes'), key: 'quizzes' },
+      { href: '/team/', label: t('فريق بوضوح', 'Our Team'), key: 'team' },
       { href: '/about/', label: t('من نحن', 'About'), key: 'about' },
     ];
     if (!IS_EN) links.push({ href: '/join/', label: 'انضم إلينا', key: 'join' });
