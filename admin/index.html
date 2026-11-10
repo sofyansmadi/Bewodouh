@@ -77,6 +77,14 @@
   .icon-btn.danger:hover{ border-color:var(--alert); background:rgba(181,85,91,.08); }
   .icon-btn svg{ width:14px; height:14px; }
 
+  .sp-modal{ position:fixed; inset:0; background:rgba(36,29,46,.6); z-index:1000; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto; }
+  .sp-modal-box{ background:#fff; border-radius:18px; width:100%; max-width:780px; margin:auto; padding:22px 26px 0; box-shadow:0 30px 80px -30px rgba(0,0,0,.5); }
+  .sp-modal-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .sp-modal-head h3{ font-size:17px; margin:0; }
+  .sp-modal-x{ background:var(--fog); border:1px solid var(--fog-dim); border-radius:50%; width:36px; height:36px; font-size:22px; line-height:1; cursor:pointer; color:var(--ink); flex:none; }
+  .sp-modal-box .form-actions{ position:sticky; bottom:0; background:#fff; padding:14px 0 18px; margin-top:8px; border-top:1px solid var(--fog-dim); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .sp-modal-box .form-actions .btn-primary{ margin-top:0; }
+  @media (max-width:600px){ .sp-modal{ padding:0; } .sp-modal-box{ border-radius:0; min-height:100%; padding:18px 16px 0; } }
   .form-card{ background:#fff; border:1px solid var(--fog-dim); border-radius:16px; padding:28px 26px; }
   .form-card h3{ font-size:16px; margin-bottom:18px; }
   .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -349,6 +357,10 @@
       <h2 class="section-title">إدارة فريق الأخصائيين</h2>
       <p class="section-sub">أي تعديل هنا يظهر مباشرة بصفحة "فريق بوضوح" وصفحة كل أخصائي.</p>
 
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+        <button type="button" class="btn-primary" id="addSpecialistBtn" style="width:auto; margin-top:0;">+ إضافة أخصائي جديد</button>
+        <span class="status-msg" id="teamFlash" style="margin-top:0;"></span>
+      </div>
       <div id="teamBulkBox" style="margin-bottom:14px;"></div>
       <table>
         <thead>
@@ -366,8 +378,12 @@
         </tbody>
       </table>
 
-      <div class="form-card">
-        <h3 id="specialistFormTitle">إضافة أخصائي جديد</h3>
+      <div class="sp-modal" id="spModal" role="dialog" aria-modal="true" aria-labelledby="specialistFormTitle" style="display:none;">
+       <div class="sp-modal-box">
+        <div class="sp-modal-head">
+          <h3 id="specialistFormTitle">إضافة أخصائي جديد</h3>
+          <button type="button" class="sp-modal-x" id="spModalClose" aria-label="إغلاق">&times;</button>
+        </div>
         <form id="specialistForm">
           <input type="hidden" id="spId">
           <div class="form-grid">
@@ -439,11 +455,12 @@
             </div>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn-primary" style="width:auto;">حفظ الأخصائي</button>
-            <button type="button" class="btn-secondary" id="cancelSpecialistEditBtn" style="display:none;">إلغاء التعديل</button>
+            <button type="submit" class="btn-primary" style="width:auto;">حفظ وإغلاق</button>
+            <button type="button" class="btn-secondary" id="cancelSpecialistEditBtn">إلغاء</button>
+            <span class="status-msg" id="specialistFormStatus" style="margin-top:0;"></span>
           </div>
-          <div class="status-msg" id="specialistFormStatus"></div>
         </form>
+       </div>
       </div>
       </div>
 
@@ -1635,8 +1652,7 @@ function startEditSpecialist(sp){
   document.getElementById('spBioEn').value = sp.bio_en || '';
   document.getElementById('spPublished').checked = sp.is_published;
   specialistFormTitle.textContent = 'تعديل: ' + sp.full_name;
-  cancelSpecialistEditBtn.style.display = 'inline-block';
-  window.scrollTo({ top: document.querySelectorAll('.form-card')[2].offsetTop - 20, behavior: 'smooth' });
+  openSpModal();
 }
 
 function resetSpecialistForm(){
@@ -1647,9 +1663,37 @@ function resetSpecialistForm(){
   document.getElementById('spId').value = '';
   document.getElementById('spPublished').checked = true;
   specialistFormTitle.textContent = 'إضافة أخصائي جديد';
-  cancelSpecialistEditBtn.style.display = 'none';
 }
-cancelSpecialistEditBtn.addEventListener('click', resetSpecialistForm);
+
+// ---- نافذة منبثقة للتعديل/الإضافة ----
+const spModal = document.getElementById('spModal');
+let spDirty = false;
+function openSpModal(){
+  specialistFormStatus.classList.remove('active', 'success', 'error');
+  spDirty = false;
+  spModal.style.display = 'flex';
+  spModal.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+function closeSpModal(askIfDirty){
+  if (askIfDirty && spDirty && !confirm('في تعديلات ما انحفظت. تسكّر بدون حفظ؟')) return;
+  resetSpecialistForm();
+  spModal.style.display = 'none';
+  document.body.style.overflow = '';
+  spDirty = false;
+}
+function flashTeam(msg){
+  const f = document.getElementById('teamFlash');
+  f.textContent = msg; f.className = 'status-msg active success';
+  clearTimeout(flashTeam._t); flashTeam._t = setTimeout(() => f.classList.remove('active'), 6000);
+}
+specialistForm.addEventListener('input', () => { spDirty = true; });
+document.getElementById('spPhotoFile').addEventListener('change', () => { spDirty = true; });
+document.getElementById('spPhotoRemove').addEventListener('click', () => { spDirty = true; });
+cancelSpecialistEditBtn.addEventListener('click', () => closeSpModal(true));
+document.getElementById('spModalClose').addEventListener('click', () => closeSpModal(true));
+document.getElementById('addSpecialistBtn').addEventListener('click', () => { resetSpecialistForm(); openSpModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && spModal.style.display !== 'none') closeSpModal(true); });
 
 specialistForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1699,9 +1743,9 @@ specialistForm.addEventListener('submit', async (e) => {
   const stale = [spOriginalPhoto, ...spUploadedUrls].filter(u => u && u !== finalPhoto);
   await removeSpecialistPhotoFiles(stale);
   spUploadedUrls = [];
-  specialistFormStatus.textContent = 'تم الحفظ بنجاح.';
-  specialistFormStatus.classList.add('active', 'success');
-  resetSpecialistForm();
+  const savedName = payload.full_name;
+  closeSpModal(false);
+  flashTeam('تم حفظ بيانات «' + savedName + '».');
   loadTeam();
 });
 
