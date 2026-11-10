@@ -111,6 +111,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="/password-reset.js"></script>
 <script>
 /* بوابة الأخصائيين / Specialists' portal. عربي وإنجليزي من نفس الملف: اللغة من وسم html lang.
    كل الصلاحيات مفروضة من قاعدة البيانات (RLS): الأخصائي يرى حجوزاته المدفوعة والملغاة فقط، ويعدّل جدوله وملفه وملاحظاته فقط.
@@ -144,6 +145,7 @@ $('loginView').innerHTML = `
   <form id="loginForm">
     <div class="field"><label for="lgEmail">${t('البريد الإلكتروني', 'Email')}</label><input type="email" id="lgEmail" required autocomplete="email" class="ltr"></div>
     <div class="field"><label for="lgPass">${t('كلمة السر', 'Password')}</label><input type="password" id="lgPass" required autocomplete="current-password" class="ltr"></div>
+    <p style="margin:-4px 0 14px; font-size:13px;"><a href="#" id="forgotLink" class="lnk">${t('نسيت كلمة السر؟', 'Forgot your password?')}</a></p>
     <button class="btn full" type="submit">${t('دخول', 'Sign in')}</button>
     <div class="msg" id="loginMsg"></div>
   </form>
@@ -160,6 +162,10 @@ function show(view){ ['loginView','unlinkedView','portalView'].forEach(v => $(v)
 async function logout(){ await sb.auth.signOut(); ME = null; show('loginView'); }
 $('logoutBtn').addEventListener('click', logout);
 $('unlinkedLogout').addEventListener('click', logout);
+$('forgotLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  openPasswordReset({ lang: EN ? 'en' : 'ar', email: $('lgEmail').value, onDone: (em) => { $('lgEmail').value = em; $('lgPass').focus(); } });
+});
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = $('loginMsg'); msg.className = 'msg'; msg.textContent = '';

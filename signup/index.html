@@ -176,6 +176,7 @@
           <label for="loginPassword">كلمة السر</label>
           <input type="password" id="loginPassword" required>
         </div>
+        <p style="text-align:start; margin:-8px 0 14px; font-size:13px;"><a href="#" id="forgotLink" style="color:var(--clarity); font-weight:700; text-decoration:underline;">نسيت كلمة السر؟</a></p>
 
         <button type="submit" class="btn-primary">تسجيل الدخول</button>
       </form>
@@ -214,6 +215,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="/password-reset.js"></script>
 <script>
 /* ============================================================
    بوضوح — إنشاء حساب / تسجيل الدخول (نظام حقيقي عبر Supabase Auth).
@@ -237,6 +239,11 @@ function accountUrl(){ if (NEXT_PORTAL && !inApp) return '/specialist-portal/'; 
   set('signupEmail', em, true); set('loginEmail', em, false);
   if (nm) set('fullName', nm, false);
 })();
+
+document.getElementById('forgotLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  openPasswordReset({ lang: 'ar', email: document.getElementById('loginEmail').value, onDone: (em) => { document.getElementById('loginEmail').value = em; document.getElementById('loginPassword').focus(); } });
+});
 
 const tabSignup = document.getElementById('tabSignup');
 const tabLogin = document.getElementById('tabLogin');
