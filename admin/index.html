@@ -413,6 +413,26 @@
               <label for="spBio">النبذة الكاملة (تظهر بصفحته الشخصية)</label>
               <textarea id="spBio" style="min-height:140px;" required></textarea>
             </div>
+            <div class="field full" style="border-top:1px solid var(--fog-dim); padding-top:18px; margin-top:6px;">
+              <label style="font-size:15px;">النسخة الإنجليزية (تظهر في الموقع الإنجليزي)</label>
+              <p style="font-size:12.5px; color:var(--text-muted-light); margin-top:4px;">اختيارية. إن تُركت الخانة فارغة يظهر النص العربي في الموقع الإنجليزي.</p>
+            </div>
+            <div class="field">
+              <label for="spNameEn">الاسم بالإنجليزي</label>
+              <input type="text" id="spNameEn" maxlength="120" style="direction:ltr; text-align:left;">
+            </div>
+            <div class="field">
+              <label for="spSpecialtyEn">التخصص بالإنجليزي</label>
+              <input type="text" id="spSpecialtyEn" maxlength="500" style="direction:ltr; text-align:left;">
+            </div>
+            <div class="field full">
+              <label for="spShortBioEn">الجملة القصيرة بالإنجليزي</label>
+              <input type="text" id="spShortBioEn" maxlength="200" style="direction:ltr; text-align:left;">
+            </div>
+            <div class="field full">
+              <label for="spBioEn">النبذة الكاملة بالإنجليزي</label>
+              <textarea id="spBioEn" maxlength="4000" style="min-height:140px; direction:ltr; text-align:left;"></textarea>
+            </div>
             <div class="field full checkbox-row">
               <input type="checkbox" id="spPublished" checked>
               <label for="spPublished">منشور (يظهر للزوار)</label>
@@ -1609,6 +1629,10 @@ function startEditSpecialist(sp){
     .then(({ data }) => { if (data) document.getElementById('spLoginEmail').value = data.email; });
   document.getElementById('spShortBio').value = sp.short_bio || '';
   document.getElementById('spBio').value = sp.bio;
+  document.getElementById('spNameEn').value = sp.full_name_en || '';
+  document.getElementById('spSpecialtyEn').value = sp.specialty_en || '';
+  document.getElementById('spShortBioEn').value = sp.short_bio_en || '';
+  document.getElementById('spBioEn').value = sp.bio_en || '';
   document.getElementById('spPublished').checked = sp.is_published;
   specialistFormTitle.textContent = 'تعديل: ' + sp.full_name;
   cancelSpecialistEditBtn.style.display = 'inline-block';
@@ -1640,6 +1664,10 @@ specialistForm.addEventListener('submit', async (e) => {
     photo_url: document.getElementById('spPhoto').value.trim(),  // '' = no photo (placeholder shown)
     short_bio: document.getElementById('spShortBio').value.trim() || null,
     bio: document.getElementById('spBio').value.trim(),
+    full_name_en: document.getElementById('spNameEn').value.trim() || null,
+    specialty_en: document.getElementById('spSpecialtyEn').value.trim() || null,
+    short_bio_en: document.getElementById('spShortBioEn').value.trim() || null,
+    bio_en: document.getElementById('spBioEn').value.trim() || null,
     is_published: document.getElementById('spPublished').checked,
   };
 

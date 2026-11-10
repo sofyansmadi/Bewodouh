@@ -546,7 +546,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const chosenSpecialist = urlParams.get('specialist');
 if (chosenSpecialist) {
   const banner = document.getElementById('specialistBanner');
-  banner.textContent = `You'll be booking with: ${chosenSpecialist}`;
+  banner.textContent = `You'll be booking with: ${urlParams.get('label') || chosenSpecialist}`;
   banner.style.display = 'block';
 }
 
@@ -822,7 +822,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
   async function loadSlots(){
     const { data, error } = await supabaseClient
       .from('availability_slots')
-      .select('id, starts_at, duration_min, specialists(full_name)')
+      .select('id, starts_at, duration_min, specialists(full_name, full_name_en)')
       .order('starts_at', { ascending: true })
       .limit(300);
     let slots = !error && data ? data : [];
@@ -855,7 +855,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'slot-btn'; btn.setAttribute('aria-pressed', 'false');
       btn.textContent = d.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
-      if (showSpecialist) { const sm = document.createElement('small'); sm.textContent = sl.specialists ? sl.specialists.full_name : TEAM; btn.appendChild(sm); }
+      if (showSpecialist) { const sm = document.createElement('small'); sm.textContent = sl.specialists ? (sl.specialists.full_name_en || sl.specialists.full_name) : TEAM; btn.appendChild(sm); }
       btn.addEventListener('click', () => {
         picker.querySelectorAll('.slot-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
         btn.setAttribute('aria-pressed', 'true');

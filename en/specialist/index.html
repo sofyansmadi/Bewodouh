@@ -139,19 +139,25 @@ async function loadSpecialist(){
     return;
   }
 
-  document.getElementById('pageTitle').textContent = data.full_name + ' — Bewoduh';
-  document.getElementById('pageDesc').setAttribute('content', data.short_bio || data.bio.slice(0, 150));
+  // English text when available; otherwise fall back to the original (Arabic) fields
+  const nm = data.full_name_en || data.full_name;
+  const spec = data.specialty_en || data.specialty;
+  const bioTxt = data.bio_en || data.bio;
+  const shortTxt = data.short_bio_en || (data.bio_en ? '' : (data.short_bio || ''));
+  document.getElementById('pageTitle').textContent = nm + ' — Bewoduh';
+  document.getElementById('pageDesc').setAttribute('content', shortTxt || bioTxt.slice(0, 150));
   document.getElementById('profilePhoto').src = data.photo_url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
-  document.getElementById('profilePhoto').alt = data.full_name;
-  document.getElementById('profileName').textContent = data.full_name;
-  document.getElementById('profileRole').textContent = data.specialty;
-  document.getElementById('profileBio').textContent = data.bio;
+  document.getElementById('profilePhoto').alt = nm;
+  document.getElementById('profileName').textContent = nm;
+  document.getElementById('profileRole').textContent = spec;
+  document.getElementById('profileBio').textContent = bioTxt;
   const facts = document.getElementById('profileFacts');
   const addFact = (text) => { const li = document.createElement('li'); li.textContent = '• ' + text; facts.appendChild(li); };
   if (data.years_experience != null) addFact(data.years_experience + ' ' + (data.years_experience === 1 ? 'year of experience' : 'years of experience'));
   if (data.credentials_verified) addFact('Credentials verified by Bewoduh');
-  document.getElementById('bookName').textContent = data.full_name;
-  document.getElementById('bookLink').href = '/en/sales-page/?specialist=' + encodeURIComponent(data.full_name);
+  document.getElementById('bookName').textContent = nm;
+  // 'specialist' stays the original name (it is the booking key); 'label' is only for display
+  document.getElementById('bookLink').href = '/en/sales-page/?specialist=' + encodeURIComponent(data.full_name) + '&label=' + encodeURIComponent(nm);
 
   loadingState.style.display = 'none';
   document.getElementById('profileCard').classList.add('loaded');

@@ -107,7 +107,13 @@ async function loadTeam(){
     return;
   }
 
-  grid.innerHTML = data.map(sp => `
+  // English text when available; otherwise fall back to the original (Arabic) fields
+  grid.innerHTML = data.map(raw => { const sp = Object.assign({}, raw, {
+    full_name: raw.full_name_en || raw.full_name,
+    specialty: raw.specialty_en || raw.specialty,
+    short_bio: raw.short_bio_en || (raw.bio_en ? null : raw.short_bio),
+    bio: raw.bio_en || raw.bio,
+  }); return `
     <a href="/en/specialist/?slug=${encodeURIComponent(sp.slug)}" class="specialist-card">
       <img class="specialist-photo" src="${esc(sp.photo_url || AVATAR_PLACEHOLDER)}" alt="${esc(sp.full_name)}" loading="lazy">
       <div class="specialist-body">
@@ -116,7 +122,7 @@ async function loadTeam(){
         <p class="specialist-bio">${esc(sp.short_bio || (sp.bio.length > 90 ? sp.bio.slice(0, 90) + '…' : sp.bio))}</p>
       </div>
     </a>
-  `).join('');
+  `; }).join('');
 }
 loadTeam();
 </script>
