@@ -286,13 +286,16 @@ function renderSchedule(){
       <div class="days" style="margin-bottom:14px;"><label><input type="radio" name="slotMode" value="single" checked> ${t('موعد واحد', 'Single slot')}</label><label><input type="radio" name="slotMode" value="weekly"> ${t('متكرر أسبوعياً', 'Repeat weekly')}</label></div>
       <div class="grid2">
         <div class="field"><label for="slDate">${t('التاريخ (أول يوم)', 'Date (first day)')}</label><input type="date" id="slDate" min="${todayStr}"></div>
-        <div class="field"><label for="slTime">${t('الوقت', 'Time')}</label><input type="time" id="slTime" value="10:00"></div>
-        <div class="field"><label for="slDur">${t('المدة', 'Duration')}</label><select id="slDur"><option value="30">${t('٣٠ دقيقة', '30 min')}</option><option value="45" selected>${t('٤٥ دقيقة', '45 min')}</option><option value="60">${t('٦٠ دقيقة', '60 min')}</option><option value="90">${t('٩٠ دقيقة', '90 min')}</option></select></div>
+        <div class="field"><label for="slTime">${t('من الساعة', 'From')}</label><input type="time" id="slTime" value="18:00"></div>
+        <div class="field"><label for="slTimeTo">${t('إلى الساعة', 'To')}</label><input type="time" id="slTimeTo" value="22:00"></div>
+        <div class="field"><label for="slDur">${t('مدة كل جلسة', 'Length of each session')}</label><select id="slDur"><option value="30">${t('٣٠ دقيقة', '30 min')}</option><option value="45" selected>${t('٤٥ دقيقة', '45 min')}</option><option value="60">${t('٦٠ دقيقة', '60 min')}</option><option value="90">${t('٩٠ دقيقة', '90 min')}</option></select></div>
+        <div class="field"><label for="slGap">${t('فاصل بين الجلسات', 'Break between sessions')}</label><select id="slGap"><option value="0" selected>${t('بدون فاصل', 'No break')}</option><option value="5">${t('٥ دقائق', '5 min')}</option><option value="10">${t('١٠ دقائق', '10 min')}</option><option value="15">${t('١٥ دقيقة', '15 min')}</option></select></div>
       </div>
       <div id="weeklyBox" class="hidden">
         <div class="field"><span class="lbl">${t('أيام الأسبوع', 'Days of the week')}</span><div class="days">${WEEKDAYS.map((d, i) => `<label><input type="checkbox" class="wd" value="${i}"> ${d}</label>`).join('')}</div></div>
         <div class="field" style="max-width:240px;"><label for="slWeeks">${t('عدد الأسابيع', 'Number of weeks')}</label><input type="number" id="slWeeks" min="1" max="12" value="4"></div>
       </div>
+      <div class="muted" id="slPreview" style="margin:4px 0 14px; line-height:1.9;"></div>
       <button class="btn" id="slAdd" type="button">${t('إضافة', 'Add')}</button>
       <div class="msg" id="slMsg"></div>
     </div>
@@ -305,23 +308,59 @@ function renderSchedule(){
     }).join('')}</div>`).join('') : `<div class="empty">${t('ما أضفت أي موعد بعد.', 'You have not added any slots yet.')}</div>`}`;
   document.querySelectorAll('input[name=slotMode]').forEach(r => r.addEventListener('change', () => $('weeklyBox').classList.toggle('hidden', document.querySelector('input[name=slotMode]:checked').value !== 'weekly')));
   $('slAdd').addEventListener('click', addSlots);
+  const addCard = $('slAdd').closest('.card');
+  addCard.addEventListener('input', updateSlotPreview);
+  addCard.addEventListener('change', updateSlotPreview);
+  updateSlotPreview();
+}
+// يحوّل (يوم/أيام + من وقت إلى وقت + مدة الجلسة + فاصل) إلى قائمة بدايات المواعيد
+const MAX_NEW_SLOTS = 300;
+function slotPlan(){
+  const date = $('slDate').value, from = $('slTime').value, to = $('slTimeTo').value;
+  const dur = parseInt($('slDur').value), gap = parseInt($('slGap').value) || 0;
+  if (!date || !from || !to) return { starts: [], offsets: [], incomplete: true };
+  const [y, mo, d] = date.split('-').map(Number), [h, mi] = from.split(':').map(Number), [h2, mi2] = to.split(':').map(Number);
+  const startMin = h * 60 + mi; let endMin = h2 * 60 + mi2;
+  if (endMin === 0) endMin = 1440; // «إلى 12:00 منتصف الليل»
+  if (endMin <= startMin) return { starts: [], offsets: [], err: t('وقت النهاية لازم يكون بعد وقت البداية.', 'The end time must be after the start time.') };
+  if (endMin - startMin < dur) return { starts: [], offsets: [], err: t('الفترة أقصر من مدة الجلسة الواحدة.', 'The range is shorter than a single session.') };
+  const offsets = [];
+  for (let m = startMin; m + dur <= endMin; m += dur + gap) offsets.push(m);
+  const weekly = document.querySelector('input[name=slotMode]:checked').value === 'weekly';
+  const days = [];
+  if (!weekly) days.push(new Date(y, mo - 1, d));
+  else {
+    const wds = [...document.querySelectorAll('.wd:checked')].map(i => +i.value);
+    const weeks = Math.min(12, Math.max(1, parseInt($('slWeeks').value) || 1));
+    if (!wds.length) return { starts: [], offsets, err: t('اختر يوماً واحداً على الأقل.', 'Pick at least one day.') };
+    for (let i = 0; i < weeks * 7; i++) { const dt = new Date(y, mo - 1, d + i); if (wds.includes(dt.getDay())) days.push(dt); }
+  }
+  const starts = [];
+  days.forEach(dt => offsets.forEach(m => starts.push(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 0, m))));
+  return { starts, offsets, days: days.length };
+}
+function updateSlotPreview(){
+  const box = $('slPreview'); if (!box) return;
+  const p = slotPlan();
+  if (p.incomplete) { box.textContent = ''; return; }
+  if (p.err) { box.className = 'muted'; box.style.color = 'var(--alert)'; box.textContent = p.err; return; }
+  box.style.color = '';
+  const fresh = p.starts.filter(dt => dt > now());
+  const times = p.offsets.map(m => fmtT(new Date(2000, 0, 1, 0, m)));
+  const per = t('في اليوم الواحد ' + p.offsets.length + ' موعد: ', p.offsets.length + ' slot(s) per day: ');
+  const total = p.days > 1 ? t(' — المجموع ' + fresh.length + ' موعد.', ' — ' + fresh.length + ' in total.') : '';
+  const over = fresh.length > MAX_NEW_SLOTS ? t(' (سيُضاف أول ' + MAX_NEW_SLOTS + ' فقط)', ' (only the first ' + MAX_NEW_SLOTS + ' will be added)') : '';
+  box.textContent = per + times.join(' · ') + total + over;
 }
 async function addSlots(){
   const msg = $('slMsg'); msg.className = 'msg'; msg.textContent = '';
-  const date = $('slDate').value, time = $('slTime').value, dur = parseInt($('slDur').value);
-  if (!date || !time) { msg.className = 'msg err'; msg.textContent = t('اختر التاريخ والوقت.', 'Pick a date and time.'); return; }
-  const weekly = document.querySelector('input[name=slotMode]:checked').value === 'weekly';
-  const starts = [];
-  const [y, mo, d] = date.split('-').map(Number), [h, mi] = time.split(':').map(Number);
-  if (!weekly) starts.push(new Date(y, mo - 1, d, h, mi));
-  else {
-    const days = [...document.querySelectorAll('.wd:checked')].map(i => +i.value);
-    const weeks = Math.min(12, Math.max(1, parseInt($('slWeeks').value) || 1));
-    if (!days.length) { msg.className = 'msg err'; msg.textContent = t('اختر يوماً واحداً على الأقل.', 'Pick at least one day.'); return; }
-    for (let i = 0; i < weeks * 7; i++) { const dt = new Date(y, mo - 1, d + i, h, mi); if (days.includes(dt.getDay())) starts.push(dt); }
-  }
+  const dur = parseInt($('slDur').value);
+  const plan = slotPlan();
+  if (plan.incomplete) { msg.className = 'msg err'; msg.textContent = t('اختر التاريخ ووقت البداية والنهاية.', 'Pick a date, a start time and an end time.'); return; }
+  if (plan.err) { msg.className = 'msg err'; msg.textContent = plan.err; return; }
+  const starts = plan.starts;
   const existing = new Set(SLOTS.map(s => new Date(s.starts_at).getTime()));
-  const rows = starts.filter(dt => dt > now() && !existing.has(dt.getTime())).slice(0, 60)
+  const rows = starts.filter(dt => dt > now() && !existing.has(dt.getTime())).slice(0, MAX_NEW_SLOTS)
     .map(dt => ({ specialist_id: ME.id, starts_at: dt.toISOString(), duration_min: dur }));
   if (!rows.length) { msg.className = 'msg err'; msg.textContent = t('لا مواعيد جديدة لإضافتها (إما في الماضي أو مضافة مسبقاً).', 'No new slots to add (they are in the past or already added).'); return; }
   $('slAdd').disabled = true;
