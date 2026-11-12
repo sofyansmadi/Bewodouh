@@ -525,11 +525,24 @@
               <label for="slotSpecialist">الأخصائي</label>
               <select id="slotSpecialist" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"></select>
             </div>
-            <div class="field"><label for="slotDate">التاريخ</label><input type="date" id="slotDate" required></div>
+            <div class="field full">
+              <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:14px;">
+                <label style="display:inline-flex; gap:6px; align-items:center; white-space:nowrap; margin:0;"><input type="radio" name="slotMode" value="single" checked style="width:auto;"> يوم واحد</label>
+                <label style="display:inline-flex; gap:6px; align-items:center; white-space:nowrap; margin:0;"><input type="radio" name="slotMode" value="weekly" style="width:auto;"> متكرر أسبوعياً</label>
+              </div>
+            </div>
+            <div class="field"><label for="slotDate">التاريخ (أول يوم)</label><input type="date" id="slotDate" required></div>
             <div class="field"><label for="slotLength">مدة الجلسة (دقيقة)</label><input type="number" id="slotLength" value="45" min="15" max="180" step="5" required></div>
             <div class="field"><label for="slotStart">من الساعة</label><input type="time" id="slotStart" value="10:00" required></div>
             <div class="field"><label for="slotEnd">إلى الساعة</label><input type="time" id="slotEnd" value="14:00" required></div>
             <div class="field"><label for="slotBreak">استراحة بين الجلسات (دقيقة)</label><input type="number" id="slotBreak" value="15" min="0" max="120" step="5" required></div>
+            <div class="field full" id="slotWeeklyBox" style="display:none;">
+              <label>أيام الأسبوع</label>
+              <div id="slotDays" style="display:flex; flex-wrap:wrap; gap:6px 4px; margin-bottom:12px;"></div>
+              <label for="slotWeeks">عدد الأسابيع</label>
+              <input type="number" id="slotWeeks" value="4" min="1" max="12" style="max-width:160px;">
+            </div>
+            <div class="field full" id="slotPreview" style="font-size:13px; color:var(--text-muted-light); line-height:1.9; margin-bottom:0;"></div>
           </div>
           <div class="form-actions"><button type="submit" class="btn-primary" style="width:auto; padding:12px 28px;">إضافة المواعيد</button></div>
           <div class="status-msg" id="slotFormStatus"></div>
@@ -1524,34 +1537,84 @@ async function loadSlots(){
   });
 }
 
-document.getElementById('slotForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const status = document.getElementById('slotFormStatus');
-  status.classList.remove('active', 'success', 'error');
+// ---- إضافة المواعيد: من وقت إلى وقت، يوم واحد أو تكرار أسبوعي، مع معاينة ----
+const SLOT_WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const MAX_NEW_SLOTS = 300;
+document.getElementById('slotDays').innerHTML = SLOT_WEEKDAYS.map((d, i) =>
+  `<label style="display:inline-flex; gap:6px; align-items:center; margin-inline-end:14px; font-size:13.5px; font-weight:400;"><input type="checkbox" class="slot-wd" value="${i}" style="width:auto;"> ${d}</label>`).join('');
+const slotIsWeekly = () => document.querySelector('input[name=slotMode]:checked').value === 'weekly';
 
+function adminSlotPlan(){
   const date = document.getElementById('slotDate').value;
   const start = document.getElementById('slotStart').value;
   const end = document.getElementById('slotEnd').value;
   const length = parseInt(document.getElementById('slotLength').value, 10);
   const gap = parseInt(document.getElementById('slotBreak').value, 10) || 0;
+  if (!date || !start || !end || !length) return { starts: [], offsets: [], incomplete: true };
+  const [y, mo, d] = date.split('-').map(Number), [h, mi] = start.split(':').map(Number), [h2, mi2] = end.split(':').map(Number);
+  const startMin = h * 60 + mi; let endMin = h2 * 60 + mi2;
+  if (endMin === 0) endMin = 1440; // «إلى 12:00 منتصف الليل»
+  if (endMin <= startMin) return { starts: [], offsets: [], err: 'وقت النهاية لازم يكون بعد وقت البداية.' };
+  if (endMin - startMin < length) return { starts: [], offsets: [], err: 'الوقت المحدد لا يتّسع لأي جلسة. عدّل الساعات أو مدة الجلسة.' };
+  const offsets = [];
+  for (let m = startMin; m + length <= endMin; m += length + gap) offsets.push(m);
+  const days = [];
+  if (!slotIsWeekly()) days.push(new Date(y, mo - 1, d));
+  else {
+    const wds = [...document.querySelectorAll('.slot-wd:checked')].map(i => +i.value);
+    const weeks = Math.min(12, Math.max(1, parseInt(document.getElementById('slotWeeks').value, 10) || 1));
+    if (!wds.length) return { starts: [], offsets, err: 'اختر يوماً واحداً على الأقل.' };
+    for (let i = 0; i < weeks * 7; i++) { const dt = new Date(y, mo - 1, d + i); if (wds.includes(dt.getDay())) days.push(dt); }
+  }
+  const starts = [];
+  days.forEach(dt => offsets.forEach(m => starts.push(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 0, m))));
+  return { starts, offsets, days: days.length, length };
+}
+function updateAdminSlotPreview(){
+  const box = document.getElementById('slotPreview');
+  document.getElementById('slotWeeklyBox').style.display = slotIsWeekly() ? 'block' : 'none';
+  const p = adminSlotPlan();
+  if (p.incomplete) { box.textContent = ''; return; }
+  if (p.err) { box.style.color = 'var(--alert)'; box.textContent = p.err; return; }
+  box.style.color = 'var(--text-muted-light)';
+  const fresh = p.starts.filter(dt => dt.getTime() > Date.now());
+  const times = p.offsets.map(m => new Date(2000, 0, 1, 0, m).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }));
+  box.textContent = 'في اليوم الواحد ' + p.offsets.length + ' موعد: ' + times.join(' · ')
+    + (p.days > 1 ? ' — المجموع ' + fresh.length + ' موعد.' : '')
+    + (fresh.length > MAX_NEW_SLOTS ? ' (سيُضاف أول ' + MAX_NEW_SLOTS + ' فقط)' : '');
+}
+const slotFormEl = document.getElementById('slotForm');
+slotFormEl.addEventListener('input', updateAdminSlotPreview);
+slotFormEl.addEventListener('change', updateAdminSlotPreview);
+updateAdminSlotPreview();
+
+slotFormEl.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = document.getElementById('slotFormStatus');
+  status.classList.remove('active', 'success', 'error');
+  const fail = (msg) => { status.textContent = msg; status.classList.add('active', 'error'); };
+
+  const plan = adminSlotPlan();
+  if (plan.incomplete) return fail('اختر التاريخ ووقت البداية والنهاية ومدة الجلسة.');
+  if (plan.err) return fail(plan.err);
+  const length = plan.length;
   const specialistId = document.getElementById('slotSpecialist').value || null;
 
-  const rows = [];
-  let t = new Date(date + 'T' + start);
-  const last = new Date(date + 'T' + end);
-  while (t.getTime() + length * 60000 <= last.getTime()) {
-    rows.push({ specialist_id: specialistId, starts_at: t.toISOString(), duration_min: length });
-    t = new Date(t.getTime() + (length + gap) * 60000);
-  }
-  if (!rows.length) { status.textContent = 'الوقت المحدد لا يتّسع لأي جلسة. عدّل الساعات أو مدة الجلسة.'; status.classList.add('active', 'error'); return; }
+  // نتجاوز المواعيد التي مضت أو المضافة مسبقاً لنفس الأخصائي بدل أن تفشل الإضافة كلها
+  let q = supabaseClient.from('availability_slots').select('starts_at').gte('starts_at', new Date().toISOString()).limit(2000);
+  q = specialistId ? q.eq('specialist_id', specialistId) : q.is('specialist_id', null);
+  const { data: existingRows } = await q;
+  const existing = new Set((existingRows || []).map(r => new Date(r.starts_at).getTime()));
+  const rows = plan.starts
+    .filter(dt => dt.getTime() > Date.now() && !existing.has(dt.getTime()))
+    .slice(0, MAX_NEW_SLOTS)
+    .map(dt => ({ specialist_id: specialistId, starts_at: dt.toISOString(), duration_min: length }));
+  if (!rows.length) return fail('لا مواعيد جديدة لإضافتها (إما في الماضي أو مضافة مسبقاً).');
 
   const { error } = await supabaseClient.from('availability_slots').insert(rows);
-  if (error) {
-    status.textContent = error.code === '23505' ? 'بعض هذه المواعيد مضافة مسبقاً لنفس الأخصائي.' : 'تعذّرت الإضافة: ' + error.message;
-    status.classList.add('active', 'error');
-    return;
-  }
-  status.textContent = 'تمت إضافة ' + rows.length + ' موعد.';
+  if (error) return fail(error.code === '23505' ? 'بعض هذه المواعيد مضافة مسبقاً لنفس الأخصائي.' : 'تعذّرت الإضافة: ' + error.message);
+  const skipped = plan.starts.length - rows.length;
+  status.textContent = 'تمت إضافة ' + rows.length + ' موعد.' + (skipped > 0 ? ' (تم تجاوز ' + skipped + ' لأنها مضت أو مضافة مسبقاً)' : '');
   status.classList.add('active', 'success');
   loadSlots();
 });
