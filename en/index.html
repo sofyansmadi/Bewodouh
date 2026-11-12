@@ -356,6 +356,16 @@
   </div>
 </section>
 
+<section id="team-strip">
+  <div class="wrap reveal">
+    <div class="eyebrow">Our Team</div>
+    <h2 class="section-title">A real person behind every session</h2>
+    <p class="section-lede">Get to know the specialists before you book, and choose the one you feel comfortable with.</p>
+    <div class="bw-strip" id="bwStrip"></div>
+    <a href="/en/team/" class="bw-link">See the whole team →</a>
+  </div>
+</section>
+
 <section id="booking">
   <div class="wrap reveal">
     <div class="eyebrow">Individual Consultations</div>
@@ -370,6 +380,11 @@
         <h3>Real support, from your very first session</h3>
         <p>Choose the type of consultation you need, answer a few simple questions about your situation, and book with a specialist who fits you — all in just a few steps.</p>
         <div class="feature-price">Starting from $35 <span>— single session or package</span></div>
+        <ul class="bw-reassure">
+          <li>Fully confidential between you and your specialist</li>
+          <li>Free rescheduling up to 24 hours before your session</li>
+          <li>Not a fit? We will change your specialist any time</li>
+        </ul>
         <a href="/en/sales-page/" class="btn-primary" style="width:fit-content;">Book Your Consultation Now</a>
       </div>
     </div>
@@ -405,6 +420,9 @@
 
 <site-footer variant="rich"></site-footer>
 <app-bottom-nav active="home"></app-bottom-nav>
+
+<script src="/team-ui.js?v=1"></script>
+<script>BW.homeStrip(document.getElementById('bwStrip'));</script>
 
 <script>
   const io = new IntersectionObserver((entries)=>{

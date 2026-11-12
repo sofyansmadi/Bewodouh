@@ -350,7 +350,8 @@ class PricingCards extends HTMLElement {
   renderCards() {
     const cfg = CURRENCY_CONFIG[this._currency] || CURRENCY_CONFIG.USD;
 
-    this.innerHTML = this._data.map(pkg => {
+    // «ادعم بوضوح» (تبرّع $1) ليس جلسة: لا نعرضه كبطاقة بين باقات الاستشارة (يبقى متاحاً بقائمة النموذج)
+    this.innerHTML = this._data.filter(pkg => pkg.name !== 'ادعم بوضوح').map(pkg => {
       const converted = (Number(pkg.price) * cfg.rate).toFixed(cfg.decimals);
       const en = IS_EN ? PKG_EN[pkg.name] : null;
       const priceText = IS_EN && CURRENCY_CODE_EN[this._currency] ? `${converted} ${CURRENCY_CODE_EN[this._currency]}` : cfg.format(converted);

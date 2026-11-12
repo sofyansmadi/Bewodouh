@@ -326,7 +326,7 @@
             <option value="باقة الانطلاقة">باقة الانطلاقة — $150 / شهرياً</option>
             <option value="باقة المرافقة">باقة المرافقة — $300 / شهرياً</option>
             <option value="دعم فوري">دعم فوري — $70</option>
-            <option value="ادعم بوضوح">ادعم بوضوح — $1</option>
+            <option value="ادعم بوضوح">تبرّع اختياري لدعم بوضوح — $1 (ليس جلسة)</option>
           </select>
         </div>
         <div class="field">
@@ -349,7 +349,13 @@
           <label class="pm-opt"><input type="radio" name="bkPayMethod" value="card" checked><span>بطاقة بنكية<small>Visa / Mastercard / Apple Pay — فوري</small></span></label>
           <label class="pm-opt"><input type="radio" name="bkPayMethod" value="cliq"><span>كليك (CliQ) — للدفع من الأردن<small>حوالة فورية من تطبيق بنكك بالدينار الأردني</small></span></label>
         </div>
-        <button type="submit" class="btn-primary">إرسال طلب الحجز</button>
+        <ul style="list-style:none; padding:14px 16px; margin:4px 0 18px; display:grid; gap:7px; font-size:13.5px; color:var(--text-muted-light); background:#F7F2EA; border:1px solid #EBD9B5; border-radius:14px;">
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> يُؤكَّد موعدك بعد الدفع مباشرة، ويصلك رابط الجلسة على بريدك</li>
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> سرية تامة بينك وبين المختص</li>
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> إعادة جدولة مجانية حتى ٢٤ ساعة قبل الموعد</li>
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> لا يناسبك المختص؟ يمكنك طلب تغييره في أي وقت</li>
+        </ul>
+        <button type="submit" class="btn-primary">تأكيد الحجز والمتابعة للدفع</button>
         <p style="text-align:center; font-size:12.5px; color:var(--text-muted-light); margin-top:14px;">بإرسال الطلب فإنك توافق على <a href="/terms/" target="_blank" rel="noopener" style="color:var(--clarity); font-weight:700; text-decoration:underline;">شروط الاستخدام وسياسة الإلغاء والاسترجاع</a> و<a href="/privacy/" target="_blank" rel="noopener" style="color:var(--clarity); font-weight:700; text-decoration:underline;">سياسة الخصوصية</a>.</p>
       </form>
 
@@ -447,7 +453,7 @@ const PACKAGE_RECOMMENDATIONS = [
   { min: 5, max: 6, name: "باقة المرافقة", text: "بناءً على إجاباتك، باقة المرافقة (٨ جلسات) تناسب وضعك أكثر لأنها تسمح بمتابعة أعمق." },
 ];
 
-const ORIGINAL_SUBMIT_TEXT = 'إرسال طلب الحجز';
+const ORIGINAL_SUBMIT_TEXT = 'تأكيد الحجز والمتابعة للدفع';
 window.__slotMode = false;
 window.__selectedSlot = null;
 window.__slotHintText = "الأوقات المعروضة بتوقيت جهازك. إعادة الجدولة مجاناً حتى ٢٤ ساعة قبل الجلسة.";
@@ -628,7 +634,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'إرسال طلب الحجز';
+    submitBtn.textContent = 'تأكيد الحجز والمتابعة للدفع';
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'تعذّر إرسال الحجز — لم يتم إعداد الاتصال بقاعدة البيانات بعد.';
     return;
@@ -652,7 +658,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (error) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'إرسال طلب الحجز';
+    submitBtn.textContent = 'تأكيد الحجز والمتابعة للدفع';
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'حدث خطأ أثناء إرسال الحجز. حاول مرة أخرى.';
     console.error('booking submit:', error);
@@ -928,6 +934,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
     const opt = document.createElement('option');
     opt.value = pkg.name;
     opt.textContent = `${pkg.name} — $${pkg.price}${pkg.price_unit ? ' / ' + pkg.price_unit : ''}`;
+    if (pkg.name === 'ادعم بوضوح') opt.textContent = 'تبرّع اختياري لدعم بوضوح — $' + pkg.price + ' (ليس جلسة)';
     select.appendChild(opt);
     PACKAGE_PRICES_USD[pkg.name] = Number(pkg.price);
   });

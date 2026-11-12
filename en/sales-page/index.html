@@ -309,7 +309,7 @@
             <option value="باقة الانطلاقة">Launch Package — $150 / monthly</option>
             <option value="باقة المرافقة">Companion Package — $300 / monthly</option>
             <option value="دعم فوري">Immediate Support — $70</option>
-            <option value="ادعم بوضوح">Support Bewoduh — $1</option>
+            <option value="ادعم بوضوح">Optional donation to support Bewoduh — $1 (not a session)</option>
           </select>
         </div>
         <div class="field">
@@ -332,7 +332,13 @@
           <label class="pm-opt"><input type="radio" name="bkPayMethod" value="card" checked><span>Bank card<small>Visa / Mastercard / Apple Pay — instant</small></span></label>
           <label class="pm-opt"><input type="radio" name="bkPayMethod" value="cliq"><span>CliQ — for payments from Jordan<small>Instant transfer in Jordanian dinars from your banking app</small></span></label>
         </div>
-        <button type="submit" class="btn-primary">Send Booking Request</button>
+        <ul style="list-style:none; padding:14px 16px; margin:4px 0 18px; display:grid; gap:7px; font-size:13.5px; color:var(--text-muted-light); background:#F7F2EA; border:1px solid #EBD9B5; border-radius:14px;">
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> Your session is confirmed right after payment, and the session link reaches your email</li>
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> Fully confidential between you and your specialist</li>
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> Free rescheduling up to 24 hours before your session</li>
+          <li><span style="color:#3C8C5A; font-weight:900;">✓</span> Not a fit? You can ask to change your specialist at any time</li>
+        </ul>
+        <button type="submit" class="btn-primary">Confirm & continue to payment</button>
         <p style="text-align:center; font-size:12.5px; color:var(--text-muted-light); margin-top:14px;">By sending this request you agree to the <a href="/en/terms/" target="_blank" rel="noopener" style="color:var(--clarity); font-weight:700; text-decoration:underline;">Terms of Use, including the cancellation and refund policy</a>, and the <a href="/en/privacy/" target="_blank" rel="noopener" style="color:var(--clarity); font-weight:700; text-decoration:underline;">Privacy Policy</a>.</p>
       </form>
 
@@ -427,7 +433,7 @@ const PACKAGE_RECOMMENDATIONS = [
   { min: 5, max: 6, name: "باقة المرافقة", text: "Based on your answers, the Companion Package (8 sessions) suits your situation better because it allows for deeper follow-up." },
 ];
 
-const ORIGINAL_SUBMIT_TEXT = 'Send Booking Request';
+const ORIGINAL_SUBMIT_TEXT = 'Confirm & continue to payment';
 window.__slotMode = false;
 window.__selectedSlot = null;
 window.__slotHintText = "Times are shown in your device's timezone. Free rescheduling up to 24 hours before the session.";
@@ -603,7 +609,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Send Booking Request';
+    submitBtn.textContent = 'Confirm & continue to payment';
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'Unable to send the booking — the database connection hasn\'t been set up yet.';
     return;
@@ -627,7 +633,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (error) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Send Booking Request';
+    submitBtn.textContent = 'Confirm & continue to payment';
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'An error occurred while sending the booking. Please try again.';
     console.error('booking submit:', error);
@@ -890,6 +896,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
     const opt = document.createElement('option');
     opt.value = pkg.name; // stays Arabic: must match the stored package name
     opt.textContent = `${en ? en.name : pkg.name} — $${pkg.price}${en ? ' / ' + en.unit : ''}`;
+    if (pkg.name === 'ادعم بوضوح') opt.textContent = 'Optional donation to support Bewoduh — $' + pkg.price + ' (not a session)';
     select.appendChild(opt);
     PACKAGE_PRICES_USD[pkg.name] = Number(pkg.price);
   });

@@ -86,6 +86,7 @@
 
 <main>
   <div class="wrap">
+    <div id="teamFilters"></div>
     <div class="team-grid" id="teamGrid">
       <p class="empty-state">Loading the team...</p>
     </div>
@@ -96,47 +97,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
-<script>
-const AVATAR_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
-
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-async function loadTeam(){
-  const grid = document.getElementById('teamGrid');
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    grid.innerHTML = '<p class="empty-state">Unable to load the team right now.</p>';
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from('specialists')
-    .select('*')
-    .eq('is_published', true)
-    .order('sort_order', { ascending: true });
-
-  if (error || !data || !data.length) {
-    grid.innerHTML = '<p class="empty-state">No specialists are listed right now.</p>';
-    return;
-  }
-
-  // English text when available; otherwise fall back to the original (Arabic) fields
-  grid.innerHTML = data.map(raw => { const sp = Object.assign({}, raw, {
-    full_name: raw.full_name_en || raw.full_name,
-    specialty: raw.specialty_en || raw.specialty,
-    short_bio: raw.short_bio_en || (raw.bio_en ? null : raw.short_bio),
-    bio: raw.bio_en || raw.bio,
-  }); return `
-    <a href="/en/specialist/?slug=${encodeURIComponent(sp.slug)}" class="specialist-card">
-      <img class="specialist-photo" src="${esc(sp.photo_url || AVATAR_PLACEHOLDER)}" alt="${esc(sp.full_name)}" loading="lazy">
-      <div class="specialist-body">
-        <div class="specialist-name">${esc(sp.full_name)}</div>
-        <div class="specialist-role">${esc(sp.specialty)}</div>
-        <p class="specialist-bio">${esc(sp.short_bio || (sp.bio.length > 90 ? sp.bio.slice(0, 90) + '…' : sp.bio))}</p>
-      </div>
-    </a>
-  `; }).join('');
-}
-loadTeam();
-</script>
+<script src="/team-ui.js?v=1"></script>
+<script>BW.teamPage(document.getElementById('teamGrid'), document.getElementById('teamFilters'));</script>
 
 <app-bottom-nav></app-bottom-nav>
 <script src="/components.js"></script>
