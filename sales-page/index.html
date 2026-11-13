@@ -329,6 +329,15 @@
             <option value="ادعم بوضوح">تبرّع اختياري لدعم بوضوح — $1 (ليس جلسة)</option>
           </select>
         </div>
+        <div class="field" id="promoField">
+          <label for="bkPromo">كود الخصم (اختياري)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="bkPromo" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="اكتب الكود هنا" style="direction:ltr; text-transform:uppercase; flex:1; min-width:0;">
+            <button type="button" id="bkPromoApply" style="white-space:nowrap; background:var(--ink); color:var(--fog); border:none; border-radius:12px; padding:0 20px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer;">تطبيق</button>
+          </div>
+          <div id="promoMsg" role="status" style="font-size:13px; margin-top:8px; min-height:18px;"></div>
+          <div id="priceSummary" style="display:none; margin-top:10px; padding:12px 14px; background:#F7F2EA; border:1px solid #EBD9B5; border-radius:12px; font-size:14.5px; font-weight:700;"></div>
+        </div>
         <div class="field">
           <div id="dtField">
             <label for="bkDateTime">الموعد المفضّل للجلسة</label>
@@ -628,6 +637,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     preferred_datetime: selectedDate.toISOString(),
     message: document.getElementById('bkMessage').value.trim() || null,
     specialist_name: chosenSpecialist || null,
+    promo_code: ((document.getElementById('bkPromo').value || '').trim().toUpperCase()) || null,
     lang: 'ar',
     client_tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; } })(),
   };
@@ -677,7 +687,8 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   // بعد الحجز نحوّل الزبون مباشرة إلى صفحة الدفع (Stripe Checkout) بدل أن يضطر للنزول بالصفحة.
   // دالة create-checkout-session تقرأ السعر من قاعدة البيانات لا من المتصفح، وتأكيد الدفع يصل لدالة stripe-webhook.
-  const amount = PACKAGE_PRICES_USD[payload.package_name];
+  const pinfo = await fetchPaymentInfo(bookingId);
+  const amount = pinfo ? Number(pinfo.final_usd) : PACKAGE_PRICES_USD[payload.package_name];
   const payContainer = document.getElementById('pay-container');
   document.getElementById('successBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -687,7 +698,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     return;
   }
 
-  const payLabel = `ادفع الآن — $${amount}`;
+  const payLabel = `ادفع الآن — $${fmtUsd(amount)}`;
   const payBtn = document.createElement('button');
   payBtn.type = 'button';
   payBtn.className = 'btn-primary';
@@ -716,6 +727,55 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 });
 
 // ---------- Manual CliQ payment (Jordan) ----------
+
+// ---------- Promo code + price summary (the discount is always computed on the server) ----------
+const PROMO_T = {"label": "كود الخصم (اختياري)", "apply": "تطبيق", "ph": "اكتب الكود هنا", "price": "السعر", "off": "خصم", "checking": "جارٍ التحقق...", "auto": "✓ تم تطبيق خصم {p}% على أول جلسة لك", "code_ok": "✓ تم تطبيق الكود {c}: خصم {p}%", "code_other": "✓ الكود صالح، وأفضل خصم متاح لك هو {p}% وقد طُبّق.", "code_bad": "الكود غير صالح أو لا ينطبق على هذه الباقة أو هذا الحجز.", "code_bad_keep": " (يبقى خصم {p}% مطبّقاً)", "pay": "ادفع الآن — $"};
+const fmtUsd = (n) => { const v = Math.round(Number(n) * 100) / 100; return Number.isInteger(v) ? String(v) : v.toFixed(2); };
+async function fetchPaymentInfo(bookingId) {
+  try {
+    const { data, error } = await supabaseClient.rpc('booking_payment_info', { p_booking: bookingId });
+    if (error || !data || data.final_usd == null) return null;
+    return data;
+  } catch (e) { return null; }
+}
+(function setupPromo(){
+  const pkgEl = document.getElementById('bkPackage'), emailEl = document.getElementById('bkEmail'), codeEl = document.getElementById('bkPromo');
+  const applyBtn = document.getElementById('bkPromoApply'), msgEl = document.getElementById('promoMsg'), sumEl = document.getElementById('priceSummary');
+  if (!pkgEl || !codeEl) return;
+  let last = '', seq = 0;
+  async function refresh(typedByUser) {
+    const pkg = pkgEl.value, email = (emailEl.value || '').trim(), code = (codeEl.value || '').trim();
+    const key = [pkg, email.toLowerCase(), code.toUpperCase()].join('|');
+    if (!typedByUser && key === last) return;
+    last = key;
+    if (!pkg || typeof supabaseClient === 'undefined' || !supabaseClient) { sumEl.style.display = 'none'; msgEl.textContent = ''; return; }
+    const mine = ++seq;
+    if (typedByUser) { msgEl.style.color = 'var(--text-muted-light)'; msgEl.textContent = PROMO_T.checking; }
+    const { data, error } = await supabaseClient.rpc('check_promo', { p_email: email, p_package: pkg, p_code: code });
+    if (mine !== seq) return;
+    if (error || !data || data.list_usd == null) { sumEl.style.display = 'none'; msgEl.textContent = ''; return; }
+    const pct = Number(data.percent) || 0;
+    let msg = '', color = '#2E6B45';
+    if (code && !data.code_ok) { color = 'var(--alert)'; msg = PROMO_T.code_bad + (pct > 0 ? PROMO_T.code_bad_keep.replace('{p}', pct) : ''); }
+    else if (code && data.code_ok && data.code && data.code.toUpperCase() !== code.toUpperCase()) msg = PROMO_T.code_other.replace('{p}', pct);
+    else if (code && data.code_ok) msg = PROMO_T.code_ok.replace('{c}', data.code).replace('{p}', pct);
+    else if (pct > 0) msg = PROMO_T.auto.replace('{p}', pct);
+    msgEl.style.color = color; msgEl.textContent = msg;
+    sumEl.style.display = 'block';
+    sumEl.replaceChildren();
+    sumEl.append(PROMO_T.price + ': ');
+    if (pct > 0) {
+      const old = document.createElement('s'); old.style.cssText = 'color:var(--text-muted-light); font-weight:500; margin-inline-end:6px;'; old.textContent = '$' + fmtUsd(data.list_usd);
+      const nw = document.createElement('span'); nw.style.color = '#2E6B45'; nw.textContent = '$' + fmtUsd(data.final_usd) + ' (' + pct + '% ' + PROMO_T.off + ')';
+      sumEl.append(old, nw);
+    } else { sumEl.append('$' + fmtUsd(data.list_usd)); }
+  }
+  applyBtn.addEventListener('click', () => refresh(true));
+  codeEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); refresh(true); } });
+  // الباقة تتغيّر برمجياً أحياناً (توصية الاختبار) فنراقب القيم بدل الاعتماد على حدث change فقط
+  setInterval(() => { refresh(false); }, 800);
+})();
+
 const CLIQ_ALIAS = 'BEWODUH';
 const JOD_PER_USD = 0.709; // الدينار مربوط بالدولار (١ دولار = ٠٫٧٠٩ دينار)
 
@@ -736,7 +796,8 @@ async function showCliqPayment(bookingId, pkg) {
     c.appendChild(e);
     return;
   }
-  const usd = PACKAGE_PRICES_USD[pkg];
+  const pinfo = await fetchPaymentInfo(bookingId);
+  const usd = pinfo ? Number(pinfo.final_usd) : PACKAGE_PRICES_USD[pkg];
   const jod = usd ? (Math.round(usd * JOD_PER_USD * 100) / 100).toFixed(2) : null;
 
   const card = document.createElement('div');

@@ -183,6 +183,7 @@
     <div id="dashboard">
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="packages">الباقات والأسعار</button>
+        <button class="admin-tab" data-tab="promos">أكواد الخصم</button>
         <button class="admin-tab" data-tab="articles">المقالات</button>
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
         <button class="admin-tab" data-tab="team">الفريق</button>
@@ -362,6 +363,36 @@
           <div class="status-msg" id="articleFormStatus"></div>
         </form>
       </div>
+      </div>
+
+      <div id="tab-promos" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">أكواد الخصم</h2>
+      <p class="section-sub">أنشئ كود خصم وانشره، فيُطبَّق فعلياً على السعر عند الدفع (بالبطاقة وبكليك). الخصم يُحسب على الخادم ولا يمكن التلاعب به من المتصفح. «تلقائي» يعني عرض عام يُطبَّق على الجميع بدون كود. لا تتجمّع الخصومات: يُطبَّق الأعلى فقط.</p>
+
+      <div class="form-card" style="margin-bottom:28px;">
+        <h3>إنشاء كود خصم</h3>
+        <form id="promoForm">
+          <div class="form-grid">
+            <div class="field"><label for="pmCode">الكود (حروف إنجليزية وأرقام)</label><input type="text" id="pmCode" maxlength="32" placeholder="WELCOME20" style="direction:ltr; text-transform:uppercase;"></div>
+            <div class="field"><label for="pmPercent">نسبة الخصم %</label><input type="number" id="pmPercent" min="1" max="99" value="20" required></div>
+            <div class="field full"><label for="pmDesc">وصف داخلي (اختياري)</label><input type="text" id="pmDesc" maxlength="200" placeholder="مثلاً: حملة رمضان"></div>
+            <div class="field"><label for="pmPackage">ينطبق على</label><select id="pmPackage" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"><option value="">كل الباقات</option></select></div>
+            <div class="field"><label for="pmMax">أقصى عدد استخدامات (اختياري)</label><input type="number" id="pmMax" min="1" placeholder="غير محدود"></div>
+            <div class="field"><label for="pmStart">يبدأ من (اختياري)</label><input type="datetime-local" id="pmStart"></div>
+            <div class="field"><label for="pmEnd">ينتهي في (اختياري)</label><input type="datetime-local" id="pmEnd"></div>
+            <div class="field full checkbox-row"><input type="checkbox" id="pmFirst"><label for="pmFirst">لأول جلسة للشخص فقط (من ليس له جلسة مدفوعة سابقة بنفس البريد)</label></div>
+            <div class="field full checkbox-row"><input type="checkbox" id="pmAuto"><label for="pmAuto">يُطبَّق تلقائياً على الجميع بدون كود (عرض عام)</label></div>
+            <div class="field full checkbox-row"><input type="checkbox" id="pmActive" checked><label for="pmActive">مفعّل (منشور)</label></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn-primary" style="width:auto; padding:12px 28px;">نشر الكود</button></div>
+          <div class="status-msg" id="promoFormStatus"></div>
+        </form>
+      </div>
+
+      <table>
+        <thead><tr><th>الكود</th><th>الخصم</th><th>الشروط</th><th>الاستخدام</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="promosTableBody"><tr><td colspan="6">جارٍ التحميل...</td></tr></tbody>
+      </table>
       </div>
 
       <div id="tab-bookings" class="admin-tab-panel" style="display:none;">
@@ -735,7 +766,7 @@ const dashboard = document.getElementById('dashboard');
 const logoutBtn = document.getElementById('logoutBtn');
 const loginError = document.getElementById('loginError');
 
-const TAB_PERMISSION = { packages: 'packages', articles: 'articles', bookings: 'bookings', team: 'team', applications: 'applications', slots: 'slots', users: 'users', 'static-pages': 'pages', exercises: 'exercises', admins: 'super' };
+const TAB_PERMISSION = { packages: 'packages', promos: 'packages', articles: 'articles', bookings: 'bookings', team: 'team', applications: 'applications', slots: 'slots', users: 'users', 'static-pages': 'pages', exercises: 'exercises', admins: 'super' };
 const PERMISSION_LABELS = { bookings: 'الحجوزات', applications: 'طلبات الانضمام', team: 'الفريق (الأخصائيون)', slots: 'المواعيد المتاحة', articles: 'المقالات', packages: 'الباقات والأسعار', pages: 'الصفحات الثابتة (الشروط والخصوصية والأسئلة)', exercises: 'تمارين يومية', users: 'قائمة المستخدمين' };
 let ADMIN_ACCESS = { is_admin: false, is_super: false, permissions: [] };
 const canAccess = (tab) => ADMIN_ACCESS.is_super || (TAB_PERMISSION[tab] !== 'super' && ADMIN_ACCESS.permissions.includes(TAB_PERMISSION[tab]));
@@ -923,6 +954,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     if (tab.dataset.tab === 'team') loadTeam();
     if (tab.dataset.tab === 'applications') loadApplications();
     if (tab.dataset.tab === 'slots') loadSlots();
+    if (tab.dataset.tab === 'promos') loadPromos();
     if (tab.dataset.tab === 'admins') loadAdmins();
     if (tab.dataset.tab === 'users') loadUsers();
     if (tab.dataset.tab === 'static-pages') loadStaticPage('privacy');
@@ -955,6 +987,8 @@ async function loadBookings(){
   // أسعار الباقات لحساب المبلغ المتوقع بالدينار لحوالات كليك
   const { data: pk } = await supabaseClient.from('packages').select('name, price');
   const priceByName = Object.fromEntries((pk || []).map(p => [p.name, Number(p.price)]));
+  const usdOf = (b) => (b.final_price_usd != null ? Number(b.final_price_usd) : priceByName[b.package_name]);
+  const fmtUsdA = (n) => { const v = Math.round(Number(n) * 100) / 100; return Number.isInteger(v) ? String(v) : v.toFixed(2); };
   const cliqRef = (id) => 'BW-' + String(id).replace(/-/g, '').slice(0, 6).toUpperCase();
 
   tbody.innerHTML = data.map(b => {
@@ -968,13 +1002,13 @@ async function loadBookings(){
           ? '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">غير مدفوع (ملغى)</span>'
           : (b.payment_method === 'cliq'
               ? '<span class="badge-yes" style="background:rgba(201,161,95,.2); color:#7D5F27;">كليك — ' + (b.cliq_reported_at ? 'العميل أبلغ بالتحويل، تحقق من البنك' : 'بانتظار التحويل') + '</span>'
-                + '<div style="font-size:11.5px; margin-top:6px; direction:ltr; text-align:right;">' + esc(cliqRef(b.id)) + (priceByName[b.package_name] ? ' · ' + (Math.round(priceByName[b.package_name] * 0.709 * 100) / 100).toFixed(2) + ' JOD' : '') + '</div>'
+                + '<div style="font-size:11.5px; margin-top:6px; direction:ltr; text-align:right;">' + esc(cliqRef(b.id)) + (usdOf(b) ? ' · ' + (Math.round(usdOf(b) * 0.709 * 100) / 100).toFixed(2) + ' JOD' : '') + '</div>'
                 + '<button type="button" class="btn-secondary" data-mark-paid-id="' + esc(b.id) + '" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">تأكيد استلام الحوالة</button>'
               : '<span class="badge-yes" style="background:rgba(181,85,93,.14); color:#9C3F47;">غير مدفوع</span><br><button type="button" class="btn-secondary" data-mark-paid-id="' + esc(b.id) + '" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">تعليم كمدفوع (دفع خارجي)</button>'));
     return `
     <tr>
       <td>${esc(b.full_name)}<br><span style="font-size:12px; color:var(--text-muted-light);">${esc(b.email)}</span></td>
-      <td>${esc(b.package_name)}</td>
+      <td>${esc(b.package_name)}${usdOf(b) != null ? `<div style="font-size:12px; margin-top:4px; color:var(--text-muted-light);">$${fmtUsdA(usdOf(b))}${Number(b.discount_percent) > 0 ? ` · <span style="color:#2E6B45; font-weight:700;">خصم ${esc(b.discount_percent)}%${b.promo_code ? ' (' + esc(b.promo_code) + ')' : ' (عرض أول جلسة)'}</span>` : ''}</div>` : ''}</td>
       <td>${formatted}</td>
       <td>${esc(b.phone)}</td>
       <td>${payCell}</td>
@@ -1506,6 +1540,98 @@ document.getElementById('adminRoleForm').addEventListener('submit', async (e) =>
   adminFormStatus.classList.add('active', 'success');
   resetAdminForm();
   loadAdmins();
+});
+
+// ---------- Promo codes ----------
+async function loadPromos(){
+  const tbody = document.getElementById('promosTableBody');
+  const pkgSel = document.getElementById('pmPackage');
+  const { data: pk } = await supabaseClient.from('packages').select('name').order('sort_order', { ascending: true });
+  const keep = pkgSel.value;
+  pkgSel.innerHTML = '<option value="">كل الباقات</option>' + (pk || []).map(x => `<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');
+  pkgSel.value = keep;
+
+  const { data, error } = await supabaseClient.from('promo_codes').select('*').order('created_at', { ascending: false });
+  if (error) { tbody.innerHTML = '<tr><td colspan="6">تعذّر تحميل الأكواد.</td></tr>'; console.error('promos:', error); return; }
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6">ما في أكواد بعد.</td></tr>'; return; }
+
+  const { data: used } = await supabaseClient.from('bookings').select('promo_code, paid, status').not('promo_code', 'is', null).neq('status', 'ملغى');
+  const usage = {};
+  (used || []).forEach(b => { const u = usage[b.promo_code] = usage[b.promo_code] || { all: 0, paid: 0 }; u.all++; if (b.paid) u.paid++; });
+  const fmtD = (iso) => new Date(iso).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' });
+
+  tbody.innerHTML = data.map(pr => {
+    const conds = [
+      pr.applies_to_packages && pr.applies_to_packages.length ? 'الباقة: ' + pr.applies_to_packages.map(esc).join('، ') : 'كل الباقات',
+      pr.first_session_only ? 'أول جلسة للشخص فقط' : null,
+      pr.auto_apply ? '<b>تلقائي للجميع</b>' : null,
+      pr.starts_at ? 'من ' + fmtD(pr.starts_at) : null,
+      pr.ends_at ? 'حتى ' + fmtD(pr.ends_at) : null,
+    ].filter(Boolean).join('<br>');
+    const u = usage[pr.code] || { all: 0, paid: 0 };
+    const useTxt = (pr.code ? u.all + (pr.max_redemptions ? ' / ' + pr.max_redemptions : '') + ' <span style="font-size:11.5px; color:var(--text-muted-light);">(' + u.paid + ' مدفوع)</span>' : '—');
+    const expired = pr.ends_at && new Date(pr.ends_at) < new Date();
+    const state = !pr.active ? '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">معطّل</span>'
+      : expired ? '<span class="badge-yes" style="background:rgba(181,85,93,.14); color:#9C3F47;">منتهي</span>'
+      : '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">فعّال</span>';
+    return `<tr>
+      <td><b dir="ltr">${pr.code ? esc(pr.code) : '—'}</b>${pr.description ? '<div style="font-size:12px; color:var(--text-muted-light);">' + esc(pr.description) + '</div>' : ''}</td>
+      <td><b>${esc(pr.percent_off)}%</b></td>
+      <td style="font-size:12.5px; line-height:1.7;">${conds}</td>
+      <td>${useTxt}</td>
+      <td>${state}<br><button type="button" class="btn-secondary" data-toggle-promo="${esc(pr.id)}" data-next="${pr.active ? '0' : '1'}" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">${pr.active ? 'تعطيل' : 'تفعيل'}</button></td>
+      <td><button class="icon-btn danger" title="حذف" data-delete-promo="${esc(pr.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button></td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('[data-toggle-promo]').forEach(btn => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const { error: e } = await supabaseClient.from('promo_codes').update({ active: btn.dataset.next === '1' }).eq('id', btn.dataset.togglePromo);
+    if (e) { alert('تعذّر تغيير الحالة.'); console.error(e); }
+    loadPromos();
+  }));
+  tbody.querySelectorAll('[data-delete-promo]').forEach(btn => btn.addEventListener('click', async () => {
+    if (!confirm('حذف هذا الكود نهائياً؟ الحجوزات التي استخدمته تبقى كما هي. (إن أردت إيقافه مؤقتاً استخدم «تعطيل».)')) return;
+    const { error: e } = await supabaseClient.from('promo_codes').delete().eq('id', btn.dataset.deletePromo);
+    if (e) { alert('تعذّر الحذف.'); console.error(e); }
+    loadPromos();
+  }));
+}
+
+document.getElementById('promoForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = document.getElementById('promoFormStatus');
+  status.classList.remove('active', 'success', 'error');
+  const fail = (m) => { status.textContent = m; status.classList.add('active', 'error'); };
+  const code = document.getElementById('pmCode').value.trim().toUpperCase().replace(/\s+/g, '');
+  const auto = document.getElementById('pmAuto').checked;
+  const percent = parseInt(document.getElementById('pmPercent').value, 10);
+  if (!code && !auto) return fail('اكتب كوداً، أو فعّل «يُطبَّق تلقائياً على الجميع».');
+  if (code && !/^[A-Z0-9_-]{3,32}$/.test(code)) return fail('الكود: ٣ إلى ٣٢ حرفاً إنجليزياً كبيراً أو أرقاماً أو - أو _ فقط.');
+  if (!(percent >= 1 && percent <= 99)) return fail('نسبة الخصم من ١ إلى ٩٩.');
+  const pkg = document.getElementById('pmPackage').value;
+  const row = {
+    code: code || null,
+    description: document.getElementById('pmDesc').value.trim() || null,
+    percent_off: percent,
+    applies_to_packages: pkg ? [pkg] : null,
+    first_session_only: document.getElementById('pmFirst').checked,
+    auto_apply: auto,
+    active: document.getElementById('pmActive').checked,
+    starts_at: document.getElementById('pmStart').value ? new Date(document.getElementById('pmStart').value).toISOString() : null,
+    ends_at: document.getElementById('pmEnd').value ? new Date(document.getElementById('pmEnd').value).toISOString() : null,
+    max_redemptions: parseInt(document.getElementById('pmMax').value, 10) || null,
+  };
+  if (row.starts_at && row.ends_at && row.ends_at <= row.starts_at) return fail('تاريخ الانتهاء لازم يكون بعد البداية.');
+  if (auto && !confirm('الخصم «التلقائي» يُطبَّق على كل الزبائن بدون كود' + (row.first_session_only ? ' (لأول جلسة للشخص)' : '') + '. متابعة؟')) return;
+  const { error } = await supabaseClient.from('promo_codes').insert(row);
+  if (error) return fail(error.code === '23505' ? 'هذا الكود موجود مسبقاً.' : 'تعذّر الحفظ: ' + error.message);
+  document.getElementById('promoForm').reset();
+  document.getElementById('pmPercent').value = 20;
+  document.getElementById('pmActive').checked = true;
+  status.textContent = 'تم نشر الكود.';
+  status.classList.add('active', 'success');
+  loadPromos();
 });
 
 // ---------- Availability slots ----------
