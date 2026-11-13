@@ -174,6 +174,7 @@
             <label for="loginPassword">كلمة السر</label>
             <input type="password" id="loginPassword" required>
           </div>
+          <p style="font-size:13px; margin:-6px 0 14px;"><a href="#" id="forgotLink" style="color:var(--clarity); font-weight:700; text-decoration:underline;">نسيت كلمة السر؟</a></p>
           <button type="submit" class="btn-primary">تسجيل الدخول</button>
         </form>
       </div>
@@ -698,6 +699,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="/password-reset.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
 /* ============================================================
@@ -743,7 +745,7 @@ async function showDashboard(){
   if (error || !access || !access.is_admin) {
     await supabaseClient.auth.signOut();
     showLogin();
-    loginError.textContent = 'هذا الحساب ليس له صلاحية دخول لوحة التحكم.';
+    loginError.textContent = 'هذا الحساب ليس له صلاحية دخول لوحة التحكم. إذا كنت أخصائياً فادخل من بوابة الأخصائيين: bewoduh.com/specialist-portal';
     loginError.classList.add('active');
     return;
   }
@@ -772,6 +774,11 @@ async function checkSession(){
   if (data.session) showDashboard(); else showLogin();
 }
 checkSession();
+
+document.getElementById('forgotLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  openPasswordReset({ lang: 'ar', email: document.getElementById('loginEmail').value, onDone: (em) => { document.getElementById('loginEmail').value = em; document.getElementById('loginPassword').focus(); } });
+});
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
