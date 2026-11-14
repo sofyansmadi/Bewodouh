@@ -231,7 +231,8 @@ const inApp = typeof window.Capacitor !== 'undefined';
 // دعوة بوابة الأخصائيين: ?email=&name=&next=portal يعبّئ الاسم والبريد (البريد مقفل) ويحوّل بعد التأكيد إلى البوابة
 const INVITE = new URLSearchParams(location.search);
 const NEXT_PORTAL = INVITE.get('next') === 'portal';
-function accountUrl(){ if (NEXT_PORTAL && !inApp) return '/specialist-portal/'; return inApp ? '/account/index.html' : '/account/'; }
+const NEXT_CHAT = INVITE.get('next') === 'chat';
+function accountUrl(){ if (NEXT_PORTAL && !inApp) return '/specialist-portal/'; if (NEXT_CHAT && !inApp) return '/chat/'; return inApp ? '/account/index.html' : '/account/'; }
 (function prefillInvite(){
   const em = (INVITE.get('email') || '').trim().slice(0, 254), nm = (INVITE.get('name') || '').trim().slice(0, 120);
   if (!NEXT_PORTAL || !em) return;

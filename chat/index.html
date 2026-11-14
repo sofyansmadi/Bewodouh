@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المحادثة والنقاط — بوضوح</title>
+<meta name="description" content="تحدّث مع أخصائي مباشرة داخل بوضوح بنقاطك. ١٠٠ نقطة هدية عند التسجيل.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --alert:#B5555B; --ok:#2E6B45;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --max:1000px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.8; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; cursor:pointer; }
+  [hidden]{ display:none !important; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 20px; }
+  .page-head{ background:radial-gradient(120% 90% at 75% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:44px 0 40px; text-align:center; }
+  .page-head h1{ color:var(--fog); font-size:clamp(26px,4vw,38px); font-weight:900; }
+  .page-head p{ color:var(--text-muted-dark); font-size:15px; max-width:56ch; margin:10px auto 0; }
+  main{ padding:28px 0 90px; }
+  .btn{ background:var(--ink); color:var(--fog); font-weight:700; font-size:14.5px; padding:12px 24px; border-radius:100px; border:none; }
+  .btn.gold{ background:var(--clarity); color:var(--ink); }
+  .btn.ghost{ background:transparent; color:var(--ink); border:1.5px solid var(--fog-dim); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn.sm{ padding:8px 16px; font-size:13px; }
+  .card{ background:#fff; border:1px solid var(--fog-dim); border-radius:18px; padding:22px; box-shadow:0 18px 40px -32px rgba(36,29,46,.25); }
+  .sec-title{ font-size:18px; font-weight:900; margin:34px 0 14px; }
+  .muted{ color:var(--text-muted-light); font-size:13.5px; }
+  .notice{ border-radius:14px; padding:14px 18px; font-size:14.5px; font-weight:600; margin-bottom:16px; }
+  .notice.ok{ background:#F1F8F3; border:1.5px solid #BFDCC8; color:var(--ok); }
+  .notice.warn{ background:#FDF8EE; border:1.5px solid #EBD9B5; color:#7D5F27; }
+  .notice.err{ background:#FCF2F2; border:1.5px solid #EBC4C7; color:#9C3F47; }
+
+  .gate{ text-align:center; padding:56px 24px; }
+  .gate h2{ font-size:22px; margin-bottom:10px; }
+  .gate .gift{ font-size:46px; }
+
+  .wallet{ background:radial-gradient(140% 140% at 80% 0%, var(--ink-soft), var(--ink)); color:var(--fog); border-radius:22px; padding:26px 26px 22px; }
+  .wallet .w-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .w-num{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; font-size:64px; line-height:1; color:var(--clarity); }
+  .w-unit{ font-size:16px; margin-inline-start:8px; color:var(--text-muted-dark); }
+  .w-eq{ font-size:14px; color:var(--text-muted-dark); margin-top:6px; }
+  .w-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .w-chip{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); border-radius:100px; padding:4px 14px; font-size:12.5px; color:var(--text-on-dark); }
+  .w-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  .specs{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:16px; }
+  @media (max-width:560px){ .specs{ grid-template-columns:repeat(2,1fr); gap:10px; } }
+  .sp{ background:#fff; border:1px solid var(--fog-dim); border-radius:18px; overflow:hidden; display:flex; flex-direction:column; }
+  .sp img{ width:100%; aspect-ratio:4/5; object-fit:cover; object-position:center 22%; display:block; background:var(--fog-dim); }
+  .sp-b{ padding:12px 14px 14px; display:flex; flex-direction:column; gap:4px; flex:1; }
+  .sp-n{ font-family:'Noto Kufi Arabic'; font-weight:700; font-size:14.5px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .sp-r{ font-size:12px; color:var(--text-muted-light); line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .sp-s{ font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px; margin-top:4px; }
+  .dot{ width:9px; height:9px; border-radius:50%; background:#9a90a6; display:inline-block; }
+  .dot.on{ background:#3C8C5A; box-shadow:0 0 0 3px rgba(60,140,90,.2); }
+  .sp-act{ margin-top:auto; padding-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .sp-act .btn{ flex:1; text-align:center; padding:9px 12px; font-size:13px; }
+
+  .threads{ display:flex; flex-direction:column; gap:10px; }
+  .th{ display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--fog-dim); border-radius:16px; padding:12px 16px; cursor:pointer; text-align:start; width:100%; }
+  .th:hover{ border-color:var(--clarity); }
+  .th img{ width:46px; height:46px; border-radius:50%; object-fit:cover; background:var(--fog-dim); flex:none; }
+  .th-b{ flex:1; min-width:0; }
+  .th-n{ font-weight:700; font-size:14.5px; }
+  .pill{ font-size:11.5px; font-weight:700; border-radius:100px; padding:3px 12px; background:var(--fog); color:var(--text-muted-light); white-space:nowrap; }
+  .pill.active{ background:#F1F8F3; color:var(--ok); }
+  .pill.paused{ background:#FDF8EE; color:#7D5F27; }
+  .pill.requested{ background:#EEEAF6; color:var(--plum); }
+
+  .chatbox{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; display:flex; flex-direction:column; height:min(78vh, 720px); min-height:460px; overflow:hidden; }
+  @media (max-width:600px){ .chatbox{ height:calc(100dvh - 128px); min-height:380px; border-radius:16px; } }
+  .ch-head{ display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--fog-dim); }
+  .ch-head img{ width:42px; height:42px; border-radius:50%; object-fit:cover; background:var(--fog-dim); }
+  .ch-head .nm{ font-weight:700; font-size:15px; line-height:1.4; }
+  .ch-bar{ background:var(--fog); font-size:12.5px; padding:7px 16px; color:var(--text-muted-light); display:flex; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--fog-dim); }
+  .ch-msgs{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#FBF9F7; }
+  .msg{ max-width:82%; padding:10px 14px; border-radius:16px; font-size:15px; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+  .msg.me{ align-self:flex-start; background:var(--ink); color:var(--fog); border-end-start-radius:4px; }
+  .msg.them{ align-self:flex-end; background:#fff; border:1px solid var(--fog-dim); border-end-end-radius:4px; }
+  .msg time{ display:block; font-size:10.5px; opacity:.6; margin-top:2px; }
+  .msg.sys{ align-self:center; max-width:92%; text-align:center; background:transparent; font-size:12.5px; color:var(--text-muted-light); padding:2px 8px; }
+  .ch-banner{ padding:10px 16px; font-size:13.5px; border-top:1px solid var(--fog-dim); display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ch-banner.warn{ background:#FDF8EE; color:#7D5F27; }
+  .ch-banner.info{ background:#EEEAF6; color:var(--plum); }
+  .ch-banner.err{ background:#FCF2F2; color:#9C3F47; }
+  .ch-form{ display:flex; gap:10px; padding:12px; border-top:1px solid var(--fog-dim); align-items:flex-end; }
+  .ch-form textarea{ flex:1; border:1.5px solid var(--fog-dim); border-radius:14px; padding:10px 14px; font-family:inherit; font-size:15px; resize:none; max-height:120px; background:var(--fog); }
+  .ch-form textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+
+  .modal{ position:fixed; inset:0; background:rgba(36,29,46,.6); z-index:1000; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto; }
+  .modal-box{ background:#fff; border-radius:20px; width:100%; max-width:640px; margin:auto; padding:24px; }
+  .modal-box h3{ font-size:18px; margin-bottom:6px; }
+  .x{ float:inline-end; background:var(--fog); border:1px solid var(--fog-dim); border-radius:50%; width:34px; height:34px; font-size:20px; line-height:1; }
+  .tabs{ display:flex; gap:8px; margin:14px 0; }
+  .tab{ flex:1; border:1.5px solid var(--fog-dim); background:#fff; border-radius:100px; padding:9px; font-weight:700; font-size:14px; }
+  .tab.on{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
+  .prods{ display:grid; gap:10px; }
+  .prod{ display:flex; align-items:center; justify-content:space-between; gap:12px; border:1.5px solid var(--fog-dim); border-radius:16px; padding:14px 18px; background:var(--fog); }
+  .prod b{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; font-size:17px; }
+  .prod .pr{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; font-size:20px; color:var(--ink); }
+  select.sel{ width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:14.5px; background:var(--fog); margin-bottom:12px; }
+  .back{ background:none; border:none; color:var(--text-muted-light); font-weight:600; font-size:13.5px; padding:0 0 12px; }
+</style>
+<link rel="canonical" href="https://bewoduh.com/chat/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/chat/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/chat/">
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <h1 id="phTitle">المحادثة والنقاط</h1>
+    <p id="phSub">تحدّث مع أخصائي مباشرة داخل المنصة. تُخصم النقاط بالدقيقة، وتتوقف المحادثة تلقائياً عند الخمول أو انتهاء النقاط.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="muted" id="loadingState" style="text-align:center; padding:60px 0;">جارٍ التحميل...</p>
+
+    <!-- يظهر لغير المسجّل -->
+    <div class="card gate" id="gate" hidden>
+      <div class="gift">🎁</div>
+      <h2 id="gateTitle"></h2>
+      <p class="muted" id="gateText" style="margin-bottom:18px;"></p>
+      <a class="btn gold" id="gateBtn" href="#"></a>
+    </div>
+
+    <div id="app" hidden>
+      <div id="notices"></div>
+
+      <!-- القائمة الرئيسية -->
+      <div id="homeView">
+        <div class="wallet">
+          <div class="w-row">
+            <div>
+              <div><span class="w-num" id="wNum">0</span><span class="w-unit" id="wUnit"></span></div>
+              <div class="w-eq" id="wEq"></div>
+            </div>
+            <div class="w-actions">
+              <button class="btn gold" id="btnTopup" type="button"></button>
+              <button class="btn" id="btnPlans" type="button" style="background:rgba(255,255,255,.14);"></button>
+            </div>
+          </div>
+          <div class="w-chips" id="wChips"></div>
+        </div>
+
+        <h2 class="sec-title" id="specTitle"></h2>
+        <div class="specs" id="specs"></div>
+
+        <div id="threadsBox" hidden>
+          <h2 class="sec-title" id="threadsTitle"></h2>
+          <div class="threads" id="threads"></div>
+        </div>
+
+        <div id="subsBox" hidden>
+          <h2 class="sec-title" id="subsTitle"></h2>
+          <div class="threads" id="subs"></div>
+        </div>
+
+        <p class="muted" id="legal" style="margin-top:34px; line-height:1.9;"></p>
+      </div>
+
+      <!-- المحادثة -->
+      <div id="chatView" hidden>
+        <button class="back" id="btnBack" type="button"></button>
+        <div class="chatbox">
+          <div class="ch-head">
+            <img id="chImg" alt="">
+            <div style="flex:1; min-width:0;"><div class="nm" id="chName"></div><div class="muted" id="chSpec" style="font-size:12px;"></div></div>
+            <span class="pill" id="chState"></span>
+            <button class="btn ghost sm" id="btnEnd" type="button"></button>
+          </div>
+          <div class="ch-bar" id="chBar"></div>
+          <div class="ch-msgs" id="msgs" aria-live="polite"></div>
+          <div class="ch-banner" id="banner" hidden></div>
+          <form class="ch-form" id="chForm">
+            <textarea id="chInput" rows="1" maxlength="2000"></textarea>
+            <button class="btn gold" id="btnSend" type="submit"></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- نافذة الشحن/الاشتراك -->
+<div class="modal" id="topupModal" hidden role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="x" id="topupClose" type="button" aria-label="×">&times;</button>
+    <h3 id="topupTitle"></h3>
+    <p class="muted" id="topupSub"></p>
+    <div class="tabs"><button class="tab on" id="tabPack" type="button"></button><button class="tab" id="tabSub" type="button"></button></div>
+    <div id="topupBody"></div>
+    <p class="muted" id="topupMsg" style="margin-top:12px; min-height:20px;"></p>
+  </div>
+</div>
+
+<!-- موافقة أول محادثة -->
+<div class="modal" id="consentModal" hidden role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3 id="consentTitle"></h3>
+    <div class="muted" id="consentText" style="margin:12px 0 18px; line-height:2;"></div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn gold" id="consentOk" type="button"></button>
+      <button class="btn ghost" id="consentNo" type="button"></button>
+    </div>
+  </div>
+</div>
+
+<site-footer></site-footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+const EN = document.documentElement.lang === 'en';
+const t = (ar, en) => (EN ? en : ar);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const LOC = EN ? 'en-GB' : 'ar-EG';
+const nf = (n) => Number(n).toLocaleString(LOC);
+const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
+const DEFAULT_RATE = 10;
+const sb = (typeof supabaseClient !== 'undefined') ? supabaseClient : null;
+
+let ME = null, WALLET = { general: 0, free: 0, paid: 0, subs: [], free_expires_at: null };
+let SPECS = {}, PRODUCTS = [], THREADS = [], SESS = {}, SUBS = [];
+let CUR = null, MSGS = [], lastMsgId = 0, chan = null, pollT = null, secT = null, pollN = 0;
+
+// ---------- نصوص ----------
+$('phTitle').textContent = t('المحادثة والنقاط', 'Chat & points');
+$('phSub').textContent = t('تحدّث مع أخصائي مباشرة داخل المنصة. تُخصم النقاط بالدقيقة، وتتوقف المحادثة تلقائياً عند الخمول أو انتهاء النقاط.', 'Talk to a specialist right inside the platform. Points are charged per minute, and the chat pauses automatically when you are idle or out of points.');
+$('loadingState').textContent = t('جارٍ التحميل...', 'Loading...');
+$('wUnit').textContent = t('نقطة', 'points');
+$('btnTopup').textContent = t('اشحن نقاطك', 'Buy points');
+$('btnPlans').textContent = t('اشتراك شهري', 'Monthly plan');
+$('specTitle').textContent = t('ابدأ محادثة مع أخصائي', 'Start a chat with a specialist');
+$('threadsTitle').textContent = t('محادثاتي', 'My chats');
+$('subsTitle').textContent = t('اشتراكاتي', 'My plans');
+$('btnBack').textContent = t('→ رجوع', '← Back');
+$('btnEnd').textContent = t('إنهاء', 'End');
+$('btnSend').textContent = t('إرسال', 'Send');
+$('chInput').placeholder = t('اكتب رسالتك...', 'Type your message...');
+$('topupTitle').textContent = t('اشحن نقاطك', 'Get more points');
+$('topupSub').textContent = t('النقاط المشتراة لا تنتهي، ونقاط الاشتراك صالحة حتى نهاية الشهر.', 'Purchased points do not expire; plan points are valid until the end of the month.');
+$('tabPack').textContent = t('شحن مرة وحدة', 'One-time top-up');
+$('tabSub').textContent = t('اشتراك شهري', 'Monthly plan');
+$('consentTitle').textContent = t('قبل أن تبدأ', 'Before you start');
+$('consentText').innerHTML = EN
+  ? 'Chat is for support and guidance. <b>It is not an emergency service</b>: if you or someone you know is in immediate danger, contact your local emergency services right away (Jordan: 911).<br>Your chats are treated confidentially and are only visible to you and your specialist inside the platform. Points are charged per minute while the chat is active.'
+  : 'المحادثة للدعم والإرشاد، و<b>ليست خدمة طوارئ</b>: إذا كنت أنت أو شخص تعرفه في خطر مباشر فتواصل فوراً مع جهات الطوارئ في بلدك (الأردن: ٩١١).<br>تُعامل محادثاتك بسرية ولا تظهر إلا لك وللأخصائي داخل المنصة. وتُخصم النقاط بالدقيقة طالما المحادثة جارية.';
+$('consentOk').textContent = t('أفهم وأوافق', 'I understand');
+$('consentNo').textContent = t('إلغاء', 'Cancel');
+$('legal').textContent = t('الاستشارات والمحادثات داعمة ولا تغني عن الرعاية الطبية عند الحاجة. في الطوارئ تواصل مع جهات الطوارئ في بلدك. نقاط الهدية صالحة ٩٠ يوماً.', 'Chats are supportive and do not replace medical care when needed. In an emergency contact your local emergency services. Welcome points are valid for 90 days.');
+
+const SYS = {
+  'sys:requested': t('أُرسل طلب المحادثة، بانتظار موافقة الأخصائي (حتى ٥ دقائق). لا تُخصم نقاط قبل القبول.', 'Request sent. Waiting for the specialist (up to 5 minutes). No points are charged before they accept.'),
+  'sys:started': t('بدأت المحادثة. تُخصم النقاط كل دقيقة.', 'The chat has started. Points are charged every minute.'),
+  'sys:paused_idle': t('توقفت المحادثة مؤقتاً لعدم النشاط. اكتب رسالة لتتابع.', 'The chat paused because of inactivity. Send a message to continue.'),
+  'sys:paused_no_points': t('توقفت المحادثة لأن النقاط انتهت. اشحن لتكمل.', 'The chat paused because points ran out. Top up to continue.'),
+  'sys:resumed': t('تمت متابعة المحادثة.', 'The chat resumed.'),
+  'sys:ended': t('انتهت المحادثة.', 'The chat ended.'),
+  'sys:declined': t('اعتذر الأخصائي عن هذه المحادثة الآن. لم تُخصم أي نقاط.', 'The specialist is unable to chat right now. No points were charged.'),
+  'sys:timeout': t('انتهت مهلة الطلب بدون رد. لم تُخصم أي نقاط، جرّب لاحقاً.', 'The request timed out with no reply. No points were charged, please try again later.'),
+  'sys:ended_no_points': t('تعذّر بدء المحادثة لأن النقاط لا تكفي.', 'The chat could not start because points were not enough.'),
+};
+const STATE = {
+  requested: t('بانتظار الأخصائي', 'Waiting'), active: t('جارية', 'Live'), paused: t('متوقفة مؤقتاً', 'Paused'), ended: t('انتهت', 'Ended'),
+};
+
+const spName = (s) => (EN ? (s.full_name_en || s.full_name) : s.full_name) || '';
+const spRole = (s) => (EN ? (s.specialty_en || s.specialty) : s.specialty) || '';
+const fmtTime = (iso) => new Date(iso).toLocaleTimeString(LOC, { hour: 'numeric', minute: '2-digit' });
+const fmtDate = (iso) => new Date(iso).toLocaleDateString(LOC, { day: 'numeric', month: 'short' });
+
+function notice(kind, text) {
+  const d = document.createElement('div'); d.className = 'notice ' + kind; d.textContent = text;
+  $('notices').appendChild(d); return d;
+}
+
+// ---------- تحميل البيانات ----------
+async function refreshWallet() {
+  const { data } = await sb.rpc('my_points');
+  if (data) WALLET = data;
+  renderWallet();
+}
+async function loadAll() {
+  const [w, prod, specs, th, subs] = await Promise.all([
+    sb.rpc('my_points'),
+    sb.from('point_products').select('*').eq('active', true).order('sort_order', { ascending: true }),
+    sb.from('specialists').select('id,slug,full_name,full_name_en,specialty,specialty_en,photo_url,chat_online,chat_rate_pts').eq('is_published', true).eq('chat_enabled', true),
+    sb.from('chat_threads').select('*').eq('user_id', ME.id).order('last_message_at', { ascending: false, nullsFirst: false }),
+    sb.from('point_subscriptions').select('*').eq('user_id', ME.id).in('status', ['active', 'canceling', 'past_due']),
+  ]);
+  if (w.data) WALLET = w.data;
+  PRODUCTS = prod.data || [];
+  SPECS = Object.fromEntries((specs.data || []).map(s => [s.id, s]));
+  THREADS = th.data || [];
+  SUBS = subs.data || [];
+  // أخصائيون عندهم محادثات سابقة لكن أُوقف الشات عندهم: نجلب أسماءهم
+  const missing = [...new Set([...THREADS.map(x => x.specialist_id), ...SUBS.map(x => x.specialist_id)].filter(id => id && !SPECS[id]))];
+  if (missing.length) {
+    const { data } = await sb.from('specialists').select('id,slug,full_name,full_name_en,specialty,specialty_en,photo_url,chat_online,chat_rate_pts').in('id', missing);
+    (data || []).forEach(s => { s.__offlineOnly = true; SPECS[s.id] = s; });
+  }
+  SESS = {};
+  if (THREADS.length) {
+    const { data } = await sb.from('chat_sessions').select('*').in('thread_id', THREADS.map(x => x.id)).order('created_at', { ascending: false });
+    (data || []).forEach(s => { if (!SESS[s.thread_id]) SESS[s.thread_id] = s; });
+  }
+  renderHome();
+}
+
+// ---------- الواجهة الرئيسية ----------
+function renderWallet() {
+  $('wNum').textContent = nf(WALLET.general || 0);
+  const mins = Math.floor((WALLET.general || 0) / DEFAULT_RATE);
+  $('wEq').textContent = t(`≈ ${nf(mins)} دقيقة محادثة (بسعر ${nf(DEFAULT_RATE)} نقاط للدقيقة)`, `≈ ${nf(mins)} chat minutes (at ${nf(DEFAULT_RATE)} points per minute)`);
+  const chips = [];
+  if (WALLET.free > 0) chips.push(t(`🎁 هدية: ${nf(WALLET.free)}` + (WALLET.free_expires_at ? ` · تنتهي ${fmtDate(WALLET.free_expires_at)}` : ''), `🎁 Welcome: ${nf(WALLET.free)}` + (WALLET.free_expires_at ? ` · expires ${fmtDate(WALLET.free_expires_at)}` : '')));
+  if (WALLET.paid > 0) chips.push(t(`مشتراة: ${nf(WALLET.paid)}`, `Purchased: ${nf(WALLET.paid)}`));
+  (WALLET.subs || []).forEach(s => chips.push(t(`اشتراك ${s.specialist_name || ''}: ${nf(s.points)}`, `Plan ${s.specialist_name_en || s.specialist_name || ''}: ${nf(s.points)}`)));
+  $('wChips').innerHTML = chips.map(c => `<span class="w-chip">${esc(c)}</span>`).join('');
+}
+function pointsFor(spId) {
+  const sub = (WALLET.subs || []).find(s => s.specialist_id === spId);
+  return (WALLET.general || 0) + (sub ? sub.points : 0);
+}
+function renderHome() {
+  renderWallet();
+  const list = Object.values(SPECS).filter(s => !s.__offlineOnly).sort((a, b) => Number(b.chat_online) - Number(a.chat_online));
+  $('specs').innerHTML = list.length ? list.map(s => `
+    <div class="sp">
+      <img src="${esc(s.photo_url || PLACEHOLDER)}" alt="" loading="lazy">
+      <div class="sp-b">
+        <div class="sp-n">${esc(spName(s))}</div>
+        <div class="sp-r">${esc(spRole(s))}</div>
+        <div class="sp-s"><span class="dot ${s.chat_online ? 'on' : ''}"></span>${s.chat_online ? t('متصل الآن', 'Online now') : t('غير متصل', 'Offline')} · ${nf(s.chat_rate_pts)} ${t('نقطة/دقيقة', 'pts/min')}</div>
+        <div class="sp-act">
+          <button class="btn gold sm" data-start="${esc(s.id)}" type="button" ${s.chat_online ? '' : 'disabled'}>${t('ابدأ محادثة', 'Start chat')}</button>
+          <button class="btn ghost sm" data-plan="${esc(s.id)}" type="button">${t('اشتراك', 'Plan')}</button>
+        </div>
+      </div>
+    </div>`).join('') : `<p class="muted">${t('لا يوجد أخصائيون متاحون للمحادثة حالياً. نضيف المزيد قريباً.', 'No specialists are available for chat yet. We are adding more soon.')}</p>`;
+  $('specs').querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => startFlow(b.dataset.start)));
+  $('specs').querySelectorAll('[data-plan]').forEach(b => b.addEventListener('click', () => openTopup('sub', b.dataset.plan)));
+
+  $('threadsBox').hidden = !THREADS.length;
+  $('threads').innerHTML = THREADS.map(th => {
+    const s = SPECS[th.specialist_id] || {}; const se = SESS[th.id];
+    const st = se ? se.state : 'ended';
+    return `<button class="th" data-open="${esc(th.id)}" type="button">
+      <img src="${esc(s.photo_url || PLACEHOLDER)}" alt="">
+      <div class="th-b"><div class="th-n">${esc(spName(s))}</div><div class="muted" style="font-size:12px;">${th.last_message_at ? fmtDate(th.last_message_at) + ' ' + fmtTime(th.last_message_at) : ''}</div></div>
+      <span class="pill ${esc(st)}">${esc(STATE[st] || '')}</span></button>`;
+  }).join('');
+  $('threads').querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openThread(b.dataset.open)));
+
+  $('subsBox').hidden = !SUBS.length;
+  $('subs').innerHTML = SUBS.map(sub => {
+    const s = SPECS[sub.specialist_id] || {};
+    const label = sub.status === 'canceling' ? t('سيُلغى نهاية الفترة', 'Ends at period end') : sub.status === 'past_due' ? t('متعثّر الدفع', 'Payment issue') : t('فعّال', 'Active');
+    return `<div class="th" style="cursor:default;">
+      <img src="${esc(s.photo_url || PLACEHOLDER)}" alt="">
+      <div class="th-b"><div class="th-n">${esc(spName(s))} — ${nf(sub.points_per_cycle)} ${t('نقطة/شهر', 'pts/month')}</div><div class="muted" style="font-size:12px;">${esc(label)}${sub.current_period_end ? ' · ' + fmtDate(sub.current_period_end) : ''}</div></div>
+      ${sub.status === 'active' ? `<button class="btn ghost sm" data-cancel="${esc(sub.id)}" type="button">${t('إلغاء', 'Cancel')}</button>` : ''}</div>`;
+  }).join('');
+  $('subs').querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm(t('إلغاء الاشتراك؟ تبقى نقاطك المتبقية صالحة حتى نهاية الفترة الحالية.', 'Cancel this plan? Your remaining points stay valid until the end of the current period.'))) return;
+    b.disabled = true;
+    const { data, error } = await sb.functions.invoke('manage-subscription', { body: { subscription_id: b.dataset.cancel } });
+    if (error || !data || !data.ok) { alert(t('تعذّر الإلغاء الآن. تواصل معنا على hello@bewoduh.com', 'Could not cancel right now. Please contact hello@bewoduh.com')); b.disabled = false; return; }
+    await loadAll();
+  }));
+}
+
+// ---------- الشحن والاشتراك ----------
+let topupTab = 'pack', topupSpec = '';
+function openTopup(tab, spec) {
+  topupTab = tab || 'pack'; topupSpec = spec || '';
+  $('topupMsg').textContent = '';
+  $('topupModal').hidden = false; document.body.style.overflow = 'hidden';
+  renderTopup();
+}
+function closeTopup() { $('topupModal').hidden = true; document.body.style.overflow = ''; }
+function renderTopup() {
+  $('tabPack').classList.toggle('on', topupTab === 'pack'); $('tabSub').classList.toggle('on', topupTab === 'sub');
+  const prods = PRODUCTS.filter(p => p.kind === (topupTab === 'pack' ? 'pack' : 'subscription'));
+  let head = '';
+  if (topupTab === 'sub') {
+    const opts = Object.values(SPECS).filter(s => !s.__offlineOnly);
+    head = `<p class="muted" style="margin-bottom:10px;">${t('الاشتراك مربوط بأخصائي واحد، ونقاطه تُستخدم معه فقط خلال الشهر.', 'A plan is tied to one specialist and its points are used only with them during the month.')}</p>
+      <select class="sel" id="topupSpec"><option value="">${t('اختر الأخصائي...', 'Choose a specialist...')}</option>${opts.map(s => `<option value="${esc(s.id)}"${s.id === topupSpec ? ' selected' : ''}>${esc(spName(s))}</option>`).join('')}</select>`;
+  }
+  $('topupBody').innerHTML = head + `<div class="prods">${prods.map(p => `
+    <div class="prod"><div><b>${nf(p.points)} ${t('نقطة', 'points')}</b><div class="muted" style="font-size:12.5px;">≈ ${nf(Math.floor(p.points / DEFAULT_RATE))} ${t('دقيقة', 'min')}${p.kind === 'subscription' ? ' · ' + t('شهرياً', 'monthly') : ''}</div></div>
+      <div style="display:flex; align-items:center; gap:14px;"><span class="pr">$${nf(p.price_usd)}</span><button class="btn gold sm" data-buy="${esc(p.id)}" type="button">${p.kind === 'subscription' ? t('اشترك', 'Subscribe') : t('اشحن', 'Buy')}</button></div></div>`).join('') || `<p class="muted">${t('لا توجد باقات الآن.', 'No packages available right now.')}</p>`}</div>`;
+  if ($('topupSpec')) $('topupSpec').addEventListener('change', (e) => { topupSpec = e.target.value; });
+  $('topupBody').querySelectorAll('[data-buy]').forEach(b => b.addEventListener('click', async () => {
+    const prod = PRODUCTS.find(p => p.id === b.dataset.buy);
+    if (prod.kind === 'subscription' && !topupSpec) { $('topupMsg').style.color = 'var(--alert)'; $('topupMsg').textContent = t('اختر الأخصائي أولاً.', 'Choose a specialist first.'); return; }
+    b.disabled = true; $('topupMsg').style.color = ''; $('topupMsg').textContent = t('جارٍ تحويلك إلى صفحة الدفع...', 'Taking you to the payment page...');
+    const { data, error } = await sb.functions.invoke('create-points-checkout', { body: { product_id: prod.id, specialist_id: topupSpec || undefined, lang: EN ? 'en' : 'ar' } });
+    if (error || !data || !data.url) {
+      let code = ''; try { code = (await error.context.json()).error; } catch (_) {}
+      $('topupMsg').style.color = 'var(--alert)';
+      $('topupMsg').textContent = code === 'already_subscribed' ? t('عندك اشتراك فعّال مع هذا الأخصائي.', 'You already have an active plan with this specialist.') : t('تعذّر فتح صفحة الدفع. حاول مرة أخرى.', 'Could not open the payment page. Please try again.');
+      b.disabled = false; return;
+    }
+    window.location.href = data.url;
+  }));
+}
+$('btnTopup').addEventListener('click', () => openTopup('pack'));
+$('btnPlans').addEventListener('click', () => openTopup('sub'));
+$('topupClose').addEventListener('click', closeTopup);
+$('tabPack').addEventListener('click', () => { topupTab = 'pack'; renderTopup(); });
+$('tabSub').addEventListener('click', () => { topupTab = 'sub'; renderTopup(); });
+
+// ---------- بدء محادثة ----------
+function askConsent() {
+  try { if (localStorage.getItem('bw_chat_consent') === '1') return Promise.resolve(true); } catch (_) {}
+  return new Promise((resolve) => {
+    $('consentModal').hidden = false;
+    const done = (v) => { $('consentModal').hidden = true; if (v) { try { localStorage.setItem('bw_chat_consent', '1'); } catch (_) {} } resolve(v); };
+    $('consentOk').onclick = () => done(true); $('consentNo').onclick = () => done(false);
+  });
+}
+async function startFlow(spId) {
+  const sp = SPECS[spId]; if (!sp) return;
+  if (!(await askConsent())) return;
+  const { data, error } = await sb.rpc('start_chat', { p_specialist: spId });
+  if (error) {
+    const m = error.message || '';
+    if (/no_points/.test(m)) { notice('warn', t('نقاطك لا تكفي لأول دقيقة. اشحن لتبدأ.', 'You do not have enough points for the first minute. Top up to start.')); openTopup('pack'); }
+    else if (/specialist_offline/.test(m)) notice('warn', t('الأخصائي غير متصل الآن.', 'The specialist is offline right now.'));
+    else notice('err', t('تعذّر بدء المحادثة.', 'Could not start the chat.'));
+    return;
+  }
+  await loadAll();
+  openThread(data.thread_id);
+}
+
+// ---------- المحادثة ----------
+function curSpec() { return CUR && SPECS[CUR.thread.specialist_id] || {}; }
+async function openThread(id) {
+  const th = THREADS.find(x => x.id === id); if (!th) return;
+  CUR = { thread: th, session: SESS[id] || null };
+  MSGS = []; lastMsgId = 0;
+  $('homeView').hidden = true; $('chatView').hidden = false; document.querySelector('.page-head').hidden = true; window.scrollTo({ top: 0 });
+  const s = curSpec();
+  $('chImg').src = s.photo_url || PLACEHOLDER; $('chName').textContent = spName(s); $('chSpec').textContent = spRole(s);
+  const { data } = await sb.from('chat_messages').select('*').eq('thread_id', id).order('id', { ascending: true }).limit(500);
+  (data || []).forEach(addMsg);
+  renderMsgs(); renderChatMeta();
+  subscribeChat();
+  clearInterval(pollT); clearInterval(secT); pollN = 0;
+  pollT = setInterval(pollChat, 4000);
+  secT = setInterval(renderBar, 1000);
+}
+function closeThread() {
+  if (chan) { sb.removeChannel(chan); chan = null; }
+  clearInterval(pollT); clearInterval(secT); CUR = null;
+  $('chatView').hidden = true; $('homeView').hidden = false; document.querySelector('.page-head').hidden = false;
+  loadAll();
+}
+function addMsg(m) {
+  if (m.id <= lastMsgId && MSGS.some(x => x.id === m.id)) return false;
+  if (MSGS.some(x => x.id === m.id)) return false;
+  MSGS.push(m); MSGS.sort((a, b) => a.id - b.id); lastMsgId = Math.max(lastMsgId, m.id); return true;
+}
+function renderMsgs() {
+  const box = $('msgs'); const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  box.innerHTML = MSGS.map(m => {
+    if (m.sender === 'system') return `<div class="msg sys">${esc(SYS[m.body] || m.body)}</div>`;
+    return `<div class="msg ${m.sender === 'user' ? 'me' : 'them'}">${esc(m.body)}<time>${fmtTime(m.created_at)}</time></div>`;
+  }).join('');
+  if (atBottom || MSGS.length < 3) box.scrollTop = box.scrollHeight;
+}
+function renderBar() {
+  if (!CUR) return;
+  const s = CUR.session, sp = curSpec();
+  const left = pointsFor(CUR.thread.specialist_id);
+  const parts = [t(`نقاطك: ${nf(left)}`, `Your points: ${nf(left)}`), t(`${nf(s ? s.rate_pts : (sp.chat_rate_pts || DEFAULT_RATE))} نقطة/دقيقة`, `${nf(s ? s.rate_pts : (sp.chat_rate_pts || DEFAULT_RATE))} pts/min`)];
+  if (s && s.state === 'active' && s.paid_until) {
+    const sec = Math.max(0, Math.round((new Date(s.paid_until) - Date.now()) / 1000));
+    parts.push(t(`الدقيقة التالية بعد ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`, `Next minute in ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`));
+  }
+  $('chBar').innerHTML = parts.map(p => `<span>${esc(p)}</span>`).join('');
+}
+function renderChatMeta() {
+  const s = CUR.session, st = s ? s.state : 'ended';
+  const pill = $('chState'); pill.textContent = STATE[st] || ''; pill.className = 'pill ' + st;
+  $('btnEnd').hidden = st === 'ended';
+  renderBar();
+  const b = $('banner'); b.hidden = true; b.className = 'ch-banner'; b.replaceChildren();
+  const add = (cls, text, btns) => {
+    b.className = 'ch-banner ' + cls; b.hidden = false;
+    const sp = document.createElement('span'); sp.textContent = text; b.appendChild(sp);
+    const box = document.createElement('span'); box.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap;';
+    (btns || []).forEach(([label, fn, gold]) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'btn sm' + (gold ? ' gold' : ' ghost'); x.textContent = label; x.addEventListener('click', fn); box.appendChild(x); });
+    b.appendChild(box);
+  };
+  const rate = s ? s.rate_pts : DEFAULT_RATE;
+  const left = pointsFor(CUR.thread.specialist_id);
+  const input = $('chInput'), send = $('btnSend');
+  input.disabled = send.disabled = (st === 'ended');
+  if (st === 'requested') add('info', t('بانتظار موافقة الأخصائي. لن تُخصم نقاط قبل القبول.', 'Waiting for the specialist. No points are charged before they accept.'), [[t('إلغاء الطلب', 'Cancel request'), endChat]]);
+  else if (st === 'paused' && s.pause_reason === 'no_points') add('err', t('نفدت نقاطك فتوقفت المحادثة. اشحن لتكمل نفس المحادثة.', 'You are out of points, so the chat paused. Top up to continue this same chat.'), [[t('اشحن', 'Top up'), () => openTopup('pack'), true], [t('متابعة', 'Resume'), resumeChat]]);
+  else if (st === 'paused') add('warn', t(`توقفت لعدم النشاط. المتابعة تخصم ${nf(rate)} نقاط للدقيقة.`, `Paused due to inactivity. Resuming charges ${nf(rate)} points per minute.`), [[t('متابعة', 'Resume'), resumeChat, true]]);
+  else if (st === 'active' && left <= rate * 3) add('warn', t(`نقاطك قاربت على الانتهاء (${nf(left)}). اشحن حتى لا تتوقف المحادثة.`, `You are running low (${nf(left)} points). Top up so the chat does not stop.`), [[t('اشحن', 'Top up'), () => openTopup('pack'), true]]);
+  else if (st === 'ended') add('info', t('انتهت هذه المحادثة.', 'This chat has ended.'), SPECS[CUR.thread.specialist_id] && SPECS[CUR.thread.specialist_id].chat_online && !SPECS[CUR.thread.specialist_id].__offlineOnly ? [[t('محادثة جديدة', 'New chat'), () => startFlow(CUR.thread.specialist_id), true]] : []);
+}
+async function pollChat() {
+  if (!CUR) return;
+  pollN++;
+  const id = CUR.thread.id;
+  const [m, s] = await Promise.all([
+    sb.from('chat_messages').select('*').eq('thread_id', id).gt('id', lastMsgId).order('id', { ascending: true }),
+    sb.from('chat_sessions').select('*').eq('thread_id', id).order('created_at', { ascending: false }).limit(1),
+  ]);
+  let changed = false;
+  (m.data || []).forEach(x => { if (addMsg(x)) changed = true; });
+  if (changed) renderMsgs();
+  const ns = s.data && s.data[0];
+  if (ns && JSON.stringify(ns) !== JSON.stringify(CUR.session)) { CUR.session = ns; SESS[id] = ns; renderChatMeta(); refreshWallet(); }
+  else if (pollN % 5 === 0) refreshWallet().then(renderBar);
+}
+function subscribeChat() {
+  if (chan) { sb.removeChannel(chan); chan = null; }
+  const id = CUR.thread.id;
+  chan = sb.channel('chat-' + id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `thread_id=eq.${id}` }, (p) => { if (addMsg(p.new)) renderMsgs(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions', filter: `thread_id=eq.${id}` }, (p) => {
+      if (p.new && CUR && (!CUR.session || p.new.created_at >= CUR.session.created_at)) { CUR.session = p.new; SESS[id] = p.new; renderChatMeta(); refreshWallet(); }
+    })
+    .subscribe();
+}
+async function sendMsg(body) {
+  const { error } = await sb.rpc('send_chat_message', { p_thread: CUR.thread.id, p_body: body });
+  if (error) {
+    const m = error.message || '';
+    if (/no_points/.test(m)) { notice('warn', t('نقاطك انتهت. اشحن لتكمل.', 'You are out of points. Top up to continue.')); openTopup('pack'); }
+    else if (/no_session/.test(m)) { notice('warn', t('لا توجد جلسة جارية. ابدأ محادثة جديدة.', 'There is no live session. Start a new chat.')); await pollChat(); }
+    else notice('err', t('تعذّر إرسال الرسالة.', 'Could not send the message.'));
+    return false;
+  }
+  await pollChat();
+  return true;
+}
+$('chForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const v = $('chInput').value.trim(); if (!v || !CUR) return;
+  $('btnSend').disabled = true;
+  const ok = await sendMsg(v);
+  if (ok) { $('chInput').value = ''; $('chInput').style.height = 'auto'; }
+  $('btnSend').disabled = !CUR || (CUR.session && CUR.session.state === 'ended');
+});
+$('chInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chForm').requestSubmit(); } });
+$('chInput').addEventListener('input', (e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px'; });
+async function resumeChat() {
+  const { data, error } = await sb.rpc('resume_chat', { p_session: CUR.session.id });
+  if (error || !data || !data.ok) { notice('warn', t('نقاطك لا تكفي للمتابعة. اشحن أولاً.', 'Not enough points to resume. Top up first.')); openTopup('pack'); return; }
+  await pollChat();
+}
+async function endChat() {
+  if (!CUR || !CUR.session) return;
+  if (!confirm(t('إنهاء المحادثة؟', 'End this chat?'))) return;
+  await sb.rpc('end_chat', { p_session: CUR.session.id });
+  await pollChat();
+}
+$('btnEnd').addEventListener('click', endChat);
+$('btnBack').addEventListener('click', closeThread);
+
+// ---------- البداية ----------
+async function init() {
+  $('loadingState').hidden = true;
+  const next = EN ? '/en/chat/' : '/chat/';
+  const gate = () => {
+    $('gate').hidden = false;
+    $('gateTitle').textContent = t('سجّل دخولك لتحصل على ١٠٠ نقطة هدية', 'Sign in to get 100 free points');
+    $('gateText').textContent = t('كل حساب جديد يحصل على ١٠٠ نقطة مجانية، تكفي لحوالي ١٠ دقائق محادثة مع أخصائي.', 'Every new account gets 100 free points, about 10 minutes of chat with a specialist.');
+    $('gateBtn').textContent = t('تسجيل الدخول / إنشاء حساب', 'Sign in / Create account');
+    $('gateBtn').href = (EN ? '/en/signup/' : '/signup/') + '?next=chat';
+  };
+  if (!sb) { gate(); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { gate(); return; }
+  ME = session.user;
+  $('app').hidden = false;
+  const { data: claim } = await sb.rpc('claim_welcome_points');
+  if (claim && claim.granted) notice('ok', t(`🎁 حصلت على ${nf(claim.points)} نقطة هدية! تكفي لحوالي ${nf(Math.floor(claim.points / DEFAULT_RATE))} دقائق محادثة.`, `🎁 You received ${nf(claim.points)} welcome points! About ${nf(Math.floor(claim.points / DEFAULT_RATE))} minutes of chat.`));
+  else if (claim && claim.reason === 'email_not_confirmed') notice('warn', t('أكّد بريدك الإلكتروني (من الرسالة التي وصلتك) لتحصل على ١٠٠ نقطة هدية.', 'Confirm your email (from the message we sent) to receive your 100 welcome points.'));
+  const q = new URLSearchParams(location.search);
+  if (q.get('paid') === '1') {
+    const n = notice('ok', t('تم الدفع. تُضاف نقاطك خلال لحظات...', 'Payment received. Your points are being added...'));
+    let tries = 0; const before = WALLET.general || 0;
+    const iv = setInterval(async () => { tries++; await refreshWallet(); if ((WALLET.general || 0) > before || (WALLET.subs || []).length || tries > 12) { clearInterval(iv); if (tries <= 12) n.textContent = t('✓ تمت إضافة نقاطك.', '✓ Your points were added.'); } }, 3000);
+  }
+  if (q.get('canceled') === '1') notice('warn', t('لم يكتمل الدفع.', 'The payment was not completed.'));
+  await loadAll();
+  const sp = q.get('sp');
+  if (sp && SPECS[sp] && !SPECS[sp].__offlineOnly) startFlow(sp);
+}
+init();
+</script>
+
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

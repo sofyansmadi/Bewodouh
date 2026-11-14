@@ -161,7 +161,7 @@ async function loadSpecialist(){
   // 'specialist' stays the original name (it is the booking key); 'label' is only for display
   document.getElementById('bookLink').href = '/en/sales-page/?specialist=' + encodeURIComponent(data.full_name) + '&label=' + encodeURIComponent(nm);
   BW.loadAvailability().then(by => {
-    document.getElementById('quickBook').innerHTML = BW.quickBook(by[data.id], document.getElementById('bookLink').getAttribute('href'));
+    document.getElementById('quickBook').innerHTML = BW.quickBook(by[data.id], document.getElementById('bookLink').getAttribute('href'), data);
   });
 
   loadingState.style.display = 'none';

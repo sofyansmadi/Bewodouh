@@ -155,7 +155,7 @@ async function loadSpecialist(){
   document.getElementById('bookName').textContent = data.full_name;
   document.getElementById('bookLink').href = '/sales-page/?specialist=' + encodeURIComponent(data.full_name);
   BW.loadAvailability().then(by => {
-    document.getElementById('quickBook').innerHTML = BW.quickBook(by[data.id], document.getElementById('bookLink').getAttribute('href'));
+    document.getElementById('quickBook').innerHTML = BW.quickBook(by[data.id], document.getElementById('bookLink').getAttribute('href'), data);
   });
 
   loadingState.style.display = 'none';

@@ -86,6 +86,21 @@
   .avatar{ width:96px; height:96px; border-radius:50%; object-fit:cover; background:var(--fog-dim); border:1px solid var(--fog-dim); }
   a.lnk{ color:#7D5F27; text-decoration:underline; font-weight:600; }
   .section-gap{ margin-top:22px; }
+  .cbox{ background:#fff; border:1px solid var(--fog-dim); border-radius:18px; display:flex; flex-direction:column; height:min(74vh, 660px); min-height:420px; overflow:hidden; }
+  .chead{ display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--fog-dim); }
+  .cbar{ background:var(--fog); font-size:12.5px; padding:7px 16px; color:var(--text-muted-light); display:flex; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--fog-dim); }
+  .cmsgs{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#FBF9F7; }
+  .cm{ max-width:82%; padding:10px 14px; border-radius:16px; font-size:14.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+  .cm.me{ align-self:flex-start; background:var(--ink); color:var(--fog); }
+  .cm.them{ align-self:flex-end; background:#fff; border:1px solid var(--fog-dim); }
+  .cm.sys{ align-self:center; max-width:92%; text-align:center; background:transparent; font-size:12.5px; color:var(--text-muted-light); padding:2px 8px; }
+  .cm time{ display:block; font-size:10.5px; opacity:.6; margin-top:2px; }
+  .cban{ padding:10px 16px; font-size:13.5px; border-top:1px solid var(--fog-dim); display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; background:#EEEAF6; color:var(--plum); }
+  .cban.warn{ background:#FDF8EE; color:#7D5F27; }
+  .cform{ display:flex; gap:10px; padding:12px; border-top:1px solid var(--fog-dim); align-items:flex-end; }
+  .cform textarea{ flex:1; border:1.5px solid var(--fog-dim); border-radius:14px; padding:10px 14px; font-family:inherit; font-size:14.5px; resize:none; max-height:120px; background:var(--fog); min-height:44px; }
+  .cform textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
+  .reqcard{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:#FDF8EE; border:1.5px solid #EBD9B5; border-radius:14px; padding:14px 18px; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -104,7 +119,7 @@
   <section id="portalView" class="hidden">
     <div style="margin-bottom:18px;"><h1 class="kufi" style="font-size:22px;" id="hello"></h1><div class="muted" id="helloSub"></div></div>
     <nav class="tabs" id="tabs"></nav>
-    <div id="tab-overview"></div><div id="tab-upcoming" class="hidden"></div><div id="tab-schedule" class="hidden"></div>
+    <div id="tab-overview"></div><div id="tab-upcoming" class="hidden"></div><div id="tab-schedule" class="hidden"></div><div id="tab-chat" class="hidden"></div>
     <div id="tab-past" class="hidden"></div><div id="tab-cancelled" class="hidden"></div><div id="tab-clients" class="hidden"></div><div id="tab-profile" class="hidden"></div>
   </section>
 </main>
@@ -154,8 +169,8 @@ $('unlinkedView').innerHTML = `
   <h1>${t('حسابك غير مرتبط بملف أخصائي', 'Your account is not linked to a specialist profile')}</h1>
   <p>${t('سجّلت الدخول، لكن هذا البريد غير مرتبط بأي ملف في فريق بوضوح. تأكد أنك دخلت بنفس البريد الذي قدّمت به طلب الانضمام، أو تواصل مع الإدارة على hello@bewoduh.com.', 'You are signed in, but this email is not linked to any profile in the Bewoduh team. Make sure you signed in with the email you used for your application, or contact us at hello@bewoduh.com.')}</p>
   <button class="btn full" id="unlinkedLogout" type="button">${t('تسجيل الخروج', 'Sign out')}</button>`;
-const TABS = [['overview', t('نظرة عامة', 'Overview')], ['upcoming', t('القادمة', 'Upcoming')], ['schedule', t('جدولي المتاح', 'My availability')], ['past', t('الجلسات السابقة', 'Past sessions')], ['cancelled', t('الملغاة', 'Cancelled')], ['clients', t('ملفات المراجعين', 'Client files')], ['profile', t('ملفي وبياناتي', 'My profile & details')]];
-$('tabs').innerHTML = TABS.map(([k, l], i) => `<button class="tab${i ? '' : ' active'}" data-tab="${k}">${l}${k === 'upcoming' ? ' <span class="count" id="cUpcoming">0</span>' : ''}</button>`).join('');
+const TABS = [['overview', t('نظرة عامة', 'Overview')], ['upcoming', t('القادمة', 'Upcoming')], ['schedule', t('جدولي المتاح', 'My availability')], ['chat', t('المحادثات', 'Chats')], ['past', t('الجلسات السابقة', 'Past sessions')], ['cancelled', t('الملغاة', 'Cancelled')], ['clients', t('ملفات المراجعين', 'Client files')], ['profile', t('ملفي وبياناتي', 'My profile & details')]];
+$('tabs').innerHTML = TABS.map(([k, l], i) => `<button class="tab${i ? '' : ' active'}" data-tab="${k}">${l}${k === 'upcoming' ? ' <span class="count" id="cUpcoming">0</span>' : ''}${k === 'chat' ? ' <span class="count hidden" id="cChat">0</span>' : ''}</button>`).join('');
 
 /* ---------- auth ---------- */
 function show(view){ ['loginView','unlinkedView','portalView'].forEach(v => $(v).classList.toggle('hidden', v !== view)); $('logoutBtn').classList.toggle('hidden', view === 'loginView'); }
@@ -185,6 +200,7 @@ async function start(){
   setHello();
   show('portalView');
   await loadAll();
+  chatInit();
   openTab(location.hash.slice(1) || 'overview');
 }
 function setHello(){
@@ -209,8 +225,162 @@ const past = () => BOOKINGS.filter(b => b.paid && !isCancelled(b) && new Date(b.
 const cancelled = () => BOOKINGS.filter(isCancelled);
 const counted = () => past().filter(b => b.outcome === 'completed' || b.outcome === 'client_no_show').sort((a, c) => new Date(a.preferred_datetime) - new Date(c.preferred_datetime));
 
+/* ---------- chat (paid live chat with clients) ---------- */
+const CFG = { point_usd: 0.05, specialist_share: 0.6 };
+const BASE_TITLE = document.title;
+let CH = { threads: [], sess: {}, reqs: [], cur: null, msgs: [], lastId: 0, earn: { usd: 0, usdMonth: 0, min: 0 }, inited: false };
+const SYSM = {
+  'sys:requested': t('طلب محادثة جديد', 'New chat request'), 'sys:started': t('بدأت المحادثة (تُحتسب أتعابك كل دقيقة)', 'Chat started (you earn per minute)'),
+  'sys:paused_idle': t('توقفت لعدم النشاط', 'Paused: inactivity'), 'sys:paused_no_points': t('توقفت: نقاط المراجع انتهت', 'Paused: client is out of points'),
+  'sys:resumed': t('تابع المراجع المحادثة', 'The client resumed the chat'), 'sys:ended': t('انتهت المحادثة', 'Chat ended'),
+  'sys:declined': t('اعتذرت عن الطلب', 'You declined the request'), 'sys:timeout': t('انتهت مهلة الطلب', 'The request timed out'), 'sys:ended_no_points': t('لم تبدأ: نقاط المراجع لا تكفي', 'Not started: client has too few points'),
+};
+const SST = { requested: t('طلب جديد', 'Request'), active: t('جارية', 'Live'), paused: t('متوقفة', 'Paused'), ended: t('انتهت', 'Ended') };
+const sBadge = (st) => `<span class="badge ${st === 'active' ? 'ok' : st === 'ended' ? 'grey' : ''}">${esc(SST[st] || st)}</span>`;
+
+async function chatRefresh(){
+  const [th, ss, ea, pr] = await Promise.all([
+    sb.from('chat_threads').select('*').eq('specialist_id', ME.id).order('last_message_at', { ascending: false, nullsFirst: false }),
+    sb.from('chat_sessions').select('*').eq('specialist_id', ME.id).order('created_at', { ascending: false }).limit(400),
+    sb.from('chat_earnings').select('usd,created_at').eq('specialist_id', ME.id).limit(10000),
+    sb.from('specialists').select('*').eq('id', ME.id).maybeSingle(),
+  ]);
+  if (pr.data) PROFILE = pr.data;
+  CH.threads = th.data || [];
+  CH.sess = {}; (ss.data || []).forEach(s => { if (!CH.sess[s.thread_id]) CH.sess[s.thread_id] = s; });
+  CH.reqs = (ss.data || []).filter(s => s.state === 'requested');
+  const ym = (d) => d.getFullYear() + '-' + d.getMonth(); const nowYm = ym(new Date());
+  CH.earn = { usd: 0, usdMonth: 0, min: (ea.data || []).length };
+  (ea.data || []).forEach(e => { CH.earn.usd += Number(e.usd); if (ym(new Date(e.created_at)) === nowYm) CH.earn.usdMonth += Number(e.usd); });
+  const n = CH.reqs.length, el = $('cChat');
+  if (el) { el.textContent = n; el.classList.toggle('hidden', !n); }
+  document.title = (n ? `(${n}) ` : '') + BASE_TITLE;
+}
+const chatTabVisible = () => !$('tab-chat').classList.contains('hidden');
+async function chatInit(){
+  if (CH.inited) return; CH.inited = true;
+  const { data: cfg } = await sb.from('chat_config').select('key,value');
+  (cfg || []).forEach(r => { CFG[r.key] = Number(r.value); });
+  await chatRefresh();
+  // نبضة حضور: ما دام الأخصائي «متاح» والصفحة مفتوحة، وإلا يصبح غير متصل تلقائياً بعد دقيقتين
+  setInterval(() => { if (PROFILE && PROFILE.chat_online) sb.from('specialists').update({ chat_seen_at: new Date().toISOString() }).eq('id', ME.id).then(() => {}); }, 30000);
+  setInterval(async () => {
+    await chatRefresh();
+    if (!chatTabVisible()) return;
+    if (CH.cur) pollThread(); else if (!document.activeElement || document.activeElement.id !== 'chOnline') renderChat();
+  }, 6000);
+  sb.channel('sp-chat-' + ME.id).on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions', filter: `specialist_id=eq.${ME.id}` }, async () => {
+    await chatRefresh();
+    if (chatTabVisible()) { if (CH.cur) pollThread(); else renderChat(); }
+  }).subscribe();
+}
+const perMin = () => PROFILE ? (PROFILE.chat_rate_pts * CFG.point_usd * CFG.specialist_share) : 0;
+
+async function renderChat(){
+  if (!CH.inited) await chatInit(); else await chatRefresh();
+  if (CH.cur) { renderThreadView(); return; }
+  const enabled = PROFILE && PROFILE.chat_enabled;
+  const stat = (n, l) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`;
+  $('tab-chat').innerHTML = `
+    <h2 class="title">${t('المحادثات', 'Chats')}</h2>
+    <p class="sub">${t('محادثات مباشرة مدفوعة بالدقيقة. عند «متاح» تصلك طلبات المراجعين هنا، وتُحتسب أتعابك من لحظة قبولك للطلب.', 'Live chats paid per minute. While you are available, client requests arrive here, and you earn from the moment you accept.')}</p>
+    ${!enabled ? `<div class="privacy">${t('خدمة المحادثة غير مفعّلة لحسابك بعد. تواصل مع إدارة بوضوح لتفعيلها.', 'Chat is not enabled for your account yet. Please contact the Bewoduh team to enable it.')}</div>` : `
+    <div class="card" style="margin-bottom:20px;">
+      <label class="row" style="gap:12px; cursor:pointer;"><input type="checkbox" id="chOnline" ${PROFILE.chat_online ? 'checked' : ''} style="width:20px; height:20px;"><b>${t('متاح للمحادثة الآن', 'Available for chat now')}</b></label>
+      <div class="muted" style="margin-top:8px;">${t(`سعر الدقيقة: ${PROFILE.chat_rate_pts} نقطة، وأتعابك ≈ $${perMin().toFixed(2)} للدقيقة. أبقِ هذه الصفحة مفتوحة وأنت متاح، وإلا تصبح غير متصل تلقائياً بعد دقيقتين.`, `Rate: ${PROFILE.chat_rate_pts} points per minute, your fee ≈ $${perMin().toFixed(2)} per minute. Keep this page open while available, otherwise you go offline automatically after two minutes.`)}</div>
+      <div class="msg" id="chMsg"></div>
+    </div>`}
+    <div class="stats">${stat('$' + CH.earn.usdMonth.toFixed(2), t('أتعاب المحادثات هذا الشهر', 'Chat fees this month'))}${stat('$' + CH.earn.usd.toFixed(2), t('إجمالي أتعاب المحادثات', 'Total chat fees'))}${stat(CH.earn.min, t('دقائق محادثة مدفوعة', 'Paid chat minutes'))}</div>
+    ${CH.reqs.length ? `<h3 class="kufi" style="font-size:16px; margin:6px 0 10px;">${t('طلبات المحادثة', 'Chat requests')}</h3>` + CH.reqs.map(s => {
+      const th = CH.threads.find(x => x.id === s.thread_id) || {};
+      return `<div class="reqcard"><div><b>${esc(th.user_name || t('مراجع', 'Client'))}</b><div class="muted">${t('يطلب محادثة الآن', 'Requesting a chat now')} · ${fmtT(s.created_at)}</div></div>
+        <div class="row"><button class="btn" data-acc="${esc(s.id)}" type="button">${t('قبول', 'Accept')}</button><button class="btn2 danger" data-dec="${esc(s.id)}" type="button">${t('اعتذار', 'Decline')}</button></div></div>`;
+    }).join('') : ''}
+    <h3 class="kufi" style="font-size:16px; margin:22px 0 10px;">${t('محادثاتي', 'My chats')}</h3>
+    ${CH.threads.length ? table([t('المراجع', 'Client'), t('الحالة', 'Status'), t('آخر نشاط', 'Last activity'), ''], CH.threads.map(th => {
+      const s = CH.sess[th.id]; return `<tr><td><b>${esc(th.user_name || t('مراجع', 'Client'))}</b></td><td>${sBadge(s ? s.state : 'ended')}</td><td class="muted">${th.last_message_at ? fmtDT(th.last_message_at) : '—'}</td><td><button class="btn2" data-open="${esc(th.id)}" type="button">${t('فتح', 'Open')}</button></td></tr>`;
+    })) : `<div class="empty">${t('لا محادثات بعد.', 'No chats yet.')}</div>`}`;
+  const on = $('chOnline');
+  if (on) on.addEventListener('change', async () => {
+    const { error } = await sb.from('specialists').update({ chat_online: on.checked, chat_seen_at: new Date().toISOString() }).eq('id', ME.id);
+    const m = $('chMsg'); m.className = 'msg' + (error ? ' err' : ' ok');
+    m.textContent = error ? t('تعذّر التحديث.', 'Could not update.') : (on.checked ? t('أنت متاح الآن للمراجعين.', 'You are now available to clients.') : t('أنت غير متاح.', 'You are now unavailable.'));
+    if (!error) PROFILE.chat_online = on.checked;
+  });
+  $('tab-chat').querySelectorAll('[data-acc]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true;
+    const { data, error } = await sb.rpc('accept_chat', { p_session: b.dataset.acc });
+    if (error) { alert(t('تعذّر قبول الطلب (ربما انتهت مهلته).', 'Could not accept (it may have expired).')); }
+    else if (data && !data.ok) { alert(t('لا تكفي نقاط المراجع لبدء المحادثة، فأُلغي الطلب.', 'The client does not have enough points, so the request was cancelled.')); }
+    await chatRefresh();
+    if (!error && data && data.ok) { const s = CH.reqs.length ? null : null; const sess = (await sb.from('chat_sessions').select('thread_id').eq('id', b.dataset.acc).maybeSingle()).data; if (sess) { openThreadView(sess.thread_id); return; } }
+    renderChat();
+  }));
+  $('tab-chat').querySelectorAll('[data-dec]').forEach(b => b.addEventListener('click', async () => { b.disabled = true; await sb.rpc('decline_chat', { p_session: b.dataset.dec }); await chatRefresh(); renderChat(); }));
+  $('tab-chat').querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openThreadView(b.dataset.open)));
+}
+
+async function openThreadView(id){
+  const th = CH.threads.find(x => x.id === id) || (await sb.from('chat_threads').select('*').eq('id', id).maybeSingle()).data;
+  if (!th) return;
+  if (!CH.threads.find(x => x.id === id)) CH.threads.unshift(th);
+  CH.cur = { thread: th, session: CH.sess[id] || null }; CH.msgs = []; CH.lastId = 0;
+  const { data } = await sb.from('chat_messages').select('*').eq('thread_id', id).order('id', { ascending: true }).limit(500);
+  (data || []).forEach(m => { CH.msgs.push(m); CH.lastId = Math.max(CH.lastId, m.id); });
+  openTab('chat');
+}
+function renderThreadView(){
+  const c = CH.cur;
+  $('tab-chat').innerHTML = `
+    <button class="btn2" id="chBack" type="button" style="margin-bottom:14px;">${t('→ كل المحادثات', '← All chats')}</button>
+    <div class="cbox">
+      <div class="chead"><div style="flex:1; min-width:0;"><b>${esc(c.thread.user_name || t('مراجع', 'Client'))}</b></div><span id="chSt"></span><button class="btn2 danger" id="chEnd" type="button">${t('إنهاء', 'End')}</button></div>
+      <div class="cbar" id="chBar"></div>
+      <div class="cmsgs" id="chMsgs"></div>
+      <div class="cban warn" id="chBan" style="display:none;"></div>
+      <form class="cform" id="chForm"><textarea id="chInput" rows="1" maxlength="2000" placeholder="${t('اكتب رسالتك...', 'Type your message...')}"></textarea><button class="btn" id="chSend" type="submit">${t('إرسال', 'Send')}</button></form>
+    </div>`;
+  $('chBack').addEventListener('click', () => { CH.cur = null; renderChat(); });
+  $('chEnd').addEventListener('click', async () => { if (!CH.cur.session || !confirm(t('إنهاء المحادثة؟', 'End this chat?'))) return; await sb.rpc('end_chat', { p_session: CH.cur.session.id }); await pollThread(); });
+  $('chForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); const v = $('chInput').value.trim(); if (!v) return;
+    $('chSend').disabled = true;
+    const { error } = await sb.rpc('send_chat_message', { p_thread: CH.cur.thread.id, p_body: v });
+    $('chSend').disabled = false;
+    if (error) { alert(t('تعذّر الإرسال. ربما انتهت الجلسة.', 'Could not send. The session may have ended.')); } else { $('chInput').value = ''; }
+    await pollThread();
+  });
+  $('chInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chForm').requestSubmit(); } });
+  renderThreadParts();
+}
+function renderThreadParts(){
+  const c = CH.cur; if (!c || !$('chMsgs')) return;
+  const s = c.session, st = s ? s.state : 'ended';
+  $('chSt').innerHTML = sBadge(st);
+  $('chEnd').style.display = st === 'ended' ? 'none' : '';
+  $('chInput').disabled = $('chSend').disabled = !(st === 'active' || st === 'paused');
+  const earned = s ? (s.points_spent * CFG.point_usd * CFG.specialist_share) : 0;
+  $('chBar').innerHTML = s ? `<span>${t('دقائق مدفوعة', 'Paid minutes')}: ${s.minutes_billed}</span><span>${t('أتعاب هذه الجلسة', 'This session')}: ≈ $${earned.toFixed(2)}</span>` : '';
+  const ban = $('chBan');
+  const msgs = { requested: t('طلب جديد: اقبله من قائمة المحادثات لتبدأ.', 'New request: accept it from the chats list to start.'), paused: s && s.pause_reason === 'no_points' ? t('توقفت المحادثة لأن نقاط المراجع انتهت. تُستأنف عندما يشحن.', 'Paused: the client is out of points. It resumes when they top up.') : t('توقفت مؤقتاً لعدم النشاط. تُستأنف عندما يكتب المراجع رسالة.', 'Paused due to inactivity. It resumes when the client sends a message.') };
+  ban.style.display = msgs[st] ? '' : 'none'; ban.textContent = msgs[st] || '';
+  const box = $('chMsgs'); const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  box.innerHTML = CH.msgs.map(m => m.sender === 'system' ? `<div class="cm sys">${esc(SYSM[m.body] || m.body)}</div>` : `<div class="cm ${m.sender === 'specialist' ? 'me' : 'them'}">${esc(m.body)}<time>${fmtT(m.created_at)}</time></div>`).join('');
+  if (atBottom || CH.msgs.length < 3) box.scrollTop = box.scrollHeight;
+}
+async function pollThread(){
+  const c = CH.cur; if (!c) return;
+  const [m, s] = await Promise.all([
+    sb.from('chat_messages').select('*').eq('thread_id', c.thread.id).gt('id', CH.lastId).order('id', { ascending: true }),
+    sb.from('chat_sessions').select('*').eq('thread_id', c.thread.id).order('created_at', { ascending: false }).limit(1),
+  ]);
+  (m.data || []).forEach(x => { if (!CH.msgs.some(y => y.id === x.id)) { CH.msgs.push(x); CH.lastId = Math.max(CH.lastId, x.id); } });
+  if (s.data && s.data[0]) { c.session = s.data[0]; CH.sess[c.thread.id] = s.data[0]; }
+  renderThreadParts();
+}
+
 /* ---------- tabs ---------- */
-const RENDER = { overview: renderOverview, upcoming: renderUpcoming, schedule: renderSchedule, past: renderPast, cancelled: renderCancelled, clients: renderClients, profile: renderProfile };
+const RENDER = { overview: renderOverview, upcoming: renderUpcoming, schedule: renderSchedule, chat: renderChat, past: renderPast, cancelled: renderCancelled, clients: renderClients, profile: renderProfile };
 function openTab(name){
   if (!RENDER[name]) name = 'overview';
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));

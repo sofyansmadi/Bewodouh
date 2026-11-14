@@ -184,6 +184,7 @@
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="packages">الباقات والأسعار</button>
         <button class="admin-tab" data-tab="promos">أكواد الخصم</button>
+        <button class="admin-tab" data-tab="points">النقاط والمحادثات</button>
         <button class="admin-tab" data-tab="articles">المقالات</button>
         <button class="admin-tab" data-tab="bookings">الحجوزات</button>
         <button class="admin-tab" data-tab="team">الفريق</button>
@@ -392,6 +393,71 @@
       <table>
         <thead><tr><th>الكود</th><th>الخصم</th><th>الشروط</th><th>الاستخدام</th><th>الحالة</th><th></th></tr></thead>
         <tbody id="promosTableBody"><tr><td colspan="6">جارٍ التحميل...</td></tr></tbody>
+      </table>
+      </div>
+
+      <div id="tab-points" class="admin-tab-panel" style="display:none;">
+      <h2 class="section-title">النقاط والمحادثات</h2>
+      <p class="section-sub">نظام النقاط: كل مسجّل جديد يحصل على هدية، ويستهلكها بالدقيقة بمحادثة لحظية مع أخصائي مفعّل له الشات. أجر الأخصائي = النقاط المستهلكة × سعر النقطة × نسبة الأخصائي. لا يقرأ الأدمن محتوى المحادثات، فقط الأرقام.</p>
+
+      <div id="ptStats" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:24px;"></div>
+
+      <div class="form-card" style="margin-bottom:24px;">
+        <h3>الإعدادات</h3>
+        <p class="section-sub" style="margin-top:-8px;">«سعر النقطة» و«نسبة الأخصائي» تُستخدمان لحساب أجر الأخصائي والإحصائيات فقط. أسعار الباقات للزبائن تحدّدها قائمة الباقات تحت. أي تغيير هنا يسري على الجديد فقط.</p>
+        <form id="ptCfgForm">
+          <div class="form-grid" id="ptCfgGrid"></div>
+          <div class="form-actions"><button type="submit" class="btn-primary" style="width:auto; padding:12px 28px;">حفظ الإعدادات</button></div>
+          <div class="status-msg" id="ptCfgStatus"></div>
+        </form>
+      </div>
+
+      <h3 class="section-title" style="font-size:17px;">أخصائيو المحادثة</h3>
+      <p class="section-sub">فعّل الشات لمن تريد، وحدّد سعر الدقيقة بالنقاط (اقتراح: مدرب ٨، مرشد ١٠، أخصائي ١٣). الأخصائي يتحكم بحالة «متاح» من بوابته.</p>
+      <table>
+        <thead><tr><th>الأخصائي</th><th>الشات مفعّل</th><th>نقاط/دقيقة</th><th>أجره/دقيقة</th><th>الحالة</th></tr></thead>
+        <tbody id="ptSpecBody"><tr><td colspan="5">جارٍ التحميل...</td></tr></tbody>
+      </table>
+
+      <h3 class="section-title" style="font-size:17px; margin-top:34px;">باقات الشحن والاشتراكات</h3>
+      <table>
+        <thead><tr><th>النوع</th><th>الاسم</th><th>النقاط</th><th>السعر</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="ptProdBody"><tr><td colspan="6">جارٍ التحميل...</td></tr></tbody>
+      </table>
+      <div class="form-card" style="margin-top:16px;">
+        <h3>إضافة باقة</h3>
+        <form id="ptProdForm">
+          <div class="form-grid">
+            <div class="field"><label for="ppKind">النوع</label><select id="ppKind" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"><option value="pack">شحن مرة وحدة</option><option value="subscription">اشتراك شهري (مربوط بأخصائي)</option></select></div>
+            <div class="field"><label for="ppPoints">عدد النقاط</label><input type="number" id="ppPoints" min="1" required></div>
+            <div class="field"><label for="ppName">الاسم (عربي)</label><input type="text" id="ppName" required></div>
+            <div class="field"><label for="ppNameEn">الاسم (إنجليزي)</label><input type="text" id="ppNameEn" style="direction:ltr; text-align:left;"></div>
+            <div class="field"><label for="ppPrice">السعر بالدولار</label><input type="number" id="ppPrice" min="1" step="0.01" required></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn-primary" style="width:auto; padding:12px 28px;">إضافة</button></div>
+          <div class="status-msg" id="ptProdStatus"></div>
+        </form>
+      </div>
+
+      <div class="form-card" style="margin-top:24px;">
+        <h3>منح نقاط لمستخدم</h3>
+        <p class="section-sub" style="margin-top:-8px;">تُضاف كنقاط هدية (تنتهي بنفس مدة نقاط الترحيب). للتعويض أو العروض الخاصة.</p>
+        <form id="ptGrantForm">
+          <div class="form-grid">
+            <div class="field"><label for="pgEmail">بريد المستخدم</label><input type="email" id="pgEmail" required style="direction:ltr; text-align:left;"></div>
+            <div class="field"><label for="pgPoints">النقاط</label><input type="number" id="pgPoints" min="1" max="100000" required></div>
+            <div class="field full"><label for="pgNote">ملاحظة داخلية (اختياري)</label><input type="text" id="pgNote" maxlength="100"></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn-primary" style="width:auto; padding:12px 28px;">منح النقاط</button></div>
+          <div class="status-msg" id="ptGrantStatus"></div>
+        </form>
+      </div>
+
+      <h3 class="section-title" style="font-size:17px; margin-top:34px;">أرباح الأخصائيين من المحادثات</h3>
+      <p class="section-sub">تُحسب من الدقائق المدفوعة. التسوية الشهرية حسب العقد.</p>
+      <table>
+        <thead><tr><th>الأخصائي</th><th>دقائق هذا الشهر</th><th>أجر هذا الشهر</th><th>إجمالي الأجر</th><th>منها من نقاط الهدية</th></tr></thead>
+        <tbody id="ptEarnBody"><tr><td colspan="5">جارٍ التحميل...</td></tr></tbody>
       </table>
       </div>
 
@@ -766,7 +832,7 @@ const dashboard = document.getElementById('dashboard');
 const logoutBtn = document.getElementById('logoutBtn');
 const loginError = document.getElementById('loginError');
 
-const TAB_PERMISSION = { packages: 'packages', promos: 'packages', articles: 'articles', bookings: 'bookings', team: 'team', applications: 'applications', slots: 'slots', users: 'users', 'static-pages': 'pages', exercises: 'exercises', admins: 'super' };
+const TAB_PERMISSION = { packages: 'packages', promos: 'packages', points: 'packages', articles: 'articles', bookings: 'bookings', team: 'team', applications: 'applications', slots: 'slots', users: 'users', 'static-pages': 'pages', exercises: 'exercises', admins: 'super' };
 const PERMISSION_LABELS = { bookings: 'الحجوزات', applications: 'طلبات الانضمام', team: 'الفريق (الأخصائيون)', slots: 'المواعيد المتاحة', articles: 'المقالات', packages: 'الباقات والأسعار', pages: 'الصفحات الثابتة (الشروط والخصوصية والأسئلة)', exercises: 'تمارين يومية', users: 'قائمة المستخدمين' };
 let ADMIN_ACCESS = { is_admin: false, is_super: false, permissions: [] };
 const canAccess = (tab) => ADMIN_ACCESS.is_super || (TAB_PERMISSION[tab] !== 'super' && ADMIN_ACCESS.permissions.includes(TAB_PERMISSION[tab]));
@@ -955,6 +1021,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     if (tab.dataset.tab === 'applications') loadApplications();
     if (tab.dataset.tab === 'slots') loadSlots();
     if (tab.dataset.tab === 'promos') loadPromos();
+    if (tab.dataset.tab === 'points') loadPoints();
     if (tab.dataset.tab === 'admins') loadAdmins();
     if (tab.dataset.tab === 'users') loadUsers();
     if (tab.dataset.tab === 'static-pages') loadStaticPage('privacy');
@@ -1540,6 +1607,97 @@ document.getElementById('adminRoleForm').addEventListener('submit', async (e) =>
   adminFormStatus.classList.add('active', 'success');
   resetAdminForm();
   loadAdmins();
+});
+
+// ---------- Points & chat ----------
+const PT_CFG_LABELS = {
+  free_points: 'نقاط الهدية للمسجّل الجديد', free_expiry_days: 'صلاحية نقاط الهدية (أيام)',
+  point_usd: 'سعر النقطة بالدولار (لحساب أجر الأخصائي)', specialist_share: 'نسبة الأخصائي من قيمة النقاط (٠ إلى ١)',
+  idle_seconds: 'ثواني الخمول قبل إيقاف الشات', request_ttl_seconds: 'مهلة قبول الأخصائي للطلب (ثواني)',
+};
+async function loadPoints(){
+  const { data: ov, error: ovErr } = await supabaseClient.rpc('admin_chat_overview');
+  const box = document.getElementById('ptStats');
+  if (ovErr || !ov) { box.textContent = 'تعذّر تحميل الإحصائيات.'; console.error(ovErr); }
+  else {
+    const card = (n, l, hi) => `<div style="background:#fff; border:1px solid var(--fog-dim); border-radius:14px; padding:16px;${hi ? ' border-color:var(--clarity);' : ''}"><b style="display:block; font-family:'Noto Kufi Arabic',sans-serif; font-size:24px;">${n}</b><span style="font-size:12.5px; color:var(--text-muted-light);">${l}</span></div>`;
+    box.innerHTML = card(esc(ov.welcome_claims), 'مسجّلون استلموا الهدية') + card(esc(ov.free_granted), 'نقاط هدية ممنوحة') + card(esc(ov.free_left), 'نقاط هدية متبقية (قيد الصلاحية)')
+      + card(esc(ov.minutes), 'دقائق محادثة مدفوعة') + card('$' + esc(ov.specialists_usd), 'مستحقات الأخصائيين الكلية')
+      + card('$' + esc(ov.free_funded_usd), 'منها ممولة من الهدايا (كلفة تسويق عليك)', true) + card(esc(ov.active_sessions), 'محادثات جارية الآن');
+  }
+
+  // الإعدادات
+  const { data: cfg } = await supabaseClient.from('chat_config').select('key,value');
+  const grid = document.getElementById('ptCfgGrid');
+  grid.innerHTML = Object.entries(PT_CFG_LABELS).map(([k, label]) => {
+    const row = (cfg || []).find(r => r.key === k);
+    return `<div class="field"><label for="cfg_${k}">${esc(label)}</label><input type="number" step="any" id="cfg_${k}" data-cfg="${k}" value="${row ? esc(row.value) : ''}" required></div>`;
+  }).join('');
+
+  // الأخصائيون
+  const { data: sp } = await supabaseClient.from('specialists').select('id, full_name, is_published, chat_enabled, chat_online, chat_rate_pts').order('sort_order', { ascending: true });
+  const share = Number((cfg || []).find(r => r.key === 'specialist_share')?.value ?? 0.6), pusd = Number((cfg || []).find(r => r.key === 'point_usd')?.value ?? 0.05);
+  document.getElementById('ptSpecBody').innerHTML = (sp || []).map(x => `<tr>
+    <td>${esc(x.full_name)}${x.is_published ? '' : ' <span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">مخفي</span>'}</td>
+    <td><input type="checkbox" data-pt-enable="${esc(x.id)}" ${x.chat_enabled ? 'checked' : ''} style="width:18px; height:18px;"></td>
+    <td><input type="number" min="1" max="100" value="${esc(x.chat_rate_pts)}" data-pt-rate="${esc(x.id)}" style="width:80px; border:1px solid var(--fog-dim); border-radius:8px; padding:6px 8px;"></td>
+    <td>≈ $${(x.chat_rate_pts * pusd * share).toFixed(2)}</td>
+    <td>${x.chat_online ? '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">متصل الآن</span>' : '—'}</td></tr>`).join('') || '<tr><td colspan="5">لا يوجد أخصائيون.</td></tr>';
+  const upd = async (id, patch) => { const { error } = await supabaseClient.from('specialists').update(patch).eq('id', id); if (error) { alert('تعذّر الحفظ: ' + error.message); loadPoints(); } };
+  document.querySelectorAll('[data-pt-enable]').forEach(el => el.addEventListener('change', () => upd(el.dataset.ptEnable, el.checked ? { chat_enabled: true } : { chat_enabled: false, chat_online: false })));
+  document.querySelectorAll('[data-pt-rate]').forEach(el => el.addEventListener('change', () => { const v = parseInt(el.value, 10); if (v >= 1 && v <= 100) upd(el.dataset.ptRate, { chat_rate_pts: v }).then(loadPoints); }));
+
+  // الباقات
+  const { data: prods } = await supabaseClient.from('point_products').select('*').order('sort_order', { ascending: true });
+  document.getElementById('ptProdBody').innerHTML = (prods || []).map(p => `<tr>
+    <td>${p.kind === 'pack' ? 'شحن' : 'اشتراك شهري'}</td><td>${esc(p.name)}${p.name_en ? '<div style="font-size:12px; color:var(--text-muted-light); direction:ltr; text-align:right;">' + esc(p.name_en) + '</div>' : ''}</td>
+    <td>${esc(p.points)}</td><td>$${esc(p.price_usd)}</td>
+    <td>${p.active ? '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">منشور</span>' : '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">مخفي</span>'}<br><button type="button" class="btn-secondary" data-pt-toggle="${esc(p.id)}" data-next="${p.active ? '0' : '1'}" style="margin-top:6px; padding:4px 10px; font-size:11.5px;">${p.active ? 'إخفاء' : 'نشر'}</button></td>
+    <td><button class="icon-btn danger" title="حذف" data-pt-del="${esc(p.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button></td></tr>`).join('') || '<tr><td colspan="6">لا توجد باقات.</td></tr>';
+  document.querySelectorAll('[data-pt-toggle]').forEach(b => b.addEventListener('click', async () => { await supabaseClient.from('point_products').update({ active: b.dataset.next === '1' }).eq('id', b.dataset.ptToggle); loadPoints(); }));
+  document.querySelectorAll('[data-pt-del]').forEach(b => b.addEventListener('click', async () => { if (!confirm('حذف الباقة؟ (الأفضل إخفاؤها إن كان فيها مشتركون)')) return; await supabaseClient.from('point_products').delete().eq('id', b.dataset.ptDel); loadPoints(); }));
+
+  // الأرباح
+  const { data: earn } = await supabaseClient.from('chat_earnings').select('specialist_id, usd, free_points, created_at').limit(20000);
+  const names = Object.fromEntries((sp || []).map(x => [x.id, x.full_name]));
+  const ym = (d) => d.getFullYear() + '-' + d.getMonth(); const nowYm = ym(new Date());
+  const agg = {};
+  (earn || []).forEach(e => { const a = agg[e.specialist_id] = agg[e.specialist_id] || { minM: 0, usdM: 0, usd: 0, free: 0 }; const m = ym(new Date(e.created_at)) === nowYm; a.usd += Number(e.usd); a.free += Number(e.free_points) * pusd * share; if (m) { a.minM++; a.usdM += Number(e.usd); } });
+  const rows = Object.entries(agg).sort((a, b) => b[1].usd - a[1].usd);
+  document.getElementById('ptEarnBody').innerHTML = rows.map(([id, a]) => `<tr><td>${esc(names[id] || id)}</td><td>${a.minM}</td><td>$${a.usdM.toFixed(2)}</td><td>$${a.usd.toFixed(2)}</td><td>$${a.free.toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5">لا أرباح بعد.</td></tr>';
+}
+
+document.getElementById('ptCfgForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const st = document.getElementById('ptCfgStatus'); st.classList.remove('active', 'success', 'error');
+  const rows = [...document.querySelectorAll('[data-cfg]')].map(i => ({ key: i.dataset.cfg, value: Number(i.value) }));
+  const bad = rows.find(r => !Number.isFinite(r.value) || r.value < 0 || (r.key === 'specialist_share' && r.value > 1) || (['free_points', 'free_expiry_days', 'idle_seconds', 'request_ttl_seconds'].includes(r.key) && r.value < 1));
+  if (bad) { st.textContent = 'قيمة غير صالحة: ' + (PT_CFG_LABELS[bad.key] || bad.key); st.classList.add('active', 'error'); return; }
+  const { error } = await supabaseClient.from('chat_config').upsert(rows, { onConflict: 'key' });
+  st.textContent = error ? 'تعذّر الحفظ: ' + error.message : 'تم حفظ الإعدادات.'; st.classList.add('active', error ? 'error' : 'success');
+  if (!error) loadPoints();
+});
+document.getElementById('ptProdForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const st = document.getElementById('ptProdStatus'); st.classList.remove('active', 'success', 'error');
+  const { data: last } = await supabaseClient.from('point_products').select('sort_order').order('sort_order', { ascending: false }).limit(1);
+  const { error } = await supabaseClient.from('point_products').insert({
+    kind: document.getElementById('ppKind').value, name: document.getElementById('ppName').value.trim(), name_en: document.getElementById('ppNameEn').value.trim() || null,
+    points: parseInt(document.getElementById('ppPoints').value, 10), price_usd: Number(document.getElementById('ppPrice').value), sort_order: (last && last[0] ? last[0].sort_order : 0) + 1,
+  });
+  st.textContent = error ? 'تعذّرت الإضافة: ' + error.message : 'تمت إضافة الباقة.'; st.classList.add('active', error ? 'error' : 'success');
+  if (!error) { document.getElementById('ptProdForm').reset(); loadPoints(); }
+});
+document.getElementById('ptGrantForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const st = document.getElementById('ptGrantStatus'); st.classList.remove('active', 'success', 'error');
+  const email = document.getElementById('pgEmail').value.trim(), pts = parseInt(document.getElementById('pgPoints').value, 10);
+  if (!confirm('منح ' + pts + ' نقطة إلى ' + email + '؟')) return;
+  const { data, error } = await supabaseClient.rpc('admin_grant_points', { p_email: email, p_points: pts, p_note: document.getElementById('pgNote').value.trim() || null });
+  const ok = !error && data && data.ok;
+  st.textContent = ok ? 'تم منح النقاط.' : (data && data.reason === 'no_user' ? 'لا يوجد مستخدم بهذا البريد.' : 'تعذّر المنح' + (error ? ': ' + error.message : '.'));
+  st.classList.add('active', ok ? 'success' : 'error');
+  if (ok) { document.getElementById('ptGrantForm').reset(); loadPoints(); }
 });
 
 // ---------- Promo codes ----------

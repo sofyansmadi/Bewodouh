@@ -11,7 +11,7 @@
   const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
   const get = (q) => fetch(BASE + q, { headers: H }).then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))));
 
-  const COLS = 'id,slug,full_name,full_name_en,specialty,specialty_en,short_bio,short_bio_en,bio,bio_en,photo_url,sort_order,years_experience';
+  const COLS = 'id,slug,full_name,full_name_en,specialty,specialty_en,short_bio,short_bio_en,bio,bio_en,photo_url,sort_order,years_experience,chat_enabled,chat_online,chat_rate_pts';
   const loadTeam = () => get('specialists?select=' + COLS + '&is_published=eq.true&order=sort_order.asc');
 
   // أقرب المواعيد غير المحجوزة (بعد ٢٤ ساعة، كما تفرض صفحة الحجز) مجمّعة حسب الأخصائي
@@ -72,6 +72,7 @@
         <div class="specialist-role">${esc(l.specialty)}</div>
         <p class="specialist-bio">${esc(snippet(l))}</p>
         ${availTag(slots)}
+        ${(sp.chat_enabled && sp.chat_online) ? `<div class="avail"><span class="dot"></span><span>💬 ${t('متاح للمحادثة الآن', 'Available to chat now')}</span></div>` : ''}
       </div></a>`;
   }
   async function teamPage(gridEl, filtersEl) {
@@ -124,9 +125,17 @@
   }
 
   // ---------- صفحة الأخصائي: بطاقة الحجز السريع ----------
-  function quickBook(slots, href) {
+  function chatBlock(sp) {
+    if (!sp || !sp.chat_enabled) return '';
+    const link = (EN ? '/en/chat/' : '/chat/') + '?sp=' + encodeURIComponent(sp.id);
+    const on = !!sp.chat_online;
+    return `<div class="qb-chat"><div class="qb-t">💬 ${t('محادثة مباشرة بالنقاط', 'Live chat with points')}</div>
+      <p class="qb-none">${on ? t('متصل الآن', 'Online now') : t('غير متصل حالياً', 'Offline right now')} · ${sp.chat_rate_pts} ${t('نقطة/دقيقة', 'points/min')} · ${t('١٠٠ نقطة هدية عند التسجيل (≈ ١٠ دقائق)', '100 free points when you sign up (≈ 10 minutes)')}</p>
+      <a class="qb-btn" style="${on ? '' : 'opacity:.75;'}" href="${link}">${on ? t('ابدأ محادثة', 'Start a chat') : t('افتح صفحة المحادثة', 'Open the chat page')}</a></div>`;
+  }
+  function quickBook(slots, href, sp) {
     const chips = (slots || []).slice(0, 4).map(s => `<a class="qb-chip" href="${href}">${esc(fmtSlot(s))}</a>`).join('');
-    return `<div class="qb">
+    return `${chatBlock(sp)}<div class="qb">
       <div class="qb-t">${(slots && slots.length) ? t('أقرب المواعيد المتاحة', 'Next available times') : t('المواعيد', 'Availability')}</div>
       ${(slots && slots.length)
         ? `<div class="qb-chips">${chips}</div>`
@@ -172,6 +181,8 @@
   .qb-btn{ display:block; text-align:center; background:var(--ink,#241D2E); color:var(--fog,#F3EEEA); font-weight:700; font-size:15px; padding:13px 20px; border-radius:100px; text-decoration:none; }
   .qb-ul{ list-style:none; padding:0; margin:14px 0 0; display:grid; gap:5px; font-size:13px; color:var(--text-muted-light,#6B6072); }
   .qb-ul li::before{ content:'✓'; color:#3C8C5A; font-weight:900; margin-inline-end:8px; }
+  .qb-chat{ background:#EEEAF6; border:1.5px solid #D9D0EA; border-radius:18px; padding:18px 20px; margin:0 0 14px; }
+  .qb-chat .qb-none{ margin:0 0 12px; }
   `;
   document.head.appendChild(css);
 
