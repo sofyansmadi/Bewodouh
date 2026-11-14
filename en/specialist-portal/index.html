@@ -228,7 +228,7 @@ const counted = () => past().filter(b => b.outcome === 'completed' || b.outcome 
 /* ---------- chat (paid live chat with clients) ---------- */
 const CFG = { point_usd: 0.05, specialist_share: 0.6 };
 const BASE_TITLE = document.title;
-let CH = { threads: [], sess: {}, reqs: [], cur: null, msgs: [], lastId: 0, earn: { usd: 0, usdMonth: 0, min: 0 }, inited: false };
+let CH = { audio: null, lastBeep: 0, seen: new Set(), seenInit: false, threads: [], sess: {}, reqs: [], cur: null, msgs: [], lastId: 0, earn: { usd: 0, usdMonth: 0, min: 0 }, inited: false };
 const SYSM = {
   'sys:requested': t('طلب محادثة جديد', 'New chat request'), 'sys:started': t('بدأت المحادثة (تُحتسب أتعابك كل دقيقة)', 'Chat started (you earn per minute)'),
   'sys:paused_idle': t('توقفت لعدم النشاط', 'Paused: inactivity'), 'sys:paused_no_points': t('توقفت: نقاط المراجع انتهت', 'Paused: client is out of points'),
@@ -237,6 +237,43 @@ const SYSM = {
 };
 const SST = { requested: t('طلب جديد', 'Request'), active: t('جارية', 'Live'), paused: t('متوقفة', 'Paused'), ended: t('انتهت', 'Ended') };
 const sBadge = (st) => `<span class="badge ${st === 'active' ? 'ok' : st === 'ended' ? 'grey' : ''}">${esc(SST[st] || st)}</span>`;
+
+
+/* تنبيه الطلبات: صوت + إشعار المتصفح (حتى والتبويب بالخلفية) + تذكير كل ٢٠ ثانية ما دام في طلب معلّق */
+function unlockAudio(){ try { if (!CH.audio) CH.audio = new (window.AudioContext || window.webkitAudioContext)(); if (CH.audio.state === 'suspended') CH.audio.resume(); } catch (_) {} }
+document.addEventListener('pointerdown', unlockAudio, { passive: true });
+function beep(){
+  try {
+    unlockAudio(); const a = CH.audio; if (!a || a.state !== 'running') return;
+    CH.lastBeep = Date.now();
+    [[880, 0], [1175, 0.28]].forEach(([f, dt]) => {
+      const o = a.createOscillator(), g = a.createGain(); o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, a.currentTime + dt); g.gain.exponentialRampToValueAtTime(0.25, a.currentTime + dt + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dt + 0.25);
+      o.connect(g); g.connect(a.destination); o.start(a.currentTime + dt); o.stop(a.currentTime + dt + 0.3);
+    });
+  } catch (_) {}
+}
+function updNotifyBtn(){
+  const b = $('chNotifyBtn'); if (!b) return;
+  const p = window.Notification ? Notification.permission : 'unsupported';
+  b.textContent = p === 'granted' ? t('🔔 التنبيهات مفعّلة (اضغط لتجربة الصوت)', '🔔 Alerts on (tap to test the sound)')
+    : p === 'denied' ? t('🔕 التنبيهات محجوبة من إعدادات المتصفح', '🔕 Alerts are blocked in your browser settings')
+    : p === 'unsupported' ? t('🔔 اضغط لتجربة الصوت', '🔔 Tap to test the sound') : t('🔔 فعّل تنبيهات الطلبات', '🔔 Turn on request alerts');
+}
+function askNotifyPermission(){
+  try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission().then(updNotifyBtn); } catch (_) {}
+}
+function alertNewRequest(){
+  beep();
+  try {
+    if (window.Notification && Notification.permission === 'granted') {
+      const x = new Notification(t('طلب محادثة جديد على بوضوح', 'New chat request on Bewoduh'), {
+        body: t('مراجع ينتظر ردّك الآن. ينتهي الطلب خلال ٥ دقائق.', 'A client is waiting for your reply. The request expires in 5 minutes.'), tag: 'bw-chat-request', requireInteraction: true,
+      });
+      x.onclick = () => { window.focus(); openTab('chat'); x.close(); };
+    }
+  } catch (_) {}
+}
 
 async function chatRefresh(){
   const [th, ss, ea, pr] = await Promise.all([
@@ -249,6 +286,10 @@ async function chatRefresh(){
   CH.threads = th.data || [];
   CH.sess = {}; (ss.data || []).forEach(s => { if (!CH.sess[s.thread_id]) CH.sess[s.thread_id] = s; });
   CH.reqs = (ss.data || []).filter(s => s.state === 'requested');
+  // طلبات جديدة لم نرها من قبل: صوت + إشعار (أول تحميل لا ينبّه على طلبات قديمة)
+  const reqIds = CH.reqs.map(r => r.id);
+  if (!CH.seenInit) { CH.seenInit = true; } else if (reqIds.some(id => !CH.seen.has(id))) { alertNewRequest(); }
+  CH.seen = new Set([...CH.seen, ...reqIds]);
   const ym = (d) => d.getFullYear() + '-' + d.getMonth(); const nowYm = ym(new Date());
   CH.earn = { usd: 0, usdMonth: 0, min: (ea.data || []).length };
   (ea.data || []).forEach(e => { CH.earn.usd += Number(e.usd); if (ym(new Date(e.created_at)) === nowYm) CH.earn.usdMonth += Number(e.usd); });
@@ -266,6 +307,7 @@ async function chatInit(){
   setInterval(() => { if (PROFILE && PROFILE.chat_online) sb.from('specialists').update({ chat_seen_at: new Date().toISOString() }).eq('id', ME.id).then(() => {}); }, 30000);
   setInterval(async () => {
     await chatRefresh();
+    if (CH.reqs.length && Date.now() - CH.lastBeep > 20000) beep();
     if (!chatTabVisible()) return;
     if (CH.cur) pollThread(); else if (!document.activeElement || document.activeElement.id !== 'chOnline') renderChat();
   }, 6000);
@@ -288,6 +330,7 @@ async function renderChat(){
     <div class="card" style="margin-bottom:20px;">
       <label class="row" style="gap:12px; cursor:pointer;"><input type="checkbox" id="chOnline" ${PROFILE.chat_online ? 'checked' : ''} style="width:20px; height:20px;"><b>${t('متاح للمحادثة الآن', 'Available for chat now')}</b></label>
       <div class="muted" style="margin-top:8px;">${t(`سعر الدقيقة: ${PROFILE.chat_rate_pts} نقطة، وأتعابك ≈ $${perMin().toFixed(2)} للدقيقة. أبقِ هذه الصفحة مفتوحة وأنت متاح، وإلا تصبح غير متصل تلقائياً بعد دقيقتين.`, `Rate: ${PROFILE.chat_rate_pts} points per minute, your fee ≈ $${perMin().toFixed(2)} per minute. Keep this page open while available, otherwise you go offline automatically after two minutes.`)}</div>
+      <div style="margin-top:12px;"><button class="btn2" id="chNotifyBtn" type="button"></button></div>
       <div class="msg" id="chMsg"></div>
     </div>`}
     <div class="stats">${stat('$' + CH.earn.usdMonth.toFixed(2), t('أتعاب المحادثات هذا الشهر', 'Chat fees this month'))}${stat('$' + CH.earn.usd.toFixed(2), t('إجمالي أتعاب المحادثات', 'Total chat fees'))}${stat(CH.earn.min, t('دقائق محادثة مدفوعة', 'Paid chat minutes'))}</div>
@@ -301,7 +344,10 @@ async function renderChat(){
       const s = CH.sess[th.id]; return `<tr><td><b>${esc(th.user_name || t('مراجع', 'Client'))}</b></td><td>${sBadge(s ? s.state : 'ended')}</td><td class="muted">${th.last_message_at ? fmtDT(th.last_message_at) : '—'}</td><td><button class="btn2" data-open="${esc(th.id)}" type="button">${t('فتح', 'Open')}</button></td></tr>`;
     })) : `<div class="empty">${t('لا محادثات بعد.', 'No chats yet.')}</div>`}`;
   const on = $('chOnline');
+  updNotifyBtn();
+  if ($('chNotifyBtn')) $('chNotifyBtn').addEventListener('click', () => { askNotifyPermission(); beep(); updNotifyBtn(); });
   if (on) on.addEventListener('change', async () => {
+    if (on.checked) { askNotifyPermission(); unlockAudio(); }
     const { error } = await sb.from('specialists').update({ chat_online: on.checked, chat_seen_at: new Date().toISOString() }).eq('id', ME.id);
     const m = $('chMsg'); m.className = 'msg' + (error ? ' err' : ' ok');
     m.textContent = error ? t('تعذّر التحديث.', 'Could not update.') : (on.checked ? t('أنت متاح الآن للمراجعين.', 'You are now available to clients.') : t('أنت غير متاح.', 'You are now unavailable.'));
