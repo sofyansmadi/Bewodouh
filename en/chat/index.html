@@ -655,9 +655,25 @@ async function init() {
     $('gateBtn').href = (EN ? '/en/signup/' : '/signup/') + '?next=chat';
   };
   if (!sb) { gate(); return; }
+  { const m = document.createElement('meta'); m.name = 'robots'; m.content = 'noindex'; document.head.appendChild(m); }
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) { gate(); return; }
+  if (!session) {
+    const { data: l0 } = await sb.rpc('chat_launched');
+    if (!l0) { $('gate').hidden = false; $('gateTitle').textContent = t('قريباً: المحادثة مع الأخصائيين', 'Coming soon: chat with specialists'); $('gateText').textContent = t('نجهّز خدمة المحادثة داخل المنصة وسنعلن عنها قريباً.', 'We are getting chat with specialists ready and will announce it soon.'); $('gateBtn').textContent = t('تصفّح فريق الأخصائيين', 'Browse our specialists'); $('gateBtn').href = EN ? '/en/team/' : '/team/'; return; }
+    gate(); return;
+  }
   ME = session.user;
+  const { data: launched } = await sb.rpc('chat_launched');
+  if (!launched) {
+    const { data: mine } = await sb.from('chat_threads').select('id').eq('user_id', ME.id).limit(1);
+    if (!(mine && mine.length)) {
+      $('gate').hidden = false;
+      $('gateTitle').textContent = t('قريباً: المحادثة مع الأخصائيين', 'Coming soon: chat with specialists');
+      $('gateText').textContent = t('نجهّز خدمة المحادثة داخل المنصة وسنعلن عنها قريباً. تابعنا وسنخبرك عند الإطلاق.', 'We are getting chat with specialists ready and will announce it soon. Stay tuned.');
+      $('gateBtn').textContent = t('تصفّح فريق الأخصائيين', 'Browse our specialists'); $('gateBtn').href = EN ? '/en/team/' : '/team/';
+      return;
+    }
+  }
   $('app').hidden = false;
   const { data: claim } = await sb.rpc('claim_welcome_points');
   if (claim && claim.granted) notice('ok', t(`🎁 حصلت على ${nf(claim.points)} نقطة هدية! تكفي لحوالي ${nf(Math.floor(claim.points / DEFAULT_RATE))} دقائق محادثة.`, `🎁 You received ${nf(claim.points)} welcome points! About ${nf(Math.floor(claim.points / DEFAULT_RATE))} minutes of chat.`));

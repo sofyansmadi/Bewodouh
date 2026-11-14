@@ -400,6 +400,10 @@
       <h2 class="section-title">النقاط والمحادثات</h2>
       <p class="section-sub">نظام النقاط: كل مسجّل جديد يحصل على هدية، ويستهلكها بالدقيقة بمحادثة لحظية مع أخصائي مفعّل له الشات. أجر الأخصائي = النقاط المستهلكة × سعر النقطة × نسبة الأخصائي. لا يقرأ الأدمن محتوى المحادثات، فقط الأرقام.</p>
 
+      <div style="background:#fff; border:1px solid var(--fog-dim); border-radius:14px; padding:16px; margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:220px;"><b id="ptLaunchState">...</b><div style="font-size:12.5px; color:var(--text-muted-light); margin-top:4px;">الميزة جاهزة بالكامل لكنها مخفية عن الزوار حتى الإطلاق. «إطلاق للجميع» يفعّل المحادثة لكل الأخصائيين المنشورين، و«إخفاء» يوقفها فوراً (المحادثات الجارية تبقى لحين انتهائها).</div></div>
+        <button type="button" class="btn-primary" id="ptLaunchAll">إطلاق للجميع</button><button type="button" class="btn-secondary" id="ptHideAll">إخفاء الميزة</button>
+      </div>
       <div id="ptStats" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:24px;"></div>
 
       <div class="form-card" style="margin-bottom:24px;">
@@ -1635,6 +1639,10 @@ async function loadPoints(){
     return `<div class="field"><label for="cfg_${k}">${esc(label)}</label><input type="number" step="any" id="cfg_${k}" data-cfg="${k}" value="${row ? esc(row.value) : ''}" required></div>`;
   }).join('');
 
+  // حالة الإطلاق
+  { const { data: on } = await supabaseClient.rpc('chat_launched'); const el = document.getElementById('ptLaunchState'); el.textContent = on ? '🟢 الميزة مُطلقة (ظاهرة للزوار)' : '⚪ الميزة مخفية (غير مُطلقة)';
+    const setAll = async (v) => { if (!confirm(v ? 'إطلاق المحادثة والنقاط لكل الأخصائيين المنشورين الآن؟ (النقاط الهدية تبدأ بالتوزيع للمسجلين)' : 'إخفاء الميزة عن الجميع؟')) return; const { error } = await supabaseClient.from('specialists').update(v ? { chat_enabled: true } : { chat_enabled: false, chat_online: false }).eq('is_published', true); if (error) alert('تعذّر: ' + error.message); loadPoints(); };
+    document.getElementById('ptLaunchAll').onclick = () => setAll(true); document.getElementById('ptHideAll').onclick = () => setAll(false); }
   // الأخصائيون
   const { data: sp } = await supabaseClient.from('specialists').select('id, full_name, is_published, chat_enabled, chat_online, chat_rate_pts').order('sort_order', { ascending: true });
   const share = Number((cfg || []).find(r => r.key === 'specialist_share')?.value ?? 0.6), pusd = Number((cfg || []).find(r => r.key === 'point_usd')?.value ?? 0.05);

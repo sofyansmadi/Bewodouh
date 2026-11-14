@@ -216,6 +216,11 @@ async function loadAll(){
     sb.from('specialists').select('*').eq('id', ME.id).maybeSingle(),
   ]);
   BOOKINGS = b.data || []; SLOTS = s.data || []; PROFILE = p.data || null;
+  try {
+    let showChat = !!(PROFILE && PROFILE.chat_enabled);
+    if (!showChat) { const { data: th } = await sb.from('chat_threads').select('id').eq('specialist_id', ME.id).limit(1); showChat = !!(th && th.length); }
+    const ct = document.querySelector('#tabs [data-tab="chat"]'); if (ct) ct.classList.toggle('hidden', !showChat);
+  } catch (_) {}
   if (b.error) console.error('bookings:', b.error);
 }
 const now = () => Date.now();
