@@ -1614,6 +1614,7 @@ const PT_CFG_LABELS = {
   free_points: 'نقاط الهدية للمسجّل الجديد', free_expiry_days: 'صلاحية نقاط الهدية (أيام)',
   point_usd: 'سعر النقطة بالدولار (لحساب أجر الأخصائي)', specialist_share: 'نسبة الأخصائي من قيمة النقاط (٠ إلى ١)',
   idle_seconds: 'ثواني الخمول قبل إيقاف الشات', request_ttl_seconds: 'مهلة قبول الأخصائي للطلب (ثواني)',
+  window_points: 'سعر نافذة الرسائل (نقاط)', window_hours: 'مدة نافذة الرسائل (ساعات)',
 };
 async function loadPoints(){
   const { data: ov, error: ovErr } = await supabaseClient.rpc('admin_chat_overview');
@@ -1658,11 +1659,11 @@ async function loadPoints(){
   document.querySelectorAll('[data-pt-del]').forEach(b => b.addEventListener('click', async () => { if (!confirm('حذف الباقة؟ (الأفضل إخفاؤها إن كان فيها مشتركون)')) return; await supabaseClient.from('point_products').delete().eq('id', b.dataset.ptDel); loadPoints(); }));
 
   // الأرباح
-  const { data: earn } = await supabaseClient.from('chat_earnings').select('specialist_id, usd, free_points, created_at').limit(20000);
+  const { data: earn } = await supabaseClient.from('chat_earnings').select('specialist_id, usd, free_points, created_at, kind').limit(20000);
   const names = Object.fromEntries((sp || []).map(x => [x.id, x.full_name]));
   const ym = (d) => d.getFullYear() + '-' + d.getMonth(); const nowYm = ym(new Date());
   const agg = {};
-  (earn || []).forEach(e => { const a = agg[e.specialist_id] = agg[e.specialist_id] || { minM: 0, usdM: 0, usd: 0, free: 0 }; const m = ym(new Date(e.created_at)) === nowYm; a.usd += Number(e.usd); a.free += Number(e.free_points) * pusd * share; if (m) { a.minM++; a.usdM += Number(e.usd); } });
+  (earn || []).forEach(e => { const a = agg[e.specialist_id] = agg[e.specialist_id] || { minM: 0, usdM: 0, usd: 0, free: 0 }; const m = ym(new Date(e.created_at)) === nowYm; a.usd += Number(e.usd); a.free += Number(e.free_points) * pusd * share; if (m) { if (e.kind !== 'window') a.minM++; a.usdM += Number(e.usd); } });
   const rows = Object.entries(agg).sort((a, b) => b[1].usd - a[1].usd);
   document.getElementById('ptEarnBody').innerHTML = rows.map(([id, a]) => `<tr><td>${esc(names[id] || id)}</td><td>${a.minM}</td><td>$${a.usdM.toFixed(2)}</td><td>$${a.usd.toFixed(2)}</td><td>$${a.free.toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5">لا أرباح بعد.</td></tr>';
 }
@@ -1671,7 +1672,7 @@ document.getElementById('ptCfgForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const st = document.getElementById('ptCfgStatus'); st.classList.remove('active', 'success', 'error');
   const rows = [...document.querySelectorAll('[data-cfg]')].map(i => ({ key: i.dataset.cfg, value: Number(i.value) }));
-  const bad = rows.find(r => !Number.isFinite(r.value) || r.value < 0 || (r.key === 'specialist_share' && r.value > 1) || (['free_points', 'free_expiry_days', 'idle_seconds', 'request_ttl_seconds'].includes(r.key) && r.value < 1));
+  const bad = rows.find(r => !Number.isFinite(r.value) || r.value < 0 || (r.key === 'specialist_share' && r.value > 1) || (['free_points', 'free_expiry_days', 'idle_seconds', 'request_ttl_seconds', 'window_points', 'window_hours'].includes(r.key) && r.value < 1));
   if (bad) { st.textContent = 'قيمة غير صالحة: ' + (PT_CFG_LABELS[bad.key] || bad.key); st.classList.add('active', 'error'); return; }
   const { error } = await supabaseClient.from('chat_config').upsert(rows, { onConflict: 'key' });
   st.textContent = error ? 'تعذّر الحفظ: ' + error.message : 'تم حفظ الإعدادات.'; st.classList.add('active', error ? 'error' : 'success');

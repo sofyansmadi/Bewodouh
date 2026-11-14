@@ -235,15 +235,17 @@ const LOC = EN ? 'en-GB' : 'ar-EG';
 const nf = (n) => Number(n).toLocaleString(LOC);
 const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
 const DEFAULT_RATE = 10;
+let WINDOW_PTS = 30, WINDOW_HRS = 24;
 const sb = (typeof supabaseClient !== 'undefined') ? supabaseClient : null;
 
 let ME = null, WALLET = { general: 0, free: 0, paid: 0, subs: [], free_expires_at: null };
 let SPECS = {}, PRODUCTS = [], THREADS = [], SESS = {}, SUBS = [];
+let BUSY = {};
 let CUR = null, MSGS = [], lastMsgId = 0, chan = null, pollT = null, secT = null, pollN = 0;
 
 // ---------- نصوص ----------
 $('phTitle').textContent = t('المحادثة والنقاط', 'Chat & points');
-$('phSub').textContent = t('تحدّث مع أخصائي مباشرة داخل المنصة. تُخصم النقاط بالدقيقة، وتتوقف المحادثة تلقائياً عند الخمول أو انتهاء النقاط.', 'Talk to a specialist right inside the platform. Points are charged per minute, and the chat pauses automatically when you are idle or out of points.');
+$('phSub').textContent = t('تواصل مع أخصائي داخل المنصة: محادثة لحظية بالدقيقة عندما يكون متاحاً، أو رسالة بنافذة ٢٤ ساعة يردّ فيها متى تيسّر له، وإن لم يردّ تعود نقاطك.', 'Reach a specialist inside the platform: live chat per minute when they are available, or a 24-hour message window they reply to when they can. If they do not reply, your points are returned.');
 $('loadingState').textContent = t('جارٍ التحميل...', 'Loading...');
 $('wUnit').textContent = t('نقطة', 'points');
 $('btnTopup').textContent = t('اشحن نقاطك', 'Buy points');
@@ -276,11 +278,22 @@ const SYS = {
   'sys:ended': t('انتهت المحادثة.', 'The chat ended.'),
   'sys:declined': t('اعتذر الأخصائي عن هذه المحادثة الآن. لم تُخصم أي نقاط.', 'The specialist is unable to chat right now. No points were charged.'),
   'sys:timeout': t('انتهت مهلة الطلب بدون رد. لم تُخصم أي نقاط، جرّب لاحقاً.', 'The request timed out with no reply. No points were charged, please try again later.'),
+  'sys:window_started': t('فُتحت نافذة ٢٤ ساعة. اكتب رسالتك والأخصائي يردّ عليك خلال ٢٤ ساعة، ويصلك تنبيه بالإيميل عند الرد. إن لم يرد تعود نقاطك كاملة تلقائياً.', 'Your 24-hour window is open. Write your message and the specialist will reply within 24 hours; you get an email alert when they do. If they do not reply, your points are returned automatically.'),
+  'sys:window_refunded': t('لم يردّ الأخصائي ضمن المدة، فأُعيدت نقاطك كاملة.', 'The specialist did not reply in time, so your points were returned in full.'),
+  'sys:window_ended': t('انتهت نافذة الـ٢٤ ساعة.', 'The 24-hour window has ended.'),
   'sys:ended_no_points': t('تعذّر بدء المحادثة لأن النقاط لا تكفي.', 'The chat could not start because points were not enough.'),
 };
 const STATE = {
   requested: t('بانتظار الأخصائي', 'Waiting'), active: t('جارية', 'Live'), paused: t('متوقفة مؤقتاً', 'Paused'), ended: t('انتهت', 'Ended'),
 };
+const isWin = (se) => !!se && se.kind === 'window';
+const winLeftMs = (se) => (se && se.window_expires_at ? new Date(se.window_expires_at) - Date.now() : 0);
+function fmtLeft(ms) { const m = Math.max(0, Math.floor(ms / 60000)); const h = Math.floor(m / 60); return h ? t(`${nf(h)} س ${nf(m % 60)} د`, `${nf(h)}h ${nf(m % 60)}m`) : t(`${nf(m)} د`, `${nf(m)}m`); }
+function stateLabel(se) {
+  if (!se) return STATE.ended;
+  if (isWin(se)) { if (se.state === 'ended') return STATE.ended; return se.answered_at ? t('نافذة · ردّ', 'Window · replied') : t('نافذة · بانتظار الرد', 'Window · awaiting reply'); }
+  return STATE[se.state] || '';
+}
 
 const spName = (s) => (EN ? (s.full_name_en || s.full_name) : s.full_name) || '';
 const spRole = (s) => (EN ? (s.specialty_en || s.specialty) : s.specialty) || '';
@@ -307,6 +320,7 @@ async function loadAll() {
     sb.from('point_subscriptions').select('*').eq('user_id', ME.id).in('status', ['active', 'canceling', 'past_due']),
   ]);
   if (w.data) WALLET = w.data;
+  try { const { data: cf } = await sb.from('chat_config').select('key,value').in('key', ['window_points', 'window_hours']); (cf || []).forEach(r => { if (r.key === 'window_points') WINDOW_PTS = Number(r.value) || 30; if (r.key === 'window_hours') WINDOW_HRS = Number(r.value) || 24; }); } catch (_) {}
   PRODUCTS = prod.data || [];
   SPECS = Object.fromEntries((specs.data || []).map(s => [s.id, s]));
   THREADS = th.data || [];
@@ -343,19 +357,27 @@ function pointsFor(spId) {
 function renderHome() {
   renderWallet();
   const list = Object.values(SPECS).filter(s => !s.__offlineOnly).sort((a, b) => Number(b.chat_online) - Number(a.chat_online));
-  $('specs').innerHTML = list.length ? list.map(s => `
+  const openBySp = {}; THREADS.forEach(th => { const se = SESS[th.id]; if (se && se.state !== 'ended') openBySp[th.specialist_id] = th.id; });
+  $('specs').innerHTML = list.length ? list.map(s => {
+    const open = openBySp[s.id];
+    const acts = open
+      ? `<button class="btn gold sm" data-open="${esc(open)}" type="button">${t('افتح المحادثة', 'Open chat')}</button>`
+      : (s.chat_online ? `<button class="btn gold sm" data-start="${esc(s.id)}" type="button">${t('محادثة لحظية', 'Live chat')}</button>` : '')
+        + `<button class="btn ${s.chat_online ? 'ghost' : 'gold'} sm" data-win="${esc(s.id)}" type="button">${t(`رسالة ${nf(WINDOW_HRS)} ساعة · ${nf(WINDOW_PTS)} نقطة`, `${nf(WINDOW_HRS)}h message · ${nf(WINDOW_PTS)} pts`)}</button>`;
+    return `
     <div class="sp">
       <img src="${esc(s.photo_url || PLACEHOLDER)}" alt="" loading="lazy">
       <div class="sp-b">
         <div class="sp-n">${esc(spName(s))}</div>
         <div class="sp-r">${esc(spRole(s))}</div>
-        <div class="sp-s"><span class="dot ${s.chat_online ? 'on' : ''}"></span>${s.chat_online ? t('متصل الآن', 'Online now') : t('غير متصل', 'Offline')} · ${nf(s.chat_rate_pts)} ${t('نقطة/دقيقة', 'pts/min')}</div>
-        <div class="sp-act">
-          <button class="btn gold sm" data-start="${esc(s.id)}" type="button" ${s.chat_online ? '' : 'disabled'}>${t('ابدأ محادثة', 'Start chat')}</button>
+        <div class="sp-s"><span class="dot ${s.chat_online ? 'on' : ''}"></span>${s.chat_online ? t('متاح للمحادثة اللحظية', 'Available for live chat') + ` · ${nf(s.chat_rate_pts)} ${t('نقطة/دقيقة', 'pts/min')}` : t(`يردّ خلال ${nf(WINDOW_HRS)} ساعة`, `Replies within ${nf(WINDOW_HRS)}h`)}</div>
+        <div class="sp-act">${acts}
           <button class="btn ghost sm" data-plan="${esc(s.id)}" type="button">${t('اشتراك', 'Plan')}</button>
         </div>
       </div>
-    </div>`).join('') : `<p class="muted">${t('لا يوجد أخصائيون متاحون للمحادثة حالياً. نضيف المزيد قريباً.', 'No specialists are available for chat yet. We are adding more soon.')}</p>`;
+    </div>`; }).join('') : `<p class="muted">${t('لا يوجد أخصائيون متاحون للمحادثة حالياً. نضيف المزيد قريباً.', 'No specialists are available for chat yet. We are adding more soon.')}</p>`;
+  $('specs').querySelectorAll('[data-win]').forEach(b => b.addEventListener('click', () => startWindowFlow(b.dataset.win)));
+  $('specs').querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openThread(b.dataset.open)));
   $('specs').querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => startFlow(b.dataset.start)));
   $('specs').querySelectorAll('[data-plan]').forEach(b => b.addEventListener('click', () => openTopup('sub', b.dataset.plan)));
 
@@ -366,7 +388,7 @@ function renderHome() {
     return `<button class="th" data-open="${esc(th.id)}" type="button">
       <img src="${esc(s.photo_url || PLACEHOLDER)}" alt="">
       <div class="th-b"><div class="th-n">${esc(spName(s))}</div><div class="muted" style="font-size:12px;">${th.last_message_at ? fmtDate(th.last_message_at) + ' ' + fmtTime(th.last_message_at) : ''}</div></div>
-      <span class="pill ${esc(st)}">${esc(STATE[st] || '')}</span></button>`;
+      <span class="pill ${esc(st)}">${esc(stateLabel(se))}</span></button>`;
   }).join('');
   $('threads').querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openThread(b.dataset.open)));
 
@@ -454,6 +476,25 @@ async function startFlow(spId) {
   openThread(data.thread_id);
 }
 
+async function startWindowFlow(spId) {
+  const sp = SPECS[spId]; if (!sp) return;
+  if (BUSY[spId]) return; BUSY[spId] = true;
+  try {
+    if (pointsFor(spId) < WINDOW_PTS) { notice('warn', t(`تحتاج ${nf(WINDOW_PTS)} نقطة لفتح نافذة رسائل. اشحن لتبدأ.`, `You need ${nf(WINDOW_PTS)} points to open a message window. Top up to start.`)); openTopup('pack'); return; }
+    if (!confirm(t(`فتح نافذة ${nf(WINDOW_HRS)} ساعة مع ${spName(sp)} مقابل ${nf(WINDOW_PTS)} نقطة؟\nتكتب ما تريد، ويردّ الأخصائي خلال ${nf(WINDOW_HRS)} ساعة. إن لم يردّ تعود نقاطك كاملة تلقائياً.\n(المحادثة للدعم والإرشاد وليست خدمة طوارئ.)`, `Open a ${nf(WINDOW_HRS)}-hour window with ${spName(sp)} for ${nf(WINDOW_PTS)} points?\nWrite what you like and the specialist replies within ${nf(WINDOW_HRS)} hours. If they do not reply, your points are returned automatically.\n(Chat is for support and guidance, not an emergency service.)`))) return;
+    const { data, error } = await sb.rpc('start_chat_window', { p_specialist: spId });
+    if (error) {
+      const m = error.message || '';
+      if (/no_points/.test(m)) { notice('warn', t('نقاطك لا تكفي. اشحن لتبدأ.', 'Not enough points. Top up to start.')); openTopup('pack'); }
+      else if (/chat_unavailable/.test(m)) notice('warn', t('هذا الأخصائي غير متاح للمحادثة الآن.', 'This specialist is not available for chat right now.'));
+      else notice('err', t('تعذّر فتح النافذة.', 'Could not open the window.'));
+      return;
+    }
+    await loadAll();
+    openThread(data.thread_id);
+  } finally { BUSY[spId] = false; }
+}
+
 // ---------- المحادثة ----------
 function curSpec() { return CUR && SPECS[CUR.thread.specialist_id] || {}; }
 async function openThread(id) {
@@ -469,7 +510,7 @@ async function openThread(id) {
   subscribeChat();
   clearInterval(pollT); clearInterval(secT); pollN = 0;
   pollT = setInterval(pollChat, 4000);
-  secT = setInterval(renderBar, 1000);
+  secT = setInterval(() => { renderBar(); if (CUR && isWin(CUR.session) && Date.now() % 60000 < 1000) renderChatMeta(); }, 1000);
 }
 function closeThread() {
   if (chan) { sb.removeChannel(chan); chan = null; }
@@ -494,6 +535,12 @@ function renderBar() {
   if (!CUR) return;
   const s = CUR.session, sp = curSpec();
   const left = pointsFor(CUR.thread.specialist_id);
+  if (isWin(s)) {
+    const parts = [t(`نقاطك: ${nf(left)}`, `Your points: ${nf(left)}`)];
+    if (s.state !== 'ended') parts.push(s.answered_at ? t(`تنتهي النافذة بعد ${fmtLeft(winLeftMs(s))}`, `Window ends in ${fmtLeft(winLeftMs(s))}`) : t(`مهلة الرد: ${fmtLeft(winLeftMs(s))}`, `Reply deadline: ${fmtLeft(winLeftMs(s))}`));
+    $('chBar').innerHTML = parts.map(p => `<span>${esc(p)}</span>`).join('');
+    return;
+  }
   const parts = [t(`نقاطك: ${nf(left)}`, `Your points: ${nf(left)}`), t(`${nf(s ? s.rate_pts : (sp.chat_rate_pts || DEFAULT_RATE))} نقطة/دقيقة`, `${nf(s ? s.rate_pts : (sp.chat_rate_pts || DEFAULT_RATE))} pts/min`)];
   if (s && s.state === 'active' && s.paid_until) {
     const sec = Math.max(0, Math.round((new Date(s.paid_until) - Date.now()) / 1000));
@@ -503,7 +550,7 @@ function renderBar() {
 }
 function renderChatMeta() {
   const s = CUR.session, st = s ? s.state : 'ended';
-  const pill = $('chState'); pill.textContent = STATE[st] || ''; pill.className = 'pill ' + st;
+  const pill = $('chState'); pill.textContent = stateLabel(s); pill.className = 'pill ' + st;
   $('btnEnd').hidden = st === 'ended';
   renderBar();
   const b = $('banner'); b.hidden = true; b.className = 'ch-banner'; b.replaceChildren();
@@ -518,11 +565,21 @@ function renderChatMeta() {
   const left = pointsFor(CUR.thread.specialist_id);
   const input = $('chInput'), send = $('btnSend');
   input.disabled = send.disabled = (st === 'ended');
-  if (st === 'requested') add('info', t('بانتظار موافقة الأخصائي. لن تُخصم نقاط قبل القبول.', 'Waiting for the specialist. No points are charged before they accept.'), [[t('إلغاء الطلب', 'Cancel request'), endChat]]);
+  if (isWin(s) && st !== 'ended') {
+    add('info', s.answered_at
+      ? t(`الأخصائي ردّ. تبقى النافذة مفتوحة ${fmtLeft(winLeftMs(s))} ويمكنك متابعة الكتابة بدون أي نقاط إضافية.`, `The specialist replied. The window stays open for ${fmtLeft(winLeftMs(s))} and you can keep writing at no extra cost.`)
+      : t(`رسالتك وصلت. ينتظر الأخصائي ليردّ خلال ${fmtLeft(winLeftMs(s))}، ويصلك تنبيه بالإيميل عند الرد. إن لم يردّ تعود نقاطك تلقائياً.`, `Your message is in. The specialist has ${fmtLeft(winLeftMs(s))} left to reply and you will get an email alert. If they do not, your points are returned automatically.`), []);
+  }
+  else if (st === 'requested') add('info', t('بانتظار موافقة الأخصائي. لن تُخصم نقاط قبل القبول.', 'Waiting for the specialist. No points are charged before they accept.'), [[t('إلغاء الطلب', 'Cancel request'), endChat]]);
   else if (st === 'paused' && s.pause_reason === 'no_points') add('err', t('نفدت نقاطك فتوقفت المحادثة. اشحن لتكمل نفس المحادثة.', 'You are out of points, so the chat paused. Top up to continue this same chat.'), [[t('اشحن', 'Top up'), () => openTopup('pack'), true], [t('متابعة', 'Resume'), resumeChat]]);
   else if (st === 'paused') add('warn', t(`توقفت لعدم النشاط. المتابعة تخصم ${nf(rate)} نقاط للدقيقة.`, `Paused due to inactivity. Resuming charges ${nf(rate)} points per minute.`), [[t('متابعة', 'Resume'), resumeChat, true]]);
   else if (st === 'active' && left <= rate * 3) add('warn', t(`نقاطك قاربت على الانتهاء (${nf(left)}). اشحن حتى لا تتوقف المحادثة.`, `You are running low (${nf(left)} points). Top up so the chat does not stop.`), [[t('اشحن', 'Top up'), () => openTopup('pack'), true]]);
-  else if (st === 'ended') add('info', t('انتهت هذه المحادثة.', 'This chat has ended.'), SPECS[CUR.thread.specialist_id] && SPECS[CUR.thread.specialist_id].chat_online && !SPECS[CUR.thread.specialist_id].__offlineOnly ? [[t('محادثة جديدة', 'New chat'), () => startFlow(CUR.thread.specialist_id), true]] : []);
+  else if (st === 'ended') {
+    const sp2 = SPECS[CUR.thread.specialist_id], ok = sp2 && !sp2.__offlineOnly, btns = [];
+    if (ok && sp2.chat_online && !isWin(s)) btns.push([t('محادثة لحظية جديدة', 'New live chat'), () => startFlow(CUR.thread.specialist_id), true]);
+    if (ok) btns.push([t(`نافذة رسائل جديدة (${nf(WINDOW_PTS)} نقطة)`, `New message window (${nf(WINDOW_PTS)} pts)`), () => startWindowFlow(CUR.thread.specialist_id), !btns.length]);
+    add('info', t('انتهت هذه المحادثة.', 'This chat has ended.'), btns);
+  }
 }
 async function pollChat() {
   if (!CUR) return;
@@ -578,7 +635,8 @@ async function resumeChat() {
 }
 async function endChat() {
   if (!CUR || !CUR.session) return;
-  if (!confirm(t('إنهاء المحادثة؟', 'End this chat?'))) return;
+  const winUnanswered = isWin(CUR.session) && !CUR.session.answered_at;
+  if (!confirm(winUnanswered ? t('إغلاق النافذة؟ لم يردّ الأخصائي بعد، فتعود نقاطك كاملة.', 'Close the window? The specialist has not replied yet, so your points are returned in full.') : t('إنهاء المحادثة؟', 'End this chat?'))) return;
   await sb.rpc('end_chat', { p_session: CUR.session.id });
   await pollChat();
 }

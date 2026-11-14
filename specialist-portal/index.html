@@ -228,15 +228,26 @@ const counted = () => past().filter(b => b.outcome === 'completed' || b.outcome 
 /* ---------- chat (paid live chat with clients) ---------- */
 const CFG = { point_usd: 0.05, specialist_share: 0.6 };
 const BASE_TITLE = document.title;
-let CH = { audio: null, lastBeep: 0, seen: new Set(), seenInit: false, threads: [], sess: {}, reqs: [], cur: null, msgs: [], lastId: 0, earn: { usd: 0, usdMonth: 0, min: 0 }, inited: false };
+let CH = { wins: [], earnMin: 0, earnWin: 0, audio: null, lastBeep: 0, seen: new Set(), seenInit: false, threads: [], sess: {}, reqs: [], cur: null, msgs: [], lastId: 0, earn: { usd: 0, usdMonth: 0, min: 0 }, inited: false };
 const SYSM = {
   'sys:requested': t('طلب محادثة جديد', 'New chat request'), 'sys:started': t('بدأت المحادثة (تُحتسب أتعابك كل دقيقة)', 'Chat started (you earn per minute)'),
   'sys:paused_idle': t('توقفت لعدم النشاط', 'Paused: inactivity'), 'sys:paused_no_points': t('توقفت: نقاط المراجع انتهت', 'Paused: client is out of points'),
   'sys:resumed': t('تابع المراجع المحادثة', 'The client resumed the chat'), 'sys:ended': t('انتهت المحادثة', 'Chat ended'),
+  'sys:window_started': t('فتح المراجع نافذة ٢٤ ساعة. ردّ في أي وقت ضمن المدة لتُحتسب أتعابك.', 'The client opened a 24-hour window. Reply any time within it to earn your fee.'),
+  'sys:window_refunded': t('انتهت المدة بدون رد، فأُعيدت نقاط المراجع إليه.', 'The window ended without a reply, so the client was refunded.'),
+  'sys:window_ended': t('انتهت نافذة الـ٢٤ ساعة.', 'The 24-hour window has ended.'),
   'sys:declined': t('اعتذرت عن الطلب', 'You declined the request'), 'sys:timeout': t('انتهت مهلة الطلب', 'The request timed out'), 'sys:ended_no_points': t('لم تبدأ: نقاط المراجع لا تكفي', 'Not started: client has too few points'),
 };
 const SST = { requested: t('طلب جديد', 'Request'), active: t('جارية', 'Live'), paused: t('متوقفة', 'Paused'), ended: t('انتهت', 'Ended') };
 const sBadge = (st) => `<span class="badge ${st === 'active' ? 'ok' : st === 'ended' ? 'grey' : ''}">${esc(SST[st] || st)}</span>`;
+const isWinS = (s) => !!s && s.kind === 'window';
+const winWait = (s) => isWinS(s) && s.state === 'active' && !s.answered_at && s.user_msgs > 0 && new Date(s.window_expires_at) > new Date();
+const leftTxt = (iso) => { const m = Math.max(0, Math.floor((new Date(iso) - Date.now()) / 60000)); const h = Math.floor(m / 60); return h ? t(`${h} س ${m % 60} د`, `${h}h ${m % 60}m`) : t(`${m} د`, `${m}m`); };
+const sBadgeS = (s) => { if (!s) return sBadge('ended'); if (!isWinS(s)) return sBadge(s.state);
+  if (s.state === 'ended') return `<span class="badge grey">${t('نافذة · انتهت', 'Window · ended')}</span>`;
+  if (winWait(s)) return `<span class="badge" style="background:#C9A15F; color:#241D2E;">${t('رسالة بانتظار ردّك', 'Message awaiting your reply')}</span>`;
+  if (s.answered_at) return `<span class="badge ok">${t('نافذة · تم الرد', 'Window · replied')}</span>`;
+  return `<span class="badge">${t('نافذة · لا رسائل بعد', 'Window · no message yet')}</span>`; };
 
 
 /* تنبيه الطلبات: صوت + إشعار المتصفح (حتى والتبويب بالخلفية) + تذكير كل ٢٠ ثانية ما دام في طلب معلّق */
@@ -263,12 +274,13 @@ function updNotifyBtn(){
 function askNotifyPermission(){
   try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission().then(updNotifyBtn); } catch (_) {}
 }
-function alertNewRequest(){
+function alertNewRequest(kind){
   beep();
   try {
     if (window.Notification && Notification.permission === 'granted') {
-      const x = new Notification(t('طلب محادثة جديد على بوضوح', 'New chat request on Bewoduh'), {
-        body: t('مراجع ينتظر ردّك الآن. ينتهي الطلب خلال ٥ دقائق.', 'A client is waiting for your reply. The request expires in 5 minutes.'), tag: 'bw-chat-request', requireInteraction: true,
+      const w = kind === 'window';
+      const x = new Notification(w ? t('رسالة جديدة على بوضوح', 'New message on Bewoduh') : t('طلب محادثة جديد على بوضوح', 'New chat request on Bewoduh'), {
+        body: w ? t('مراجع كتب لك ضمن نافذة ٢٤ ساعة. ردّ متى تيسّر لك.', 'A client wrote to you in a 24-hour window. Reply when you can.') : t('مراجع ينتظر ردّك الآن. ينتهي الطلب خلال ٥ دقائق.', 'A client is waiting for your reply. The request expires in 5 minutes.'), tag: w ? 'bw-chat-window' : 'bw-chat-request', requireInteraction: !w,
       });
       x.onclick = () => { window.focus(); openTab('chat'); x.close(); };
     }
@@ -279,21 +291,22 @@ async function chatRefresh(){
   const [th, ss, ea, pr] = await Promise.all([
     sb.from('chat_threads').select('*').eq('specialist_id', ME.id).order('last_message_at', { ascending: false, nullsFirst: false }),
     sb.from('chat_sessions').select('*').eq('specialist_id', ME.id).order('created_at', { ascending: false }).limit(400),
-    sb.from('chat_earnings').select('usd,created_at').eq('specialist_id', ME.id).limit(10000),
+    sb.from('chat_earnings').select('usd,created_at,kind').eq('specialist_id', ME.id).limit(10000),
     sb.from('specialists').select('*').eq('id', ME.id).maybeSingle(),
   ]);
   if (pr.data) PROFILE = pr.data;
   CH.threads = th.data || [];
   CH.sess = {}; (ss.data || []).forEach(s => { if (!CH.sess[s.thread_id]) CH.sess[s.thread_id] = s; });
   CH.reqs = (ss.data || []).filter(s => s.state === 'requested');
+  CH.wins = (ss.data || []).filter(winWait);
   // طلبات جديدة لم نرها من قبل: صوت + إشعار (أول تحميل لا ينبّه على طلبات قديمة)
-  const reqIds = CH.reqs.map(r => r.id);
-  if (!CH.seenInit) { CH.seenInit = true; } else if (reqIds.some(id => !CH.seen.has(id))) { alertNewRequest(); }
-  CH.seen = new Set([...CH.seen, ...reqIds]);
+  const reqIds = CH.reqs.map(r => r.id), winIds = CH.wins.map(r => r.id);
+  if (!CH.seenInit) { CH.seenInit = true; } else if (reqIds.some(id => !CH.seen.has(id))) { alertNewRequest('live'); } else if (winIds.some(id => !CH.seen.has(id))) { alertNewRequest('window'); }
+  CH.seen = new Set([...CH.seen, ...reqIds, ...winIds]);
   const ym = (d) => d.getFullYear() + '-' + d.getMonth(); const nowYm = ym(new Date());
-  CH.earn = { usd: 0, usdMonth: 0, min: (ea.data || []).length };
+  CH.earn = { usd: 0, usdMonth: 0, min: (ea.data || []).filter(e => e.kind !== 'window').length, win: (ea.data || []).filter(e => e.kind === 'window').length };
   (ea.data || []).forEach(e => { CH.earn.usd += Number(e.usd); if (ym(new Date(e.created_at)) === nowYm) CH.earn.usdMonth += Number(e.usd); });
-  const n = CH.reqs.length, el = $('cChat');
+  const n = CH.reqs.length + CH.wins.length, el = $('cChat');
   if (el) { el.textContent = n; el.classList.toggle('hidden', !n); }
   document.title = (n ? `(${n}) ` : '') + BASE_TITLE;
 }
@@ -325,7 +338,7 @@ async function renderChat(){
   const stat = (n, l) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`;
   $('tab-chat').innerHTML = `
     <h2 class="title">${t('المحادثات', 'Chats')}</h2>
-    <p class="sub">${t('محادثات مباشرة مدفوعة بالدقيقة. عند «متاح» تصلك طلبات المراجعين هنا، وتُحتسب أتعابك من لحظة قبولك للطلب.', 'Live chats paid per minute. While you are available, client requests arrive here, and you earn from the moment you accept.')}</p>
+    <p class="sub">${t('نوعان من المحادثة: (١) رسائل «نافذة ٢٤ ساعة» ترد عليها متى تيسّر لك خلال ٢٤ ساعة وتُحتسب أتعابك عند أول رد، وإن لم تردّ تعود نقاط المراجع إليه. (٢) محادثة لحظية بالدقيقة تصلك فقط عند تفعيل «متاح»، وتُحتسب أتعابك من لحظة قبولك.', 'Two kinds of chat: (1) “24-hour window” messages you reply to whenever you are free within 24 hours; you earn at your first reply, and if you do not reply the client is refunded. (2) Live per-minute chat, which reaches you only while you are marked available; you earn from the moment you accept.')}</p>
     ${!enabled ? `<div class="privacy">${t('خدمة المحادثة غير مفعّلة لحسابك بعد. تواصل مع إدارة بوضوح لتفعيلها.', 'Chat is not enabled for your account yet. Please contact the Bewoduh team to enable it.')}</div>` : `
     <div class="card" style="margin-bottom:20px;">
       <label class="row" style="gap:12px; cursor:pointer;"><input type="checkbox" id="chOnline" ${PROFILE.chat_online ? 'checked' : ''} style="width:20px; height:20px;"><b>${t('متاح للمحادثة الآن', 'Available for chat now')}</b></label>
@@ -333,7 +346,12 @@ async function renderChat(){
       <div style="margin-top:12px;"><button class="btn2" id="chNotifyBtn" type="button"></button></div>
       <div class="msg" id="chMsg"></div>
     </div>`}
-    <div class="stats">${stat('$' + CH.earn.usdMonth.toFixed(2), t('أتعاب المحادثات هذا الشهر', 'Chat fees this month'))}${stat('$' + CH.earn.usd.toFixed(2), t('إجمالي أتعاب المحادثات', 'Total chat fees'))}${stat(CH.earn.min, t('دقائق محادثة مدفوعة', 'Paid chat minutes'))}</div>
+    <div class="stats">${stat('$' + CH.earn.usdMonth.toFixed(2), t('أتعاب المحادثات هذا الشهر', 'Chat fees this month'))}${stat('$' + CH.earn.usd.toFixed(2), t('إجمالي أتعاب المحادثات', 'Total chat fees'))}${stat(CH.earn.min, t('دقائق محادثة مدفوعة', 'Paid chat minutes'))}${stat(CH.earn.win || 0, t('نوافذ ٢٤ ساعة مدفوعة', 'Paid 24h windows'))}</div>
+    ${CH.wins.length ? `<h3 class="kufi" style="font-size:16px; margin:6px 0 10px;">${t('رسائل بانتظار ردّك', 'Messages awaiting your reply')}</h3>` + CH.wins.map(s => {
+      const th = CH.threads.find(x => x.id === s.thread_id) || {};
+      return `<div class="reqcard"><div><b>${esc(th.user_name || t('مراجع', 'Client'))}</b><div class="muted">${t(`رسائل جديدة · مهلة الرد ${leftTxt(s.window_expires_at)} · أتعابك ≈ $${(s.points_spent * CFG.point_usd * CFG.specialist_share).toFixed(2)} عند أول رد`, `New message · ${leftTxt(s.window_expires_at)} left to reply · you earn ≈ $${(s.points_spent * CFG.point_usd * CFG.specialist_share).toFixed(2)} at your first reply`)}</div></div>
+        <div class="row"><button class="btn" data-open="${esc(s.thread_id)}" type="button">${t('اقرأ وردّ', 'Read & reply')}</button></div></div>`;
+    }).join('') : ''}
     ${CH.reqs.length ? `<h3 class="kufi" style="font-size:16px; margin:6px 0 10px;">${t('طلبات المحادثة', 'Chat requests')}</h3>` + CH.reqs.map(s => {
       const th = CH.threads.find(x => x.id === s.thread_id) || {};
       return `<div class="reqcard"><div><b>${esc(th.user_name || t('مراجع', 'Client'))}</b><div class="muted">${t('يطلب محادثة الآن', 'Requesting a chat now')} · ${fmtT(s.created_at)}</div></div>
@@ -341,7 +359,7 @@ async function renderChat(){
     }).join('') : ''}
     <h3 class="kufi" style="font-size:16px; margin:22px 0 10px;">${t('محادثاتي', 'My chats')}</h3>
     ${CH.threads.length ? table([t('المراجع', 'Client'), t('الحالة', 'Status'), t('آخر نشاط', 'Last activity'), ''], CH.threads.map(th => {
-      const s = CH.sess[th.id]; return `<tr><td><b>${esc(th.user_name || t('مراجع', 'Client'))}</b></td><td>${sBadge(s ? s.state : 'ended')}</td><td class="muted">${th.last_message_at ? fmtDT(th.last_message_at) : '—'}</td><td><button class="btn2" data-open="${esc(th.id)}" type="button">${t('فتح', 'Open')}</button></td></tr>`;
+      const s = CH.sess[th.id]; return `<tr><td><b>${esc(th.user_name || t('مراجع', 'Client'))}</b></td><td>${sBadgeS(s)}</td><td class="muted">${th.last_message_at ? fmtDT(th.last_message_at) : '—'}</td><td><button class="btn2" data-open="${esc(th.id)}" type="button">${t('فتح', 'Open')}</button></td></tr>`;
     })) : `<div class="empty">${t('لا محادثات بعد.', 'No chats yet.')}</div>`}`;
   const on = $('chOnline');
   updNotifyBtn();
@@ -387,7 +405,7 @@ function renderThreadView(){
       <form class="cform" id="chForm"><textarea id="chInput" rows="1" maxlength="2000" placeholder="${t('اكتب رسالتك...', 'Type your message...')}"></textarea><button class="btn" id="chSend" type="submit">${t('إرسال', 'Send')}</button></form>
     </div>`;
   $('chBack').addEventListener('click', () => { CH.cur = null; renderChat(); });
-  $('chEnd').addEventListener('click', async () => { if (!CH.cur.session || !confirm(t('إنهاء المحادثة؟', 'End this chat?'))) return; await sb.rpc('end_chat', { p_session: CH.cur.session.id }); await pollThread(); });
+  $('chEnd').addEventListener('click', async () => { if (!CH.cur.session || !confirm(isWinS(CH.cur.session) && !CH.cur.session.answered_at ? t('إغلاق النافذة بدون رد؟ ستُعاد نقاط المراجع إليه ولن تُحتسب أتعاب.', 'Close the window without replying? The client will be refunded and you will not earn a fee.') : t('إنهاء المحادثة؟', 'End this chat?'))) return; await sb.rpc('end_chat', { p_session: CH.cur.session.id }); await pollThread(); });
   $('chForm').addEventListener('submit', async (e) => {
     e.preventDefault(); const v = $('chInput').value.trim(); if (!v) return;
     $('chSend').disabled = true;
@@ -402,14 +420,18 @@ function renderThreadView(){
 function renderThreadParts(){
   const c = CH.cur; if (!c || !$('chMsgs')) return;
   const s = c.session, st = s ? s.state : 'ended';
-  $('chSt').innerHTML = sBadge(st);
+  $('chSt').innerHTML = sBadgeS(s);
   $('chEnd').style.display = st === 'ended' ? 'none' : '';
-  $('chInput').disabled = $('chSend').disabled = !(st === 'active' || st === 'paused');
+  const winOpen = isWinS(s) && st === 'active' && new Date(s.window_expires_at) > new Date();
+  $('chInput').disabled = $('chSend').disabled = isWinS(s) ? !winOpen : !(st === 'active' || st === 'paused');
   const earned = s ? (s.points_spent * CFG.point_usd * CFG.specialist_share) : 0;
-  $('chBar').innerHTML = s ? `<span>${t('دقائق مدفوعة', 'Paid minutes')}: ${s.minutes_billed}</span><span>${t('أتعاب هذه الجلسة', 'This session')}: ≈ $${earned.toFixed(2)}</span>` : '';
+  if (isWinS(s)) { $('chBar').innerHTML = `<span>${t('نافذة ٢٤ ساعة', '24-hour window')}</span><span>${s.answered_at ? t('أتعابك محتسبة', 'Fee credited') : t('أتعابك عند أول رد', 'Fee at first reply')}: ≈ $${earned.toFixed(2)}</span>` + (st === 'active' ? `<span>${t('تنتهي بعد', 'Ends in')} ${leftTxt(s.window_expires_at)}</span>` : ''); }
+  else $('chBar').innerHTML = s ? `<span>${t('دقائق مدفوعة', 'Paid minutes')}: ${s.minutes_billed}</span><span>${t('أتعاب هذه الجلسة', 'This session')}: ≈ $${earned.toFixed(2)}</span>` : '';
   const ban = $('chBan');
   const msgs = { requested: t('طلب جديد: اقبله من قائمة المحادثات لتبدأ.', 'New request: accept it from the chats list to start.'), paused: s && s.pause_reason === 'no_points' ? t('توقفت المحادثة لأن نقاط المراجع انتهت. تُستأنف عندما يشحن.', 'Paused: the client is out of points. It resumes when they top up.') : t('توقفت مؤقتاً لعدم النشاط. تُستأنف عندما يكتب المراجع رسالة.', 'Paused due to inactivity. It resumes when the client sends a message.') };
-  ban.style.display = msgs[st] ? '' : 'none'; ban.textContent = msgs[st] || '';
+  let bt = msgs[st] || '';
+  if (isWinS(s)) bt = !winOpen ? (s.answered_at ? t('انتهت النافذة.', 'The window has ended.') : t('انتهت النافذة بدون رد وأُعيدت نقاط المراجع.', 'The window ended without a reply and the client was refunded.')) : (s.answered_at ? t('النافذة مفتوحة: يمكنك متابعة الرد على المراجع حتى انتهاء المدة.', 'The window is open: you can keep replying until it ends.') : t('ردّ في أي وقت قبل انتهاء المهلة، وتُحتسب أتعابك عند أول رد.', 'Reply any time before the deadline; your fee is credited at your first reply.'));
+  ban.style.display = bt ? '' : 'none'; ban.textContent = bt;
   const box = $('chMsgs'); const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
   box.innerHTML = CH.msgs.map(m => m.sender === 'system' ? `<div class="cm sys">${esc(SYSM[m.body] || m.body)}</div>` : `<div class="cm ${m.sender === 'specialist' ? 'me' : 'them'}">${esc(m.body)}<time>${fmtT(m.created_at)}</time></div>`).join('');
   if (atBottom || CH.msgs.length < 3) box.scrollTop = box.scrollHeight;
