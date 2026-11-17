@@ -551,10 +551,22 @@
               <input type="hidden" id="spPhoto" value="">
               <p id="spPhotoStatus" style="font-size:12.5px; color:var(--text-muted-light); margin-top:8px;">بدون صورة، يظهر رمز افتراضي في صفحة الفريق. تُحفظ الصورة عند الضغط على «حفظ».</p>
             </div>
-            <div class="field full">
-              <label for="spLoginEmail">بريد دخول الأخصائي لبوابة الأخصائيين (اختياري)</label>
-              <input type="email" id="spLoginEmail" placeholder="نفس البريد الذي سيسجّل به حسابه في الموقع" style="direction:ltr; text-align:left;">
-              <p style="font-size:12px; color:var(--text-muted-light); margin-top:6px;">عند ربطه، يسجّل الأخصائي حساباً بنفس البريد من صفحة التسجيل ثم يدخل من /specialist-portal/ ليدير صفحته وجدوله وجلساته. اتركه فارغاً لإلغاء الربط.</p>
+            <div class="field">
+              <label for="spTimezone">المنطقة الزمنية للأخصائي</label>
+              <select id="spTimezone" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"></select>
+              <p style="font-size:12px; color:var(--text-muted-light); margin-top:6px;">تُفسَّر بها المواعيد التي تضيفها له من الأدمن، ويراها العميل بجانب توقيته.</p>
+            </div>
+            <div class="field full" id="spAcctBox" style="background:var(--fog); border:1px solid var(--fog-dim); border-radius:14px; padding:16px;">
+              <label for="spLoginEmail" style="font-size:15px;">🔑 حساب دخول الأخصائي (البريد وكلمة السر)</label>
+              <input type="email" id="spLoginEmail" placeholder="بريد الأخصائي الذي يدخل به" style="direction:ltr; text-align:left;">
+              <div id="spAcctStatus" style="font-size:13px; margin:8px 0 10px; color:var(--text-muted-light);"></div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn-secondary" id="spAcctEmailBtn">تحديث البريد الآن</button>
+                <input type="text" id="spAcctPw" placeholder="كلمة سر جديدة (اتركها فارغة لتوليد واحدة تلقائياً)" autocomplete="off" style="direction:ltr; text-align:left; flex:1; min-width:220px;">
+                <button type="button" class="btn-primary" id="spAcctPwBtn" style="width:auto; padding:11px 20px;">إنشاء / تعيين كلمة سر</button>
+              </div>
+              <div id="spAcctResult" style="display:none; margin-top:12px; background:#fff; border:1px dashed var(--clarity); border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.9;"></div>
+              <p style="font-size:12px; color:var(--text-muted-light); margin-top:10px;">تغيير البريد هنا يحدّث بريد حسابه فعلياً (لا يحتاج تأكيداً) ويربطه بالبوابة. بعدها يدخل الأخصائي من /specialist-portal/ ويقدر يغيّر كلمة سره بنفسه من تبويب «ملفي وبياناتي». اتركي البريد فارغاً ثم احفظي لإلغاء الربط.</p>
             </div>
             <div class="field full">
               <label for="spShortBio">جملة قصيرة (تظهر بالبطاقة بقائمة الفريق، اختياري)</label>
@@ -617,7 +629,7 @@
 
       <div id="tab-slots" class="admin-tab-panel" style="display:none;">
       <h2 class="section-title">المواعيد المتاحة للحجز</h2>
-      <p class="section-sub">أضف أوقاتاً يختار منها الزبائن عند الحجز. الموعد المحجوز يختفي للآخرين تلقائياً، ولا يظهر أي موعد يقل عن ٢٤ ساعة من الآن. الأوقات بتوقيت جهازك.</p>
+      <p class="section-sub">أضف أوقاتاً يختار منها الزبائن عند الحجز. الموعد المحجوز يختفي للآخرين تلقائياً، ولا يظهر أي موعد يقل عن ٢٤ ساعة من الآن. تُفسَّر الأوقات بالمنطقة الزمنية للأخصائي المختار.</p>
 
       <div class="form-card" style="margin-bottom:28px;">
         <h3>إضافة مواعيد</h3>
@@ -800,6 +812,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="/tz-utils.js"></script>
 <script src="/password-reset.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
@@ -1802,18 +1815,20 @@ document.getElementById('promoForm').addEventListener('submit', async (e) => {
 });
 
 // ---------- Availability slots ----------
+let SPEC_TZ = {};
 async function loadSlots(){
   const tbody = document.getElementById('slotsTableBody');
   const specSelect = document.getElementById('slotSpecialist');
 
-  const { data: specs } = await supabaseClient.from('specialists').select('id, full_name').order('sort_order', { ascending: true });
+  const { data: specs } = await supabaseClient.from('specialists').select('id, full_name, timezone').order('sort_order', { ascending: true });
+  SPEC_TZ = Object.fromEntries((specs || []).filter(x => x.timezone).map(x => [x.id, x.timezone]));
   const keep = specSelect.value;
   specSelect.innerHTML = '<option value="">فريق بوضوح (أي مختص)</option>' + (specs || []).map(sp => `<option value="${esc(sp.id)}">${esc(sp.full_name)}</option>`).join('');
   specSelect.value = keep;
 
   const { data, error } = await supabaseClient
     .from('availability_slots')
-    .select('id, starts_at, duration_min, booking_id, specialists(full_name), bookings(full_name)')
+    .select('id, starts_at, duration_min, booking_id, specialists(full_name, timezone), bookings(full_name)')
     .gte('starts_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
     .order('starts_at', { ascending: true })
     .limit(300);
@@ -1822,7 +1837,8 @@ async function loadSlots(){
   if (!data.length) { tbody.innerHTML = '<tr><td colspan="4">ما في مواعيد مضافة بعد.</td></tr>'; return; }
 
   tbody.innerHTML = data.map(sl => {
-    const when = new Date(sl.starts_at).toLocaleString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    const stz = sl.specialists && sl.specialists.timezone && BWTZ.isValid(sl.specialists.timezone) ? sl.specialists.timezone : null;
+    const when = new Date(sl.starts_at).toLocaleString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', ...(stz ? { timeZone: stz } : {}) }) + (stz ? ' <span style="font-size:11.5px; color:var(--text-muted-light);">· ' + esc(BWTZ.name(stz, false)) + '</span>' : '');
     const who = sl.specialists ? esc(sl.specialists.full_name) : 'فريق بوضوح';
     const state = sl.booking_id ? `<span class="badge-yes">محجوز${sl.bookings ? ' — ' + esc(sl.bookings.full_name) : ''}</span>` : 'متاح';
     const del = sl.booking_id ? '' : `<button class="icon-btn danger" title="حذف" data-delete-slot="${esc(sl.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button>`;
@@ -1844,6 +1860,8 @@ document.getElementById('slotDays').innerHTML = SLOT_WEEKDAYS.map((d, i) =>
   `<label style="display:inline-flex; gap:6px; align-items:center; margin-inline-end:14px; font-size:13.5px; font-weight:400;"><input type="checkbox" class="slot-wd" value="${i}" style="width:auto;"> ${d}</label>`).join('');
 const slotIsWeekly = () => document.querySelector('input[name=slotMode]:checked').value === 'weekly';
 
+// المنطقة الزمنية التي تُفسَّر بها أوقات الإضافة: منطقة الأخصائي المختار إن حُدّدت، وإلا توقيت جهاز الأدمن
+const slotZone = () => SPEC_TZ[document.getElementById('slotSpecialist').value] || BWTZ.detect();
 function adminSlotPlan(){
   const date = document.getElementById('slotDate').value;
   const start = document.getElementById('slotStart').value;
@@ -1867,7 +1885,8 @@ function adminSlotPlan(){
     for (let i = 0; i < weeks * 7; i++) { const dt = new Date(y, mo - 1, d + i); if (wds.includes(dt.getDay())) days.push(dt); }
   }
   const starts = [];
-  days.forEach(dt => offsets.forEach(m => starts.push(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 0, m))));
+  const ztz = slotZone();
+  days.forEach(dt => offsets.forEach(m => starts.push(BWTZ.wallToUtc(dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), m, ztz))));
   return { starts, offsets, days: days.length, length };
 }
 function updateAdminSlotPreview(){
@@ -1878,8 +1897,8 @@ function updateAdminSlotPreview(){
   if (p.err) { box.style.color = 'var(--alert)'; box.textContent = p.err; return; }
   box.style.color = 'var(--text-muted-light)';
   const fresh = p.starts.filter(dt => dt.getTime() > Date.now());
-  const times = p.offsets.map(m => new Date(2000, 0, 1, 0, m).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }));
-  box.textContent = 'في اليوم الواحد ' + p.offsets.length + ' موعد: ' + times.join(' · ')
+  const times = p.offsets.map(m => new Date(Date.UTC(2000, 0, 1, 0, m)).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }));
+  box.textContent = '🌍 الأوقات بتوقيت ' + BWTZ.name(slotZone(), false) + ' (' + BWTZ.offsetLabel(slotZone()) + ')' + (SPEC_TZ[document.getElementById('slotSpecialist').value] ? '' : ' — توقيت جهازك لأن الأخصائي بلا منطقة محددة') + '. في اليوم الواحد ' + p.offsets.length + ' موعد: ' + times.join(' · ')
     + (p.days > 1 ? ' — المجموع ' + fresh.length + ' موعد.' : '')
     + (fresh.length > MAX_NEW_SLOTS ? ' (سيُضاف أول ' + MAX_NEW_SLOTS + ' فقط)' : '');
 }
@@ -2125,6 +2144,72 @@ async function loadTeam(){
 // ---------- صورة الأخصائي: رفع / تغيير / حذف ----------
 const SP_PHOTO_BUCKET = 'specialist-photos';
 const SP_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
+let spAcctOriginalEmail = '';   // بريد الدخول المحفوظ وقت بدء التعديل
+const ACCT_ERR = {
+  forbidden: 'ما عندك صلاحية إدارة الفريق.',
+  target_is_admin: 'هذا الحساب أدمن أيضاً، وتعديله للمدير العام فقط.',
+  invalid_email: 'البريد غير صالح.',
+  email_linked_to_other_specialist: 'هذا البريد مربوط بأخصائي آخر.',
+  weak_password: 'كلمة السر لازم ٨ خانات على الأقل وفيها حرف ورقم.',
+  not_linked: 'احفظي بريد الدخول أولاً.',
+  update_failed: 'تعذّر التنفيذ.',
+};
+async function acctCall(body){
+  const { data, error } = await supabaseClient.functions.invoke('specialist-account', { body });
+  let d = data;
+  if (error && error.context && typeof error.context.json === 'function') { try { d = await error.context.json(); } catch (_) {} }
+  if (!d || d.ok !== true) return { ok: false, msg: (ACCT_ERR[d && d.error] || 'تعذّر التنفيذ، حاولي مرة ثانية.') + ((d && d.detail) ? ' (' + d.detail + ')' : '') };
+  return d;
+}
+async function refreshAcctStatus(id){
+  const box = document.getElementById('spAcctStatus');
+  if (!id) { box.textContent = 'احفظي الأخصائي أولاً، ثم عدّلي حسابه لتظهر حالة الدخول وكلمة السر.'; return; }
+  box.textContent = 'جارٍ فحص الحساب...';
+  const r = await acctCall({ action: 'status', specialist_id: id });
+  if (!r.ok) { box.textContent = r.msg; return; }
+  if (!r.linked) box.innerHTML = '<span style="color:#6B6072;">⚪ غير مربوط بالبوابة. اكتبي البريد واضغطي «تحديث البريد الآن».</span>';
+  else if (!r.has_account) box.innerHTML = '<span style="color:#9A6B1E;">🟠 مربوط بـ <b dir="ltr">' + esc(r.email) + '</b> لكن لا يوجد حساب بهذا البريد بعد. «إنشاء / تعيين كلمة سر» ينشئه جاهزاً.</span>';
+  else if (!r.confirmed) box.innerHTML = '<span style="color:#9A6B1E;">🟠 الحساب موجود لكن البريد غير مؤكَّد (لهذا لا يدخل البوابة). تعيين كلمة سر يؤكّده تلقائياً.</span>';
+  else box.innerHTML = '<span style="color:#2E6B45;">🟢 حساب مفعّل ✓</span> ' + (r.last_sign_in_at ? '· آخر دخول: ' + new Date(r.last_sign_in_at).toLocaleString('ar-EG') : '· لم يسجّل دخولاً بعد');
+}
+function showAcctResult(html){ const b = document.getElementById('spAcctResult'); b.innerHTML = html; b.style.display = html ? '' : 'none'; }
+document.getElementById('spAcctEmailBtn').addEventListener('click', async (ev) => {
+  const id = document.getElementById('spId').value, email = document.getElementById('spLoginEmail').value.trim().toLowerCase();
+  if (!id) { showAcctResult('<span style="color:var(--alert);">احفظي الأخصائي أولاً ثم عدّلي بريده.</span>'); return; }
+  if (!email) { showAcctResult('<span style="color:var(--alert);">اكتبي البريد أولاً.</span>'); return; }
+  const b = ev.currentTarget; b.disabled = true;
+  const r = await acctCall({ action: 'set_email', specialist_id: id, email });
+  b.disabled = false;
+  if (!r.ok) { showAcctResult('<span style="color:var(--alert);">' + esc(r.msg) + '</span>'); return; }
+  spAcctOriginalEmail = r.email;
+  showAcctResult('<span style="color:#2E6B45;">تم تحديث البريد إلى <b dir="ltr">' + esc(r.email) + '</b>' + (r.account_email_changed ? ' (وتغيّر بريد حسابه الفعلي أيضاً).' : '.') + '</span>');
+  refreshAcctStatus(id); loadTeam();
+});
+document.getElementById('spAcctPwBtn').addEventListener('click', async (ev) => {
+  const id = document.getElementById('spId').value, email = document.getElementById('spLoginEmail').value.trim().toLowerCase();
+  const typed = document.getElementById('spAcctPw').value;
+  if (!id) { showAcctResult('<span style="color:var(--alert);">احفظي الأخصائي أولاً.</span>'); return; }
+  if (!email) { showAcctResult('<span style="color:var(--alert);">اكتبي بريد الأخصائي أولاً.</span>'); return; }
+  const b = ev.currentTarget; b.disabled = true; showAcctResult('جارٍ التنفيذ...');
+  if (email !== spAcctOriginalEmail) {                      // البريد تغيّر ولم يُحفظ: نحدّثه أولاً
+    const r0 = await acctCall({ action: 'set_email', specialist_id: id, email });
+    if (!r0.ok) { b.disabled = false; showAcctResult('<span style="color:var(--alert);">' + esc(r0.msg) + '</span>'); return; }
+    spAcctOriginalEmail = r0.email;
+  }
+  const r = await acctCall({ action: 'set_password', specialist_id: id, ...(typed ? { password: typed } : {}) });
+  b.disabled = false;
+  if (!r.ok) { showAcctResult('<span style="color:var(--alert);">' + esc(r.msg) + '</span>'); return; }
+  const pw = r.password || typed, name = document.getElementById('spName').value.trim();
+  const msg = 'مرحباً ' + name + '،\nتم تجهيز حسابك في بوابة أخصائيي بوضوح:\nالرابط: https://bewoduh.com/specialist-portal/\nالبريد: ' + r.email + '\nكلمة السر: ' + pw + '\nبعد الدخول يمكنك تغيير كلمة السر من تبويب «ملفي وبياناتي».';
+  showAcctResult('<div style="color:#2E6B45; font-weight:700;">' + (r.created ? 'تم إنشاء الحساب جاهزاً ✓' : 'تم تعيين كلمة السر ✓') + (r.password ? ' (وُلّدت تلقائياً)' : '') + '</div>'
+    + '<div>البريد: <b dir="ltr">' + esc(r.email) + '</b></div><div>كلمة السر: <b dir="ltr" style="font-family:monospace; font-size:15px; user-select:all;">' + esc(pw) + '</b></div>'
+    + '<div style="color:var(--text-muted-light); font-size:12px;">تظهر هنا مرة واحدة فقط. انسخي الرسالة وأرسليها له (واتساب مثلاً).</div>'
+    + '<button type="button" class="btn-secondary" id="spAcctCopy" style="margin-top:8px;">نسخ رسالة جاهزة</button>');
+  document.getElementById('spAcctCopy').addEventListener('click', async (e) => { try { await navigator.clipboard.writeText(msg); e.currentTarget.textContent = 'تم النسخ ✓'; } catch (_) { prompt('انسخي الرسالة:', msg); } });
+  document.getElementById('spAcctPw').value = '';
+  refreshAcctStatus(id); loadTeam();
+});
+
 let spOriginalPhoto = '';      // الصورة المحفوظة وقت بدء التعديل
 let spUploadedUrls = [];       // صور رُفعت بهذه الجلسة ولم تُحفظ بعد
 const spPhotoInput = document.getElementById('spPhoto');
@@ -2218,9 +2303,12 @@ function startEditSpecialist(sp){
   document.getElementById('spOrder').value = sp.sort_order;
   setSpecialistPhoto(sp.photo_url || '');
   spOriginalPhoto = sp.photo_url || '';
-  document.getElementById('spLoginEmail').value = '';
+  document.getElementById('spLoginEmail').value = ''; spAcctOriginalEmail = ''; showAcctResult(''); document.getElementById('spAcctPw').value = '';
+  document.getElementById('spTimezone').innerHTML = '<option value="">— غير محددة (يؤكدها الأخصائي بنفسه) —</option>' + BWTZ.optionsHtml(sp.timezone || '', false);
+  document.getElementById('spTimezone').value = sp.timezone || '';
+  refreshAcctStatus(sp.id);
   supabaseClient.from('specialist_accounts').select('email').eq('specialist_id', sp.id).maybeSingle()
-    .then(({ data }) => { if (data) document.getElementById('spLoginEmail').value = data.email; });
+    .then(({ data }) => { if (data) { document.getElementById('spLoginEmail').value = data.email; spAcctOriginalEmail = data.email; } });
   document.getElementById('spShortBio').value = sp.short_bio || '';
   document.getElementById('spBio').value = sp.bio;
   document.getElementById('spNameEn').value = sp.full_name_en || '';
@@ -2238,6 +2326,8 @@ function resetSpecialistForm(){
   setSpecialistPhoto('');
   spOriginalPhoto = '';
   document.getElementById('spId').value = '';
+  spAcctOriginalEmail = ''; showAcctResult(''); document.getElementById('spAcctStatus').textContent = '';
+  document.getElementById('spTimezone').innerHTML = '<option value="">— غير محددة (يؤكدها الأخصائي بنفسه) —</option>' + BWTZ.optionsHtml('', false);
   document.getElementById('spPublished').checked = true;
   specialistFormTitle.textContent = 'إضافة أخصائي جديد';
 }
@@ -2290,6 +2380,7 @@ specialistForm.addEventListener('submit', async (e) => {
     short_bio_en: document.getElementById('spShortBioEn').value.trim() || null,
     bio_en: document.getElementById('spBioEn').value.trim() || null,
     is_published: document.getElementById('spPublished').checked,
+    ...(document.getElementById('spTimezone').value ? { timezone: document.getElementById('spTimezone').value, timezone_confirmed: true } : {}),
   };
 
   let error, savedId = id;
@@ -2303,10 +2394,13 @@ specialistForm.addEventListener('submit', async (e) => {
   // ربط بريد الدخول لبوابة الأخصائيين (أو إلغاؤه إذا فُرّغ الحقل)
   if (!error && savedId) {
     const loginEmail = document.getElementById('spLoginEmail').value.trim().toLowerCase();
-    const linkRes = loginEmail
-      ? await supabaseClient.from('specialist_accounts').upsert({ specialist_id: savedId, email: loginEmail }, { onConflict: 'specialist_id' })
-      : await supabaseClient.from('specialist_accounts').delete().eq('specialist_id', savedId);
-    error = linkRes.error;
+    if (!loginEmail) {
+      const linkRes = await supabaseClient.from('specialist_accounts').delete().eq('specialist_id', savedId);
+      error = linkRes.error;
+    } else if (loginEmail !== spAcctOriginalEmail) {
+      const r = await acctCall({ action: 'set_email', specialist_id: savedId, email: loginEmail });
+      if (!r.ok) error = { message: r.msg };
+    }
   }
 
   if (error) {

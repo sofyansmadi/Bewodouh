@@ -117,7 +117,7 @@
   <section id="loginView" class="login card hidden"></section>
   <section id="unlinkedView" class="login card hidden"></section>
   <section id="portalView" class="hidden">
-    <div style="margin-bottom:18px;"><h1 class="kufi" style="font-size:22px;" id="hello"></h1><div class="muted" id="helloSub"></div></div>
+    <div style="margin-bottom:18px;"><h1 class="kufi" style="font-size:22px;" id="hello"></h1><div class="muted" id="helloSub"></div><div id="tzBanner"></div></div>
     <nav class="tabs" id="tabs"></nav>
     <div id="tab-overview"></div><div id="tab-upcoming" class="hidden"></div><div id="tab-schedule" class="hidden"></div><div id="tab-chat" class="hidden"></div>
     <div id="tab-past" class="hidden"></div><div id="tab-cancelled" class="hidden"></div><div id="tab-clients" class="hidden"></div><div id="tab-profile" class="hidden"></div>
@@ -126,6 +126,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="/tz-utils.js"></script>
 <script src="/password-reset.js"></script>
 <script>
 /* بوابة الأخصائيين / Specialists' portal. عربي وإنجليزي من نفس الملف: اللغة من وسم html lang.
@@ -137,10 +138,12 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':
 const $ = (id) => document.getElementById(id);
 const sb = supabaseClient;
 const LOC = EN ? 'en-GB' : 'ar-JO-u-nu-latn';
-const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ''; } })();
-const fmtDT = (iso) => new Date(iso).toLocaleString(LOC, { dateStyle: 'medium', timeStyle: 'short' });
-const fmtD = (iso) => new Date(iso).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' });
-const fmtT = (iso) => new Date(iso).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' });
+let SPTZ = BWTZ.detect(); // منطقة الأخصائي الزمنية (تُستبدل بالمحفوظة في ملفه بعد التحميل)
+const fmtDT = (iso) => new Date(iso).toLocaleString(LOC, { dateStyle: 'medium', timeStyle: 'short', timeZone: SPTZ });
+const fmtD = (iso) => new Date(iso).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long', timeZone: SPTZ });
+const fmtT = (iso) => new Date(iso).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit', timeZone: SPTZ });
+const fmtClock = (m) => new Date(Date.UTC(2000, 0, 1, 0, m)).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+const tzTxt = () => BWTZ.name(SPTZ, EN) + ' (' + BWTZ.offsetLabel(SPTZ) + ')';
 const FEE_FIRST = 10, FEE_NEXT = 15; // أتعاب الأخصائي حسب العقد: ١٠$ أول جلسة مع كل عميل، ١٥$ لكل جلسة لاحقة
 const PKG_EN = { 'استشارة سريعة': 'Quick Consultation', 'باقة الانطلاقة': 'Launch Package', 'باقة المرافقة': 'Companion Package', 'دعم فوري': 'Immediate Support', 'ادعم بوضوح': 'Support Bewoduh' };
 const pkg = (n) => EN ? (PKG_EN[n] || n) : n;
@@ -200,22 +203,46 @@ async function start(){
   setHello();
   show('portalView');
   await loadAll();
+  setHello();
   chatInit();
   openTab(location.hash.slice(1) || 'overview');
 }
 function setHello(){
   $('hello').textContent = t('مرحباً ', 'Welcome, ') + ME.full_name;
-  $('helloSub').textContent = t('الأوقات تظهر بتوقيت جهازك', 'Times are shown in your device time zone') + (TZ ? ' (' + TZ + ')' : '') + '.';
+  $('helloSub').innerHTML = esc(t('كل الأوقات في البوابة بتوقيت: ', 'All times in the portal are in: ') + tzTxt()) + ' · <a href="#" class="lnk" id="tzChange">' + t('تغيير', 'Change') + '</a>';
+  $('tzChange').addEventListener('click', (e) => { e.preventDefault(); renderTzBanner(true); });
+  renderTzBanner(false);
+}
+// تأكيد/تغيير المنطقة الزمنية: تُحفظ بملف الأخصائي، وبها تُفسَّر المواعيد التي يضيفها ويراها المراجع بجانب توقيته
+function renderTzBanner(force){
+  const box = $('tzBanner'); if (!box) return;
+  if (!PROFILE) { box.innerHTML = ''; return; }
+  const need = !(PROFILE && PROFILE.timezone_confirmed);
+  if (!need && !force) { box.innerHTML = ''; return; }
+  const det = BWTZ.detect(), cur = (PROFILE && PROFILE.timezone && BWTZ.isValid(PROFILE.timezone)) ? PROFILE.timezone : det;
+  box.innerHTML = `<div class="card" style="margin-top:12px; border-color:#C9A15F;"><b>${t('🌍 أكّد منطقتك الزمنية', '🌍 Confirm your time zone')}</b>
+    <p class="muted" style="margin:6px 0 10px; line-height:1.8;">${t('المواعيد التي تضيفها تُفسَّر بهذه المنطقة، ويراها المراجعون بتوقيتهم الخاص مع توقيتك بجانبه. اختر المنطقة التي تعمل بحسب ساعتها (مثلاً: الأردن أو مصر).', 'The slots you add are read in this time zone, and clients see them in their own time with yours next to it. Pick the zone whose clock you work by (e.g. Jordan or Egypt).')}</p>
+    <div class="row"><select id="tzSel" class="inp" style="max-width:340px;">${BWTZ.optionsHtml(cur, EN, det)}</select><button class="btn" id="tzSave" type="button">${t('تأكيد وحفظ', 'Confirm & save')}</button>${need ? '' : `<button class="btn2" id="tzCancel" type="button">${t('إلغاء', 'Cancel')}</button>`}</div><div class="msg" id="tzMsg"></div></div>`;
+  if ($('tzCancel')) $('tzCancel').addEventListener('click', () => { box.innerHTML = ''; });
+  $('tzSave').addEventListener('click', async () => {
+    const z = $('tzSel').value; $('tzSave').disabled = true;
+    const { error } = await sb.from('specialists').update({ timezone: z, timezone_confirmed: true }).eq('id', ME.id);
+    $('tzSave').disabled = false;
+    if (error) { console.error(error); $('tzMsg').className = 'msg err'; $('tzMsg').textContent = t('تعذّر الحفظ.', 'Could not save.'); return; }
+    PROFILE = { ...PROFILE, timezone: z, timezone_confirmed: true }; SPTZ = z; box.innerHTML = ''; setHello();
+    const act = document.querySelector('.tab.active'); const k = act && act.dataset.tab; if (k && RENDER[k]) RENDER[k]();
+  });
 }
 
 /* ---------- data ---------- */
 async function loadAll(){
   const [b, s, p] = await Promise.all([
     sb.from('bookings').select('*').eq('specialist_id', ME.id).order('preferred_datetime', { ascending: false }).limit(1000),
-    sb.from('availability_slots').select('*').eq('specialist_id', ME.id).gte('starts_at', new Date(Date.now() - 3600e3).toISOString()).order('starts_at', { ascending: true }).limit(500),
+    sb.from('availability_slots').select('*').eq('specialist_id', ME.id).gte('starts_at', new Date(Date.now() - 3600e3).toISOString()).order('starts_at', { ascending: true }).limit(1000),
     sb.from('specialists').select('*').eq('id', ME.id).maybeSingle(),
   ]);
   BOOKINGS = b.data || []; SLOTS = s.data || []; PROFILE = p.data || null;
+  if (PROFILE && PROFILE.timezone && BWTZ.isValid(PROFILE.timezone)) SPTZ = PROFILE.timezone;
   try {
     let showChat = !!(PROFILE && PROFILE.chat_enabled);
     if (!showChat) { const { data: th } = await sb.from('chat_threads').select('id').eq('specialist_id', ME.id).limit(1); showChat = !!(th && th.length); }
@@ -467,7 +494,8 @@ $('tabs').addEventListener('click', (e) => { const x = e.target.closest('.tab');
 
 const statusBadge = (b) => b.status === 'مؤكّد' ? `<span class="badge ok">${t('مؤكّد', 'Confirmed')}</span>` : `<span class="badge">${t('مدفوع — بانتظار تأكيد الإدارة', 'Paid — awaiting team confirmation')}</span>`;
 const clientCell = (b) => `<b>${esc(b.full_name)}</b><div class="muted"><a href="tel:${esc(b.phone)}" dir="ltr">${esc(b.phone)}</a> · <a href="mailto:${esc(b.email)}" dir="ltr">${esc(b.email)}</a></div>`;
-const when = (b) => `<b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fmtT(b.preferred_datetime)}</div>`;
+const clientClock = (b) => { const z = b.client_tz; if (!z || !BWTZ.isValid(z)) return ''; const ts = new Date(b.preferred_datetime).getTime(); if (BWTZ.offsetMs(ts, z) === BWTZ.offsetMs(ts, SPTZ)) return ''; return `<div class="muted" style="font-size:12px;">${t('عند المراجع: ', 'Client\'s clock: ')}${esc(BWTZ.fmtTime(b.preferred_datetime, z, LOC))} · ${esc(BWTZ.name(z, EN))}</div>`; };
+const when = (b) => `<b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fmtT(b.preferred_datetime)}</div>${clientClock(b)}`;
 const table = (head, rows) => rows.length ? `<div class="tbl-wrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : '';
 
 /* ---------- overview / statistics ---------- */
@@ -520,10 +548,11 @@ function renderSchedule(){
   const todayStr = new Date().toISOString().slice(0, 10);
   const byBooking = Object.fromEntries(BOOKINGS.map(b => [b.id, b]));
   const groups = {};
-  SLOTS.forEach(s => { const k = new Date(s.starts_at).toDateString(); (groups[k] = groups[k] || []).push(s); });
+  SLOTS.forEach(s => { const k = BWTZ.dayKey(s.starts_at, SPTZ); (groups[k] = groups[k] || []).push(s); });
   $('tab-schedule').innerHTML = `
     <h2 class="title">${t('جدولي المتاح', 'My availability')}</h2>
-    <p class="sub">${t('المراجعون يرون مواعيدك المتاحة على صفحة الحجز، ولا يستطيعون حجز موعد قبل ٢٤ ساعة من وقته.', 'Clients see your free slots on the booking page, and cannot book a slot less than 24 hours before it starts.')}</p>
+    <p class="sub">${t('المراجعون يرون مواعيدك المتاحة على صفحة الحجز، ولا يستطيعون حجز موعد قبل ٢٤ ساعة من وقته. كل مراجع يراها بتوقيته الخاص تلقائياً.', 'Clients see your free slots on the booking page, and cannot book a slot less than 24 hours before it starts. Each client sees them in their own time automatically.')}</p>
+    <p class="muted" style="margin:-6px 0 14px;">🌍 ${t('الأوقات التي تُدخلها وتراها هنا بتوقيت: ', 'The times you enter and see here are in: ')}<b>${esc(tzTxt())}</b> <a href="#" class="lnk" id="tzChange2">${t('تغيير', 'Change')}</a></p>
     <div class="card" style="margin-bottom:24px;">
       <h3 style="font-size:16px; margin-bottom:14px;">${t('إضافة مواعيد', 'Add slots')}</h3>
       <div class="days" style="margin-bottom:14px;"><label><input type="radio" name="slotMode" value="single" checked> ${t('موعد واحد', 'Single slot')}</label><label><input type="radio" name="slotMode" value="weekly"> ${t('متكرر أسبوعياً', 'Repeat weekly')}</label></div>
@@ -551,6 +580,7 @@ function renderSchedule(){
     }).join('')}</div>`).join('') : `<div class="empty">${t('ما أضفت أي موعد بعد.', 'You have not added any slots yet.')}</div>`}`;
   document.querySelectorAll('input[name=slotMode]').forEach(r => r.addEventListener('change', () => $('weeklyBox').classList.toggle('hidden', document.querySelector('input[name=slotMode]:checked').value !== 'weekly')));
   $('slAdd').addEventListener('click', addSlots);
+  $('tzChange2').addEventListener('click', (e) => { e.preventDefault(); renderTzBanner(true); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   const addCard = $('slAdd').closest('.card');
   addCard.addEventListener('input', updateSlotPreview);
   addCard.addEventListener('change', updateSlotPreview);
@@ -571,15 +601,15 @@ function slotPlan(){
   for (let m = startMin; m + dur <= endMin; m += dur + gap) offsets.push(m);
   const weekly = document.querySelector('input[name=slotMode]:checked').value === 'weekly';
   const days = [];
-  if (!weekly) days.push(new Date(y, mo - 1, d));
+  if (!weekly) days.push({ y, mo, d });
   else {
     const wds = [...document.querySelectorAll('.wd:checked')].map(i => +i.value);
     const weeks = Math.min(12, Math.max(1, parseInt($('slWeeks').value) || 1));
     if (!wds.length) return { starts: [], offsets, err: t('اختر يوماً واحداً على الأقل.', 'Pick at least one day.') };
-    for (let i = 0; i < weeks * 7; i++) { const dt = new Date(y, mo - 1, d + i); if (wds.includes(dt.getDay())) days.push(dt); }
+    for (let i = 0; i < weeks * 7; i++) { const u = new Date(Date.UTC(y, mo - 1, d + i)); if (wds.includes(u.getUTCDay())) days.push({ y: u.getUTCFullYear(), mo: u.getUTCMonth() + 1, d: u.getUTCDate() }); }
   }
   const starts = [];
-  days.forEach(dt => offsets.forEach(m => starts.push(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 0, m))));
+  days.forEach(dt => offsets.forEach(m => starts.push(BWTZ.wallToUtc(dt.y, dt.mo, dt.d, m, SPTZ))));
   return { starts, offsets, days: days.length };
 }
 function updateSlotPreview(){
@@ -589,7 +619,7 @@ function updateSlotPreview(){
   if (p.err) { box.className = 'muted'; box.style.color = 'var(--alert)'; box.textContent = p.err; return; }
   box.style.color = '';
   const fresh = p.starts.filter(dt => dt > now());
-  const times = p.offsets.map(m => fmtT(new Date(2000, 0, 1, 0, m)));
+  const times = p.offsets.map(fmtClock);
   const per = t('في اليوم الواحد ' + p.offsets.length + ' موعد: ', p.offsets.length + ' slot(s) per day: ');
   const total = p.days > 1 ? t(' — المجموع ' + fresh.length + ' موعد.', ' — ' + fresh.length + ' in total.') : '';
   const over = fresh.length > MAX_NEW_SLOTS ? t(' (سيُضاف أول ' + MAX_NEW_SLOTS + ' فقط)', ' (only the first ' + MAX_NEW_SLOTS + ' will be added)') : '';

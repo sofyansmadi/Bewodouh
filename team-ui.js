@@ -17,8 +17,10 @@
   // أقرب المواعيد غير المحجوزة (بعد ٢٤ ساعة، كما تفرض صفحة الحجز) مجمّعة حسب الأخصائي
   async function loadAvailability() {
     try {
-      const min = new Date(Date.now() + 24 * 3600e3).toISOString();
-      const rows = await get('availability_slots?select=specialist_id,starts_at&booking_id=is.null&specialist_id=not.is.null&starts_at=gte.' + encodeURIComponent(min) + '&order=starts_at.asc&limit=1000');
+      // دالة قاعدة البيانات تعيد أقرب ٦ مواعيد لكل أخصائي (بدل تحميل أول ١٠٠٠ موعد للفريق كله، وكانت تُسقط مواعيد الباقين)
+      const r = await fetch(BASE + 'rpc/public_next_slots', { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_n: 6 }) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const rows = await r.json();
       const by = {};
       rows.forEach(r => { (by[r.specialist_id] = by[r.specialist_id] || []).push(r.starts_at); });
       return by;
@@ -30,12 +32,15 @@
     ? { name: sp.full_name_en || sp.full_name, specialty: sp.specialty_en || sp.specialty, short: sp.short_bio_en || (sp.bio_en ? '' : (sp.short_bio || '')), bio: sp.bio_en || sp.bio || '' }
     : { name: sp.full_name, specialty: sp.specialty, short: sp.short_bio || '', bio: sp.bio || '' };
   const snippet = (l) => l.short || (l.bio.length > 90 ? l.bio.slice(0, 90) + '…' : l.bio);
+  const MY_TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (_) { return ''; } })();
+  const myOffset = () => { try { const p = new Intl.DateTimeFormat('en-US', { timeZone: MY_TZ, timeZoneName: 'shortOffset' }).formatToParts(new Date()).find(x => x.type === 'timeZoneName'); return p ? p.value : ''; } catch (_) { return ''; } };
+  const tzNote = () => { const o = myOffset(); const city = MY_TZ.split('/').pop().replace(/_/g, ' '); return t('الأوقات بتوقيت جهازك', 'Times shown in your device time') + (MY_TZ ? ' (' + city + (o ? ' · ' + o : '') + ')' : ''); };
   const fmtSlot = (iso) => new Date(iso).toLocaleString(EN ? 'en-GB' : 'ar-EG', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
   const profileHref = (sp) => (EN ? '/en/specialist/?slug=' : '/specialist/?slug=') + encodeURIComponent(sp.slug);
 
   function availTag(slots) {
     return (slots && slots.length)
-      ? `<div class="avail"><span class="dot"></span><span>${t('أقرب موعد: ', 'Next: ')}${esc(fmtSlot(slots[0]))}</span></div>`
+      ? `<div class="avail"><span class="dot"></span><span>${t('أقرب موعد: ', 'Next: ')}${esc(fmtSlot(slots[0]))}${myOffset() ? ' · ' + esc(myOffset()) : ''}</span></div>`
       : `<div class="avail none"><span>${t('لا مواعيد محددة حالياً', 'No set times right now')}</span></div>`;
   }
   // المتاحون أولاً (الأقرب موعداً)، ثم الباقون بترتيبهم
@@ -138,7 +143,7 @@
     return `${chatBlock(sp)}<div class="qb">
       <div class="qb-t">${(slots && slots.length) ? t('أقرب المواعيد المتاحة', 'Next available times') : t('المواعيد', 'Availability')}</div>
       ${(slots && slots.length)
-        ? `<div class="qb-chips">${chips}</div>`
+        ? `<div class="qb-chips">${chips}</div><p class="qb-none" style="margin:6px 0 10px; font-size:12px;">🌍 ${esc(tzNote())}</p>`
         : `<p class="qb-none">${t('لا توجد مواعيد محددة حالياً — يمكنك اختيار موعدك المفضّل في صفحة الحجز.', 'No set times right now — you can choose your preferred time on the booking page.')}</p>`}
       <a class="qb-btn" href="${href}">${t('احجز موعدك', 'Book your session')}</a>
       <ul class="qb-ul">

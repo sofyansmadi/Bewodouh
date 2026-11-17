@@ -127,6 +127,28 @@
   .slot-btn[aria-pressed="true"]{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
   .slot-btn[aria-pressed="true"] small{ color:var(--clarity-soft); }
   .slot-btn:focus-visible{ outline:3px solid rgba(201,161,95,.6); outline-offset:2px; }
+  /* منتقي المواعيد: شريط المنطقة الزمنية + شريط الأيام + أوقات اليوم + ملخص الموعد */
+  .tz-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; background:#fff; border:1.5px solid var(--fog-dim); border-radius:14px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; }
+  .tz-bar .tz-lbl{ font-weight:700; color:var(--ink); }
+  .tz-bar select{ border:1.5px solid var(--fog-dim); border-radius:10px; padding:8px 10px; font-family:inherit; font-size:13.5px; background:var(--fog); color:var(--text-on-light); min-height:40px; max-width:100%; }
+  .tz-bar .tz-note{ font-size:12px; color:var(--text-muted-light); }
+  .tz-bar .tz-reset{ border:none; background:none; color:var(--clarity); font-family:inherit; font-size:12.5px; text-decoration:underline; cursor:pointer; padding:4px; }
+  .month-label{ font-weight:700; font-size:13px; color:var(--text-muted-light); margin:4px 0 8px; }
+  .day-wrap{ display:flex; align-items:center; gap:6px; }
+  .day-strip{ display:flex; gap:8px; overflow-x:auto; flex:1; padding:4px 2px 10px; scroll-snap-type:x proximity; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+  .day-chip{ flex:0 0 auto; min-width:70px; text-align:center; border:1.5px solid var(--fog-dim); background:var(--fog); color:var(--text-on-light); border-radius:14px; padding:8px 6px; cursor:pointer; font-family:inherit; scroll-snap-align:center; transition:.15s; }
+  .day-chip b{ display:block; font-size:19px; line-height:1.25; }
+  .day-chip small{ display:block; font-size:11px; font-weight:600; color:var(--text-muted-light); line-height:1.35; }
+  .day-chip small.cnt{ font-weight:500; margin-top:2px; }
+  .day-chip:hover{ border-color:var(--clarity); background:#fff; }
+  .day-chip[aria-pressed="true"]{ background:var(--ink); color:var(--fog); border-color:var(--ink); }
+  .day-chip[aria-pressed="true"] small{ color:var(--clarity-soft); }
+  .day-chip:focus-visible, .day-nav:focus-visible{ outline:3px solid rgba(201,161,95,.6); outline-offset:2px; }
+  .day-nav{ flex:0 0 auto; width:38px; height:38px; border-radius:50%; border:1.5px solid var(--fog-dim); background:#fff; color:var(--ink); font-size:22px; line-height:1; cursor:pointer; }
+  .day-nav:hover{ border-color:var(--clarity); }
+  .pick-summary{ margin-top:16px; padding:12px 14px; border-radius:12px; background:rgba(201,161,95,.13); border:1px solid rgba(201,161,95,.4); font-size:14px; line-height:1.8; color:var(--ink); }
+  .pick-summary .tzline{ font-size:12.5px; color:var(--text-muted-light); }
+
   .btn-primary{ background:var(--ink); color:var(--fog); font-weight:700; font-size:15px; padding:14px 30px; border-radius:100px; border:none; cursor:pointer; font-family:inherit; transition:.2s; width:100%; }
   .btn-primary:hover{ background:var(--ink-soft); }
   .pm-title{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; }
@@ -586,7 +608,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   if (slotMode && !window.__selectedSlot) {
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'Please choose one of the available times above.';
-    document.getElementById('slotPicker').querySelector('button')?.focus();
+    (document.querySelector('#slotPicker .slot-btn') || document.querySelector('#slotPicker .day-chip'))?.focus();
     return;
   }
   if (!slotMode && selectedDate < minAllowed) {
@@ -614,7 +636,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     specialist_name: chosenSpecialist || null,
     promo_code: ((document.getElementById('bkPromo').value || '').trim().toUpperCase()) || null,
     lang: 'en',
-    client_tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; } })(),
+    client_tz: window.__clientTz || (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; } })(),
   };
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
@@ -871,67 +893,150 @@ document.querySelectorAll('.faq-q').forEach(q => {
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
+<script src="/tz-utils.js"></script>
 <script>
 /* Available time slots: when the team has added slots (admin > Available slots), show them as
    buttons instead of the free date-time field. Each slot is booked atomically through the
    book_with_slot function, so the same slot can never be booked twice. */
 (async function setupSlotPicker(){
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+  if (typeof supabaseClient === 'undefined' || !supabaseClient || typeof BWTZ === 'undefined') return;
+  const EN = document.documentElement.lang === 'en';
+  const tt = (ar, en) => EN ? en : ar;
+  const LOCALE = EN ? 'en-GB' : 'ar-JO-u-nu-latn';
+  const TEAM = tt('فريق بوضوح', 'Bewoduh team');
   const dtField = document.getElementById('dtField');
   const slotField = document.getElementById('slotField');
   const picker = document.getElementById('slotPicker');
   const hint = document.getElementById('dateTimeHint');
   const dtInput = document.getElementById('bkDateTime');
   const originalHint = hint.textContent;
-  const LOCALE = 'en-GB';
-  const TEAM = 'Bewoduh team';
+  const chosen = (typeof chosenSpecialist !== 'undefined' && chosenSpecialist) ? chosenSpecialist : null;
+  const detected = BWTZ.detect();
+  let tz = detected;
+  try { const s = localStorage.getItem('bw_tz'); if (s && BWTZ.isValid(s)) tz = s; } catch (_) {}
+  window.__clientTz = tz;
 
-  async function loadSlots(){
-    const { data, error } = await supabaseClient
-      .from('availability_slots')
-      .select('id, starts_at, duration_min, specialists(full_name, full_name_en)')
-      .order('starts_at', { ascending: true })
-      .limit(300);
-    let slots = !error && data ? data : [];
-    if (typeof chosenSpecialist !== 'undefined' && chosenSpecialist) slots = slots.filter(s => s.specialists && s.specialists.full_name === chosenSpecialist);
-    const cutoff = Date.now() + 14 * 24 * 3600 * 1000;
-    slots = slots.filter(s => new Date(s.starts_at).getTime() < cutoff);
+  let slots = [], byDay = new Map(), selDay = null, selId = null;
+  const spName = (sl) => sl.specialists ? (EN ? (sl.specialists.full_name_en || sl.specialists.full_name) : sl.specialists.full_name) : TEAM;
+  const gmt = (z, iso) => BWTZ.offsetLabel(z, iso ? new Date(iso) : new Date());
+  const zoneTxt = (z, iso) => BWTZ.name(z, EN) + ' (' + gmt(z, iso) + ')';
+  const setHint = () => {
+    window.__slotHintText = tt('الأوقات معروضة بتوقيت ' + zoneTxt(tz) + '. إعادة الجدولة مجاناً حتى ٢٤ ساعة قبل الجلسة.',
+      'Times are shown in ' + zoneTxt(tz) + '. Free rescheduling up to 24 hours before the session.');
+    hint.style.color = 'var(--text-muted-light)'; hint.textContent = window.__slotHintText;
+  };
 
-    window.__slotMode = slots.length > 0;
-    window.__selectedSlot = null;
-    dtField.style.display = window.__slotMode ? 'none' : '';
-    slotField.style.display = window.__slotMode ? '' : 'none';
-    dtInput.required = !window.__slotMode;
-    hint.style.color = 'var(--text-muted-light)';
-    hint.textContent = window.__slotMode ? window.__slotHintText : originalHint;
+  // نجلب كل المواعيد القادمة (حتى ١٥٠ يوماً) مصفّاة من الخادم لهذا الأخصائي، على دفعات، بدل أول ٣٠٠ موعد لكل الفريق
+  async function fetchSlots(){
+    const from = new Date(Date.now() + 24 * 3600e3).toISOString();
+    const to = new Date(Date.now() + 150 * 24 * 3600e3).toISOString();
+    const out = [], PAGE = 1000;
+    for (let off = 0; off < 6000; off += PAGE) {
+      let q = supabaseClient.from('availability_slots')
+        .select((chosen ? 'id, starts_at, duration_min, specialists!inner(full_name, full_name_en, timezone)' : 'id, starts_at, duration_min, specialists(full_name, full_name_en, timezone)'))
+        .gte('starts_at', from).lte('starts_at', to).order('starts_at', { ascending: true }).range(off, off + PAGE - 1);
+      if (chosen) q = q.eq('specialists.full_name', chosen);
+      const { data, error } = await q;
+      if (error || !data) { console.error('slots:', error); break; }
+      out.push(...data);
+      if (data.length < PAGE) break;
+    }
+    return out;
+  }
+
+  const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const group = () => { byDay = new Map(); slots.forEach(sl => { const k = BWTZ.dayKey(sl.starts_at, tz); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(sl); }); };
+
+  function summaryHtml(sl){
+    const when = BWTZ.fmtDateTime(sl.starts_at, tz, LOCALE);
+    let h = '<div>' + tt('موعدك', 'Your appointment') + ': <b>' + when + '</b><br><span class="tzline">' + zoneTxt(tz, sl.starts_at) + '</span></div>';
+    const sz = sl.specialists && sl.specialists.timezone;
+    if (sz && BWTZ.isValid(sz)) {
+      const same = BWTZ.offsetMs(new Date(sl.starts_at).getTime(), sz) === BWTZ.offsetMs(new Date(sl.starts_at).getTime(), tz);
+      h += same
+        ? '<div class="tzline" style="margin-top:4px;">✓ ' + tt('نفس توقيت الأخصائي، لا فرق بينكما.', 'Same time as the specialist, no difference.') + '</div>'
+        : '<div style="margin-top:6px;">' + tt('عند الأخصائي', 'On the specialist\'s clock') + ': <b>' + BWTZ.fmtDateTime(sl.starts_at, sz, LOCALE) + '</b><br><span class="tzline">' + zoneTxt(sz, sl.starts_at) + '</span></div>';
+    }
+    return h;
+  }
+
+  function render(){
     picker.replaceChildren();
-    if (!window.__slotMode) return;
+    // 1) شريط المنطقة الزمنية
+    const bar = mk('div', 'tz-bar');
+    bar.appendChild(mk('span', 'tz-lbl', '🌍 ' + tt('الأوقات بتوقيت:', 'Times shown in:')));
+    const sel = document.createElement('select');
+    sel.setAttribute('aria-label', tt('اختر منطقتك الزمنية', 'Choose your time zone'));
+    sel.innerHTML = BWTZ.optionsHtml(tz, EN, detected);
+    sel.addEventListener('change', () => { tz = sel.value; window.__clientTz = tz; try { localStorage.setItem('bw_tz', tz); } catch (_) {} setHint(); group(); const cur = slots.find(s => s.id === selId); selDay = cur ? BWTZ.dayKey(cur.starts_at, tz) : (byDay.keys().next().value || null); render(); });
+    bar.appendChild(sel);
+    bar.appendChild(mk('span', 'tz-note', tz === detected ? tt('(اكتُشف تلقائياً من جهازك)', '(detected from your device)') : ''));
+    if (tz !== detected) { const b = mk('button', 'tz-reset', tt('استخدم توقيت جهازي', 'Use my device time')); b.type = 'button'; b.addEventListener('click', () => { sel.value = detected; sel.dispatchEvent(new Event('change')); }); bar.appendChild(b); }
+    picker.appendChild(bar);
 
-    const showSpecialist = !(typeof chosenSpecialist !== 'undefined' && chosenSpecialist);
-    let currentDay = '';
-    let row = null;
-    slots.forEach(sl => {
-      const d = new Date(sl.starts_at);
-      const dayLabel = d.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
-      if (dayLabel !== currentDay) {
-        currentDay = dayLabel;
-        const h = document.createElement('div'); h.className = 'slot-day'; h.textContent = dayLabel;
-        row = document.createElement('div'); row.className = 'slot-row';
-        picker.append(h, row);
-      }
-      const btn = document.createElement('button');
-      btn.type = 'button'; btn.className = 'slot-btn'; btn.setAttribute('aria-pressed', 'false');
-      btn.textContent = d.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
-      if (showSpecialist) { const sm = document.createElement('small'); sm.textContent = sl.specialists ? (sl.specialists.full_name_en || sl.specialists.full_name) : TEAM; btn.appendChild(sm); }
+    if (!byDay.size) return;
+    const keys = [...byDay.keys()];
+    if (!selDay || !byDay.has(selDay)) selDay = keys[0];
+
+    // 2) شريط الأيام (أفقي قابل للتمرير)
+    const first = byDay.get(selDay)[0].starts_at;
+    picker.appendChild(mk('div', 'month-label', tt('اختر اليوم', 'Pick a day') + ' · ' + BWTZ.fmtDay(first, tz, LOCALE, { weekday: undefined, day: undefined, month: 'long', year: 'numeric' }) + ' · ' + tt(keys.length + ' يوم متاح', keys.length + ' days available')));
+    const wrap = mk('div', 'day-wrap');
+    const strip = mk('div', 'day-strip'); strip.setAttribute('role', 'group'); strip.setAttribute('aria-label', tt('الأيام المتاحة', 'Available days'));
+    const nav = (dir, ch) => { const b = mk('button', 'day-nav', ch); b.type = 'button'; b.setAttribute('aria-label', dir > 0 ? tt('الأيام التالية', 'Next days') : tt('الأيام السابقة', 'Previous days')); b.addEventListener('click', () => strip.scrollBy({ left: dir * 260 * (document.documentElement.dir === 'rtl' ? -1 : 1), behavior: 'smooth' })); return b; };
+    keys.forEach(k => {
+      const list = byDay.get(k), iso = list[0].starts_at;
+      const c = mk('button', 'day-chip'); c.type = 'button'; c.setAttribute('aria-pressed', k === selDay ? 'true' : 'false');
+      c.append(mk('small', '', BWTZ.fmtDay(iso, tz, LOCALE, { weekday: 'short', day: undefined, month: undefined })),
+               mk('b', '', BWTZ.fmtDay(iso, tz, LOCALE, { weekday: undefined, day: 'numeric', month: undefined })),
+               mk('small', '', BWTZ.fmtDay(iso, tz, LOCALE, { weekday: undefined, day: undefined, month: 'short' })),
+               mk('small', 'cnt', list.length + ' ' + tt('موعد', list.length === 1 ? 'slot' : 'slots')));
+      c.addEventListener('click', () => { selDay = k; render(); });
+      strip.appendChild(c);
+    });
+    const rtl = document.dir === 'rtl' || document.documentElement.dir === 'rtl';
+    wrap.append(nav(-1, rtl ? '›' : '‹'), strip, nav(1, rtl ? '‹' : '›'));
+    picker.appendChild(wrap);
+    const act = strip.querySelector('[aria-pressed="true"]');
+    if (act) { const a = act.getBoundingClientRect(), b = strip.getBoundingClientRect(); strip.scrollLeft += (a.left + a.width / 2) - (b.left + b.width / 2); }
+
+    // 3) أوقات اليوم المختار
+    picker.appendChild(mk('div', 'slot-day', BWTZ.fmtDay(first, tz, LOCALE)));
+    const row = mk('div', 'slot-row');
+    byDay.get(selDay).forEach(sl => {
+      const btn = mk('button', 'slot-btn', BWTZ.fmtTime(sl.starts_at, tz, LOCALE));
+      btn.type = 'button'; btn.setAttribute('aria-pressed', sl.id === selId ? 'true' : 'false');
+      if (!chosen) btn.appendChild(mk('small', '', spName(sl)));
       btn.addEventListener('click', () => {
-        picker.querySelectorAll('.slot-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        selId = sl.id; window.__selectedSlot = sl;
+        row.querySelectorAll('.slot-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
         btn.setAttribute('aria-pressed', 'true');
-        window.__selectedSlot = sl;
-        hint.style.color = 'var(--text-muted-light)';
-        hint.textContent = window.__slotHintText;
+        sum.innerHTML = summaryHtml(sl); sum.style.display = '';
+        setHint();
       });
       row.appendChild(btn);
     });
+    picker.appendChild(row);
+
+    // 4) ملخص الموعد المختار (بتوقيتك وبتوقيت الأخصائي)
+    const sum = mk('div', 'pick-summary'); sum.setAttribute('aria-live', 'polite');
+    const cur = slots.find(s => s.id === selId);
+    if (cur) sum.innerHTML = summaryHtml(cur); else sum.style.display = 'none';
+    picker.appendChild(sum);
+  }
+
+  async function loadSlots(){
+    slots = await fetchSlots();
+    window.__slotMode = slots.length > 0;
+    window.__selectedSlot = null; selId = null;
+    dtField.style.display = window.__slotMode ? 'none' : '';
+    slotField.style.display = window.__slotMode ? '' : 'none';
+    dtInput.required = !window.__slotMode;
+    picker.replaceChildren();
+    if (!window.__slotMode) { hint.style.color = 'var(--text-muted-light)'; hint.textContent = originalHint; return; }
+    setHint();
+    group(); selDay = byDay.keys().next().value || null;
+    render();
   }
   window.reloadSlots = loadSlots;
   loadSlots();
