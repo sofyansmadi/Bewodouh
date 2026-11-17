@@ -238,6 +238,10 @@
               <input type="text" id="pkgUnit" required>
             </div>
             <div class="field">
+              <label for="pkgSessions">عدد الجلسات بالباقة (0 للتبرع)</label>
+              <input type="number" id="pkgSessions" min="0" max="30" value="1">
+            </div>
+            <div class="field">
               <label for="pkgOrder">ترتيب الظهور</label>
               <input type="number" id="pkgOrder" value="0">
             </div>
@@ -971,6 +975,7 @@ function startEdit(pkg){
   document.getElementById('pkgPrice').value = pkg.price;
   document.getElementById('pkgDesc').value = pkg.description || '';
   document.getElementById('pkgUnit').value = pkg.price_unit;
+  document.getElementById('pkgSessions').value = pkg.sessions_count == null ? 1 : pkg.sessions_count;
   document.getElementById('pkgOrder').value = pkg.sort_order;
   document.getElementById('pkgRecommended').checked = pkg.is_recommended;
   formTitle.textContent = 'تعديل: ' + pkg.name;
@@ -996,6 +1001,7 @@ packageForm.addEventListener('submit', async (e) => {
     price: parseFloat(document.getElementById('pkgPrice').value),
     description: document.getElementById('pkgDesc').value.trim(),
     price_unit: document.getElementById('pkgUnit').value.trim(),
+    sessions_count: Math.max(0, Math.min(30, parseInt(document.getElementById('pkgSessions').value, 10) || 0)),
     sort_order: parseInt(document.getElementById('pkgOrder').value) || 0,
     is_recommended: document.getElementById('pkgRecommended').checked,
   };
@@ -2647,6 +2653,6 @@ async function deleteExercise(id){
 }
 </script>
 
-<script src="/admin/admin-extra.js?v=3"></script>
+<script src="/admin/admin-extra.js?v=5"></script>
 </body>
 </html>

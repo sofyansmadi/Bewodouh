@@ -101,6 +101,7 @@
   .cform textarea{ flex:1; border:1.5px solid var(--fog-dim); border-radius:14px; padding:10px 14px; font-family:inherit; font-size:14.5px; resize:none; max-height:120px; background:var(--fog); min-height:44px; }
   .cform textarea:focus{ outline:none; border-color:var(--clarity); background:#fff; }
   .reqcard{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:#FDF8EE; border:1.5px solid #EBD9B5; border-radius:14px; padding:14px 18px; margin-bottom:10px; }
+  .srow{ display:flex; gap:8px 10px; flex-wrap:wrap; align-items:center; padding:10px 0; border-top:1px solid var(--fog-dim); }
 </style>
 </head>
 <body>
@@ -148,6 +149,7 @@ const FEE_FIRST = 10, FEE_NEXT = 15; // أتعاب الأخصائي حسب ال�
 const PKG_EN = { 'استشارة سريعة': 'Quick Consultation', 'باقة الانطلاقة': 'Launch Package', 'باقة المرافقة': 'Companion Package', 'دعم فوري': 'Immediate Support', 'ادعم بوضوح': 'Support Bewoduh' };
 const pkg = (n) => EN ? (PKG_EN[n] || n) : n;
 
+let SESSIONS = [];
 let ME = null, BOOKINGS = [], SLOTS = [], PROFILE = null, currentClient = null, AUTH_EMAIL = '';
 
 /* ---------- static chrome ---------- */
@@ -172,7 +174,7 @@ $('unlinkedView').innerHTML = `
   <h1>${t('حسابك غير مرتبط بملف أخصائي', 'Your account is not linked to a specialist profile')}</h1>
   <p>${t('سجّلت الدخول، لكن هذا البريد غير مرتبط بأي ملف في فريق بوضوح. تأكد أنك دخلت بنفس البريد الذي قدّمت به طلب الانضمام، أو تواصل مع الإدارة على hello@bewoduh.com.', 'You are signed in, but this email is not linked to any profile in the Bewoduh team. Make sure you signed in with the email you used for your application, or contact us at hello@bewoduh.com.')}</p>
   <button class="btn full" id="unlinkedLogout" type="button">${t('تسجيل الخروج', 'Sign out')}</button>`;
-const TABS = [['overview', t('نظرة عامة', 'Overview')], ['upcoming', t('القادمة', 'Upcoming')], ['schedule', t('جدولي المتاح', 'My availability')], ['chat', t('المحادثات', 'Chats')], ['past', t('الجلسات السابقة', 'Past sessions')], ['cancelled', t('الملغاة', 'Cancelled')], ['clients', t('ملفات المراجعين', 'Client files')], ['profile', t('ملفي وبياناتي', 'My profile & details')]];
+const TABS = [['overview', t('نظرة عامة', 'Overview')], ['upcoming', t('القادمة والجارية', 'Upcoming & ongoing')], ['schedule', t('جدولي المتاح', 'My availability')], ['chat', t('المحادثات', 'Chats')], ['past', t('الجلسات السابقة', 'Past sessions')], ['cancelled', t('الملغاة', 'Cancelled')], ['clients', t('ملفات المراجعين', 'Client files')], ['profile', t('ملفي وبياناتي', 'My profile & details')]];
 $('tabs').innerHTML = TABS.map(([k, l], i) => `<button class="tab${i ? '' : ' active'}" data-tab="${k}">${l}${k === 'upcoming' ? ' <span class="count" id="cUpcoming">0</span>' : ''}${k === 'chat' ? ' <span class="count hidden" id="cChat">0</span>' : ''}</button>`).join('');
 
 /* ---------- auth ---------- */
@@ -236,11 +238,13 @@ function renderTzBanner(force){
 
 /* ---------- data ---------- */
 async function loadAll(){
-  const [b, s, p] = await Promise.all([
+  const [b, s, p, ss] = await Promise.all([
     sb.from('bookings').select('*').eq('specialist_id', ME.id).order('preferred_datetime', { ascending: false }).limit(1000),
     sb.from('availability_slots').select('*').eq('specialist_id', ME.id).gte('starts_at', new Date(Date.now() - 3600e3).toISOString()).order('starts_at', { ascending: true }).limit(1000),
     sb.from('specialists').select('*').eq('id', ME.id).maybeSingle(),
+    sb.from('booking_sessions').select('*').eq('specialist_id', ME.id).order('seq', { ascending: true }).limit(3000),
   ]);
+  SESSIONS = ss.data || [];
   BOOKINGS = b.data || []; SLOTS = s.data || []; PROFILE = p.data || null;
   if (PROFILE && PROFILE.timezone && BWTZ.isValid(PROFILE.timezone)) SPTZ = PROFILE.timezone;
   try {
@@ -255,7 +259,49 @@ const isCancelled = (b) => b.status === 'ملغى';
 const upcoming = () => BOOKINGS.filter(b => b.paid && !isCancelled(b) && new Date(b.preferred_datetime) > now()).sort((a, c) => new Date(a.preferred_datetime) - new Date(c.preferred_datetime));
 const past = () => BOOKINGS.filter(b => b.paid && !isCancelled(b) && new Date(b.preferred_datetime) <= now());
 const cancelled = () => BOOKINGS.filter(isCancelled);
-const counted = () => past().filter(b => b.outcome === 'completed' || b.outcome === 'client_no_show').sort((a, c) => new Date(a.preferred_datetime) - new Date(c.preferred_datetime));
+/* الجلسات الفعلية: كل جلسة لها سجل (booking_sessions). تُحتسب الأتعاب فقط للجلسات التي سجّلتها «تمت» أو «لم يحضر». */
+const bookingOf = (s) => BOOKINGS.find(b => b.id === s.booking_id);
+const sessOf = (b) => SESSIONS.filter(x => x.booking_id === b.id).sort((a, c) => a.seq - c.seq);
+const sessPending = (b) => sessOf(b).some(x => x.status === 'scheduled');
+const activeBk = () => BOOKINGS.filter(b => b.paid && !isCancelled(b));
+const nextAt = (b) => { const l = sessOf(b).filter(x => x.status === 'scheduled'); const t0 = l.map(x => x.scheduled_at ? new Date(x.scheduled_at).getTime() : Infinity); return Math.min(...t0, Infinity); };
+const pendingBk = () => activeBk().filter(sessPending).sort((a, c) => nextAt(a) - nextAt(c));
+const finishedBk = () => activeBk().filter(b => sessOf(b).length && !sessPending(b)).sort((a, c) => Math.max(...sessOf(c).map(x => +new Date(x.done_at || 0))) - Math.max(...sessOf(a).map(x => +new Date(x.done_at || 0))));
+const overdueSess = () => SESSIONS.filter(x => x.status === 'scheduled' && x.scheduled_at && new Date(x.scheduled_at) <= now() && (() => { const b = bookingOf(x); return b && b.paid && !isCancelled(b); })());
+const counted = () => SESSIONS.filter(x => x.status !== 'scheduled' && x.done_at).map(x => { const b = bookingOf(x); return b && b.paid && !isCancelled(b) ? { ...b, preferred_datetime: x.done_at, outcome: x.status === 'completed' ? 'completed' : 'client_no_show' } : null; }).filter(Boolean).sort((a, c) => new Date(a.preferred_datetime) - new Date(c.preferred_datetime));
+// تحويل وقت جداري ⇄ حقل datetime-local بمنطقة الأخصائي الزمنية
+const toLocalInput = (iso) => { if (!iso) return ''; const q = {}; new Intl.DateTimeFormat('en-US', { timeZone: SPTZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(iso)).forEach(x => { q[x.type] = x.value; }); return q.year + '-' + q.month + '-' + q.day + 'T' + String(+q.hour % 24).padStart(2, '0') + ':' + q.minute; };
+const fromLocalInput = (v) => { if (!v) return null; const [d, tm] = v.split('T'); const [y, mo, da] = d.split('-').map(Number), [h, mi] = tm.split(':').map(Number); return BWTZ.wallToUtc(y, mo, da, h * 60 + mi, SPTZ).toISOString(); };
+const SESS_ERR = {
+  set_time_first: t('حدّد موعد الجلسة واحفظه أولاً.', 'Set and save the session time first.'),
+  session_in_future: t('لم يحن موعد الجلسة بعد. سجّلها بعد انعقادها.', 'The session time has not come yet. Record it after it has taken place.'),
+  previous_session_pending: t('سجّل نتيجة الجلسة السابقة أولاً.', 'Record the previous session first.'),
+  too_soon_after_previous: t('يلزم مرور ١٢ ساعة على الأقل بعد الجلسة السابقة.', 'At least 12 hours must pass after the previous session.'),
+  booking_not_active: t('هذا الحجز غير نشط.', 'This booking is not active.'),
+  already_marked: t('هذه الجلسة سُجّلت مسبقاً.', 'This session was already recorded.'),
+  too_old: t('لا يمكن تحديد موعد أقدم من ١٤ يوماً.', 'The time cannot be older than 14 days.'),
+};
+const sessErr = (error) => { const m = String((error && error.message) || ''); const k = Object.keys(SESS_ERR).find(x => m.includes(x)); return k ? SESS_ERR[k] : t('تعذّر الحفظ.', 'Could not save.'); };
+function sessionRows(b) {
+  const list = sessOf(b), total = list.length;
+  return list.map(x => {
+    const head = `<b>${t('الجلسة', 'Session')} ${x.seq} ${t('من', 'of')} ${total}</b>`;
+    if (x.status === 'completed') return `<div class="srow">${head}<span class="badge ok">${t('تمت', 'Held')}</span><span class="muted">${fmtDT(x.done_at)}</span></div>`;
+    if (x.status === 'no_show') return `<div class="srow">${head}<span class="badge grey">${t('لم يحضر المراجع (محتسبة)', 'Client no-show (counted)')}</span><span class="muted">${fmtDT(x.done_at)}</span></div>`;
+    const due = x.scheduled_at && new Date(x.scheduled_at) <= now();
+    return `<div class="srow">${head}${due ? `<span class="badge bad">${t('بانتظار تسجيلك', 'Awaiting your record')}</span>` : ''}
+      <input class="inp" type="datetime-local" data-sess-at="${esc(x.id)}" value="${esc(toLocalInput(x.scheduled_at))}" style="padding:7px 10px; font-size:13px; max-width:210px;">
+      <button class="btn2" type="button" data-sess-time="${esc(x.id)}">${t('حفظ الموعد', 'Save time')}</button>
+      <button class="btn" type="button" data-sess-done="${esc(x.id)}" style="padding:8px 16px; font-size:13.5px;">${t('تمّت الجلسة ✓', 'Session held ✓')}</button>
+      <button class="btn2 danger" type="button" data-sess-ns="${esc(x.id)}">${t('لم يحضر المراجع', 'Client no-show')}</button></div>`;
+  }).join('');
+}
+function bookingCard(b) {
+  const list = sessOf(b), done = list.filter(x => x.status !== 'scheduled').length;
+  return `<div class="card" style="margin-bottom:14px;"><div class="row" style="justify-content:space-between; gap:12px; align-items:flex-start;"><div>${clientCell(b)}<div class="muted" style="margin-top:4px;">${esc(pkg(b.package_name))} · ${statusBadge(b)}</div></div>
+    <div style="text-align:end;"><span class="badge ${done === list.length ? 'ok' : ''}">${done} / ${list.length} ${t('جلسات مسجّلة', 'sessions recorded')}</span><div style="margin-top:8px;"><button class="btn2" data-file="${esc(b.email.toLowerCase())}">${t('ملف المراجع', 'Client file')}</button></div></div></div>
+    <div style="margin-top:10px;">${sessionRows(b)}</div></div>`;
+}
 
 /* ---------- chat (paid live chat with clients) ---------- */
 const CFG = { point_usd: 0.05, specialist_share: 0.6 };
@@ -485,7 +531,7 @@ function openTab(name){
   if (!RENDER[name]) name = 'overview';
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
   Object.keys(RENDER).forEach(k => $('tab-' + k).classList.toggle('hidden', k !== name));
-  $('cUpcoming').textContent = upcoming().length;
+  $('cUpcoming').textContent = pendingBk().length;
   history.replaceState(null, '', '#' + name); setLangLink();
   currentClient = null;
   RENDER[name]();
@@ -504,7 +550,7 @@ function renderOverview(){
   const month = new Date(); const ym = (d) => d.getFullYear() + '-' + d.getMonth();
   const thisMonth = c.filter(b => ym(new Date(b.preferred_datetime)) === ym(month)).length;
   const completed = c.filter(b => b.outcome === 'completed').length, noShow = c.filter(b => b.outcome === 'client_no_show').length;
-  const unrecorded = past().filter(b => !b.outcome).length;
+  const unrecorded = overdueSess().length;
   const byClient = {}; let earn = 0, earnMonth = 0;
   c.forEach(b => {
     const e = b.email.toLowerCase(); byClient[e] = (byClient[e] || 0) + 1;
@@ -522,7 +568,7 @@ function renderOverview(){
   const stat = (n, l) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`;
   $('tab-overview').innerHTML = `
     <h2 class="title">${t('نظرة عامة', 'Overview')}</h2><p class="sub">${t('أرقامك محسوبة من الجلسات المدفوعة التي سجّلت نتيجتها.', 'Your numbers are based on paid sessions whose outcome you recorded.')}</p>
-    ${unrecorded ? `<div class="privacy">${t(`عندك <b>${unrecorded}</b> جلسة سابقة لم تسجّل نتيجتها. سجّلها من تبويب «الجلسات السابقة» لتظهر في الإحصائيات والأتعاب.`, `You have <b>${unrecorded}</b> past session(s) with no recorded outcome. Record them in “Past sessions” so they count in your statistics and fees.`)}</div>` : ''}
+    ${unrecorded ? `<div class="privacy">${t(`عندك <b>${unrecorded}</b> جلسة سابقة لم تسجّل نتيجتها. سجّلها من تبويب «القادمة والجارية» لتظهر في الإحصائيات والأتعاب.`, `You have <b>${unrecorded}</b> past session(s) with no recorded outcome. Record them in “Upcoming & ongoing” so they count in your statistics and fees.`)}</div>` : ''}
     <div class="stats">
       ${stat(upcoming().length, t('جلسات قادمة', 'Upcoming sessions'))}${stat(thisMonth, t('جلسات هذا الشهر', 'Sessions this month'))}${stat(completed, t('جلسات تمت', 'Sessions held'))}
       ${stat(noShow, t('لم يحضر المراجع', 'Client no-shows'))}${stat(clients, t('مراجعون (جلسة واحدة على الأقل)', 'Clients (at least one session)'))}${stat(returning, t('مراجعون عادوا لجلسة ثانية', 'Returning clients'))}
@@ -536,10 +582,10 @@ function renderOverview(){
 
 /* ---------- upcoming ---------- */
 function renderUpcoming(){
-  const list = upcoming();
-  $('tab-upcoming').innerHTML = `<h2 class="title">${t('جلساتي القادمة', 'My upcoming sessions')}</h2><p class="sub">${t('الجلسات المدفوعة فقط. الحجز غير المدفوع لا يظهر لك ولا يُحجز له موعد.', 'Paid sessions only. An unpaid booking is not shown to you and holds no slot.')}</p>` +
-    (list.length ? table([t('الموعد', 'Time'), t('المراجع', 'Client'), t('الباقة', 'Package'), t('الحالة', 'Status'), ''], list.map(b => `<tr><td>${when(b)}</td><td>${clientCell(b)}</td><td>${esc(pkg(b.package_name))}</td><td>${statusBadge(b)}</td><td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">${t('ملف المراجع', 'Client file')}</button></td></tr>`))
-      : `<div class="empty">${t('لا توجد جلسات قادمة بعد.', 'No upcoming sessions yet.')}</div>`);
+  const list = pendingBk();
+  $('tab-upcoming').innerHTML = `<h2 class="title">${t('جلساتي القادمة والجارية', 'My upcoming & ongoing sessions')}</h2>
+    <p class="sub">${t('الجلسات المدفوعة فقط. بعد كل جلسة اضغط «تمّت الجلسة ✓» (أو «لم يحضر المراجع»): الجلسة التي تسجّلها تُحتسب أتعابها لك، والتي لا تسجّلها لا تُحتسب. الباقات المتعددة تُسجَّل جلسة جلسة، وحدّد موعد كل جلسة قبل تسجيلها.', 'Paid sessions only. After each session press “Session held ✓” (or “Client no-show”): a session you record is counted towards your fees, a session you do not record is not counted. Multi-session packages are recorded session by session; set the date of each session before recording it.')}</p>` +
+    (list.length ? list.map(bookingCard).join('') : `<div class="empty">${t('لا توجد جلسات بانتظارك حالياً.', 'No sessions waiting for you right now.')}</div>`);
 }
 
 /* ---------- schedule ---------- */
@@ -647,11 +693,12 @@ async function addSlots(){
 /* ---------- past sessions ---------- */
 const OUTCOME = { completed: t('جلسة تمت', 'Session held'), client_no_show: t('لم يحضر المراجع', 'Client no-show') };
 function renderPast(){
-  const list = past();
-  $('tab-past').innerHTML = `<h2 class="title">${t('الجلسات السابقة', 'Past sessions')}</h2><p class="sub">${t('سجّل نتيجة كل جلسة بعد انتهائها. غياب المراجع يُحسب في الأتعاب حسب العقد.', 'Record the outcome of each session once it has ended. A client no-show counts towards your fees, as per your agreement.')}</p>` +
-    (list.length ? table([t('الموعد', 'Time'), t('المراجع', 'Client'), t('الباقة', 'Package'), t('النتيجة', 'Outcome'), ''], list.map(b => `<tr><td>${when(b)}</td><td>${clientCell(b)}</td><td>${esc(pkg(b.package_name))}</td>
-      <td><select class="inp" data-outcome="${esc(b.id)}" style="padding:7px 10px; font-size:13px;"><option value="">${t('لم تُسجَّل', 'Not recorded')}</option><option value="completed"${b.outcome === 'completed' ? ' selected' : ''}>${OUTCOME.completed}</option><option value="client_no_show"${b.outcome === 'client_no_show' ? ' selected' : ''}>${OUTCOME.client_no_show}</option></select></td>
-      <td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">${t('ملف المراجع', 'Client file')}</button></td></tr>`)) : `<div class="empty">${t('لا توجد جلسات سابقة بعد.', 'No past sessions yet.')}</div>`);
+  const list = finishedBk();
+  $('tab-past').innerHTML = `<h2 class="title">${t('الجلسات المنتهية', 'Completed bookings')}</h2><p class="sub">${t('حجوزات سُجّلت كل جلساتها. غياب المراجع يُحسب في الأتعاب حسب العقد. للتصحيح تواصل مع الإدارة.', 'Bookings whose sessions were all recorded. A client no-show counts towards your fees, as per your agreement. To correct a record, contact the team.')}</p>` +
+    (list.length ? table([t('آخر جلسة', 'Last session'), t('المراجع', 'Client'), t('الباقة', 'Package'), t('الجلسات', 'Sessions'), ''], list.map(b => { const l = sessOf(b), last = l.map(x => x.done_at).filter(Boolean).sort().pop();
+      return `<tr><td><b>${last ? fmtD(last) : '—'}</b><div class="muted">${last ? fmtT(last) : ''}</div></td><td>${clientCell(b)}</td><td>${esc(pkg(b.package_name))}</td><td>${l.map(x => `<span class="badge ${x.status === 'completed' ? 'ok' : 'grey'}" title="${esc(x.done_at ? fmtDT(x.done_at) : '')}">${x.seq}: ${x.status === 'completed' ? t('تمت', 'held') : t('غياب', 'no-show')}</span>`).join(' ')}</td>
+      <td><button class="btn2" data-file="${esc(b.email.toLowerCase())}">${t('ملف المراجع', 'Client file')}</button></td></tr>`; }))
+      : `<div class="empty">${t('لا توجد جلسات منتهية بعد.', 'No completed bookings yet.')}</div>`);
 }
 
 /* ---------- cancelled ---------- */
@@ -838,6 +885,26 @@ document.addEventListener('click', async (e) => {
   const sn = e.target.closest('[data-save-note]');
   if (sn) { const body = sn.closest('.nbody').querySelector('textarea').value.trim(); if (!body) return; const { error } = await sb.from('client_notes').update({ body }).eq('id', sn.dataset.saveNote); if (error) alert(t('تعذّر الحفظ.', 'Could not save.')); openClient(currentClient); return; }
   if (e.target.closest('[data-cancel-note]')) openClient(currentClient);
+});
+const afterSess = async () => { await loadAll(); const act = document.querySelector('.tab.active'); const k = act && act.dataset.tab; if (k && RENDER[k]) RENDER[k](); $('cUpcoming').textContent = pendingBk().length; };
+document.addEventListener('click', async (e) => {
+  const dn = e.target.closest('[data-sess-done]'), ns = e.target.closest('[data-sess-ns]'), tm = e.target.closest('[data-sess-time]');
+  if (tm) {
+    const id = tm.dataset.sessTime, v = document.querySelector('[data-sess-at="' + CSS.escape(id) + '"]').value;
+    if (!v) { alert(t('اختر تاريخ الجلسة ووقتها.', 'Pick the session date and time.')); return; }
+    tm.disabled = true; const { error } = await sb.rpc('set_session_time', { p_session: id, p_at: fromLocalInput(v) }); tm.disabled = false;
+    if (error) { console.error(error); alert(sessErr(error)); return; }
+    await afterSess(); return;
+  }
+  if (dn || ns) {
+    const el = dn || ns, id = el.dataset.sessDone || el.dataset.sessNs, status = dn ? 'completed' : 'no_show';
+    const msg = dn ? t('تأكيد: هذه الجلسة تمّت فعلاً؟ تُحتسب أتعابك عنها ولا يمكنك التراجع (للتصحيح تواصل مع الإدارة).', 'Confirm: this session really took place? It will be counted towards your fees and you cannot undo it (contact the team to correct).')
+      : t('تأكيد: المراجع لم يحضر؟ تُحتسب الجلسة بالأتعاب حسب العقد ولا يمكنك التراجع.', 'Confirm: the client did not show up? The session counts towards your fees per your agreement and you cannot undo it.');
+    if (!confirm(msg)) return;
+    el.disabled = true; const { error } = await sb.rpc('mark_session', { p_session: id, p_status: status }); el.disabled = false;
+    if (error) { console.error(error); alert(sessErr(error)); return; }
+    await afterSess();
+  }
 });
 document.addEventListener('change', async (e) => {
   const o = e.target.closest('[data-outcome]'); if (!o) return;

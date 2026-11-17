@@ -91,19 +91,21 @@
   });
 
   /* ---------- بيانات مشتركة ---------- */
-  let CACHE = null;
+  let CACHE = null, SESS = {};
   async function loadCore(force) {
     if (CACHE && !force && Date.now() - CACHE.t < 45000) return CACHE;
-    const [b, s, p] = await Promise.all([
+    const [b, s, p, ss] = await Promise.all([
       sb().from('bookings').select('*').order('created_at', { ascending: false }).limit(5000),
       sb().from('specialists').select('id, full_name, photo_url, timezone, is_published').limit(500),
       sb().from('packages').select('name, price'),
+      sb().from('booking_sessions').select('*').order('seq', { ascending: true }).limit(20000),
     ]);
     if (b.error) throw b.error;
     const price = Object.fromEntries((p.data || []).map(x => [x.name, Number(x.price)]));
     const spec = Object.fromEntries((s.data || []).map(x => [x.id, x]));
     const amount = (bk) => (bk.final_price_usd != null ? Number(bk.final_price_usd) : (price[bk.package_name] || 0));
-    CACHE = { t: Date.now(), bookings: b.data || [], specialists: s.data || [], spec, price, amount };
+    const sessions = ss.data || []; SESS = {}; sessions.forEach(x => { (SESS[x.booking_id] = SESS[x.booking_id] || []).push(x); });
+    CACHE = { t: Date.now(), bookings: b.data || [], specialists: s.data || [], sessions, spec, price, amount };
     return CACHE;
   }
   // حالة الجلسة المشتقة (من الدفع والموعد والنتيجة)
@@ -112,29 +114,42 @@
     upcoming: { l: 'مدفوع — بانتظار الموعد', c: '#7D5F27', bg: '#FBF1DC' },
     soon: { l: 'قريباً (خلال ٢٤ ساعة)', c: '#fff', bg: '#C9A15F' },
     norecord: { l: 'انتهى الموعد — لم تُسجَّل النتيجة', c: '#fff', bg: '#C0562E' },
+    progress: { l: 'جارية (جلسات مسجّلة وأخرى بانتظار)', c: '#fff', bg: '#5B4A86' },
     completed: { l: 'تمت', c: '#2E6B45', bg: '#DCEFE3' },
     noshow: { l: 'لم يحضر المراجع', c: '#5B4A86', bg: '#E8E2F4' },
     cancelled: { l: 'ملغاة', c: '#6B6072', bg: '#ECE8EE' },
   };
+  const isActiveB = (b) => b.paid && b.status !== 'ملغى';
+  const overdueS = (x, hours) => x.status === 'scheduled' && x.scheduled_at && Date.now() - new Date(x.scheduled_at).getTime() > (hours || 0) * 3600e3;
   function sessState(b) {
     if (b.status === 'ملغى') return 'cancelled';
     if (!b.paid) return 'unpaid';
+    const list = SESS[b.id], now = Date.now();
+    if (list && list.length) {
+      const done = list.filter(x => x.status !== 'scheduled');
+      if (done.length === list.length) return list.some(x => x.status === 'completed') ? 'completed' : 'noshow';
+      if (list.some(x => overdueS(x, 0))) return 'norecord';
+      if (done.length) return 'progress';
+      const t0 = Math.min(...list.map(x => (x.scheduled_at ? new Date(x.scheduled_at).getTime() : Infinity)), Infinity);
+      return t0 - now < 24 * 3600e3 && t0 !== Infinity ? 'soon' : 'upcoming';
+    }
     if (b.outcome === 'completed') return 'completed';
     if (b.outcome === 'client_no_show') return 'noshow';
-    const t = new Date(b.preferred_datetime).getTime(), now = Date.now();
+    const t = new Date(b.preferred_datetime).getTime();
     if (t < now) return 'norecord';
     return t - now < 24 * 3600e3 ? 'soon' : 'upcoming';
   }
   const stChip = (k) => `<span class="kx-st" style="--c:${ST[k].c}; --bg:${ST[k].bg};">${ST[k].l}</span>`;
 
   // الأتعاب: 10$ لأول جلسة محتسبة مع كل مستفيد (لكل أخصائي) و15$ لكل لاحقة
-  function computeFees(bookings) {
-    const rows = bookings.filter(b => b.paid && b.specialist_id && b.status !== 'ملغى' && (b.outcome === 'completed' || b.outcome === 'client_no_show'))
-      .sort((a, c) => new Date(a.preferred_datetime) - new Date(c.preferred_datetime) || new Date(a.created_at) - new Date(c.created_at));
+  function computeFees(core) {
+    const bk = Object.fromEntries(core.bookings.map(b => [b.id, b]));
+    const rows = (core.sessions || []).filter(x => x.status !== 'scheduled' && x.done_at && bk[x.booking_id] && isActiveB(bk[x.booking_id]) && (x.specialist_id || bk[x.booking_id].specialist_id))
+      .sort((a, c) => new Date(a.done_at) - new Date(c.done_at) || a.seq - c.seq);
     const seen = {}; const out = [];
-    rows.forEach(b => {
-      const k = b.specialist_id + '|' + String(b.email).toLowerCase(); seen[k] = (seen[k] || 0) + 1;
-      out.push({ b, first: seen[k] === 1, fee: seen[k] === 1 ? FEE_FIRST : FEE_NEXT, month: monthKey(b.preferred_datetime) });
+    rows.forEach(x => {
+      const b = bk[x.booking_id], sid = x.specialist_id || b.specialist_id, k = sid + '|' + String(b.email).toLowerCase(); seen[k] = (seen[k] || 0) + 1;
+      out.push({ b, s: x, sid, first: seen[k] === 1, fee: seen[k] === 1 ? FEE_FIRST : FEE_NEXT, month: monthKey(x.done_at) });
     });
     return out;
   }
@@ -170,10 +185,11 @@
     const inRange = core.bookings.filter(b => new Date(b.created_at).getTime() >= since);
     const paid = inRange.filter(b => b.paid && b.status !== 'ملغى');
     const revenue = paid.reduce((s, b) => s + core.amount(b), 0);
-    const fees = computeFees(core.bookings).filter(f => new Date(f.b.preferred_datetime).getTime() >= since);
+    const fees = computeFees(core).filter(f => new Date(f.s.done_at).getTime() >= since);
     const feeSum = fees.reduce((s, f) => s + f.fee, 0);
-    const heldSessions = core.bookings.filter(b => b.paid && b.status !== 'ملغى' && new Date(b.preferred_datetime).getTime() >= since && new Date(b.preferred_datetime).getTime() < Date.now());
-    const completed = heldSessions.filter(b => b.outcome === 'completed').length, noshow = heldSessions.filter(b => b.outcome === 'client_no_show').length;
+    const bkMap = Object.fromEntries(core.bookings.map(b => [b.id, b]));
+    const heldSessions = core.sessions.filter(x => x.status !== 'scheduled' && x.done_at && new Date(x.done_at).getTime() >= since && bkMap[x.booking_id] && isActiveB(bkMap[x.booking_id]));
+    const completed = heldSessions.filter(x => x.status === 'completed').length, noshow = heldSessions.filter(x => x.status === 'no_show').length;
     const cancelledPaid = inRange.filter(b => b.paid && b.status === 'ملغى').length;
     const conv = inRange.length ? Math.round(paid.length / inRange.length * 100) : 0;
     const days = []; for (let i = anaDays - 1; i >= 0; i--) days.push(new Date(Date.now() - i * 86400e3));
@@ -184,7 +200,7 @@
     const grp = (arr, f, v) => { const m = {}; arr.forEach(x => { const k = f(x) || '—'; m[k] = (m[k] || 0) + (v ? v(x) : 1); }); return Object.entries(m).map(([l, val]) => ({ l, v: val })).sort((a, b) => b.v - a.v); };
     const byPkg = grp(paid, b => b.package_name, b => core.amount(b));
     const bySpecRev = grp(paid, b => (core.spec[b.specialist_id] || {}).full_name || b.specialist_name || 'بدون أخصائي', b => core.amount(b)).slice(0, 8);
-    const bySpecN = grp(heldSessions.filter(b => b.outcome), b => (core.spec[b.specialist_id] || {}).full_name || b.specialist_name || '—').slice(0, 8);
+    const bySpecN = grp(heldSessions, x => (core.spec[x.specialist_id] || {}).full_name || '—').slice(0, 8);
     const methods = grp(paid, b => (b.payment_method === 'cliq' ? 'كليك' : 'بطاقة (Stripe)'));
     const tz = grp(inRange, b => b.client_tz).slice(0, 8);
     const wd = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'].map((l, i) => ({ l, v: paid.filter(b => new Date(b.preferred_datetime).getUTCDay() === i).length }));
@@ -209,7 +225,7 @@
       </div>
       <div class="kx-grid2">
         <div class="kx-card"><h3>التسجيلات الجديدة يومياً</h3>${svgBars(signups.map(s => ({ l: fmtD(s.day), sl: new Date(s.day).toLocaleDateString(AR, { day: 'numeric', month: 'numeric' }), v: s.signups })), { color: '#5B4A86' })}</div>
-        <div class="kx-card"><h3>قمع الحجز</h3>${hbars([{ l: 'طلبات الحجز', v: inRange.length }, { l: 'مدفوعة', v: paid.length }, { l: 'جلسات انتهت موعدها', v: heldSessions.length }, { l: 'جلسات تمت', v: completed }], null, '#C9A15F')}</div>
+        <div class="kx-card"><h3>قمع الحجز</h3>${hbars([{ l: 'طلبات الحجز', v: inRange.length }, { l: 'مدفوعة', v: paid.length }, { l: 'جلسات مسجَّلة', v: heldSessions.length }, { l: 'جلسات تمت', v: completed }], null, '#C9A15F')}</div>
       </div>
       <div class="kx-grid2">
         <div class="kx-card"><h3>الإيراد حسب الباقة</h3>${hbars(byPkg, usd)}</div>
@@ -234,7 +250,7 @@
      ===================================================================== */
   const sf = { state: 'all', spec: '', q: '', month: '' };
   const KIND_LABEL = {
-    created: 'أُنشئ الطلب', paid: 'تم الدفع', status: 'تغيّرت الحالة', outcome: 'سُجّلت نتيجة الجلسة', assigned: 'عُيّن الأخصائي',
+    session: 'سُجّلت جلسة', session_time: 'حُدّد موعد جلسة', created: 'أُنشئ الطلب', paid: 'تم الدفع', status: 'تغيّرت الحالة', outcome: 'سُجّلت نتيجة الجلسة', assigned: 'عُيّن الأخصائي',
     payment_method: 'تغيّرت طريقة الدفع', cliq_reported: 'العميل أبلغ بحوالة كليك', rescheduled: 'تغيّر الموعد', meeting_link: 'أُضيف رابط الجلسة', deleted: 'حُذف الحجز',
   };
   const OUT_L = { completed: 'جلسة تمت', client_no_show: 'لم يحضر المراجع' };
@@ -245,6 +261,8 @@
       case 'paid': return `${KIND_LABEL.paid}${d.method === 'cliq' ? ' (كليك)' : ''}${d.amount_usd != null ? ' — ' + usd(d.amount_usd) : ''}${d.approx_time ? ' (الوقت تقريبي)' : ''}`;
       case 'status': return `الحالة: ${d.from || '—'} ← ${d.to || '—'}`;
       case 'outcome': return `${KIND_LABEL.outcome}: ${OUT_L[d.to] || d.to || 'مسح النتيجة'}${d.approx_time ? ' (الوقت تقريبي)' : ''}`;
+      case 'session': return `الجلسة ${d.seq}: ${d.to === 'completed' ? 'تمت' : d.to === 'no_show' ? 'لم يحضر المراجع' : 'أُعيدت لبانتظار'}`;
+      case 'session_time': return `موعد الجلسة ${d.seq}: ${d.at ? fmtDT(d.at) : 'بدون موعد'}`;
       case 'assigned': return `${KIND_LABEL.assigned}: ${d.specialist || '—'}`;
       case 'payment_method': return `${KIND_LABEL.payment_method}: ${d.to === 'cliq' ? 'كليك' : 'بطاقة'}`;
       case 'rescheduled': return `${KIND_LABEL.rescheduled}: ${d.from ? fmtDT(d.from) : '—'} ← ${d.to ? fmtDT(d.to) : '—'}`;
@@ -274,6 +292,35 @@
     if (error) { box.textContent = 'تعذّر تحميل السجل.'; return; }
     box.innerHTML = (data || []).length ? `<ul class="kx-tl">${data.map(e => `<li>${esc(evText(e))}<time>${fmtDT(e.created_at)}${e.actor ? ' · ' + esc(actorTxt(e.actor)) : ''}</time></li>`).join('')}</ul>` : '<p style="color:var(--text-muted-light);">لا أحداث مسجّلة.</p>';
   }
+  const SESS_ERR_AR = { set_time_first: 'حدّد موعد الجلسة أولاً', session_in_future: 'لم يحن موعد الجلسة', previous_session_pending: 'سجّل الجلسة السابقة أولاً', too_soon_after_previous: 'أقل من ١٢ ساعة بعد الجلسة السابقة', booking_not_active: 'الحجز غير نشط', forbidden: 'غير مسموح' };
+  const sessErrAr = (e) => { const m = String((e && e.message) || ''); const k = Object.keys(SESS_ERR_AR).find(x => m.includes(x)); return k ? SESS_ERR_AR[k] : 'تعذّر الحفظ'; };
+  const toInput = (iso) => { if (!iso) return ''; const d = new Date(iso), p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+  function openSessions(b, core) {
+    const mm = modal('<div id="smBox"></div>');
+    const paint = () => {
+      const ls = SESS[b.id] || [], sp = core.spec[b.specialist_id];
+      mm.el.querySelector('#smBox').innerHTML = `<div class="hd"><h3>جلسات: ${esc(b.full_name)}</h3><button type="button" class="kx-x" aria-label="إغلاق">&times;</button></div>
+        <p style="font-size:13.5px; line-height:1.9; margin-bottom:10px;">${esc(b.package_name)} · الأخصائي: <b>${esc(sp ? sp.full_name : (b.specialist_name || 'غير معيّن'))}</b><br><span style="color:var(--text-muted-light);">الجلسة المسجّلة (تمت أو لم يحضر) تُحتسب أتعابها للأخصائي. غير المسجّلة لا تُحتسب. لا استرجاع للعميل.</span></p>
+        ${ls.map(x => `<div style="border-top:1px solid var(--fog-dim); padding:12px 0; display:flex; gap:8px 10px; flex-wrap:wrap; align-items:center;"><b>الجلسة ${x.seq} من ${ls.length}</b>
+          ${x.status === 'scheduled' ? (overdueS(x, 0) ? '<span class="kx-st" style="--c:#fff; --bg:#C0562E;">بانتظار التسجيل</span>' : '<span class="kx-st" style="--c:#7D5F27; --bg:#FBF1DC;">مجدولة</span>') : x.status === 'completed' ? '<span class="kx-st" style="--c:#2E6B45; --bg:#DCEFE3;">تمت</span>' : '<span class="kx-st" style="--c:#5B4A86; --bg:#E8E2F4;">لم يحضر المراجع</span>'}
+          <input type="datetime-local" data-at="${esc(x.id)}" value="${esc(toInput(x.scheduled_at))}" style="border:1.5px solid var(--fog-dim); border-radius:10px; padding:6px 9px; font-family:inherit; font-size:13px;">
+          <button type="button" class="btn-secondary" data-act="time:${esc(x.id)}" style="padding:5px 12px; font-size:12px;">حفظ الموعد</button>
+          ${x.status === 'scheduled' ? `<button type="button" class="btn-primary" data-act="completed:${esc(x.id)}" style="width:auto; margin:0; padding:6px 14px; font-size:12.5px;">تمّت ✓</button><button type="button" class="btn-secondary" data-act="no_show:${esc(x.id)}" style="padding:5px 12px; font-size:12px;">لم يحضر</button>` : `<button type="button" class="btn-secondary" data-act="scheduled:${esc(x.id)}" style="padding:5px 12px; font-size:12px; color:var(--alert);">تراجع</button><span style="font-size:11.5px; color:var(--text-muted-light);">${x.done_at ? fmtDT(x.done_at) : ''}${x.marked_by ? ' · ' + esc(x.marked_by) : ''}</span>`}</div>`).join('') || '<p>لا جلسات لهذا الحجز.</p>'}
+        <span id="smMsg" style="font-size:13px; color:var(--alert);"></span>`;
+      mm.el.querySelector('.kx-x').addEventListener('click', mm.close);
+      mm.el.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', async () => {
+        const [act, id] = btn.dataset.act.split(':'); let r;
+        if (act === 'time') { const v = mm.el.querySelector('[data-at="' + id + '"]').value; r = await sb().rpc('set_session_time', { p_session: id, p_at: v ? new Date(v).toISOString() : null }); }
+        else { if (!confirm(act === 'scheduled' ? 'التراجع عن تسجيل هذه الجلسة؟ ستعود بانتظار التسجيل.' : (act === 'completed' ? 'تسجيل الجلسة «تمت»؟ تُحتسب أتعابها للأخصائي ويُسجَّل اسمك.' : 'تسجيل «لم يحضر المراجع»؟ تُحتسب بالأتعاب حسب العقد.'))) return;
+          r = await sb().rpc('mark_session', { p_session: id, p_status: act }); }
+        if (r.error) { mm.el.querySelector('#smMsg').textContent = sessErrAr(r.error); return; }
+        const fresh = await sb().from('booking_sessions').select('*').eq('booking_id', b.id).order('seq', { ascending: true });
+        SESS[b.id] = fresh.data || []; CACHE = null; paint();
+      }));
+    };
+    paint();
+    const closeOrig = mm.close; mm.close = () => { closeOrig(); loadSessions(); };
+  }
   async function loadSessions() {
     const el = $('tab-sessions');
     el.innerHTML = '<h2 class="section-title">متابعة الجلسات</h2><p class="section-sub">جارٍ التحميل...</p>';
@@ -281,12 +328,13 @@
     const all = core.bookings;
     const months = [...new Set(all.map(b => monthKey(b.preferred_datetime)))].sort().reverse();
     const counts = { all: all.length }; Object.keys(ST).forEach(k => counts[k] = 0); all.forEach(b => counts[sessState(b)]++);
-    const attention = all.filter(b => sessState(b) === 'norecord' && Date.now() - new Date(b.preferred_datetime).getTime() > 12 * 3600e3);
+    const bkM = Object.fromEntries(all.map(b => [b.id, b]));
+    const attention = core.sessions.filter(x => overdueS(x, 12) && bkM[x.booking_id] && isActiveB(bkM[x.booking_id]));
     const unassigned = all.filter(b => b.paid && b.status !== 'ملغى' && !b.specialist_id && new Date(b.preferred_datetime) > Date.now());
     el.innerHTML = `
       <h2 class="section-title">متابعة الجلسات</h2>
       <p class="section-sub">كل حجز وحالته الفعلية: الدفع، الموعد، ونتيجة الجلسة. كل تغيير يُسجَّل في سجل أحداث بمن فعله ومتى.</p>
-      ${attention.length ? `<div class="kx-warn">⚠ <b>${attention.length}</b> جلسة انتهى موعدها منذ أكثر من ١٢ ساعة ولم يسجّل الأخصائي نتيجتها. اضغط الفلتر «انتهى الموعد — لم تُسجَّل النتيجة» وتابع معهم؛ هذه الجلسات لا تدخل في الأتعاب قبل تسجيلها.</div>` : ''}
+      ${attention.length ? `<div class="kx-warn">⚠ <b>${attention.length}</b> جلسة مرّ موعدها بأكثر من ١٢ ساعة ولم تُسجَّل. اضغط الفلتر «انتهى الموعد — لم تُسجَّل النتيجة» وتابع مع الأخصائيين؛ الجلسة التي لا تُسجَّل لا تدخل في الأتعاب، ولا يُعاد للعميل أي مبلغ.</div>` : ''}
       ${unassigned.length ? `<div class="kx-warn">⚠ <b>${unassigned.length}</b> حجز مدفوع قادم بدون أخصائي معيّن.</div>` : ''}
       <div class="kx-bar" id="sfChips">${[['all', 'الكل']].concat(Object.entries(ST).map(([k, v]) => [k, v.l])).map(([k, l]) => `<button type="button" class="kx-chip${sf.state === k ? ' on' : ''}" data-st="${k}">${l}<span class="n">${counts[k] || 0}</span></button>`).join('')}</div>
       <div class="kx-bar">
@@ -295,7 +343,7 @@
         <select id="sfMonth"><option value="">كل الأشهر</option>${months.map(m => `<option value="${m}"${sf.month === m ? ' selected' : ''}>${monthLabel(m)}</option>`).join('')}</select>
         <span id="sfCount" style="font-size:12.5px; color:var(--text-muted-light);"></span>
       </div>
-      <div style="overflow-x:auto;"><table><thead><tr><th>الموعد</th><th>العميل</th><th>الباقة / المبلغ</th><th>الأخصائي</th><th>الحالة</th><th>النتيجة</th><th></th></tr></thead><tbody id="sfBody"></tbody></table></div>`;
+      <div style="overflow-x:auto;"><table><thead><tr><th>الموعد</th><th>العميل</th><th>الباقة / المبلغ</th><th>الأخصائي</th><th>الحالة</th><th>الجلسات</th><th></th></tr></thead><tbody id="sfBody"></tbody></table></div>`;
     const draw = () => {
       const q = sf.q.trim().toLowerCase();
       const list = all.filter(b => (sf.state === 'all' || sessState(b) === sf.state) && (!sf.spec || b.specialist_id === sf.spec) && (!sf.month || monthKey(b.preferred_datetime) === sf.month)
@@ -303,7 +351,8 @@
       $('sfCount').textContent = list.length + ' حجز';
       $('sfBody').innerHTML = list.length ? list.map(b => {
         const sp = core.spec[b.specialist_id], st = sessState(b);
-        const outSel = b.paid && b.status !== 'ملغى' ? `<select data-out="${esc(b.id)}" style="border:1px solid var(--fog-dim); border-radius:8px; padding:5px 8px; font-size:12.5px; font-family:inherit;"><option value="">— لم تُسجَّل —</option><option value="completed"${b.outcome === 'completed' ? ' selected' : ''}>جلسة تمت</option><option value="client_no_show"${b.outcome === 'client_no_show' ? ' selected' : ''}>لم يحضر المراجع</option></select>` : '—';
+        const ls = SESS[b.id] || [], dn = ls.filter(x => x.status !== 'scheduled').length;
+        const outSel = isActiveB(b) && ls.length ? `<div style="font-weight:700;">${dn} / ${ls.length}</div><div style="display:flex; gap:3px; margin:4px 0 6px;">${ls.map(x => `<i title="${x.seq}" style="width:11px; height:11px; border-radius:50%; background:${x.status === 'completed' ? '#2E6B45' : x.status === 'no_show' ? '#5B4A86' : overdueS(x, 0) ? '#C0562E' : '#DDD7E2'};"></i>`).join('')}</div><button type="button" class="btn-secondary" data-sm="${esc(b.id)}" style="padding:4px 12px; font-size:12px;">إدارة الجلسات</button>` : '—';
         return `<tr><td>${fmtDT(b.preferred_datetime, 'Asia/Amman')}<div style="font-size:11.5px; color:var(--text-muted-light);">بتوقيت عمّان${b.client_tz ? ' · العميل: ' + esc(b.client_tz.split('/').pop().replace(/_/g, ' ')) : ''}</div></td>
           <td>${esc(b.full_name)}<div style="font-size:12px; color:var(--text-muted-light);" dir="ltr">${esc(b.email)}</div></td>
           <td>${esc(b.package_name)}<div style="font-size:12px; color:var(--text-muted-light);">${usd(core.amount(b))}${Number(b.discount_percent) > 0 ? ' · خصم ' + b.discount_percent + '%' : ''}${b.payment_method === 'cliq' ? ' · كليك' : ''}</div></td>
@@ -311,12 +360,7 @@
           <td><button type="button" class="btn-secondary" data-tl="${esc(b.id)}" style="padding:5px 12px; font-size:12px;">المسار</button></td></tr>`;
       }).join('') : '<tr><td colspan="7">لا نتائج.</td></tr>';
       $('sfBody').querySelectorAll('[data-tl]').forEach(btn => btn.addEventListener('click', () => openTimeline(all.find(x => x.id === btn.dataset.tl), core)));
-      $('sfBody').querySelectorAll('[data-out]').forEach(s => s.addEventListener('change', async () => {
-        if (!confirm('تسجيل نتيجة هذه الجلسة من الأدمن؟ ستُحتسب بالأتعاب ويُسجَّل اسمك بالسجل.')) { loadSessions(); return; }
-        const { error } = await sb().from('bookings').update({ outcome: s.value || null }).eq('id', s.dataset.out);
-        if (error) { alert('تعذّر الحفظ: ' + error.message); }
-        CACHE = null; loadSessions();
-      }));
+      $('sfBody').querySelectorAll('[data-sm]').forEach(btn => btn.addEventListener('click', () => openSessions(all.find(x => x.id === btn.dataset.sm), core)));
     };
     $('sfChips').querySelectorAll('[data-st]').forEach(b => b.addEventListener('click', () => { sf.state = b.dataset.st; loadSessions(); }));
     $('sfQ').addEventListener('input', (e) => { sf.q = e.target.value; draw(); });
@@ -335,15 +379,15 @@
     let core, pay;
     try { core = await loadCore(true); const r = await sb().from('specialist_payouts').select('*'); if (r.error) throw r.error; pay = r.data || []; }
     catch (e) { el.innerHTML = '<h2 class="section-title">مستحقات الأخصائيين</h2><p class="section-sub">تعذّر التحميل.</p>'; console.error(e); return; }
-    const fees = computeFees(core.bookings);
+    const fees = computeFees(core);
     const months = [...new Set(fees.map(f => f.month).concat(monthKey(new Date().toISOString())))].sort().reverse();
     if (!payMonth || !months.includes(payMonth)) payMonth = months[0];
     const payMap = Object.fromEntries(pay.map(p => [p.specialist_id + '|' + p.period.slice(0, 7), p]));
     const agg = {}; // specialist|month
-    fees.forEach(f => { const k = f.b.specialist_id + '|' + f.month; const a = agg[k] = agg[k] || { sid: f.b.specialist_id, month: f.month, completed: 0, noshow: 0, first: 0, later: 0, amount: 0 }; if (f.b.outcome === 'completed') a.completed++; else a.noshow++; f.first ? a.first++ : a.later++; a.amount += f.fee; });
+    fees.forEach(f => { const k = f.sid + '|' + f.month; const a = agg[k] = agg[k] || { sid: f.sid, month: f.month, completed: 0, noshow: 0, first: 0, later: 0, amount: 0 }; if (f.s.status === 'completed') a.completed++; else a.noshow++; f.first ? a.first++ : a.later++; a.amount += f.fee; });
     const rows = Object.values(agg).filter(a => a.month === payMonth).sort((a, b) => b.amount - a.amount);
     const due = dueDate(payMonth), overdue = Date.now() > due.getTime();
-    const unrec = {}; core.bookings.forEach(b => { if (sessState(b) === 'norecord' && b.specialist_id && monthKey(b.preferred_datetime) === payMonth) unrec[b.specialist_id] = (unrec[b.specialist_id] || 0) + 1; });
+    const unrec = {}; const bkP = Object.fromEntries(core.bookings.map(b => [b.id, b])); core.sessions.forEach(x => { const bb = bkP[x.booking_id]; if (bb && isActiveB(bb) && overdueS(x, 0) && (x.specialist_id || bb.specialist_id) && monthKey(x.scheduled_at) === payMonth) { const sid = x.specialist_id || bb.specialist_id; unrec[sid] = (unrec[sid] || 0) + 1; } });
     const totalDue = rows.reduce((s, r) => s + r.amount, 0), totalPaid = rows.reduce((s, r) => { const p = payMap[r.sid + '|' + r.month]; return s + (p ? Number(p.amount_usd) : 0); }, 0);
     // رصيد كل أخصائي عبر كل الأشهر
     const life = {}; Object.values(agg).forEach(a => { const l = life[a.sid] = life[a.sid] || { earned: 0, paid: 0, sessions: 0 }; l.earned += a.amount; l.sessions += a.completed + a.noshow; });
@@ -685,6 +729,12 @@
   window.kxToast = toast;
   window.alert = (m) => toast(m, /تعذّر|فشل|خطأ|غير صالح/.test(String(m)) ? 'err' : '');
 
+  const readyCss = document.createElement('style');
+  readyCss.textContent = 'html:not(.kx-ready) #loginSection{ visibility:hidden; }';
+  document.head.appendChild(readyCss);
+  const markReady = () => document.documentElement.classList.add('kx-ready');
+  Promise.resolve(sb().auth.getSession()).then(markReady, markReady); setTimeout(markReady, 2500);
+
   const GROUPS = [
     ['نظرة عامة', ['analytics']],
     ['العمليات اليومية', ['bookings', 'sessions', 'payouts', 'slots']],
@@ -718,8 +768,9 @@
   ovl.addEventListener('click', closeMenu);
   const refreshHeads = () => heads.forEach(([h, btns]) => { h.style.display = btns.some(b => b.style.display !== 'none') ? '' : 'none'; });
   let badgeTimer = null;
-  allBtns().forEach(b => b.addEventListener('click', () => {
-    try { localStorage.setItem('kx_tab', b.dataset.tab); } catch (_) {}
+  allBtns().forEach(b => b.addEventListener('click', (ev) => {
+    // نحفظ القسم فقط عند نقرة المستخدم الفعلية (النقرات البرمجية عند التحميل ما تُحتسب) ليبقى مكانك بعد التحديث
+    if (ev.isTrusted) { try { localStorage.setItem('kx_tab', b.dataset.tab); history.replaceState(null, '', '#' + b.dataset.tab); } catch (_) {} }
     $('kxTitle').textContent = b.firstChild.textContent; closeMenu(); refreshHeads();
     clearTimeout(badgeTimer); badgeTimer = setTimeout(loadBadges, 1200);
   }));
@@ -731,7 +782,7 @@
       if (canAccess('applications')) { const r = await sb().from('specialist_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'); if (!r.error) set('applications', r.count || 0); }
       if (canAccess('bookings')) {
         const r = await sb().from('bookings').select('id', { count: 'exact', head: true }).eq('payment_method', 'cliq').eq('paid', false).not('cliq_reported_at', 'is', null).neq('status', 'ملغى'); if (!r.error) set('bookings', r.count || 0);
-        const core = await loadCore(false); set('sessions', core.bookings.filter(b => sessState(b) === 'norecord' && Date.now() - new Date(b.preferred_datetime).getTime() > 12 * 3600e3).length);
+        const core = await loadCore(false); const bkB = Object.fromEntries(core.bookings.map(b => [b.id, b])); set('sessions', core.sessions.filter(x => overdueS(x, 12) && bkB[x.booking_id] && isActiveB(bkB[x.booking_id])).length);
       }
     } catch (e) { console.warn('badges:', e); }
   }
@@ -747,7 +798,7 @@
         const w = document.createElement('div'); w.className = 'kx-scroll'; p.insertBefore(w, t); w.appendChild(t);
       });
       try {
-        const last = localStorage.getItem('kx_tab'); const b = last && side.querySelector('[data-tab="' + last + '"]');
+        const last = location.hash.slice(1) || localStorage.getItem('kx_tab'); const b = last && side.querySelector('[data-tab="' + last + '"]');
         if (b && b.style.display !== 'none' && canAccess(last)) b.click();
       } catch (_) {}
       const act = side.querySelector('.admin-tab.active'); if (act) $('kxTitle').textContent = act.firstChild.textContent;
