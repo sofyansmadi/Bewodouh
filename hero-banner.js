@@ -46,9 +46,6 @@
   .hb-dots button{ width:9px; height:9px; border-radius:50%; border:none; padding:0; background:rgba(237,231,227,.45); cursor:pointer; }
   .hb-dots button[aria-current="true"]{ background:var(--clarity); width:24px; border-radius:6px; }
   @media (max-width:700px){ .hb{ height:300px; } .hb-inner{ padding:0 20px 18px; } .hb-nav{ display:none; } .hb-veil{ background:linear-gradient(to top, rgba(26,21,34,.92) 0%, rgba(36,29,46,.7) 60%, rgba(36,29,46,.35) 100%) !important; } .hb-text{ -webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; } }
-  .intro-strip .wrap{ display:flex; gap:20px 40px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-  .intro-strip p{ max-width:62ch; margin:0; line-height:1.9; color:rgba(237,231,227,.86); font-size:15.5px; }
-  .intro-strip .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
   @media (prefers-reduced-motion: reduce){ .hb-slide{ transition:none; } }
   `;
   document.head.appendChild(css);

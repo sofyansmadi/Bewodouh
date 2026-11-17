@@ -176,14 +176,14 @@
   /* ---------- PILLARS ---------- */
   .pillars-grid{ margin-top:50px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
   .pillar-card{
-    border:1px solid rgba(255,255,255,.1); border-radius:var(--radius);
-    padding:30px; background:var(--ink-soft);
+    border:1px solid var(--fog-dim); border-radius:var(--radius);
+    padding:30px; background:#fff;
     transition:transform .2s ease, border-color .2s ease;
   }
   .pillar-card:hover{ transform:translateY(-4px); border-color:var(--clarity); }
-  .pillar-tag{ display:inline-block; font-size:12px; color:var(--clarity-soft); font-weight:700; margin-bottom:14px; }
-  .pillar-card h3{ font-size:19px; color:var(--fog); margin-bottom:10px; }
-  .pillar-card p{ font-size:14.5px; color:var(--text-muted-dark); }
+  .pillar-tag{ display:inline-block; font-size:12px; color:var(--clarity); font-weight:700; margin-bottom:14px; }
+  .pillar-card h3{ font-size:19px; margin-bottom:10px; }
+  .pillar-card p{ font-size:14.5px; color:var(--text-muted-light); }
 
   /* ---------- FEATURED PRODUCT ---------- */
   .feature-card{
@@ -289,44 +289,10 @@
   <h1 class="sr-only">بوضوح — نفهم أنفسنا بوضوح</h1>
 </header>
 
-<section class="dark intro-strip" style="padding:34px 0;">
-  <div class="wrap">
-    <p>منصة عربية تساعدك على فهم نفسك وعلاقاتك والعالم من حولك، بمحتوى صادق، واختبارات علمية ونفسية، واستشارات فردية عن بُعد.</p>
-    <div class="row">
-      <a href="#booking" class="btn-primary">احجز استشارتك الأولى</a>
-      <a href="#pillars" class="btn-ghost">عن ماذا نتحدث؟</a>
-    </div>
-  </div>
-</section>
-
-<section>
+<section id="pillars">
   <div class="wrap reveal center">
-    <div class="eyebrow" style="justify-content:center;">لماذا بوضوح</div>
-    <h2 class="section-title">مبني على ثلاث قناعات بسيطة</h2>
-    <div class="values-grid">
-      <div class="value-card">
-        <span class="value-num">١</span>
-        <h3>الوعي قبل الحكم</h3>
-        <p>هدفنا مساعدتك على فهم النمط، لا إلصاق تسميات نهائية بك أو بأي شخص آخر.</p>
-      </div>
-      <div class="value-card">
-        <span class="value-num">٢</span>
-        <h3>وضوح بدون دراما</h3>
-        <p>محتوى مباشر مبني على أسس واضحة، بعيداً عن التهويل والمحتوى المثير فقط.</p>
-      </div>
-      <div class="value-card">
-        <span class="value-num">٣</span>
-        <h3>جلسات نفسية بدون حكم</h3>
-        <p>كل تجربة مختلفة، ودورنا تزويدك بأدوات تساعدك على التفكير، لا نصائح جاهزة تُطبَّق على الجميع.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="dark" id="pillars">
-  <div class="wrap reveal center">
-    <div class="eyebrow hero-eyebrow" style="justify-content:center;">رحلتك معنا</div>
-    <h2 class="section-title" style="color:var(--fog)">أربع زوايا، رحلة وحدة متكاملة</h2>
+    <div class="eyebrow" style="justify-content:center;">رحلتك معنا</div>
+    <h2 class="section-title">أربع زوايا، رحلة وحدة متكاملة</h2>
     <p class="section-lede text-muted">من فهم نفسك ودوافعك، إلى ملاحظة الأنماط في علاقاتك، وصولاً إلى بناء علاقات صحية من الأساس.</p>
     <div class="pillars-grid">
       <div class="pillar-card">

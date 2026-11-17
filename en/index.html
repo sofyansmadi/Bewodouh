@@ -157,14 +157,14 @@
   /* ---------- PILLARS ---------- */
   .pillars-grid{ margin-top:50px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
   .pillar-card{
-    border:1px solid rgba(255,255,255,.1); border-radius:var(--radius);
-    padding:30px; background:var(--ink-soft);
+    border:1px solid var(--fog-dim); border-radius:var(--radius);
+    padding:30px; background:#fff;
     transition:transform .2s ease, border-color .2s ease;
   }
   .pillar-card:hover{ transform:translateY(-4px); border-color:var(--clarity); }
-  .pillar-tag{ display:inline-block; font-size:12px; color:var(--clarity-soft); font-weight:700; margin-bottom:14px; }
-  .pillar-card h3{ font-size:19px; color:var(--fog); margin-bottom:10px; }
-  .pillar-card p{ font-size:14.5px; color:var(--text-muted-dark); }
+  .pillar-tag{ display:inline-block; font-size:12px; color:var(--clarity); font-weight:700; margin-bottom:14px; }
+  .pillar-card h3{ font-size:19px; margin-bottom:10px; }
+  .pillar-card p{ font-size:14.5px; color:var(--text-muted-light); }
 
   /* ---------- FEATURED PRODUCT ---------- */
   .feature-card{
@@ -260,44 +260,10 @@
   <h1 class="sr-only">Bewoduh — Understanding ourselves, clearly</h1>
 </header>
 
-<section class="dark intro-strip" style="padding:34px 0;">
-  <div class="wrap">
-    <p>An Arabic-language platform that helps you understand yourself, your relationships and the world around you, through honest content, scientific and psychological quizzes and one-to-one remote consultations.</p>
-    <div class="row">
-      <a href="#booking" class="btn-primary">Book Your First Consultation</a>
-      <a href="#pillars" class="btn-ghost">What do we cover?</a>
-    </div>
-  </div>
-</section>
-
-<section>
+<section id="pillars">
   <div class="wrap reveal center">
-    <div class="eyebrow" style="justify-content:center;">Why Bewoduh</div>
-    <h2 class="section-title">Built on three simple convictions</h2>
-    <div class="values-grid">
-      <div class="value-card">
-        <span class="value-num">1</span>
-        <h3>Awareness Before Judgment</h3>
-        <p>Our goal is to help you understand the pattern, not to attach final labels to you or anyone else.</p>
-      </div>
-      <div class="value-card">
-        <span class="value-num">2</span>
-        <h3>Clarity Without Drama</h3>
-        <p>Direct content built on clear foundations, far from exaggeration and content that's only meant to provoke.</p>
-      </div>
-      <div class="value-card">
-        <span class="value-num">3</span>
-        <h3>Therapy Sessions Without Judgment</h3>
-        <p>Every experience is different, and our role is to give you tools that help you think — not ready-made advice meant for everyone.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="dark" id="pillars">
-  <div class="wrap reveal center">
-    <div class="eyebrow hero-eyebrow" style="justify-content:center;">Your Journey With Us</div>
-    <h2 class="section-title" style="color:var(--fog)">Four Angles, One Complete Journey</h2>
+    <div class="eyebrow" style="justify-content:center;">Your Journey With Us</div>
+    <h2 class="section-title">Four Angles, One Complete Journey</h2>
     <p class="section-lede text-muted">From understanding yourself and what drives you, to noticing patterns in your relationships, to building healthy relationships from the ground up.</p>
     <div class="pillars-grid">
       <div class="pillar-card">
