@@ -536,46 +536,104 @@
   /* =====================================================================
      6) المستخدمون: عملاء + حسابات مع نشاطهم
      ===================================================================== */
-  const uf = { f: 'all', q: '' };
+  const usersCss = document.createElement('style');
+  usersCss.textContent = `
+  .kx-ugrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; margin-bottom:30px; }
+  .kx-ucard{ background:#fff; border:1px solid var(--fog-dim); border-radius:16px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:10px; transition:transform .15s, box-shadow .15s; text-align:start; font-family:inherit; }
+  .kx-ucard:hover, .kx-ucard:focus-visible{ transform:translateY(-2px); box-shadow:0 16px 30px -22px rgba(36,29,46,.45); outline:none; border-color:var(--clarity); }
+  .kx-ucard .top{ display:flex; gap:12px; align-items:center; }
+  .kx-av{ width:46px; height:46px; border-radius:50%; background:var(--fog-dim); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--ink); object-fit:cover; flex:none; font-size:17px; }
+  .kx-ucard .nm{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:14.5px; line-height:1.5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kx-ucard .em{ font-size:12px; color:var(--text-muted-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:start; }
+  .kx-ucard .tags{ display:flex; gap:6px; flex-wrap:wrap; min-height:22px; }
+  .kx-tag{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background:var(--bg,#ECE8EE); color:var(--c,#6B6072); }
+  .kx-ucard .st{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; border-top:1px solid var(--fog-dim); padding-top:10px; text-align:center; }
+  .kx-ucard .st b{ display:block; font-size:15px; font-family:'Noto Kufi Arabic',sans-serif; } .kx-ucard .st span{ font-size:11px; color:var(--text-muted-light); }
+  .kx-ucard .ls{ font-size:11.5px; color:var(--text-muted-light); }
+  .kx-uact{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 4px; }
+  .kx-uact a, .kx-uact button{ border:1px solid var(--fog-dim); background:var(--fog); color:var(--ink); border-radius:100px; padding:7px 14px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; }
+  .kx-uact a:hover, .kx-uact button:hover{ border-color:var(--clarity); }
+  `;
+  document.head.appendChild(usersCss);
+
+  const uf = { f: 'all', q: '', sort: 'new', view: 'tiles' };
+  try { const v = localStorage.getItem('kx_uview'); if (v) uf.view = v; } catch (_) {}
+  const TAG = { admin: ['أدمن', '#8a6a2e', '#FBF1DC'], spec: ['أخصائي', '#5B4A86', '#E8E2F4'], guest: ['بدون حساب', '#6B6072', '#ECE8EE'], buyer: ['عميل دفع', '#2E6B45', '#DCEFE3'], repeat: ['عميل متكرر', '#fff', '#2E6B45'], fresh: ['جديد', '#7D5F27', '#FBF1DC'], idle: ['بلا حجز', '#6B6072', '#ECE8EE'] };
+  const tagHtml = (k) => `<span class="kx-tag" style="--c:${TAG[k][1]}; --bg:${TAG[k][2]};">${TAG[k][0]}</span>`;
+  const ago = (iso) => { if (!iso) return '—'; const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400e3); return d <= 0 ? 'اليوم' : d === 1 ? 'أمس' : d < 30 ? 'قبل ' + d + ' يوم' : fmtD(iso); };
+
   window.loadUsers = async function () {
     const panel = $('tab-users');
-    const table = panel.querySelector('table'); if (table) table.style.display = 'none';
+    const table = panel.querySelector('table'); if (table) { const w = table.closest('.kx-scroll') || table; w.style.display = 'none'; }
     let host = $('kxUsers'); if (!host) { host = document.createElement('div'); host.id = 'kxUsers'; panel.appendChild(host); }
     host.innerHTML = '<p style="color:var(--text-muted-light);">جارٍ التحميل...</p>';
-    const { data, error } = await sb().rpc('admin_users_overview');
-    if (error) { host.textContent = 'تعذّر تحميل البيانات.'; console.error(error); return; }
-    const all = data || [];
-    const FLT = { all: () => true, acct: u => u.has_account, guest: u => !u.has_account, buyers: u => u.paid_bookings > 0, never: u => u.has_account && !u.bookings, spec: u => u.is_specialist, adm: u => u.is_admin };
-    const chips = [['all', 'الكل'], ['acct', 'لديهم حساب'], ['guest', 'عملاء بدون حساب'], ['buyers', 'دفعوا مرة+'], ['never', 'مسجّلون لم يحجزوا'], ['spec', 'أخصائيون'], ['adm', 'أدمن']];
-    const buyers = all.filter(FLT.buyers), spent = all.reduce((s, u) => s + Number(u.spent_usd || 0), 0);
-    host.innerHTML = `<div class="kx-kpis"><div class="kx-kpi"><b>${all.length}</b><span>الكل</span></div><div class="kx-kpi"><b>${all.filter(FLT.acct).length}</b><span>حسابات</span></div><div class="kx-kpi"><b>${buyers.length}</b><span>عملاء دفعوا</span></div><div class="kx-kpi"><b>${usd(spent)}</b><span>إجمالي مدفوعاتهم</span></div></div>
-      <div class="app-filters"><div class="app-chips" id="usChips">${chips.map(([k, l]) => `<button type="button" class="app-chip${uf.f === k ? ' on' : ''}" data-f="${k}">${l}<span class="n">${all.filter(FLT[k]).length}</span></button>`).join('')}</div>
-      <input type="search" id="usQ" placeholder="بحث بالاسم أو البريد" value="${esc(uf.q)}" style="min-width:220px;"><span class="app-count" id="usCount"></span>
-      <button type="button" class="btn-secondary" id="usCsv" style="padding:8px 16px;">تصدير CSV</button></div>
-      <div style="overflow-x:auto;"><table><thead><tr><th></th><th>الاسم / البريد</th><th>التسجيل</th><th>آخر دخول</th><th>الحجوزات (مدفوعة)</th><th>المدفوع</th><th>آخر حجز</th></tr></thead><tbody id="usBody"></tbody></table></div>`;
+    const [ov, sr, core] = await Promise.all([sb().rpc('admin_users_overview'), sb().rpc('admin_signup_series', { p_days: 30 }), loadCore(false).catch(() => ({ bookings: [], spec: {}, amount: () => 0 }))]);
+    if (ov.error) { host.textContent = 'تعذّر تحميل البيانات.'; console.error(ov.error); return; }
+    const all = ov.data || [];
+    const now = Date.now(), D = 86400e3, t = (iso) => (iso ? new Date(iso).getTime() : 0);
+    const isNew = (u) => u.has_account && now - t(u.created_at) < 7 * D;
+    const FLT = {
+      all: () => true, acct: u => u.has_account, guest: u => !u.has_account, fresh: isNew, active: u => u.has_account && now - t(u.last_sign_in_at) < 30 * D,
+      buyers: u => u.paid_bookings > 0, repeat: u => u.paid_bookings > 1, never: u => u.has_account && !u.bookings, spec: u => u.is_specialist, adm: u => u.is_admin,
+    };
+    const chips = [['all', 'الكل'], ['fresh', 'جدد (٧ أيام)'], ['active', 'نشطون (٣٠ يوم)'], ['buyers', 'دفعوا مرة+'], ['repeat', 'عملاء متكررون'], ['never', 'مسجّلون لم يحجزوا'], ['guest', 'بدون حساب'], ['spec', 'أخصائيون'], ['adm', 'أدمن']];
+    const sorts = { new: ['الأحدث تسجيلاً', (a, b) => (t(b.created_at) || t(b.last_booking)) - (t(a.created_at) || t(a.last_booking))], login: ['آخر دخول', (a, b) => t(b.last_sign_in_at) - t(a.last_sign_in_at)], spent: ['الأكثر دفعاً', (a, b) => Number(b.spent_usd) - Number(a.spent_usd)], bookings: ['الأكثر حجوزات', (a, b) => b.bookings - a.bookings], name: ['الاسم', (a, b) => String(a.full_name || a.email).localeCompare(String(b.full_name || b.email), 'ar')] };
+    const accts = all.filter(FLT.acct), buyers = all.filter(FLT.buyers), spent = all.reduce((s, u) => s + Number(u.spent_usd || 0), 0);
+    const kpi = (v, l, sub) => `<div class="kx-kpi"><b>${v}</b><span>${l}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    const series = (sr.data || []).map(s => ({ l: fmtD(s.day), sl: new Date(s.day).toLocaleDateString(AR, { day: 'numeric', month: 'numeric' }), v: s.signups }));
+    host.innerHTML = `
+      <div class="kx-kpis">
+        ${kpi(accts.length, 'حسابات مسجّلة', all.length - accts.length ? '+ ' + (all.length - accts.length) + ' عميل بلا حساب' : '')}${kpi(accts.filter(isNew).length, 'جدد آخر ٧ أيام', 'آخر ٣٠ يوم: ' + accts.filter(u => now - t(u.created_at) < 30 * D).length)}
+        ${kpi(accts.filter(FLT.active).length, 'نشطون آخر ٣٠ يوم', 'سجّلوا دخولاً')}${kpi(buyers.length, 'عملاء دفعوا', all.filter(FLT.repeat).length + ' متكرر')}${kpi(usd(spent), 'إجمالي مدفوعاتهم', buyers.length ? 'متوسط ' + usd(spent / buyers.length) + ' للعميل' : '')}
+      </div>
+      <div class="kx-card"><h3>التسجيلات الجديدة، آخر ٣٠ يوم</h3>${svgBars(series, { color: '#5B4A86', h: 110 })}</div>
+      <div class="app-filters"><div class="app-chips" id="usChips">${chips.map(([k, l]) => `<button type="button" class="app-chip${uf.f === k ? ' on' : ''}" data-f="${k}">${l}<span class="n">${all.filter(FLT[k]).length}</span></button>`).join('')}</div></div>
+      <div class="kx-bar"><input type="search" id="usQ" placeholder="بحث بالاسم أو البريد" value="${esc(uf.q)}" style="min-width:230px;">
+        <select id="usSort">${Object.entries(sorts).map(([k, v]) => `<option value="${k}"${uf.sort === k ? ' selected' : ''}>ترتيب: ${v[0]}</option>`).join('')}</select>
+        <button type="button" class="kx-chip${uf.view === 'tiles' ? ' on' : ''}" data-view="tiles">بطاقات</button><button type="button" class="kx-chip${uf.view === 'table' ? ' on' : ''}" data-view="table">جدول</button>
+        <span class="app-count" id="usCount"></span><button type="button" class="btn-secondary" id="usCsv" style="padding:8px 16px; margin-inline-start:auto;">تصدير CSV</button></div>
+      <div id="usOut"></div>`;
     let shown = [];
+    const avatar = (u, big) => u.photo_url ? `<img class="kx-av" src="${esc(u.photo_url)}" alt="" loading="lazy" style="${big ? 'width:64px;height:64px;' : ''}">` : `<div class="kx-av" style="${big ? 'width:64px;height:64px;font-size:24px;' : ''}">${esc((u.full_name || u.email || '؟').trim().charAt(0).toUpperCase())}</div>`;
+    const tagsOf = (u) => [u.is_admin && 'admin', u.is_specialist && 'spec', !u.has_account && 'guest', u.paid_bookings > 1 ? 'repeat' : u.paid_bookings > 0 ? 'buyer' : (u.has_account && !u.bookings ? 'idle' : null), isNew(u) && 'fresh'].filter(Boolean);
+    function openUser(u) {
+      const mine = core.bookings.filter(b => String(b.email).toLowerCase() === String(u.email || '').toLowerCase()).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const phone = (mine.find(b => b.phone) || {}).phone || '', tz = (mine.find(b => b.client_tz) || {}).client_tz || '';
+      const wa = phone ? 'https://wa.me/' + phone.replace(/[^\d]/g, '').replace(/^00/, '') : '';
+      const mm = modal(`<div class="hd"><div style="display:flex; gap:14px; align-items:center;">${avatar(u, true)}<div><h3>${esc(u.full_name || u.email)}</h3><div style="font-size:12.5px; color:var(--text-muted-light);" dir="ltr">${esc(u.email || '')}</div></div></div><button type="button" class="kx-x" aria-label="إغلاق">&times;</button></div>
+        <div class="tags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">${tagsOf(u).map(tagHtml).join('')}</div>
+        <div class="kx-uact">${u.email ? `<a href="mailto:${esc(u.email)}">✉ إيميل</a><button type="button" id="uCopy">نسخ البريد</button>` : ''}${wa ? `<a href="${esc(wa)}" target="_blank" rel="noopener">واتساب</a>` : ''}</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; font-size:13.5px; margin:12px 0;">
+          <div>التسجيل: <b>${u.created_at ? fmtD(u.created_at) : 'بلا حساب'}</b></div><div>آخر دخول: <b>${u.last_sign_in_at ? ago(u.last_sign_in_at) : '—'}</b></div>
+          <div>الحجوزات: <b>${u.bookings}</b> (مدفوعة ${u.paid_bookings})</div><div>إجمالي الدفع: <b>${usd(u.spent_usd)}</b></div>
+          ${phone ? `<div>الهاتف: <b dir="ltr">${esc(phone)}</b></div>` : ''}${tz ? `<div>منطقته الزمنية: <b>${esc(tz.split('/').pop().replace(/_/g, ' '))}</b></div>` : ''}</div>
+        <h3 style="font-size:14.5px; margin:14px 0 10px;">حجوزاته (${mine.length})</h3>
+        ${mine.length ? `<ul class="kx-tl">${mine.map(b => `<li>${esc(b.package_name)} · ${usd(core.amount(b))} — ${stChip(sessState(b))}<time>${fmtDT(b.preferred_datetime)} · ${esc((core.spec[b.specialist_id] || {}).full_name || b.specialist_name || 'بدون أخصائي')} · <a href="#" data-tl="${esc(b.id)}" style="color:var(--clarity); font-weight:700; text-decoration:underline;">المسار</a></time></li>`).join('')}</ul>` : '<p style="color:var(--text-muted-light);">لا حجوزات.</p>'}`);
+      const cp = mm.el.querySelector('#uCopy'); if (cp) cp.addEventListener('click', async () => { try { await navigator.clipboard.writeText(u.email); cp.textContent = 'تم النسخ ✓'; } catch (_) { prompt('انسخ البريد:', u.email); } });
+      mm.el.querySelectorAll('[data-tl]').forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); openTimeline(mine.find(b => b.id === a.dataset.tl), core); }));
+    }
     const draw = () => {
       const q = uf.q.trim().toLowerCase();
-      shown = all.filter(FLT[uf.f]).filter(u => !q || ((u.full_name || '') + ' ' + (u.email || '')).toLowerCase().includes(q));
+      shown = all.filter(FLT[uf.f]).filter(u => !q || ((u.full_name || '') + ' ' + (u.email || '')).toLowerCase().includes(q)).sort(sorts[uf.sort][1]);
       $('usCount').textContent = shown.length + ' من ' + all.length;
-      $('usBody').innerHTML = shown.slice(0, 400).map((u, i) => {
-        const ini = (u.full_name || u.email || '؟').trim().charAt(0).toUpperCase();
-        const av = u.photo_url ? `<img src="${esc(u.photo_url)}" alt="" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:50%; background:var(--fog-dim); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--ink);">${esc(ini)}</div>`;
-        return `<tr data-i="${i}" style="cursor:pointer;"><td>${av}</td><td><b>${esc(u.full_name || '—')}</b>${u.is_admin ? ' <span class="badge-yes">أدمن</span>' : ''}${u.is_specialist ? ' <span class="badge-yes" style="background:rgba(91,74,134,.14); color:#5B4A86;">أخصائي</span>' : ''}${u.has_account ? '' : ' <span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">بدون حساب</span>'}<div style="font-size:12px; color:var(--text-muted-light);" dir="ltr">${esc(u.email || '')}</div></td>
-          <td>${u.created_at ? fmtD(u.created_at) : '—'}</td><td>${u.last_sign_in_at ? fmtD(u.last_sign_in_at) : '—'}</td><td>${u.bookings} <span style="color:var(--text-muted-light); font-size:12px;">(${u.paid_bookings})</span></td><td>${Number(u.spent_usd) ? usd(u.spent_usd) : '—'}</td><td>${u.last_booking ? fmtD(u.last_booking) : '—'}</td></tr>`;
-      }).join('') || '<tr><td colspan="7">لا نتائج.</td></tr>';
-      $('usBody').querySelectorAll('tr[data-i]').forEach(tr => tr.addEventListener('click', async () => {
-        const u = shown[+tr.dataset.i];
-        const core = await loadCore(false).catch(() => ({ bookings: [], spec: {}, amount: () => 0 }));
-        const mine = core.bookings.filter(b => String(b.email).toLowerCase() === String(u.email || '').toLowerCase());
-        const mm = modal(`<div class="hd"><h3>${esc(u.full_name || u.email)}</h3><button type="button" class="kx-x" aria-label="إغلاق">&times;</button></div>
-          <div style="font-size:13.5px; line-height:2; margin-bottom:10px;"><span dir="ltr">${esc(u.email || '')}</span><br>${u.has_account ? 'سجّل ' + fmtD(u.created_at) + (u.last_sign_in_at ? ' · آخر دخول ' + fmtD(u.last_sign_in_at) : '') : 'عميل حجز بدون إنشاء حساب'}<br>المدفوع الكلي: <b>${usd(u.spent_usd)}</b></div>
-          <h3 style="font-size:14.5px; margin:12px 0 8px;">حجوزاته (${mine.length})</h3>${mine.length ? `<ul class="kx-tl">${mine.map(b => `<li>${esc(b.package_name)} · ${usd(core.amount(b))} — ${stChip(sessState(b))}<time>${fmtDT(b.preferred_datetime)} · ${esc((core.spec[b.specialist_id] || {}).full_name || b.specialist_name || 'بدون أخصائي')}</time></li>`).join('')}</ul>` : '<p style="color:var(--text-muted-light);">لا حجوزات.</p>'}`);
-      }));
+      const list = shown.slice(0, 300);
+      if (uf.view === 'tiles') {
+        $('usOut').innerHTML = list.length ? `<div class="kx-ugrid">${list.map((u, i) => `<button type="button" class="kx-ucard" data-i="${i}"><div class="top">${avatar(u)}<div style="min-width:0;"><div class="nm">${esc(u.full_name || '—')}</div><div class="em">${esc(u.email || '')}</div></div></div>
+          <div class="tags">${tagsOf(u).map(tagHtml).join('')}</div>
+          <div class="st"><div><b>${u.bookings}</b><span>حجوزات</span></div><div><b>${u.paid_bookings}</b><span>مدفوعة</span></div><div><b>${Number(u.spent_usd) ? usd(u.spent_usd) : '—'}</b><span>المدفوع</span></div></div>
+          <div class="ls">${u.has_account ? 'آخر دخول: ' + ago(u.last_sign_in_at) : 'آخر حجز: ' + ago(u.last_booking)}</div></button>`).join('')}</div>` : '<p style="color:var(--text-muted-light);">لا نتائج.</p>';
+        $('usOut').querySelectorAll('[data-i]').forEach(c => c.addEventListener('click', () => openUser(list[+c.dataset.i])));
+      } else {
+        $('usOut').innerHTML = `<div class="kx-scroll"><table><thead><tr><th></th><th>الاسم / البريد</th><th>التسجيل</th><th>آخر دخول</th><th>الحجوزات</th><th>المدفوع</th><th>آخر حجز</th></tr></thead><tbody>${list.map((u, i) => `<tr data-i="${i}" style="cursor:pointer;"><td>${avatar(u)}</td><td><b>${esc(u.full_name || '—')}</b> ${tagsOf(u).map(tagHtml).join(' ')}<div style="font-size:12px; color:var(--text-muted-light);" dir="ltr">${esc(u.email || '')}</div></td><td>${u.created_at ? fmtD(u.created_at) : '—'}</td><td>${ago(u.last_sign_in_at)}</td><td>${u.bookings} <span style="color:var(--text-muted-light); font-size:12px;">(${u.paid_bookings})</span></td><td>${Number(u.spent_usd) ? usd(u.spent_usd) : '—'}</td><td>${ago(u.last_booking)}</td></tr>`).join('') || '<tr><td colspan="7">لا نتائج.</td></tr>'}</tbody></table></div>`;
+        $('usOut').querySelectorAll('tr[data-i]').forEach(tr => tr.addEventListener('click', () => openUser(list[+tr.dataset.i])));
+      }
+      if (shown.length > 300) $('usOut').insertAdjacentHTML('beforeend', '<p style="font-size:12.5px; color:var(--text-muted-light);">يُعرض أول ٣٠٠ نتيجة. استخدم البحث أو الفلاتر لتضييق القائمة.</p>');
     };
     $('usChips').querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { uf.f = b.dataset.f; $('usChips').querySelectorAll('.app-chip').forEach(x => x.classList.toggle('on', x === b)); draw(); }));
     $('usQ').addEventListener('input', (e) => { uf.q = e.target.value; draw(); });
-    $('usCsv').addEventListener('click', () => downloadCsv('users.csv', [['name', 'email', 'has_account', 'registered', 'last_sign_in', 'bookings', 'paid_bookings', 'spent_usd']].concat(shown.map(u => [u.full_name, u.email, u.has_account, u.created_at || '', u.last_sign_in_at || '', u.bookings, u.paid_bookings, u.spent_usd]))));
+    $('usSort').addEventListener('change', (e) => { uf.sort = e.target.value; draw(); });
+    host.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { uf.view = b.dataset.view; try { localStorage.setItem('kx_uview', uf.view); } catch (_) {} host.querySelectorAll('[data-view]').forEach(x => x.classList.toggle('on', x === b)); draw(); }));
+    $('usCsv').addEventListener('click', () => downloadCsv('users.csv', [['name', 'email', 'has_account', 'registered', 'last_sign_in', 'bookings', 'paid_bookings', 'spent_usd', 'last_booking']].concat(shown.map(u => [u.full_name, u.email, u.has_account, u.created_at || '', u.last_sign_in_at || '', u.bookings, u.paid_bookings, u.spent_usd, u.last_booking || '']))));
     draw();
   };
 
