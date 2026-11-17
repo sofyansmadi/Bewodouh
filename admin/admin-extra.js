@@ -579,5 +579,156 @@
     draw();
   };
 
+  /* =====================================================================
+     7) هيكل لوحة التحكم: قائمة جانبية مجمّعة + شارات تنبيه + إشعارات + فلاتر الحجوزات
+     ===================================================================== */
+  const shellCss = document.createElement('style');
+  shellCss.textContent = `
+  main > .wrap, header > .wrap{ max-width:1260px; }
+  .kx-shell{ display:grid; grid-template-columns:232px minmax(0,1fr); gap:26px; align-items:start; }
+  .kx-side{ position:sticky; top:14px; max-height:calc(100vh - 28px); overflow-y:auto; background:#fff; border:1px solid var(--fog-dim); border-radius:16px; padding:10px; box-shadow:0 12px 30px -24px rgba(36,29,46,.3); }
+  .kx-gh{ font-size:11.5px; font-weight:700; color:var(--text-muted-light); padding:12px 12px 4px; letter-spacing:.02em; }
+  .kx-side .admin-tab{ display:flex; width:100%; align-items:center; justify-content:space-between; gap:8px; margin:1px 0; padding:9px 12px; border:none; border-radius:10px; text-align:start; font-size:14px; color:var(--text-on-light); background:none; }
+  .kx-side .admin-tab:hover{ background:var(--fog); }
+  .kx-side .admin-tab.active{ background:var(--ink); color:var(--fog); }
+  .kx-badge{ background:#C0562E; color:#fff; font-family:'IBM Plex Sans Arabic',sans-serif; font-size:11px; font-weight:700; min-width:20px; height:20px; padding:0 6px; border-radius:100px; display:none; align-items:center; justify-content:center; }
+  .kx-badge.on{ display:inline-flex; }
+  .kx-content{ min-width:0; }
+  .kx-mbar, .kx-ovl{ display:none; }
+  .kx-who{ font-size:12px; color:var(--text-muted-dark); margin-inline-end:14px; }
+  .kx-who b{ color:var(--clarity-soft); font-weight:600; }
+  header .wrap > div{ display:flex; align-items:center; }
+  .kx-scroll{ overflow-x:auto; border-radius:16px; margin-bottom:36px; }
+  .kx-scroll > table{ margin-bottom:0; min-width:640px; }
+  .kx-toasts{ position:fixed; bottom:20px; inset-inline:0; z-index:2000; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; padding:0 14px; }
+  .kx-toast{ background:var(--ink); color:var(--fog); font-size:14px; padding:11px 18px; border-radius:12px; box-shadow:0 14px 34px -12px rgba(0,0,0,.5); max-width:520px; pointer-events:auto; animation:kxin .2s ease; }
+  .kx-toast.ok{ background:#2E6B45; } .kx-toast.err{ background:#9C3F47; }
+  @keyframes kxin{ from{ opacity:0; transform:translateY(8px); } }
+  #kxBkBar{ margin-bottom:14px; }
+  @media (max-width:900px){
+    main{ padding-top:0; }
+    .kx-shell{ display:block; }
+    .kx-mbar{ display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:60; background:var(--fog); padding:12px 0; border-bottom:1px solid var(--fog-dim); margin-bottom:18px; }
+    .kx-mbar button{ background:var(--ink); color:var(--fog); border:none; border-radius:10px; padding:9px 14px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; }
+    .kx-mbar span{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:15px; }
+    .kx-side{ position:fixed; top:0; bottom:0; right:0; width:min(300px,86vw); max-height:none; border-radius:0; z-index:90; transform:translateX(100%); transition:transform .22s ease; padding-top:18px; }
+    .kx-shell.open .kx-side{ transform:none; }
+    .kx-shell.open + .kx-ovl, .kx-ovl.on{ display:block; position:fixed; inset:0; background:rgba(36,29,46,.5); z-index:80; }
+    .kx-who{ display:none; }
+  }
+  `;
+  document.head.appendChild(shellCss);
+
+  function toast(msg, type) {
+    let host = document.querySelector('.kx-toasts'); if (!host) { host = document.createElement('div'); host.className = 'kx-toasts'; host.setAttribute('role', 'status'); document.body.appendChild(host); }
+    const el = document.createElement('div'); el.className = 'kx-toast' + (type ? ' ' + type : ''); el.textContent = String(msg);
+    host.appendChild(el); setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.parentNode && el.parentNode.removeChild(el), 350); }, type === 'ok' ? 3500 : 6000);
+  }
+  window.kxToast = toast;
+  window.alert = (m) => toast(m, /تعذّر|فشل|خطأ|غير صالح/.test(String(m)) ? 'err' : '');
+
+  const GROUPS = [
+    ['نظرة عامة', ['analytics']],
+    ['العمليات اليومية', ['bookings', 'sessions', 'payouts', 'slots']],
+    ['الأخصائيون', ['team', 'applications']],
+    ['العملاء', ['users']],
+    ['العروض والمحتوى', ['packages', 'promos', 'banner', 'articles', 'static-pages', 'exercises']],
+    ['النظام', ['points', 'admins']],
+  ];
+  const dash = $('dashboard'), oldTabs = dash.querySelector('.admin-tabs');
+  const shell = document.createElement('div'); shell.className = 'kx-shell';
+  const side = document.createElement('nav'); side.className = 'kx-side'; side.setAttribute('aria-label', 'أقسام لوحة التحكم');
+  const content = document.createElement('div'); content.className = 'kx-content';
+  const mbar = document.createElement('div'); mbar.className = 'kx-mbar';
+  mbar.innerHTML = '<button type="button" id="kxMenu" aria-label="القائمة">☰ القائمة</button><span id="kxTitle"></span>';
+  const ovl = document.createElement('div'); ovl.className = 'kx-ovl';
+  [...dash.children].forEach(ch => { if (ch !== oldTabs) content.appendChild(ch); });
+  shell.append(side, content); dash.insertBefore(mbar, oldTabs); dash.insertBefore(shell, oldTabs); shell.insertAdjacentElement('afterend', ovl);
+  const placed = new Set(), heads = [];
+  GROUPS.forEach(([label, ids]) => {
+    const h = document.createElement('div'); h.className = 'kx-gh'; h.textContent = label; side.appendChild(h);
+    const btns = ids.map(id => oldTabs.querySelector('[data-tab="' + id + '"]')).filter(Boolean);
+    btns.forEach(b => { side.appendChild(b); placed.add(b); }); heads.push([h, btns]);
+  });
+  const rest = [...oldTabs.querySelectorAll('.admin-tab')].filter(b => !placed.has(b));
+  if (rest.length) { const h = document.createElement('div'); h.className = 'kx-gh'; h.textContent = 'أخرى'; side.appendChild(h); rest.forEach(b => side.appendChild(b)); heads.push([h, rest]); }
+  oldTabs.parentNode.removeChild(oldTabs);
+  const allBtns = () => [...side.querySelectorAll('.admin-tab')];
+  allBtns().forEach(b => { const sp = document.createElement('span'); sp.className = 'kx-badge'; sp.dataset.badge = b.dataset.tab; b.appendChild(sp); });
+  const closeMenu = () => { shell.classList.remove('open'); ovl.classList.remove('on'); };
+  $('kxMenu').addEventListener('click', () => { shell.classList.add('open'); ovl.classList.add('on'); });
+  ovl.addEventListener('click', closeMenu);
+  const refreshHeads = () => heads.forEach(([h, btns]) => { h.style.display = btns.some(b => b.style.display !== 'none') ? '' : 'none'; });
+  let badgeTimer = null;
+  allBtns().forEach(b => b.addEventListener('click', () => {
+    try { localStorage.setItem('kx_tab', b.dataset.tab); } catch (_) {}
+    $('kxTitle').textContent = b.firstChild.textContent; closeMenu(); refreshHeads();
+    clearTimeout(badgeTimer); badgeTimer = setTimeout(loadBadges, 1200);
+  }));
+
+  // شارات الأعمال المعلّقة على القائمة
+  async function loadBadges() {
+    const set = (id, n) => { const e = side.querySelector('[data-badge="' + id + '"]'); if (!e) return; e.textContent = n > 99 ? '99+' : String(n); e.classList.toggle('on', n > 0); e.title = n > 0 ? 'يحتاج متابعة' : ''; };
+    try {
+      if (canAccess('applications')) { const r = await sb().from('specialist_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'); if (!r.error) set('applications', r.count || 0); }
+      if (canAccess('bookings')) {
+        const r = await sb().from('bookings').select('id', { count: 'exact', head: true }).eq('payment_method', 'cliq').eq('paid', false).not('cliq_reported_at', 'is', null).neq('status', 'ملغى'); if (!r.error) set('bookings', r.count || 0);
+        const core = await loadCore(false); set('sessions', core.bookings.filter(b => sessState(b) === 'norecord' && Date.now() - new Date(b.preferred_datetime).getTime() > 12 * 3600e3).length);
+      }
+    } catch (e) { console.warn('badges:', e); }
+  }
+
+  // ما بعد تسجيل الدخول: إخفاء مجموعات فارغة، اسم المشرف، لفّ الجداول، استعادة آخر قسم
+  let booted = false;
+  async function afterLogin() {
+    refreshHeads();
+    if (!booted) {
+      booted = true;
+      document.querySelectorAll('#dashboard table').forEach(t => {
+        const p = t.parentElement; if (!p || p.classList.contains('kx-scroll') || getComputedStyle(p).overflowX === 'auto') return;
+        const w = document.createElement('div'); w.className = 'kx-scroll'; p.insertBefore(w, t); w.appendChild(t);
+      });
+      try {
+        const last = localStorage.getItem('kx_tab'); const b = last && side.querySelector('[data-tab="' + last + '"]');
+        if (b && b.style.display !== 'none' && canAccess(last)) b.click();
+      } catch (_) {}
+      const act = side.querySelector('.admin-tab.active'); if (act) $('kxTitle').textContent = act.firstChild.textContent;
+      try {
+        const { data } = await sb().auth.getUser();
+        const who = document.createElement('span'); who.className = 'kx-who';
+        who.innerHTML = '<b>' + esc(data && data.user ? data.user.email : '') + '</b> · ' + (ADMIN_ACCESS.is_super ? 'مشرف عام' : 'مشرف');
+        const lo = $('logoutBtn'); lo.parentNode.insertBefore(who, lo);
+      } catch (_) {}
+      setInterval(loadBadges, 120000);
+    }
+    loadBadges();
+  }
+  new MutationObserver(() => { if (dash.style.display === 'block') afterLogin();  }).observe(dash, { attributes: true, attributeFilter: ['style'] });
+  if (dash.style.display === 'block') afterLogin();
+
+  // الحجوزات: بحث وفلاتر سريعة فوق الجدول القديم
+  const bkState = { f: 'all', q: '' };
+  const _loadBookings = window.loadBookings;
+  window.loadBookings = async function () {
+    await _loadBookings.apply(this, arguments);
+    const panel = $('tab-bookings'), body = $('bookingsTableBody'); if (!panel || !body) return;
+    const rows = [...body.querySelectorAll('tr')].filter(r => r.children.length >= 6);
+    const kind = (r) => { const t = r.children[4].innerText; return /العميل أبلغ/.test(t) ? 'cliq' : /ملغى/.test(t) ? 'cancelled' : /^\s*مدفوع/.test(t) ? 'paid' : 'unpaid'; };
+    rows.forEach(r => { r.dataset.k = kind(r); });
+    const cnt = (k) => rows.filter(r => k === 'all' || r.dataset.k === k).length;
+    let bar = $('kxBkBar');
+    if (!bar) { bar = document.createElement('div'); bar.id = 'kxBkBar'; bar.className = 'kx-bar'; const tbl = panel.querySelector('table'); (tbl.closest('.kx-scroll') || tbl).insertAdjacentElement('beforebegin', bar); }
+    const CH = [['all', 'الكل'], ['cliq', 'حوالة كليك تحتاج تأكيد'], ['unpaid', 'غير مدفوعة'], ['paid', 'مدفوعة'], ['cancelled', 'ملغاة']];
+    bar.innerHTML = CH.map(([k, l]) => `<button type="button" class="kx-chip${bkState.f === k ? ' on' : ''}" data-k="${k}">${l}<span class="n">${cnt(k)}</span></button>`).join('') + `<input type="search" id="kxBkQ" placeholder="بحث بالاسم أو البريد أو الهاتف" value="${esc(bkState.q)}" style="min-width:220px;"><span id="kxBkN" style="font-size:12.5px; color:var(--text-muted-light);"></span>`;
+    const apply = () => {
+      const q = bkState.q.trim().toLowerCase(); let n = 0;
+      rows.forEach(r => { const ok = (bkState.f === 'all' || r.dataset.k === bkState.f) && (!q || r.innerText.toLowerCase().includes(q)); r.style.display = ok ? '' : 'none'; if (ok) n++; });
+      $('kxBkN').textContent = n + ' حجز';
+    };
+    bar.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { bkState.f = b.dataset.k; bar.querySelectorAll('.kx-chip').forEach(x => x.classList.toggle('on', x === b)); apply(); }));
+    $('kxBkQ').addEventListener('input', (e) => { bkState.q = e.target.value; apply(); });
+    apply();
+  };
+
   const LOADERS = { analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner };
 })();

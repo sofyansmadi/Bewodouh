@@ -566,7 +566,7 @@
                 <button type="button" class="btn-primary" id="spAcctPwBtn" style="width:auto; padding:11px 20px;">إنشاء / تعيين كلمة سر</button>
               </div>
               <div id="spAcctResult" style="display:none; margin-top:12px; background:#fff; border:1px dashed var(--clarity); border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.9;"></div>
-              <p style="font-size:12px; color:var(--text-muted-light); margin-top:10px;">تغيير البريد هنا يحدّث بريد حسابه فعلياً (لا يحتاج تأكيداً) ويربطه بالبوابة. بعدها يدخل الأخصائي من /specialist-portal/ ويقدر يغيّر كلمة سره بنفسه من تبويب «ملفي وبياناتي». اتركي البريد فارغاً ثم احفظي لإلغاء الربط.</p>
+              <p style="font-size:12px; color:var(--text-muted-light); margin-top:10px;">تغيير البريد هنا يحدّث بريد حسابه فعلياً (لا يحتاج تأكيداً) ويربطه بالبوابة. بعدها يدخل الأخصائي من /specialist-portal/ ويقدر يغيّر كلمة سره بنفسه من تبويب «ملفي وبياناتي». اتركي البريد فارغاً ثم احفظ لإلغاء الربط.</p>
             </div>
             <div class="field full">
               <label for="spShortBio">جملة قصيرة (تظهر بالبطاقة بقائمة الفريق، اختياري)</label>
@@ -719,7 +719,7 @@
 
       <div id="tab-static-pages" class="admin-tab-panel" style="display:none;">
       <h2 class="section-title">الصفحات الثابتة</h2>
-      <p class="section-sub">عدّلي محتوى صفحات الموقع الثابتة. أي تعديل يظهر مباشرة بالموقع بعد الحفظ.</p>
+      <p class="section-sub">عدّل محتوى صفحات الموقع الثابتة. أي تعديل يظهر مباشرة بالموقع بعد الحفظ.</p>
 
       <div class="admin-tabs" style="margin-bottom:20px;">
         <button class="static-page-tab active" data-static-page="privacy">سياسة الخصوصية</button>
@@ -738,7 +738,7 @@
 
       <div id="tab-exercises" class="admin-tab-panel" style="display:none;">
       <h2 class="section-title">تمارين يومية — إدارة المحتوى</h2>
-      <p class="section-sub">أضيفي تمارين، فيديوهات، أو كورسات — تظهر مباشرة بمكتبة التمارين.</p>
+      <p class="section-sub">أضف تمارين، فيديوهات، أو كورسات — تظهر مباشرة بمكتبة التمارين.</p>
 
       <table>
         <thead>
@@ -832,7 +832,7 @@
 
 const quill = new Quill('#artBodyEditor', {
   theme: 'snow',
-  placeholder: 'اكتبي محتوى المقال هنا... اختاري نوع العنوان أو التنسيق من القائمة فوق.',
+  placeholder: 'اكتب محتوى المقال هنا... اختر نوع العنوان أو التنسيق من القائمة فوق.',
   modules: {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -1008,7 +1008,7 @@ packageForm.addEventListener('submit', async (e) => {
   }
 
   if (error) {
-    formStatus.textContent = 'صار خطأ أثناء الحفظ. حاولي مرة أخرى.';
+    formStatus.textContent = 'صار خطأ أثناء الحفظ. حاول مرة أخرى.';
     formStatus.classList.add('active', 'error');
     return;
   }
@@ -1020,7 +1020,7 @@ packageForm.addEventListener('submit', async (e) => {
 });
 
 async function deletePackage(id){
-  if (!confirm('متأكدة تريدين حذف هذه الباقة؟')) return;
+  if (!confirm('تأكيد حذف هذه الباقة؟')) return;
   const { error } = await supabaseClient.from('packages').delete().eq('id', id);
   if (!error) loadPackages();
 }
@@ -1137,7 +1137,7 @@ async function loadBookings(){
   });
   tbody.querySelectorAll('[data-mark-paid-id]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('سيُعلَّم هذا الحجز كمدفوع، وسيصل العميل إيصال. تأكدي أن المبلغ وصل فعلاً إلى حسابك (BEWODUH) وأن المرجع مطابق. متابعة؟')) return;
+      if (!confirm('سيُعلَّم هذا الحجز كمدفوع، وسيصل العميل إيصال. تأكد أن المبلغ وصل فعلاً إلى حسابك (BEWODUH) وأن المرجع مطابق. متابعة؟')) return;
       const { error: payError } = await supabaseClient.from('bookings').update({ paid: true }).eq('id', btn.dataset.markPaidId);
       if (payError) { alert('تعذّر تعليم الحجز كمدفوع.'); console.error(payError); return; }
       loadBookings();
@@ -1145,7 +1145,7 @@ async function loadBookings(){
   });
   tbody.querySelectorAll('[data-delete-booking-id]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('متأكدة تريدين حذف هذا الحجز؟')) return;
+      if (!confirm('تأكيد حذف هذا الحجز؟')) return;
       await supabaseClient.from('bookings').delete().eq('id', btn.dataset.deleteBookingId);
       loadBookings();
     });
@@ -1950,7 +1950,7 @@ async function loadArticles(){
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="5">ما في مقالات بعد. أضيفي أول مقال بالفورم تحت.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5">ما في مقالات بعد. أضف أول مقال بالفورم تحت.</td></tr>';
     return;
   }
 
@@ -2069,7 +2069,7 @@ articleForm.addEventListener('submit', async (e) => {
 });
 
 async function deleteArticle(id){
-  if (!confirm('متأكدة تريدين حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
+  if (!confirm('تأكيد حذف هذا المقال؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
   const { error } = await supabaseClient.from('articles').delete().eq('id', id);
   if (!error) loadArticles();
 }
@@ -2086,7 +2086,7 @@ async function loadTeam(){
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="6">ما في أخصائيين بعد. أضيفي أول وحد بالفورم تحت.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6">ما في أخصائيين بعد. أضف أول وحد بالفورم تحت.</td></tr>';
     return;
   }
 
@@ -2151,23 +2151,23 @@ const ACCT_ERR = {
   invalid_email: 'البريد غير صالح.',
   email_linked_to_other_specialist: 'هذا البريد مربوط بأخصائي آخر.',
   weak_password: 'كلمة السر لازم ٨ خانات على الأقل وفيها حرف ورقم.',
-  not_linked: 'احفظي بريد الدخول أولاً.',
+  not_linked: 'احفظ بريد الدخول أولاً.',
   update_failed: 'تعذّر التنفيذ.',
 };
 async function acctCall(body){
   const { data, error } = await supabaseClient.functions.invoke('specialist-account', { body });
   let d = data;
   if (error && error.context && typeof error.context.json === 'function') { try { d = await error.context.json(); } catch (_) {} }
-  if (!d || d.ok !== true) return { ok: false, msg: (ACCT_ERR[d && d.error] || 'تعذّر التنفيذ، حاولي مرة ثانية.') + ((d && d.detail) ? ' (' + d.detail + ')' : '') };
+  if (!d || d.ok !== true) return { ok: false, msg: (ACCT_ERR[d && d.error] || 'تعذّر التنفيذ، حاول مرة ثانية.') + ((d && d.detail) ? ' (' + d.detail + ')' : '') };
   return d;
 }
 async function refreshAcctStatus(id){
   const box = document.getElementById('spAcctStatus');
-  if (!id) { box.textContent = 'احفظي الأخصائي أولاً، ثم عدّلي حسابه لتظهر حالة الدخول وكلمة السر.'; return; }
+  if (!id) { box.textContent = 'احفظ الأخصائي أولاً، ثم عدّل حسابه لتظهر حالة الدخول وكلمة السر.'; return; }
   box.textContent = 'جارٍ فحص الحساب...';
   const r = await acctCall({ action: 'status', specialist_id: id });
   if (!r.ok) { box.textContent = r.msg; return; }
-  if (!r.linked) box.innerHTML = '<span style="color:#6B6072;">⚪ غير مربوط بالبوابة. اكتبي البريد واضغطي «تحديث البريد الآن».</span>';
+  if (!r.linked) box.innerHTML = '<span style="color:#6B6072;">⚪ غير مربوط بالبوابة. اكتب البريد واضغطي «تحديث البريد الآن».</span>';
   else if (!r.has_account) box.innerHTML = '<span style="color:#9A6B1E;">🟠 مربوط بـ <b dir="ltr">' + esc(r.email) + '</b> لكن لا يوجد حساب بهذا البريد بعد. «إنشاء / تعيين كلمة سر» ينشئه جاهزاً.</span>';
   else if (!r.confirmed) box.innerHTML = '<span style="color:#9A6B1E;">🟠 الحساب موجود لكن البريد غير مؤكَّد (لهذا لا يدخل البوابة). تعيين كلمة سر يؤكّده تلقائياً.</span>';
   else box.innerHTML = '<span style="color:#2E6B45;">🟢 حساب مفعّل ✓</span> ' + (r.last_sign_in_at ? '· آخر دخول: ' + new Date(r.last_sign_in_at).toLocaleString('ar-EG') : '· لم يسجّل دخولاً بعد');
@@ -2175,8 +2175,8 @@ async function refreshAcctStatus(id){
 function showAcctResult(html){ const b = document.getElementById('spAcctResult'); b.innerHTML = html; b.style.display = html ? '' : 'none'; }
 document.getElementById('spAcctEmailBtn').addEventListener('click', async (ev) => {
   const id = document.getElementById('spId').value, email = document.getElementById('spLoginEmail').value.trim().toLowerCase();
-  if (!id) { showAcctResult('<span style="color:var(--alert);">احفظي الأخصائي أولاً ثم عدّلي بريده.</span>'); return; }
-  if (!email) { showAcctResult('<span style="color:var(--alert);">اكتبي البريد أولاً.</span>'); return; }
+  if (!id) { showAcctResult('<span style="color:var(--alert);">احفظ الأخصائي أولاً ثم عدّل بريده.</span>'); return; }
+  if (!email) { showAcctResult('<span style="color:var(--alert);">اكتب البريد أولاً.</span>'); return; }
   const b = ev.currentTarget; b.disabled = true;
   const r = await acctCall({ action: 'set_email', specialist_id: id, email });
   b.disabled = false;
@@ -2188,8 +2188,8 @@ document.getElementById('spAcctEmailBtn').addEventListener('click', async (ev) =
 document.getElementById('spAcctPwBtn').addEventListener('click', async (ev) => {
   const id = document.getElementById('spId').value, email = document.getElementById('spLoginEmail').value.trim().toLowerCase();
   const typed = document.getElementById('spAcctPw').value;
-  if (!id) { showAcctResult('<span style="color:var(--alert);">احفظي الأخصائي أولاً.</span>'); return; }
-  if (!email) { showAcctResult('<span style="color:var(--alert);">اكتبي بريد الأخصائي أولاً.</span>'); return; }
+  if (!id) { showAcctResult('<span style="color:var(--alert);">احفظ الأخصائي أولاً.</span>'); return; }
+  if (!email) { showAcctResult('<span style="color:var(--alert);">اكتب بريد الأخصائي أولاً.</span>'); return; }
   const b = ev.currentTarget; b.disabled = true; showAcctResult('جارٍ التنفيذ...');
   if (email !== spAcctOriginalEmail) {                      // البريد تغيّر ولم يُحفظ: نحدّثه أولاً
     const r0 = await acctCall({ action: 'set_email', specialist_id: id, email });
@@ -2203,9 +2203,9 @@ document.getElementById('spAcctPwBtn').addEventListener('click', async (ev) => {
   const msg = 'مرحباً ' + name + '،\nتم تجهيز حسابك في بوابة أخصائيي بوضوح:\nالرابط: https://bewoduh.com/specialist-portal/\nالبريد: ' + r.email + '\nكلمة السر: ' + pw + '\nبعد الدخول يمكنك تغيير كلمة السر من تبويب «ملفي وبياناتي».';
   showAcctResult('<div style="color:#2E6B45; font-weight:700;">' + (r.created ? 'تم إنشاء الحساب جاهزاً ✓' : 'تم تعيين كلمة السر ✓') + (r.password ? ' (وُلّدت تلقائياً)' : '') + '</div>'
     + '<div>البريد: <b dir="ltr">' + esc(r.email) + '</b></div><div>كلمة السر: <b dir="ltr" style="font-family:monospace; font-size:15px; user-select:all;">' + esc(pw) + '</b></div>'
-    + '<div style="color:var(--text-muted-light); font-size:12px;">تظهر هنا مرة واحدة فقط. انسخي الرسالة وأرسليها له (واتساب مثلاً).</div>'
+    + '<div style="color:var(--text-muted-light); font-size:12px;">تظهر هنا مرة واحدة فقط. انسخ الرسالة وأرسلها له (واتساب مثلاً).</div>'
     + '<button type="button" class="btn-secondary" id="spAcctCopy" style="margin-top:8px;">نسخ رسالة جاهزة</button>');
-  document.getElementById('spAcctCopy').addEventListener('click', async (e) => { try { await navigator.clipboard.writeText(msg); e.currentTarget.textContent = 'تم النسخ ✓'; } catch (_) { prompt('انسخي الرسالة:', msg); } });
+  document.getElementById('spAcctCopy').addEventListener('click', async (e) => { try { await navigator.clipboard.writeText(msg); e.currentTarget.textContent = 'تم النسخ ✓'; } catch (_) { prompt('انسخ الرسالة:', msg); } });
   document.getElementById('spAcctPw').value = '';
   refreshAcctStatus(id); loadTeam();
 });
@@ -2421,7 +2421,7 @@ specialistForm.addEventListener('submit', async (e) => {
 });
 
 async function deleteSpecialist(id){
-  if (!confirm('متأكدة تريدين حذف هذا الأخصائي؟')) return;
+  if (!confirm('تأكيد حذف هذا الأخصائي؟')) return;
   const { data: row } = await supabaseClient.from('specialists').select('photo_url').eq('id', id).maybeSingle();
   const { error } = await supabaseClient.from('specialists').delete().eq('id', id);
   if (!error) {
@@ -2469,7 +2469,7 @@ async function loadUsers(){
 // ---------- Static pages editor ----------
 const staticPageQuill = new Quill('#staticPageEditor', {
   theme: 'snow',
-  placeholder: 'اكتبي محتوى الصفحة هنا...',
+  placeholder: 'اكتب محتوى الصفحة هنا...',
   modules: {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -2545,7 +2545,7 @@ async function loadExercisesAdmin(){
   }
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="5">ما في محتوى مضاف بعد. أضيفي أول وحد بالفورم تحت.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5">ما في محتوى مضاف بعد. أضف أول وحد بالفورم تحت.</td></tr>';
     return;
   }
 
@@ -2641,12 +2641,12 @@ exerciseForm.addEventListener('submit', async (e) => {
 });
 
 async function deleteExercise(id){
-  if (!confirm('متأكدة تريدين حذف هذا المحتوى؟')) return;
+  if (!confirm('تأكيد حذف هذا المحتوى؟')) return;
   const { error } = await supabaseClient.from('exercises').delete().eq('id', id);
   if (!error) loadExercisesAdmin();
 }
 </script>
 
-<script src="/admin/admin-extra.js?v=1"></script>
+<script src="/admin/admin-extra.js?v=2"></script>
 </body>
 </html>

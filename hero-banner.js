@@ -9,6 +9,7 @@
   const KEY = 'sb_publishable_x9K72kDpiGOXcCG2uNqXJg_I80x7-Mb';
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u, dflt) => (u && /^(\/(?!\/)|https:\/\/)/.test(u)) ? u : dflt;
+  const localize = (u) => (EN && u && u.charAt(0) === '/' && u.indexOf('/en/') !== 0 ? '/en' + u : u);
 
   const DEFAULTS = [
     { image: '/images/hero-session.jpg', eyebrow: t('علاقات · دعم · وعي · علاج', 'Relationships · Support · Awareness · Therapy'),
@@ -99,7 +100,7 @@
       const list = (rows || []).map(r => ({
         image: safeUrl(r.image_url, ''), eyebrow: (EN ? r.eyebrow_en || r.eyebrow_ar : r.eyebrow_ar || r.eyebrow_en) || '',
         title: (EN ? r.title_en || r.title_ar : r.title_ar || r.title_en) || '', text: (EN ? r.text_en || r.text_ar : r.text_ar || r.text_en) || '',
-        code: r.code || '', cta: (EN ? r.cta_en || r.cta_ar : r.cta_ar || r.cta_en) || '', url: safeUrl(r.cta_url, '#booking'),
+        code: r.code || '', cta: (EN ? r.cta_en || r.cta_ar : r.cta_ar || r.cta_en) || '', url: localize(safeUrl(r.cta_url, '#booking')),
       })).filter(s => s.title);
       if (started) { if (list.length) { started = false; start(list); } } else start(list.length ? list : DEFAULTS);
     })
