@@ -46,7 +46,9 @@
     box-shadow:0 30px 60px -30px rgba(36,29,46,.3); overflow:hidden; display:none;
   }
   .profile-card.loaded{ display:block; }
-  .profile-photo{ width:100%; height:340px; object-fit:cover; display:block; }
+  /* صورة شخصية مقصوصة 4:5 (وجه في الأعلى)، بجانب النص على الشاشات العريضة */
+  .profile-photo{ width:100%; aspect-ratio:4/5; max-height:420px; object-fit:cover; object-position:50% 20%; display:block; background:var(--fog-dim); }
+  @media (min-width:820px){ .profile-card.loaded{ display:grid; grid-template-columns:300px 1fr; align-items:start; } .profile-photo{ max-height:none; height:100%; min-height:100%; aspect-ratio:auto; } }
   .profile-body{ padding:30px 30px 34px; }
   .profile-name{ font-size:24px; font-weight:900; margin-bottom:6px; }
   .profile-role{ font-size:14.5px; color:var(--clarity); font-weight:700; margin-bottom:20px; }
@@ -112,7 +114,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
-<script src="/team-ui.js?v=2"></script>
+<script src="/team-ui.js?v=3"></script>
 <script>
 async function loadSpecialist(){
   const params = new URLSearchParams(window.location.search);

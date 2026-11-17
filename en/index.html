@@ -256,27 +256,19 @@
 
 <site-nav></site-nav>
 
-<header class="hero">
-  <img class="hero-photo" src="/images/hero-session.jpg" alt="" width="1920" height="1279" fetchpriority="high">
-  <div class="hero-veil"></div>
+<header class="hb" id="heroBanner" aria-roledescription="carousel" aria-label="Bewoduh offers and news">
+  <h1 class="sr-only">Bewoduh — Understanding ourselves, clearly</h1>
+</header>
+
+<section class="dark intro-strip" style="padding:34px 0;">
   <div class="wrap">
-    <div class="hero-inner">
-      <div class="eyebrow hero-eyebrow">Relationships · Support · Awareness · Therapy</div>
-      <h1 class="hero-title"><em>Bewoduh<span class="dot">.</span></em></h1>
-      <p class="hero-tagline">Understanding ourselves, clearly.</p>
-      <p class="hero-sub">An Arabic-language platform that helps you understand yourself, your relationships and the world around you, through honest content, scientific and psychological quizzes and one-to-one remote consultations.</p>
-      <div class="hero-actions">
-        <a href="#booking" class="btn-primary">Book Your First Consultation</a>
-        <a href="#pillars" class="btn-ghost">What do we cover?</a>
-      </div>
-      <ul class="hero-points">
-        <li>Remote sessions</li>
-        <li>Fully confidential</li>
-        <li>In Arabic</li>
-      </ul>
+    <p>An Arabic-language platform that helps you understand yourself, your relationships and the world around you, through honest content, scientific and psychological quizzes and one-to-one remote consultations.</p>
+    <div class="row">
+      <a href="#booking" class="btn-primary">Book Your First Consultation</a>
+      <a href="#pillars" class="btn-ghost">What do we cover?</a>
     </div>
   </div>
-</header>
+</section>
 
 <section>
   <div class="wrap reveal center">
@@ -421,7 +413,7 @@
 <site-footer variant="rich"></site-footer>
 <app-bottom-nav active="home"></app-bottom-nav>
 
-<script src="/team-ui.js?v=2"></script>
+<script src="/team-ui.js?v=3"></script>
 <script>BW.homeStrip(document.getElementById('bwStrip'));</script>
 
 <script>
@@ -434,5 +426,6 @@
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
 </script>
+<script src="/hero-banner.js?v=1"></script>
 </body>
 </html>

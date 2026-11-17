@@ -146,6 +146,7 @@
         ? `<div class="qb-chips">${chips}</div><p class="qb-none" style="margin:6px 0 10px; font-size:12px;">🌍 ${esc(tzNote())}</p>`
         : `<p class="qb-none">${t('لا توجد مواعيد محددة حالياً — يمكنك اختيار موعدك المفضّل في صفحة الحجز.', 'No set times right now — you can choose your preferred time on the booking page.')}</p>`}
       <a class="qb-btn" href="${href}">${t('احجز موعدك', 'Book your session')}</a>
+      <div class="qb-prices" data-bw-prices></div>
       <ul class="qb-ul">
         <li>${t('جلسة عن بُعد بالصوت أو الفيديو', 'Online session by audio or video')}</li>
         <li>${t('سرية تامة بينك وبين المختص', 'Fully confidential')}</li>
@@ -186,10 +187,72 @@
   .qb-btn{ display:block; text-align:center; background:var(--ink,#241D2E); color:var(--fog,#F3EEEA); font-weight:700; font-size:15px; padding:13px 20px; border-radius:100px; text-decoration:none; }
   .qb-ul{ list-style:none; padding:0; margin:14px 0 0; display:grid; gap:5px; font-size:13px; color:var(--text-muted-light,#6B6072); }
   .qb-ul li::before{ content:'✓'; color:#3C8C5A; font-weight:900; margin-inline-end:8px; }
+  .qb-prices{ margin:16px 0 4px; padding-top:14px; border-top:1px dashed #E5D3AB; }
+  .qb-ph{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .qb-cur{ border:1.5px solid #E5D3AB; border-radius:10px; padding:6px 9px; font-family:inherit; font-size:12.5px; background:#fff; color:var(--ink,#241D2E); max-width:60%; }
+  .qb-pl{ list-style:none; padding:0; margin:0; display:grid; gap:9px; }
+  .qb-pl li{ display:grid; grid-template-columns:1fr auto; gap:2px 10px; font-size:13.5px; align-items:baseline; }
+  .qb-pl .qb-pr{ font-weight:700; text-align:end; } .qb-pl .qb-pr s{ color:var(--text-muted-light,#6B6072); font-weight:500; } .qb-pl .qb-pr em{ display:block; font-style:normal; font-weight:500; font-size:12px; color:var(--text-muted-light,#6B6072); }
+  .qb-pl .qb-off{ grid-column:1 / -1; color:#2E6B45; font-size:12px; font-weight:700; }
+  .qb-note{ font-size:11.5px; color:var(--text-muted-light,#6B6072); margin:10px 0 0; line-height:1.7; }
+  .bw-bk{ position:fixed; inset:0; background:rgba(36,29,46,.62); z-index:9999; display:flex; align-items:center; justify-content:center; padding:18px; }
+  .bw-bk-box{ position:relative; background:#fff; width:100%; max-width:600px; height:min(92vh, 860px); border-radius:20px; overflow:hidden; box-shadow:0 40px 90px -30px rgba(0,0,0,.6); }
+  .bw-bk-box iframe{ width:100%; height:100%; border:0; display:block; }
+  .bw-bk-x{ position:absolute; top:10px; inset-inline-end:10px; z-index:2; width:38px; height:38px; border-radius:50%; border:1px solid var(--fog-dim,#E6DFDA); background:#fff; font-size:24px; line-height:1; cursor:pointer; color:var(--ink,#241D2E); box-shadow:0 4px 14px rgba(0,0,0,.15); }
+  .bw-bk-load{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted-light,#6B6072); font-size:14px; }
+  @media (max-width:640px){ .bw-bk{ padding:0; } .bw-bk-box{ max-width:none; height:100%; border-radius:0; } }
   .qb-chat{ background:#EEEAF6; border:1.5px solid #D9D0EA; border-radius:18px; padding:18px 20px; margin:0 0 14px; }
   .qb-chat .qb-none{ margin:0 0 12px; }
   `;
   document.head.appendChild(css);
 
-  window.BW = { loadTeam, loadAvailability, loc, fmtSlot, availTag, teamPage, homeStrip, quickBook, esc, PLACEHOLDER };
+  // ---------- نافذة الحجز المنبثقة (بدل نقل الزائر لصفحة الأسعار الطويلة) ----------
+  function openBooking(href) {
+    const url = new URL(href, location.origin); url.searchParams.set('embed', '1');
+    const ov = document.createElement('div'); ov.className = 'bw-bk'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', t('حجز جلسة', 'Book a session'));
+    ov.innerHTML = `<div class="bw-bk-box"><button type="button" class="bw-bk-x" aria-label="${t('إغلاق', 'Close')}">&times;</button><div class="bw-bk-load">${t('جارٍ التحميل...', 'Loading...')}</div><iframe title="${t('حجز جلسة', 'Book a session')}" src="${esc(url.pathname + url.search)}"></iframe></div>`;
+    const close = () => { ov.parentNode && ov.parentNode.removeChild(ov); document.body.style.overflow = ''; document.removeEventListener('keydown', onKey); };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+    ov.querySelector('.bw-bk-x').addEventListener('click', close);
+    ov.querySelector('iframe').addEventListener('load', () => { const l = ov.querySelector('.bw-bk-load'); if (l) l.style.display = 'none'; });
+    document.addEventListener('keydown', onKey); document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+  }
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const a = e.target.closest && e.target.closest('a[href*="sales-page/?specialist="]');
+    if (!a || a.target === '_blank') return;
+    e.preventDefault(); openBooking(a.getAttribute('href'));
+  });
+
+  // ---------- الأسعار بعملة الزائر (تقريبي) مع خصم أول جلسة ----------
+  const loadScript = (src) => new Promise((res) => { if (window.BWCUR) return res(); const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+  let pkgCache = null;
+  async function hydratePrices(box) {
+    if (box.dataset.ready) return; box.dataset.ready = '1';
+    try {
+      await loadScript('/currency.js?v=1'); if (window.BWCUR) await BWCUR.ready;
+      if (!pkgCache) {
+        const pk = await get('packages?select=name,price,price_unit,sort_order&order=sort_order.asc');
+        pkgCache = (pk || []).filter(p => p.name !== 'ادعم بوضوح');
+        await Promise.all(pkgCache.map(async p => { try { const r = await fetch(BASE + 'rpc/check_promo', { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_email: '', p_package: p.name, p_code: '' }) }); if (r.ok) p.promo = await r.json(); } catch (_) {} }));
+      }
+      const PKG_EN = { 'استشارة سريعة': 'Quick Consultation', 'باقة الانطلاقة': 'Launch Package', 'باقة المرافقة': 'Companion Package', 'دعم فوري': 'Immediate Support' };
+      const paint = () => {
+        const c = window.BWCUR ? BWCUR.get() : 'USD';
+        box.innerHTML = `<div class="qb-ph"><span class="qb-t" style="margin:0;">${t('الأسعار', 'Prices')}</span>${window.BWCUR ? `<select class="qb-cur" aria-label="${t('العملة', 'Currency')}">${BWCUR.optionsHtml()}</select>` : ''}</div>
+          <ul class="qb-pl">${pkgCache.map(p => { const pct = p.promo && Number(p.promo.percent) > 0 ? Number(p.promo.percent) : 0, fin = pct ? Number(p.promo.final_usd) : Number(p.price);
+            const cv = window.BWCUR && c !== 'USD' ? `<em>≈ ${esc(BWCUR.fmt(fin))}</em>` : '';
+            return `<li><span>${esc(EN ? (PKG_EN[p.name] || p.name) : p.name)}</span><span class="qb-pr">${pct ? `<s>$${Number(p.price)}</s> <b>$${fin}</b>` : `<b>$${Number(p.price)}</b>`} ${cv}</span>${pct ? `<small class="qb-off">${t('خصم ' + pct + '% على أول جلسة لك', pct + '% off your first session')}</small>` : ''}</li>`; }).join('')}</ul>
+          <p class="qb-note">${window.BWCUR ? esc(BWCUR.note()) : ''}</p>`;
+        const sel = box.querySelector('.qb-cur'); if (sel) sel.addEventListener('change', () => BWCUR.set(sel.value));
+      };
+      paint(); window.addEventListener('bw-currency', paint);
+    } catch (e) { console.warn('prices:', e); }
+  }
+  const hydrateAll = () => document.querySelectorAll('[data-bw-prices]').forEach(hydratePrices);
+  new MutationObserver(hydrateAll).observe(document.documentElement, { childList: true, subtree: true });
+  hydrateAll();
+
+  window.BW = { openBooking, loadTeam, loadAvailability, loc, fmtSlot, availTag, teamPage, homeStrip, quickBook, esc, PLACEHOLDER };
 })();

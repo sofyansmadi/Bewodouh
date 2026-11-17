@@ -212,6 +212,7 @@
 <meta property="og:locale" content="ar_AR">
 <meta name="twitter:card" content="summary_large_image">
 <!-- seo:end -->
+<script>(function(){var q=new URLSearchParams(location.search),r=document.documentElement;if(q.get("all")!=="1"&&(q.get("embed")==="1"||q.get("specialist")))r.classList.add("focus");if(q.get("embed")==="1")r.classList.add("embed");})();</script>
 </head>
 <body>
 
@@ -720,7 +721,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     return;
   }
 
-  const payLabel = `ادفع الآن — $${fmtUsd(amount)}`;
+  const payLabel = `ادفع الآن — $${fmtUsd(amount)}` + (window.BWCUR && BWCUR.get() !== 'USD' ? ' (≈ ' + BWCUR.fmt(amount) + ')' : '');
   const payBtn = document.createElement('button');
   payBtn.type = 'button';
   payBtn.className = 'btn-primary';
@@ -741,7 +742,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
       payBtn.textContent = payLabel;
       return;
     }
-    window.location.href = data.url;
+    (window.top || window).location.href = data.url;
   }
   payBtn.addEventListener('click', goToPayment);
   payContainer.append(payBtn, payError);
@@ -784,6 +785,7 @@ async function fetchPaymentInfo(bookingId) {
     else if (pct > 0) msg = PROMO_T.auto.replace('{p}', pct);
     msgEl.style.color = color; msgEl.textContent = msg;
     sumEl.style.display = 'block';
+    sumEl.dataset.usd = String(data.final_usd); sumEl.dataset.list = String(data.list_usd);
     sumEl.replaceChildren();
     sumEl.append(PROMO_T.price + ': ');
     if (pct > 0) {
@@ -898,7 +900,7 @@ async function showCliqPayment(bookingId, pkg) {
         btn.remove();
         return;
       }
-      window.location.href = data.url;
+      (window.top || window).location.href = data.url;
     });
     note.appendChild(btn);
   }
@@ -1120,5 +1122,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
 <script>
   document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
 </script>
+<script src="/currency.js?v=1"></script>
+<script src="/book-focus.js?v=1"></script>
 </body>
 </html>
