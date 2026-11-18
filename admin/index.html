@@ -859,9 +859,21 @@ let ADMIN_ACCESS = { is_admin: false, is_super: false, permissions: [] };
 const canAccess = (tab) => ADMIN_ACCESS.is_super || (TAB_PERMISSION[tab] !== 'super' && ADMIN_ACCESS.permissions.includes(TAB_PERMISSION[tab]));
 
 async function showDashboard(){
-  const { data: access, error } = await supabaseClient.rpc('my_admin_access');
-  if (error || !access || !access.is_admin) {
-    await supabaseClient.auth.signOut();
+  // خطأ مؤقت بالشبكة لا يجوز أن يُخرجك: نعيد المحاولة ونبقي الجلسة، ولا نسجّل خروجاً إلا إذا قال الخادم صراحةً إن الحساب ليس أدمن
+  let access = null, error = null;
+  for (let i = 0; i < 3; i++) {
+    const r = await supabaseClient.rpc('my_admin_access'); access = r.data; error = r.error;
+    if (!error) break;
+    await new Promise(res => setTimeout(res, 700 * (i + 1)));
+  }
+  if (error) {
+    showLogin();
+    loginError.textContent = 'تعذّر التحقق من صلاحيتك الآن بسبب اتصال الشبكة. جلستك محفوظة، أعد تحميل الصفحة بعد لحظات.';
+    loginError.classList.add('active');
+    return;
+  }
+  if (!access || !access.is_admin) {
+    await supabaseClient.auth.signOut({ scope: 'local' });
     showLogin();
     loginError.textContent = 'هذا الحساب ليس له صلاحية دخول لوحة التحكم. إذا كنت أخصائياً فادخل من بوابة الأخصائيين: bewoduh.com/specialist-portal';
     loginError.classList.add('active');
@@ -920,7 +932,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 });
 
 logoutBtn.addEventListener('click', async () => {
-  await supabaseClient.auth.signOut();
+  await supabaseClient.auth.signOut({ scope: 'local' });
   showLogin();
 });
 
@@ -2653,6 +2665,6 @@ async function deleteExercise(id){
 }
 </script>
 
-<script src="/admin/admin-extra.js?v=5"></script>
+<script src="/admin/admin-extra.js?v=6"></script>
 </body>
 </html>

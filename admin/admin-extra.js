@@ -730,10 +730,23 @@
   window.alert = (m) => toast(m, /تعذّر|فشل|خطأ|غير صالح/.test(String(m)) ? 'err' : '');
 
   const readyCss = document.createElement('style');
-  readyCss.textContent = 'html:not(.kx-ready) #loginSection{ visibility:hidden; }';
+  readyCss.textContent = 'html:not(.kx-ready) #loginSection{ visibility:hidden; } html:not(.kx-ready) main::before{ content:"جارٍ التحميل..."; display:block; text-align:center; padding:90px 0; color:#6B6072; font-size:14px; }';
   document.head.appendChild(readyCss);
+  // نُظهر نموذج الدخول فقط بعد أن يقرّر السكربت الرئيسي فعلاً (دخول أو عدمه)، فلا يومض النموذج أثناء فحص الجلسة المحفوظة
   const markReady = () => document.documentElement.classList.add('kx-ready');
-  Promise.resolve(sb().auth.getSession()).then(markReady, markReady); setTimeout(markReady, 2500);
+  const ls = $('loginSection');
+  // عند ظهور نموذج الدخول نشرح السبب بدل الصمت، ليسهل معرفة هل المشكلة من المتصفح أم من الجلسة
+  const diag = () => {
+    const card = document.querySelector('.login-card'); if (!card || card.querySelector('.kx-diag')) return;
+    let msg;
+    try { const key = Object.keys(localStorage).find(k => /^sb-.*-auth-token$/.test(k)); msg = key ? 'جلستك المحفوظة انتهت أو رفضها الخادم، سجّل الدخول من جديد.' : 'لا توجد جلسة محفوظة بهذا المتصفح. إن تكرر هذا بعد كل تحديث للصفحة فالمتصفح يمسح بيانات الموقع (التصفح الخاص، أو منع التخزين، أو إضافة تنظّف الملفات).'; }
+    catch (_) { msg = 'المتصفح يمنع حفظ الجلسة (التخزين محظور)، لذلك يُطلب الدخول بعد كل تحديث. اسمح بالتخزين لهذا الموقع.'; }
+    const p = document.createElement('p'); p.className = 'kx-diag'; p.style.cssText = 'font-size:12.5px; color:#6B6072; margin-top:14px; line-height:1.8;'; p.textContent = msg; card.appendChild(p);
+  };
+  const watch = () => { if ($('dashboard').style.display === 'block' || (ls && ls.style.display === 'block')) markReady(); if (ls && ls.style.display === 'block' && $('dashboard').style.display !== 'block') diag(); };
+  new MutationObserver(watch).observe($('dashboard'), { attributes: true, attributeFilter: ['style'] });
+  if (ls) new MutationObserver(watch).observe(ls, { attributes: true, attributeFilter: ['style'] });
+  setTimeout(markReady, 8000);
 
   const GROUPS = [
     ['نظرة عامة', ['analytics']],
