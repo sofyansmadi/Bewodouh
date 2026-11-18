@@ -14,7 +14,7 @@
   const DEFAULTS = [
     { image: '/images/hero-session.jpg', eyebrow: t('علاقات · دعم · وعي · علاج', 'Relationships · Support · Awareness · Therapy'),
       title: t('نفهم أنفسنا بوضوح.', 'Understanding ourselves, clearly.'), text: t('جلسات عن بُعد مع أخصائيين، بسرية تامة وبلغتك.', 'Remote sessions with specialists, fully confidential and in your language.'),
-      cta: t('احجز استشارتك الأولى', 'Book your first consultation'), url: '#booking' },
+      cta: t('احجز استشارتك الأولى', 'Book your first consultation'), url: EN ? '/en/sales-page/' : '/sales-page/' },
     { image: '', eyebrow: t('اكتشف نفسك', 'Know yourself'), title: t('اختبارات نفسية مجانية', 'Free psychological quizzes'),
       text: t('اختبارات علمية قصيرة تساعدك تفهم نمط تعلّقك ومشاعرك وعلاقاتك.', 'Short, science-based quizzes to understand your attachment style, feelings and relationships.'),
       cta: t('جرّب اختباراً', 'Try a quiz'), url: EN ? '/en/quizzes/' : '/quizzes/' },
@@ -100,7 +100,7 @@
       const list = (rows || []).map(r => ({
         image: safeUrl(r.image_url, ''), eyebrow: (EN ? r.eyebrow_en || r.eyebrow_ar : r.eyebrow_ar || r.eyebrow_en) || '',
         title: (EN ? r.title_en || r.title_ar : r.title_ar || r.title_en) || '', text: (EN ? r.text_en || r.text_ar : r.text_ar || r.text_en) || '',
-        code: r.code || '', cta: (EN ? r.cta_en || r.cta_ar : r.cta_ar || r.cta_en) || '', url: localize(safeUrl(r.cta_url, '#booking')),
+        code: r.code || '', cta: (EN ? r.cta_en || r.cta_ar : r.cta_ar || r.cta_en) || '', url: localize(safeUrl(r.cta_url, '/sales-page/')),
       })).filter(s => s.title);
       if (started) { if (list.length) { started = false; start(list); } } else start(list.length ? list : DEFAULTS);
     })
