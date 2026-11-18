@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلستك — بوضوح</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#241D2E; --ink-soft:#372C46; --fog:#F3EEEA; --fog-dim:#E6DFDA; --clarity:#C9A15F; --clarity-soft:#E4C98A; --alert:#B5555B; --ok:#2E6B45;
+    --text-muted-light:#6B6072; --text-on-light:#2A2130; --max:600px; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 20px; }
+  main{ padding:34px 0 90px; }
+  .card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:28px 26px; box-shadow:0 24px 50px -34px rgba(36,29,46,.3); text-align:center; }
+  .who{ display:flex; gap:16px; align-items:center; margin-bottom:20px; text-align:start; }
+  .who img{ width:72px; height:90px; border-radius:14px; object-fit:cover; object-position:50% 20%; background:var(--fog-dim); flex:none; }
+  .who h1{ font-size:19px; line-height:1.5; } .who p{ font-size:13px; color:var(--text-muted-light); }
+  .when{ background:var(--fog); border-radius:14px; padding:14px 16px; margin:6px 0 18px; }
+  .when b{ display:block; font-size:17px; font-family:'Noto Kufi Arabic',sans-serif; }
+  .when small{ color:var(--text-muted-light); font-size:12.5px; }
+  .count{ font-family:'Noto Kufi Arabic',sans-serif; font-size:30px; font-weight:900; color:var(--ink); letter-spacing:1px; direction:ltr; margin:6px 0; }
+  .btn{ display:block; width:100%; background:var(--clarity); color:var(--ink); border:none; border-radius:100px; padding:16px 24px; font-family:inherit; font-weight:700; font-size:17px; cursor:pointer; margin-top:12px; }
+  .btn:disabled{ background:var(--fog-dim); color:var(--text-muted-light); cursor:default; }
+  .note{ font-size:13px; color:var(--text-muted-light); margin-top:10px; }
+  .tips{ text-align:start; list-style:none; padding:14px 16px; margin-top:20px; background:#FBF6EC; border:1px solid #EBD9B5; border-radius:14px; display:grid; gap:6px; font-size:13.5px; }
+  .tips li::before{ content:'✓'; color:var(--ok); font-weight:900; margin-inline-end:8px; }
+  .err{ color:var(--alert); font-size:13.5px; margin-top:10px; min-height:20px; }
+  .big{ font-size:44px; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<site-nav></site-nav>
+<main><div class="wrap"><div class="card" id="box"><p style="color:var(--text-muted-light);" id="loading"></p></div></div></main>
+<app-bottom-nav></app-bottom-nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+(function () {
+const EN = document.documentElement.lang === 'en';
+const t = (ar, en) => EN ? en : ar;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const box = document.getElementById('box');
+document.title = t('جلستك — بوضوح', 'Your session — Bewoduh');
+document.getElementById('loading').textContent = t('جارٍ التحميل...', 'Loading...');
+const TOKEN = new URLSearchParams(location.search).get('c') || '';
+const LOC = EN ? 'en-GB' : 'ar-JO-u-nu-latn';
+const msg = (icon, title, text) => { box.innerHTML = `<div class="big">${icon}</div><h1 class="kufi" style="font-size:20px;margin-bottom:8px;">${esc(title)}</h1><p style="color:var(--text-muted-light);">${esc(text)}</p><p style="margin-top:20px;"><a href="${EN ? '/en/' : '/'}" style="color:var(--clarity);font-weight:700;text-decoration:underline;">${t('العودة للرئيسية', 'Back to home')}</a></p>`; };
+const pad = (n) => String(n).padStart(2, '0');
+const clock = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (d ? d + (EN ? 'd ' : 'ي ') : '') + pad(h) + ':' + pad(m) + ':' + pad(x); };
+
+async function init() {
+  if (!supabaseClient || !/^[0-9a-f-]{36}$/i.test(TOKEN)) return msg('🔗', t('الرابط غير صالح', 'Invalid link'), t('افتح الرابط كاملاً من الرسالة التي وصلتك.', 'Please open the full link from the email we sent you.'));
+  const { data: info, error } = await supabaseClient.rpc('session_room_info', { p_token: TOKEN });
+  if (error || !info || !info.ok) return msg('🔗', t('الرابط غير صالح', 'Invalid link'), t('لم نجد هذه الجلسة. تأكد من الرابط.', 'We could not find this session. Please check the link.'));
+  const name = (EN ? info.specialist_name_en : '') || info.specialist_name || '';
+  if (!info.active) return msg('🗓', t('هذه الجلسة غير نشطة', 'This session is not active'), info.status === 'completed' ? t('انتهت هذه الجلسة. شكراً لك.', 'This session has ended. Thank you.') : t('تم إلغاء الجلسة أو لم يكتمل دفعها. تواصل معنا إن احتجت مساعدة: hello@bewoduh.com', 'This session was cancelled or its payment was not completed. Contact us if you need help: hello@bewoduh.com'));
+  if (!info.scheduled_at) return msg('⏳', t('لم يُحدَّد موعد هذه الجلسة بعد', 'This session has no date yet'), t('سيصلك إيميل فيه الموعد ورابط الجلسة فور تحديده.', 'You will receive an email with the date and the session link as soon as it is set.'));
+  const at = new Date(info.scheduled_at).getTime(), opens = new Date(info.opens_at).getTime(), closes = new Date(info.closes_at).getTime();
+  const drift = new Date(info.now).getTime() - Date.now();
+  let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (_) {}
+  const whenTxt = new Date(at).toLocaleString(LOC, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', hour12: EN ? true : undefined });
+  box.innerHTML = `<div class="who">${info.photo_url ? `<img src="${esc(info.photo_url)}" alt="">` : ''}<div><h1>${esc(t('جلستك مع ', 'Your session with ') + name)}</h1><p>${esc(info.package_name || '')}${info.total > 1 ? ' · ' + t('الجلسة ' + info.seq + ' من ' + info.total, 'Session ' + info.seq + ' of ' + info.total) : ''}</p></div></div>
+    <div class="when"><b>${esc(whenTxt)}</b><small>${esc(t('بتوقيت جهازك', 'In your device time') + (tz ? ' (' + tz.split('/').pop().replace(/_/g, ' ') + ')' : ''))}</small></div>
+    <div id="state"></div>
+    <button class="btn" id="join" type="button" disabled>${t('ادخل الجلسة', 'Join the session')}</button>
+    <div class="err" id="err" role="alert"></div>
+    <p class="note" id="hint"></p>
+    <ul class="tips"><li>${t('اختر مكاناً هادئاً وخاصاً، وسمّاعات إن أمكن.', 'Pick a quiet, private place, and use headphones if you can.')}</li><li>${t('جرّب الميكروفون والكاميرا قبل البدء.', 'Test your microphone and camera before you start.')}</li><li>${t('الغرفة خاصة بجلستك فقط. لا تشارك هذا الرابط مع أحد.', 'The room is only for your session. Do not share this link with anyone.')}</li><li>${t('تفتح الغرفة قبل الموعد بـ١٥ دقيقة وتبقى متاحة لـ٣ ساعات.', 'The room opens 15 minutes before the start and stays available for 3 hours.')}</li></ul>`;
+  const stateEl = document.getElementById('state'), joinBtn = document.getElementById('join'), hint = document.getElementById('hint');
+  const tick = () => {
+    const now = Date.now() + drift;
+    if (now < opens) { stateEl.innerHTML = `<div class="note">${t('تفتح الغرفة بعد', 'The room opens in')}</div><div class="count">${clock(opens - now)}</div>`; joinBtn.disabled = true; hint.textContent = t('سيتفعّل الزر تلقائياً عند فتح الغرفة. أبقِ هذه الصفحة مفتوحة.', 'The button turns on automatically when the room opens. Keep this page open.'); }
+    else if (now <= closes) { stateEl.innerHTML = now < at ? `<div class="note">${t('تبدأ الجلسة بعد', 'The session starts in')}</div><div class="count">${clock(at - now)}</div>` : `<div class="note" style="color:var(--ok);font-weight:700;">${t('الجلسة جارية الآن', 'The session is in progress')}</div>`; joinBtn.disabled = false; hint.textContent = t('بعد الضغط ستُفتح غرفة الاجتماع بنافذة جديدة.', 'The meeting room opens in a new window.'); }
+    else { stateEl.innerHTML = ''; joinBtn.disabled = true; hint.textContent = t('انتهت مهلة دخول الغرفة. تواصل معنا إن لزم: hello@bewoduh.com', 'The room entry window has ended. Contact us if needed: hello@bewoduh.com'); clearInterval(timer); }
+  };
+  tick(); const timer = setInterval(tick, 1000);
+  joinBtn.addEventListener('click', async () => {
+    const err = document.getElementById('err'); err.textContent = ''; joinBtn.disabled = true;
+    const { data, error: e } = await supabaseClient.rpc('join_session_client', { p_token: TOKEN });
+    joinBtn.disabled = false;
+    if (e || !data || !data.url) { const m = (e && e.message) || ''; err.textContent = /not_open_yet/.test(m) ? t('الغرفة لم تُفتح بعد.', 'The room has not opened yet.') : /session_closed/.test(m) ? t('انتهت مهلة دخول هذه الجلسة.', 'The entry window for this session has ended.') : t('تعذّر فتح الغرفة. حاول مرة أخرى.', 'Could not open the room. Please try again.'); return; }
+    const url = data.url + '#config.prejoinPageEnabled=true&userInfo.displayName=' + encodeURIComponent(JSON.stringify(data.display_name || ''));
+    const w = window.open(url, '_blank', 'noopener');
+    if (!w) { err.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--clarity);font-weight:700;text-decoration:underline;">${t('اضغط هنا لفتح الغرفة', 'Click here to open the room')}</a>`; }
+  });
+}
+init().catch((e) => { console.error('session page:', e); msg('⚠', t('تعذّر تحميل الصفحة', 'Could not load the page'), t('حدّث الصفحة أو تواصل معنا: hello@bewoduh.com', 'Reload the page or contact us: hello@bewoduh.com')); });
+})();
+</script>
+<script src="/components.js"></script>
+</body>
+</html>

@@ -292,6 +292,7 @@ function sessionRows(b) {
     return `<div class="srow">${head}${due ? `<span class="badge bad">${t('بانتظار تسجيلك', 'Awaiting your record')}</span>` : ''}
       <input class="inp" type="datetime-local" data-sess-at="${esc(x.id)}" value="${esc(toLocalInput(x.scheduled_at))}" style="padding:7px 10px; font-size:13px; max-width:210px;">
       <button class="btn2" type="button" data-sess-time="${esc(x.id)}">${t('حفظ الموعد', 'Save time')}</button>
+      ${x.scheduled_at ? `<button class="btn2" type="button" data-sess-join="${esc(x.id)}" style="background:#241D2E; color:#F3EEEA;">${t('ادخل الغرفة 🎥', 'Enter room 🎥')}</button>` : ''}
       <button class="btn" type="button" data-sess-done="${esc(x.id)}" style="padding:8px 16px; font-size:13.5px;">${t('تمّت الجلسة ✓', 'Session held ✓')}</button>
       <button class="btn2 danger" type="button" data-sess-ns="${esc(x.id)}">${t('لم يحضر المراجع', 'Client no-show')}</button></div>`;
   }).join('');
@@ -902,6 +903,14 @@ document.addEventListener('click', async (e) => {
 });
 const afterSess = async () => { await loadAll(); const act = document.querySelector('.tab.active'); const k = act && act.dataset.tab; if (k && RENDER[k]) RENDER[k](); $('cUpcoming').textContent = pendingBk().length; };
 document.addEventListener('click', async (e) => {
+  const jn = e.target.closest('[data-sess-join]');
+  if (jn) {
+    jn.disabled = true; const { data, error } = await sb.rpc('join_session_specialist', { p_session: jn.dataset.sessJoin }); jn.disabled = false;
+    if (error || !data || !data.url) { const m = (error && error.message) || ''; alert(/not_open_yet/.test(m) ? t('تُفتح الغرفة قبل موعد الجلسة بـ١٥ دقيقة.', 'The room opens 15 minutes before the session.') : /not_scheduled/.test(m) ? t('حدّد موعد الجلسة واحفظه أولاً.', 'Set and save the session time first.') : /session_closed/.test(m) ? t('انتهت مهلة دخول هذه الجلسة.', 'The entry window for this session has ended.') : t('تعذّر فتح الغرفة.', 'Could not open the room.')); return; }
+    const url = data.url + '#config.prejoinPageEnabled=true&userInfo.displayName=' + encodeURIComponent(JSON.stringify(data.display_name || ''));
+    if (!window.open(url, '_blank', 'noopener')) location.href = url;
+    return;
+  }
   const dn = e.target.closest('[data-sess-done]'), ns = e.target.closest('[data-sess-ns]'), tm = e.target.closest('[data-sess-time]');
   if (tm) {
     const id = tm.dataset.sessTime, v = document.querySelector('[data-sess-at="' + CSS.escape(id) + '"]').value;
