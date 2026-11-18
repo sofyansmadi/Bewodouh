@@ -70,7 +70,8 @@
   /* ---------- تسجيل التبويبات الجديدة ---------- */
   const NEW_TABS = [
     { id: 'analytics', label: 'لوحة التحليلات', perm: 'bookings', first: true },
-    { id: 'sessions', label: 'متابعة الجلسات', perm: 'bookings', after: 'bookings' },
+    { id: 'campaigns', label: 'الحملات الإعلانية', perm: 'bookings', after: 'bookings' },
+    { id: 'sessions', label: 'متابعة الجلسات', perm: 'bookings', after: 'campaigns' },
     { id: 'payouts', label: 'مستحقات الأخصائيين', perm: 'bookings', after: 'sessions' },
     { id: 'feedback', label: 'آراء المستفيدين', perm: 'bookings', after: 'payouts' },
     { id: 'banner', label: 'بانر الرئيسية', perm: 'pages', after: 'promos' },
@@ -925,5 +926,48 @@
     draw();
   }
 
-  const LOADERS = { analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner, feedback: loadFeedback };
+
+  /* =====================================================================
+     الحملات الإعلانية: من الزيارة إلى الدفع لكل حملة وإعلان (بيانات داخلية مجهولة + مصدر الحجز)
+     ===================================================================== */
+  let campDays = 14;
+  async function loadCampaigns() {
+    const el = $('tab-campaigns');
+    el.innerHTML = '<h2 class="section-title">الحملات الإعلانية</h2><p class="section-sub">جارٍ التحميل...</p>';
+    const to = new Date(Date.now() + 3600e3).toISOString(), from = new Date(Date.now() - campDays * 86400e3).toISOString();
+    const { data, error } = await sb().rpc('admin_campaign_report', { p_from: from, p_to: to });
+    if (error) {
+      el.innerHTML = '<h2 class="section-title">الحملات الإعلانية</h2><div class="kx-warn">تعذّر تحميل التقرير: ' + esc(error.message) + '</div>';
+      return;
+    }
+    const rows = data || [];
+    const sum = (k) => rows.reduce((t, r) => t + (Number(r[k]) || 0), 0);
+    const pct = (a, b) => (b ? Math.round(a / b * 1000) / 10 + '%' : '—');
+    const tot = { v: sum('visitors'), c: sum('cta_clicks'), bv: sum('booking_views'), co: sum('checkouts'), b: sum('bookings'), p: sum('paid_bookings'), rev: sum('revenue_usd') };
+    const kpi = (v, l, sub) => `<div class="kx-kpi"><b>${v}</b><span>${l}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    const ads = rows.filter(r => r.utm_campaign !== '(none)');
+    el.innerHTML = `
+      <h2 class="section-title">الحملات الإعلانية</h2>
+      <p class="section-sub">يعرض الزوار الذين وافقوا على ملفات الارتباط فقط. أرقام Ads Manager (النقرات والإنفاق) قد تزيد عن هذه الأرقام، ومن لم يوافق على الكوكيز لا يظهر هنا.</p>
+      <div class="kx-bar"><span style="font-size:13px;">الفترة:</span>
+        ${[7, 14, 30, 90].map(d => `<button type="button" class="kx-chip${d === campDays ? ' on' : ''}" data-cd="${d}">${d} يوم</button>`).join('')}
+        <button type="button" class="kx-chip" id="campCsv" style="margin-inline-start:auto;">تصدير CSV</button></div>
+      <div class="kx-kpis">
+        ${kpi(num(tot.v), 'زوار الصفحات المعلنة', 'زوار فريدون')}
+        ${kpi(num(tot.c), 'نقرات الأزرار', 'حجز / تواصل')}
+        ${kpi(num(tot.bv), 'فتحوا صفحة الحجز', pct(tot.bv, tot.v) + ' من الزوار')}
+        ${kpi(num(tot.co), 'بدؤوا الدفع', pct(tot.co, tot.bv) + ' من فاتحي الحجز')}
+        ${kpi(num(tot.p) + ' / ' + num(tot.b), 'حجوزات مدفوعة / كل الحجوزات', pct(tot.p, tot.b) + ' نسبة الدفع')}
+        ${kpi(usd(tot.rev), 'الإيراد المدفوع', ads.length ? 'من حملات موسومة: ' + usd(ads.reduce((t, r) => t + Number(r.revenue_usd || 0), 0)) : '')}
+      </div>
+      <div class="kx-card"><h3>حسب الحملة والإعلان</h3>
+      <div style="overflow-x:auto;"><table style="min-width:760px;"><thead><tr><th>المصدر</th><th>الحملة</th><th>الإعلان (utm_content)</th><th>زوار</th><th>نقرات أزرار</th><th>فتحوا الحجز</th><th>بدؤوا الدفع</th><th>حجوزات</th><th>مدفوعة</th><th>الإيراد</th><th>نسبة الشراء من الزوار</th></tr></thead>
+      <tbody>${rows.length ? rows.map(r => `<tr><td>${esc(r.utm_source)}</td><td>${esc(r.utm_campaign)}</td><td>${esc(r.utm_content)}</td><td>${num(r.visitors)}</td><td>${num(r.cta_clicks)}</td><td>${num(r.booking_views)}</td><td>${num(r.checkouts)}</td><td>${num(r.bookings)}</td><td><b>${num(r.paid_bookings)}</b></td><td>${usd(r.revenue_usd)}</td><td>${pct(r.paid_bookings, r.visitors)}</td></tr>`).join('') : '<tr><td colspan="11" style="text-align:center; color:var(--text-muted-light);">لا بيانات بعد. ستظهر هنا بعد أول زيارة من إعلان موسوم بـ utm.</td></tr>'}</tbody></table></div>
+      <p style="font-size:12px; color:var(--text-muted-light); margin-top:10px;">(none) = زيارات بلا وسم حملة (مباشر / عضوي). الحجوزات المدفوعة بكليك تظهر هنا بعد أن تؤكد استلام الحوالة في تبويب الحجوزات.</p></div>`;
+    el.querySelectorAll('[data-cd]').forEach(b => b.addEventListener('click', () => { campDays = Number(b.dataset.cd); loadCampaigns(); }));
+    $('campCsv').addEventListener('click', () => downloadCsv('campaigns-' + new Date().toISOString().slice(0, 10) + '.csv',
+      [['source', 'campaign', 'content', 'visitors', 'cta_clicks', 'booking_views', 'checkouts', 'bookings', 'paid', 'revenue_usd']].concat(rows.map(r => [r.utm_source, r.utm_campaign, r.utm_content, r.visitors, r.cta_clicks, r.booking_views, r.checkouts, r.bookings, r.paid_bookings, r.revenue_usd]))));
+  }
+
+  const LOADERS = { campaigns: loadCampaigns, analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner, feedback: loadFeedback };
 })();

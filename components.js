@@ -235,6 +235,7 @@ class SiteFooter extends HTMLElement {
           <h4>${t('قانوني', 'Legal')}</h4>
           <a href="${h('/terms/')}">${t('شروط الاستخدام', 'Terms of Use')}</a>
           <a href="${h('/privacy/')}">${t('سياسة الخصوصية', 'Privacy Policy')}</a>
+          <a href="#" data-bw-consent>${t('إعدادات الكوكيز', 'Cookie settings')}</a>
         </div>
       </div>
       <p class="footer-bottom">${t(
@@ -265,6 +266,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>
         <a href="${h('/terms/')}" ${linkStyle}>${t('شروط الاستخدام', 'Terms of Use')}</a>
         <a href="${h('/privacy/')}" ${linkStyle}>${t('سياسة الخصوصية', 'Privacy Policy')}</a>
+        <a href="#" data-bw-consent ${linkStyle}>${t('إعدادات الكوكيز', 'Cookie settings')}</a>
       </div>
       ${this.emergencyLine()}
       ${this.companyLine()}
@@ -536,3 +538,11 @@ if (isRunningInApp()) {
     }
   });
 }
+
+/* تتبّع الحملات الإعلانية (يعمل فقط على صفحات الحجز والتسويق وبعد موافقة الزائر — انظر tracking.js) */
+(function(){
+  if (window.BWTrack || document.querySelector('script[data-bw-tracking]')) return;
+  var s = document.createElement('script');
+  s.src = '/tracking.js?v=1'; s.async = true; s.setAttribute('data-bw-tracking', '1');
+  document.head.appendChild(s);
+})();

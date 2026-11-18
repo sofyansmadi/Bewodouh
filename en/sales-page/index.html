@@ -580,6 +580,20 @@ window.addEventListener('package-selected', (e) => {
 // ---------- Booking form ----------
 
 // If the user came from a specific specialist's page, show a confirmation banner and save the name for the booking
+// ---------- Ad tracking helpers (see /tracking.js; they do nothing without visitor consent) ----------
+function bwTrack(name, data){ try { if (window.BWTrack) BWTrack.track(name, data || {}); } catch (e) {} }
+function bwBegin(id, value, pkg, promo, method){
+  try {
+    if (!window.BWTrack) return;
+    BWTrack.beginCheckout({ id: id, value: value, name: pkg, promo: promo, method: method });
+    if (method === 'cliq') BWTrack.track('AddPaymentInfo', { value: value, content_name: pkg, payment_method: 'cliq', event_id: id });
+  } catch (e) {}
+}
+window.addEventListener('load', function(){
+  var sel = document.getElementById('bkPackage'); var nm = sel ? sel.value : '';
+  bwTrack('ViewContent', { content_name: nm, value: (typeof PACKAGE_PRICES_USD !== 'undefined' && PACKAGE_PRICES_USD[nm]) || undefined });
+});
+let __bwSlotTracked = false;
 const urlParams = new URLSearchParams(window.location.search);
 const chosenSpecialist = urlParams.get('specialist');
 if (chosenSpecialist) {
@@ -687,6 +701,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   // دالة create-checkout-session تقرأ السعر من قاعدة البيانات لا من المتصفح، وتأكيد الدفع يصل لدالة stripe-webhook.
   const pinfo = await fetchPaymentInfo(bookingId);
   const amount = pinfo ? Number(pinfo.final_usd) : PACKAGE_PRICES_USD[payload.package_name];
+  bwBegin(bookingId, amount, payload.package_name, payload.promo_code, 'card');
   const payContainer = document.getElementById('pay-container');
   document.getElementById('successBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -740,6 +755,8 @@ async function fetchPaymentInfo(bookingId) {
   const pkgEl = document.getElementById('bkPackage'), emailEl = document.getElementById('bkEmail'), codeEl = document.getElementById('bkPromo');
   const applyBtn = document.getElementById('bkPromoApply'), msgEl = document.getElementById('promoMsg'), sumEl = document.getElementById('priceSummary');
   if (!pkgEl || !codeEl) return;
+  const __qp = new URLSearchParams(location.search).get('promo');
+  if (__qp && !codeEl.value) codeEl.value = __qp.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 40);
   let last = '', seq = 0;
   async function refresh(typedByUser) {
     const pkg = pkgEl.value, email = (emailEl.value || '').trim(), code = (codeEl.value || '').trim();
@@ -759,6 +776,7 @@ async function fetchPaymentInfo(bookingId) {
     else if (code && data.code_ok) msg = PROMO_T.code_ok.replace('{c}', data.code).replace('{p}', pct);
     else if (pct > 0) msg = PROMO_T.auto.replace('{p}', pct);
     msgEl.style.color = color; msgEl.textContent = msg;
+    if (typedByUser && code && data.code_ok && window.__bwPromoSent !== code.toUpperCase()) { window.__bwPromoSent = code.toUpperCase(); bwTrack('PromoApplied', { content_name: pkg, promo_code: code.toUpperCase(), label: 'promo_applied' }); }
     sumEl.style.display = 'block';
     sumEl.dataset.usd = String(data.final_usd); sumEl.dataset.list = String(data.list_usd);
     sumEl.replaceChildren();
@@ -797,6 +815,7 @@ async function showCliqPayment(bookingId, pkg) {
   }
   const pinfo = await fetchPaymentInfo(bookingId);
   const usd = pinfo ? Number(pinfo.final_usd) : PACKAGE_PRICES_USD[pkg];
+  bwBegin(bookingId, usd, pkg, pinfo && pinfo.promo_code, 'cliq');
   const jod = usd ? (Math.round(usd * JOD_PER_USD * 100) / 100).toFixed(2) : null;
 
   const card = document.createElement('div');
@@ -1011,6 +1030,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
       if (!chosen) btn.appendChild(mk('small', '', spName(sl)));
       btn.addEventListener('click', () => {
         selId = sl.id; window.__selectedSlot = sl;
+        if (!__bwSlotTracked) { __bwSlotTracked = true; const _n = (document.getElementById('bkPackage') || {}).value || ''; bwTrack('AddToCart', { content_name: _n, value: (PACKAGE_PRICES_USD || {})[_n] }); }
         row.querySelectorAll('.slot-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
         btn.setAttribute('aria-pressed', 'true');
         sum.innerHTML = summaryHtml(sl); sum.style.display = '';
