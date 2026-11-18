@@ -72,6 +72,7 @@
     { id: 'analytics', label: 'لوحة التحليلات', perm: 'bookings', first: true },
     { id: 'sessions', label: 'متابعة الجلسات', perm: 'bookings', after: 'bookings' },
     { id: 'payouts', label: 'مستحقات الأخصائيين', perm: 'bookings', after: 'sessions' },
+    { id: 'feedback', label: 'آراء المستفيدين', perm: 'bookings', after: 'payouts' },
     { id: 'banner', label: 'بانر الرئيسية', perm: 'pages', after: 'promos' },
   ];
   const tabsBar = document.querySelector('.admin-tabs');
@@ -750,7 +751,7 @@
 
   const GROUPS = [
     ['نظرة عامة', ['analytics']],
-    ['العمليات اليومية', ['bookings', 'sessions', 'payouts', 'slots']],
+    ['العمليات اليومية', ['bookings', 'sessions', 'payouts', 'feedback', 'slots']],
     ['الأخصائيون', ['team', 'applications']],
     ['العملاء', ['users']],
     ['العروض والمحتوى', ['packages', 'promos', 'banner', 'articles', 'static-pages', 'exercises']],
@@ -792,6 +793,7 @@
   async function loadBadges() {
     const set = (id, n) => { const e = side.querySelector('[data-badge="' + id + '"]'); if (!e) return; e.textContent = n > 99 ? '99+' : String(n); e.classList.toggle('on', n > 0); e.title = n > 0 ? 'يحتاج متابعة' : ''; };
     try {
+      if (canAccess('bookings')) { const fr = await sb().from('session_feedback').select('rating, flags, handled, submitted_at, public_status').not('submitted_at', 'is', null).limit(3000); if (!fr.error) set('feedback', (fr.data || []).filter(x => !x.handled && (x.rating <= 2 || (x.flags || []).length)).length + (fr.data || []).filter(x => x.public_status === 'pending').length); }
       if (canAccess('applications')) { const r = await sb().from('specialist_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'); if (!r.error) set('applications', r.count || 0); }
       if (canAccess('bookings')) {
         const r = await sb().from('bookings').select('id', { count: 'exact', head: true }).eq('payment_method', 'cliq').eq('paid', false).not('cliq_reported_at', 'is', null).neq('status', 'ملغى'); if (!r.error) set('bookings', r.count || 0);
@@ -852,5 +854,71 @@
     apply();
   };
 
-  const LOADERS = { analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner };
+  /* =====================================================================
+     8) آراء المستفيدين بعد الجلسات (تقييمات + متابعة + اعتماد التعليقات العامة)
+     ===================================================================== */
+  const FLAG_L = { late_or_absent: 'الأخصائي تأخر كثيراً / لم يحضر', off_platform: 'طُلب التواصل أو الدفع خارج المنصة', uncomfortable: 'عدم ارتياح / عدم احترام', technical: 'مشكلة تقنية' };
+  const ASP_L = { listening: 'الإصغاء والفهم', clarity: 'وضوح التوجيه', punctuality: 'الالتزام بالموعد' };
+  const fbf = { f: 'all', spec: '' };
+  const starsTxt = (n) => '<span style="color:#C9A15F; letter-spacing:1px;">' + '★'.repeat(n) + '<span style="opacity:.25">' + '★'.repeat(5 - n) + '</span></span>';
+  const npsOf = (rows) => { const r = rows.filter(x => x.recommend != null); if (!r.length) return null; return Math.round((r.filter(x => x.recommend >= 9).length - r.filter(x => x.recommend <= 6).length) / r.length * 100); };
+  const needsAttention = (x) => x.submitted_at && !x.handled && (x.rating <= 2 || (x.flags || []).length);
+  async function loadFeedback() {
+    const el = $('tab-feedback');
+    el.innerHTML = '<h2 class="section-title">آراء المستفيدين</h2><p class="section-sub">جارٍ التحميل...</p>';
+    let core, rows;
+    try { core = await loadCore(false); const r = await sb().from('session_feedback').select('*').order('created_at', { ascending: false }).limit(3000); if (r.error) throw r.error; rows = r.data || []; }
+    catch (e) { el.innerHTML = '<h2 class="section-title">آراء المستفيدين</h2><p class="section-sub">تعذّر التحميل.</p>'; console.error(e); return; }
+    const bk = Object.fromEntries(core.bookings.map(b => [b.id, b]));
+    const done = rows.filter(x => x.submitted_at), requested = rows.filter(x => x.requested_at);
+    const avg = done.length ? done.reduce((s, x) => s + x.rating, 0) / done.length : 0, nps = npsOf(done);
+    const attention = rows.filter(needsAttention), pendingC = rows.filter(x => x.public_status === 'pending');
+    const FLT = { all: x => x.submitted_at, attention: needsAttention, pending: x => x.public_status === 'pending', low: x => x.submitted_at && x.rating <= 3, flags: x => (x.flags || []).length > 0, unanswered: x => x.requested_at && !x.submitted_at };
+    const chips = [['all', 'كل الردود'], ['attention', 'تحتاج متابعة'], ['pending', 'تعليقات بانتظار الاعتماد'], ['low', 'تقييم ٣ فأقل'], ['flags', 'فيها بلاغ'], ['unanswered', 'لم يردّوا بعد']];
+    // ملخص كل أخصائي
+    const per = {}; done.forEach(x => { (per[x.specialist_id] = per[x.specialist_id] || []).push(x); });
+    const perRows = Object.entries(per).map(([sid, l]) => ({ sid, n: l.length, avg: l.reduce((s, x) => s + x.rating, 0) / l.length, nps: npsOf(l), low: l.filter(x => x.rating <= 3).length, flags: l.filter(x => (x.flags || []).length).length })).sort((a, b) => a.avg - b.avg);
+    const kpi = (v, l, sub, warn) => `<div class="kx-kpi"><b style="${warn ? 'color:#C0562E;' : ''}">${v}</b><span>${l}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    el.innerHTML = `<h2 class="section-title">آراء المستفيدين</h2>
+      <p class="section-sub">بعد تسجيل الجلسة الأولى والأخيرة من كل حجز بساعتين يصل المستفيد بريد برابط تقييم شخصي (وتذكير واحد بعد ٣ أيام). النجوم تُحتسب فوراً بمتوسط الأخصائي، والتعليق لا يظهر للعموم إلا بعد اعتمادك. الأخصائي لا يرى الملاحظات الخاصة ولا البلاغات.</p>
+      <div class="kx-kpis">${kpi(done.length, 'ردود وصلت', requested.length ? 'نسبة الرد ' + Math.round(done.length / requested.length * 100) + '% من ' + requested.length + ' طلب' : '')}${kpi(done.length ? avg.toFixed(2) + ' ★' : '—', 'متوسط التقييم العام')}
+        ${kpi(nps == null ? '—' : nps, 'مؤشر التوصية NPS', 'من ٩-١٠ ناقص ٠-٦ (من −١٠٠ إلى ١٠٠)')}${kpi(attention.length, 'تحتاج متابعة', 'تقييم ١-٢ أو بلاغ لم يُعالَج', attention.length > 0)}${kpi(pendingC.length, 'تعليقات بانتظار اعتمادك')}</div>
+      ${perRows.length ? `<h3 style="font-size:15px; margin:6px 0 10px;">ملخص الأخصائيين</h3><div class="kx-scroll"><table><thead><tr><th>الأخصائي</th><th>التقييم</th><th>عدد الردود</th><th>NPS</th><th>٣ فأقل</th><th>بلاغات</th></tr></thead><tbody>${perRows.map(r => `<tr><td>${esc((core.spec[r.sid] || {}).full_name || '—')}</td><td><b style="color:${r.avg < 4 && r.n >= 3 ? '#C0562E' : 'inherit'};">${r.avg.toFixed(2)}</b> ${starsTxt(Math.round(r.avg))}</td><td>${r.n}${r.n < 3 ? ' <span style="font-size:11px; color:var(--text-muted-light);">(قليل)</span>' : ''}</td><td>${r.nps == null ? '—' : r.nps}</td><td>${r.low}</td><td>${r.flags ? '<b style="color:#C0562E;">' + r.flags + '</b>' : 0}</td></tr>`).join('')}</tbody></table></div>` : ''}
+      <div class="kx-bar" id="fbChips">${chips.map(([k, l]) => `<button type="button" class="kx-chip${fbf.f === k ? ' on' : ''}" data-k="${k}">${l}<span class="n">${rows.filter(FLT[k]).length}</span></button>`).join('')}
+        <select id="fbSpec"><option value="">كل الأخصائيين</option>${core.specialists.slice().sort((a, b) => a.full_name.localeCompare(b.full_name)).map(s => `<option value="${esc(s.id)}"${fbf.spec === s.id ? ' selected' : ''}>${esc(s.full_name)}</option>`).join('')}</select></div>
+      <div id="fbList"></div>`;
+    const draw = () => {
+      const list = rows.filter(FLT[fbf.f]).filter(x => !fbf.spec || x.specialist_id === fbf.spec);
+      $('fbList').innerHTML = list.length ? list.map(x => {
+        const b = bk[x.booking_id] || {}, sp = core.spec[x.specialist_id] || {};
+        if (!x.submitted_at) return `<div class="kx-card" style="padding:12px 16px;">⏳ لم يردّ بعد · ${esc(b.full_name || '')} مع <b>${esc(sp.full_name || '—')}</b> · طُلب ${x.requested_at ? fmtD(x.requested_at) : '—'}</div>`;
+        const asp = Object.entries(x.aspects || {}).map(([k, v]) => `${ASP_L[k] || k}: ${v}/5`).join(' · ');
+        const st = { pending: ['بانتظار الاعتماد', '#7D5F27', '#FBF1DC'], approved: ['معتمد (ظاهر للعموم)', '#2E6B45', '#DCEFE3'], hidden: ['غير منشور', '#6B6072', '#ECE8EE'] }[x.public_status];
+        return `<div class="kx-card" style="${needsAttention(x) ? 'border-color:#C0562E;' : ''}">
+          <div style="display:flex; gap:10px 14px; flex-wrap:wrap; align-items:center; margin-bottom:6px;"><span style="font-size:18px;">${starsTxt(x.rating)}</span><b>${esc(sp.full_name || '—')}</b><span style="font-size:12.5px; color:var(--text-muted-light);">${esc(b.full_name || x.client_first_name || '')} · ${esc(b.package_name || '')} · ${fmtD(x.submitted_at)}</span>
+            ${x.recommend != null ? `<span class="kx-st" style="--c:#5B4A86; --bg:#E8E2F4;">توصية ${x.recommend}/10</span>` : ''}${x.handled ? '<span class="kx-st" style="--c:#2E6B45; --bg:#DCEFE3;">تمت المتابعة</span>' : ''}</div>
+          ${(x.flags || []).length ? `<div style="margin:6px 0; display:flex; gap:6px; flex-wrap:wrap;">${x.flags.map(f => `<span class="kx-st" style="--c:#fff; --bg:#C0562E;">⚠ ${esc(FLAG_L[f] || f)}</span>`).join('')}</div>` : ''}
+          ${asp ? `<div style="font-size:12.5px; color:var(--text-muted-light);">${esc(asp)}</div>` : ''}
+          ${x.comment ? `<p style="margin:8px 0; white-space:pre-line;">«${esc(x.comment)}» ${x.public_ok ? `<span class="kx-st" style="--c:${st[1]}; --bg:${st[2]};">${st[0]}</span>` : '<span class="kx-st" style="--c:#6B6072; --bg:#ECE8EE;">لم يسمح بالنشر</span>'}</p>` : ''}
+          ${x.team_note ? `<p style="margin:8px 0; background:var(--fog); border-radius:10px; padding:8px 12px; font-size:13.5px; white-space:pre-line;"><b>ملاحظة خاصة للفريق:</b> ${esc(x.team_note)}</p>` : ''}
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+            ${x.comment && x.public_ok ? (x.public_status === 'approved' ? `<button type="button" class="btn-secondary" data-fb="hide:${esc(x.id)}" style="padding:5px 12px; font-size:12px;">إخفاء عن العموم</button>` : `<button type="button" class="btn-primary" data-fb="approve:${esc(x.id)}" style="width:auto; margin:0; padding:6px 14px; font-size:12.5px;">اعتماد ونشر التعليق</button>${x.public_status === 'pending' ? `<button type="button" class="btn-secondary" data-fb="hide:${esc(x.id)}" style="padding:5px 12px; font-size:12px;">رفض</button>` : ''}`) : ''}
+            <button type="button" class="btn-secondary" data-fb="${x.handled ? 'unhandle' : 'handle'}:${esc(x.id)}" style="padding:5px 12px; font-size:12px;">${x.handled ? 'إلغاء «تمت المتابعة»' : 'تمت المتابعة ✓'}</button>
+            <input type="text" data-fbnote="${esc(x.id)}" value="${esc(x.admin_note || '')}" maxlength="500" placeholder="ملاحظتك الداخلية (ماذا فعلت؟)" style="flex:1; min-width:180px; border:1.5px solid var(--fog-dim); border-radius:10px; padding:6px 10px; font-family:inherit; font-size:13px;">
+            <button type="button" class="btn-secondary" data-fb="note:${esc(x.id)}" style="padding:5px 12px; font-size:12px;">حفظ الملاحظة</button></div></div>`;
+      }).join('') : '<p style="color:var(--text-muted-light);">لا نتائج.</p>';
+      $('fbList').querySelectorAll('[data-fb]').forEach(btn => btn.addEventListener('click', async () => {
+        const [act, id] = btn.dataset.fb.split(':'); const upd = act === 'approve' ? { public_status: 'approved' } : act === 'hide' ? { public_status: 'hidden' } : act === 'handle' ? { handled: true } : act === 'unhandle' ? { handled: false } : { admin_note: ($('fbList').querySelector('[data-fbnote="' + id + '"]').value.trim() || null) };
+        const { error } = await sb().from('session_feedback').update(upd).eq('id', id);
+        if (error) { alert('تعذّر الحفظ: ' + error.message); return; }
+        if (act === 'note') { toast('تم حفظ الملاحظة', 'ok'); return; }
+        loadFeedback();
+      }));
+    };
+    $('fbChips').querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { fbf.f = b.dataset.k; loadFeedback(); }));
+    $('fbSpec').addEventListener('change', (e) => { fbf.spec = e.target.value; draw(); });
+    draw();
+  }
+
+  const LOADERS = { analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner, feedback: loadFeedback };
 })();

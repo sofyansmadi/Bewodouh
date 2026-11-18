@@ -545,6 +545,19 @@ const when = (b) => `<b>${fmtD(b.preferred_datetime)}</b><div class="muted">${fm
 const table = (head, rows) => rows.length ? `<div class="tbl-wrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : '';
 
 /* ---------- overview / statistics ---------- */
+async function loadMyRatings(){
+  const box = $('myRatings'); if (!box) return;
+  const { data, error } = await sb.rpc('my_ratings');
+  if (error || !data) return;
+  const n = data.n || 0, st = (k) => '★'.repeat(k) + '<span style="opacity:.25">' + '★'.repeat(5 - k) + '</span>';
+  if (!n) { box.innerHTML = `<div class="card" style="margin-top:18px;"><h3 style="font-size:15px; margin-bottom:6px;">${t('تقييمات المراجعين', 'Client ratings')}</h3><p class="muted">${t('بعد تسجيلك للجلسات يصل المراجع رابط تقييم، وستظهر النتائج هنا.', 'After you record sessions, the client receives a rating link and the results appear here.')}</p></div>`; return; }
+  const max = Math.max(1, ...[1, 2, 3, 4, 5].map(k => (data.dist || {})[k] || 0));
+  box.innerHTML = `<div class="card" style="margin-top:18px;"><h3 style="font-size:15px; margin-bottom:10px;">${t('تقييمات المراجعين', 'Client ratings')}</h3>
+    <div class="row" style="gap:22px; align-items:center; flex-wrap:wrap;"><div style="text-align:center;"><div style="font-size:34px; font-weight:900; font-family:'Noto Kufi Arabic',sans-serif;">${Number(data.avg).toFixed(1)}</div><div style="color:#C9A15F;">${st(Math.round(data.avg))}</div><div class="muted">${n} ${t('تقييم', 'ratings')}</div></div>
+    <div style="flex:1; min-width:200px;">${[5, 4, 3, 2, 1].map(k => `<div style="display:flex; align-items:center; gap:8px; font-size:12.5px; margin:3px 0;"><span style="width:14px;">${k}</span><span style="flex:1; background:var(--fog); border-radius:100px; height:9px; overflow:hidden;"><i style="display:block; height:100%; width:${Math.round(((data.dist || {})[k] || 0) / max * 100)}%; background:#C9A15F;"></i></span><span style="width:24px; text-align:end;">${(data.dist || {})[k] || 0}</span></div>`).join('')}</div></div>
+    ${(data.reviews || []).length ? `<h4 style="font-size:14px; margin:16px 0 6px;">${t('تعليقات معتمدة', 'Approved comments')}</h4>` + data.reviews.map(r => `<div style="border-top:1px solid var(--fog-dim); padding:9px 0;"><span style="color:#C9A15F;">${st(r.rating)}</span> <b style="font-size:13px;">${esc(r.first_name || '')}</b><div style="font-size:14px; white-space:pre-line;">${esc(r.comment)}</div></div>`).join('') : ''}
+    <p class="muted" style="margin-top:10px;">${t('ما يظهر هنا هو النجوم والتعليقات المعتمدة فقط. الملاحظات الخاصة للمراجعين تبقى عند الإدارة.', 'Only the stars and approved comments are shown here. Clients\' private notes stay with the team.')}</p></div>`;
+}
 function renderOverview(){
   const c = counted();
   const month = new Date(); const ym = (d) => d.getFullYear() + '-' + d.getMonth();
@@ -578,6 +591,7 @@ function renderOverview(){
       <div class="bars">${months.map(m => `<div class="bar"><em>${m.n}</em><i style="height:${Math.round(m.n / max * 100)}%"></i><span>${esc(m.label)}</span></div>`).join('')}</div>
     </div>
     <p class="muted" style="margin-top:14px;">${t(`الأتعاب تقديرية حسب العقد: ${FEE_FIRST}$ أول جلسة مع كل مراجع و${FEE_NEXT}$ لكل جلسة لاحقة، وتشمل غياب المراجع. الدفع الفعلي يتم بتاريخ الدفع الشهري وكشف الإدارة هو المرجع.`, `Fees are an estimate based on your agreement: $${FEE_FIRST} for the first session with each client and $${FEE_NEXT} for every later one, including client no-shows. Actual payment follows the monthly payment date and the team's statement is the reference.`)}</p>`;
+  $('tab-overview').insertAdjacentHTML('beforeend', '<div id="myRatings"></div>'); loadMyRatings();
 }
 
 /* ---------- upcoming ---------- */

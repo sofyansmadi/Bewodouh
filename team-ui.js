@@ -12,6 +12,13 @@
   const get = (q) => fetch(BASE + q, { headers: H }).then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))));
 
   const COLS = 'id,slug,full_name,full_name_en,specialty,specialty_en,short_bio,short_bio_en,bio,bio_en,photo_url,country_code,sort_order,years_experience,chat_enabled,chat_online,chat_rate_pts';
+  // تقييمات المستفيدين (متوسط النجوم يظهر عند ٣ تقييمات فأكثر حتى لا يُظلم أحد بعينة صغيرة)
+  let RATINGS = {};
+  const loadRatings = async () => {
+    try { const r = await fetch(BASE + 'rpc/public_ratings', { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: '{}' }); if (r.ok) RATINGS = Object.fromEntries((await r.json()).map(x => [x.specialist_id, { avg: Number(x.avg_rating), n: x.n }])); } catch (e) { console.warn('ratings:', e); }
+    return RATINGS;
+  };
+  const ratingTag = (sp) => { const r = sp && RATINGS[sp.id]; return r && r.n >= 3 ? `<span class="bw-rate" title="${t('متوسط تقييم المستفيدين', 'Average client rating')}">★ ${r.avg.toFixed(1)} <small>(${r.n})</small></span>` : ''; };
   const loadTeam = () => get('specialists?select=' + COLS + '&is_published=eq.true&order=sort_order.asc');
 
   // أقرب المواعيد غير المحجوزة (بعد ٢٤ ساعة، كما تفرض صفحة الحجز) مجمّعة حسب الأخصائي
@@ -77,7 +84,7 @@
       <img class="specialist-photo" src="${esc(sp.photo_url || PLACEHOLDER)}" alt="${esc(l.name)}" loading="lazy">
       <div class="specialist-body">
         <div class="specialist-name">${esc(l.name)}</div>
-        <div class="bw-cty-row">${countryTag(sp)}</div>
+        <div class="bw-cty-row">${countryTag(sp)}${ratingTag(sp)}</div>
         <div class="specialist-role">${esc(l.specialty)}</div>
         <p class="specialist-bio">${esc(snippet(l))}</p>
         ${availTag(slots)}
@@ -86,7 +93,7 @@
   }
   async function teamPage(gridEl, filtersEl) {
     let team, avail;
-    try { [team, avail] = await Promise.all([loadTeam(), loadAvailability()]); }
+    try { [team, avail] = await Promise.all([loadTeam(), loadAvailability(), loadRatings()]); }
     catch (e) { console.error(e); gridEl.innerHTML = `<p class="empty-state">${t('تعذّر تحميل الفريق حالياً.', 'Unable to load the team right now.')}</p>`; return; }
     if (!team.length) { gridEl.innerHTML = `<p class="empty-state">${t('لا يوجد أخصائيون معروضون حالياً.', 'No specialists are listed right now.')}</p>`; return; }
     const sorted = sortByAvailability(team, avail);
@@ -128,14 +135,14 @@
   // ---------- الرئيسية: شريط الفريق ----------
   async function homeStrip(el) {
     let team, avail;
-    try { [team, avail] = await Promise.all([loadTeam(), loadAvailability()]); } catch (e) { el.closest('section').style.display = 'none'; return; }
+    try { [team, avail] = await Promise.all([loadTeam(), loadAvailability(), loadRatings()]); } catch (e) { el.closest('section').style.display = 'none'; return; }
     const pool = sortByAvailability(team.filter(sp => sp.photo_url), avail).slice(0, 12);
     if (!pool.length) { el.closest('section').style.display = 'none'; return; }
     el.innerHTML = pool.map(sp => {
       const l = loc(sp);
       return `<a href="${profileHref(sp)}" class="bw-mini">
         <img src="${esc(sp.photo_url)}" alt="${esc(l.name)}" loading="lazy">
-        <div class="bw-mini-b"><div class="bw-mini-n">${esc(l.name)}</div><div class="bw-cty-row">${countryTag(sp)}</div><div class="bw-mini-r">${esc(l.specialty)}</div>${availTag(avail[sp.id])}</div></a>`;
+        <div class="bw-mini-b"><div class="bw-mini-n">${esc(l.name)}</div><div class="bw-cty-row">${countryTag(sp)}${ratingTag(sp)}</div><div class="bw-mini-r">${esc(l.specialty)}</div>${availTag(avail[sp.id])}</div></a>`;
     }).join('');
   }
 
@@ -188,6 +195,10 @@
   .bw-mini-b{ padding:10px 12px 13px; }
   .bw-cty{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-muted-light,#6B6072); line-height:1.4; }
   .bw-cty img{ border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.12); display:block; }
+  .bw-rate{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; color:#8a6a2e; margin-inline-start:10px; } .bw-rate small{ font-weight:500; color:var(--text-muted-light,#6B6072); }
+  .bw-rsum{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 14px; } .bw-rsum b{ font-size:26px; font-family:'Noto Kufi Arabic',sans-serif; }
+  .bw-stars{ color:#C9A15F; letter-spacing:1px; } .bw-rsum .muted, .bw-rev .muted{ font-size:12.5px; color:var(--text-muted-light,#6B6072); }
+  .bw-rev{ border-top:1px solid var(--fog-dim,#E6DFDA); padding:12px 0 4px; } .bw-rev-h{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:13.5px; } .bw-rev p{ font-size:14.5px; margin:4px 0 8px; white-space:pre-line; }
   .bw-cty-row{ margin:2px 0 5px; min-height:0; }
   .bw-mini-n{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:13.5px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .bw-mini-r{ font-size:11.5px; color:var(--text-muted-light,#6B6072); line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -269,5 +280,20 @@
   new MutationObserver(hydrateAll).observe(document.documentElement, { childList: true, subtree: true });
   hydrateAll();
 
-  window.BW = { countryTag, openBooking, loadTeam, loadAvailability, loc, fmtSlot, availTag, teamPage, homeStrip, quickBook, esc, PLACEHOLDER };
+  // آراء المستفيدين على صفحة الأخصائي: المتوسط + التعليقات المعتمدة من فريق بوضوح
+  async function renderReviews(spId, el) {
+    try {
+      await loadRatings();
+      const r = await fetch(BASE + 'rpc/public_reviews', { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_specialist: spId, p_limit: 6 }) });
+      const list = r.ok ? await r.json() : [];
+      const sm = RATINGS[spId];
+      if ((!sm || sm.n < 3) && !list.length) { el.style.display = 'none'; return; }
+      const stars = (n) => '★'.repeat(n) + '<span style="opacity:.25">' + '★'.repeat(5 - n) + '</span>';
+      el.style.display = '';
+      el.innerHTML = `<h3 class="kufi" style="font-size:17px; margin:0 0 4px;">${t('آراء المستفيدين', 'Client reviews')}</h3>
+        ${sm && sm.n >= 3 ? `<div class="bw-rsum"><b>${sm.avg.toFixed(1)}</b><span class="bw-stars">${stars(Math.round(sm.avg))}</span><span class="muted">${t(sm.n + ' تقييم من مستفيدين حضروا جلسات فعلية', sm.n + ' ratings from clients who attended real sessions')}</span></div>` : ''}
+        ${list.map(x => `<div class="bw-rev"><div class="bw-rev-h"><span class="bw-stars">${stars(x.rating)}</span><b>${esc(x.first_name)}</b><span class="muted">${new Date(x.created).toLocaleDateString(EN ? 'en-GB' : 'ar-JO-u-nu-latn', { month: 'long', year: 'numeric' })}</span></div><p>${esc(x.comment)}</p></div>`).join('')}`;
+    } catch (e) { el.style.display = 'none'; }
+  }
+  window.BW = { renderReviews, countryTag, openBooking, loadTeam, loadAvailability, loc, fmtSlot, availTag, teamPage, homeStrip, quickBook, esc, PLACEHOLDER };
 })();

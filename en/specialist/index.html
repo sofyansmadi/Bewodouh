@@ -99,6 +99,7 @@
         <ul class="profile-facts" id="profileFacts" style="list-style:none; display:flex; flex-wrap:wrap; gap:8px 18px; margin:-8px 0 20px; padding:0; font-size:13.5px; color:var(--text-muted-light);"></ul>
         <div id="quickBook"></div>
         <p class="profile-bio" id="profileBio"></p>
+        <div id="reviews" style="display:none; margin-top:26px;"></div>
 
         <div class="book-box">
           <h3>Would you like to book a session with <span id="bookName"></span>?</h3>
@@ -114,7 +115,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
-<script src="/team-ui.js?v=5"></script>
+<script src="/team-ui.js?v=6"></script>
 <script>
 async function loadSpecialist(){
   const params = new URLSearchParams(window.location.search);
@@ -162,6 +163,7 @@ async function loadSpecialist(){
   document.getElementById('bookName').textContent = nm;
   // 'specialist' stays the original name (it is the booking key); 'label' is only for display
   document.getElementById('bookLink').href = '/en/sales-page/?specialist=' + encodeURIComponent(data.full_name) + '&label=' + encodeURIComponent(nm);
+  BW.renderReviews(data.id, document.getElementById('reviews'));
   BW.loadAvailability().then(by => {
     document.getElementById('quickBook').innerHTML = BW.quickBook(by[data.id], document.getElementById('bookLink').getAttribute('href'), data);
   });
