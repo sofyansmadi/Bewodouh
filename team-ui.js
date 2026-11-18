@@ -90,7 +90,9 @@
     catch (e) { console.error(e); gridEl.innerHTML = `<p class="empty-state">${t('تعذّر تحميل الفريق حالياً.', 'Unable to load the team right now.')}</p>`; return; }
     if (!team.length) { gridEl.innerHTML = `<p class="empty-state">${t('لا يوجد أخصائيون معروضون حالياً.', 'No specialists are listed right now.')}</p>`; return; }
     const sorted = sortByAvailability(team, avail);
-    const st = { topic: 'all', onlyAvail: false };
+    const st = { topic: 'all', onlyAvail: false, country: '' };
+    const cc = {}; sorted.forEach(sp => { if (sp.country_code && COUNTRIES[sp.country_code]) cc[sp.country_code] = (cc[sp.country_code] || 0) + 1; });
+    const ccList = Object.entries(cc).sort((a, b) => b[1] - a[1]);
     const nAvail = sorted.filter(sp => avail[sp.id]).length;
     const topicCounts = Object.fromEntries(TOPICS.map(tp => [tp[0], sorted.filter(sp => hasTopic(sp, tp[0])).length]));
     const chips = [['all', t('الكل', 'All') + ' (' + sorted.length + ')', '']]
@@ -98,11 +100,13 @@
       .concat(TOPICS.filter(tp => topicCounts[tp[0]] > 0).map(tp => [tp[0], tp[1] + ' (' + topicCounts[tp[0]] + ')', '']));
     filtersEl.innerHTML = `
       <p class="bw-hint">${t('الأخصائيون المتاحون للحجز يظهرون أولاً. اختر موضوعاً لتضييق الاختيار، أو افتح أي ملف لتتعرّف على صاحبه.', 'Specialists with open times appear first. Pick a topic to narrow your choice, or open any profile to get to know them.')}</p>
-      <div class="bw-chips" id="bwChips">${chips.map(c => `<button type="button" class="bw-chip ${c[2]}${c[0] === 'all' ? ' on' : ''}" data-k="${c[0]}">${esc(c[1])}</button>`).join('')}</div>`;
+      <div class="bw-chips" id="bwChips">${chips.map(c => `<button type="button" class="bw-chip ${c[2]}${c[0] === 'all' ? ' on' : ''}" data-k="${c[0]}">${esc(c[1])}</button>`).join('')}</div>
+      ${ccList.length > 1 ? `<div class="bw-cty-filter"><label for="bwCty">${t('الدولة', 'Country')}</label><select id="bwCty"><option value="">${t('كل الدول', 'All countries')} (${sorted.length})</option>${ccList.map(([c, n]) => `<option value="${c}">${esc(COUNTRIES[c][EN ? 1 : 0])} (${n})</option>`).join('')}</select></div>` : ''}`;
     const render = () => {
       const rows = sorted.filter(sp => {
         if (st.onlyAvail && !avail[sp.id]) return false;
         if (st.topic !== 'all' && !hasTopic(sp, st.topic)) return false;
+        if (st.country && sp.country_code !== st.country) return false;
         return true;
       });
       gridEl.innerHTML = rows.length ? rows.map(sp => teamCard(sp, avail[sp.id])).join('')
@@ -112,10 +116,12 @@
     };
     const pick = (k) => {
       st.onlyAvail = k === 'avail'; st.topic = (k === 'all' || k === 'avail') ? 'all' : k;
+      if (k === 'all') { st.country = ''; const cs = document.getElementById('bwCty'); if (cs) cs.value = ''; }
       filtersEl.querySelectorAll('.bw-chip').forEach(b => b.classList.toggle('on', b.dataset.k === k));
       render();
     };
     filtersEl.querySelectorAll('.bw-chip').forEach(b => b.addEventListener('click', () => pick(b.dataset.k)));
+    const cSel = document.getElementById('bwCty'); if (cSel) cSel.addEventListener('change', () => { st.country = cSel.value; render(); });
     render();
   }
 
@@ -167,6 +173,8 @@
   .avail.none{ color:#8b8197; font-weight:600; }
   @media (max-width:600px){ .avail{ font-size:11px; margin-top:8px; } }
   .bw-hint{ font-size:14px; color:var(--text-muted-light,#6B6072); max-width:62ch; margin:0 0 14px; }
+  .bw-cty-filter{ display:flex; align-items:center; gap:10px; margin:-8px 0 20px; font-size:13.5px; font-weight:700; color:var(--ink,#241D2E); }
+  .bw-cty-filter select{ border:1.5px solid var(--fog-dim,#E6DFDA); border-radius:100px; padding:8px 16px; font-family:inherit; font-size:13.5px; font-weight:600; background:#fff; color:var(--ink,#241D2E); min-height:40px; }
   .bw-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
   .bw-chip{ border:1.5px solid var(--fog-dim,#E6DFDA); background:#fff; border-radius:100px; padding:8px 15px; font-family:inherit; font-size:13px; font-weight:700; color:var(--ink,#241D2E); cursor:pointer; transition:.15s; }
   .bw-chip:hover{ border-color:var(--clarity,#C9A15F); }
