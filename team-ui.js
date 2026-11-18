@@ -244,12 +244,7 @@
     ov.querySelector('iframe').addEventListener('load', () => { const l = ov.querySelector('.bw-bk-load'); if (l) l.style.display = 'none'; });
     document.addEventListener('keydown', onKey); document.body.appendChild(ov); document.body.style.overflow = 'hidden';
   }
-  document.addEventListener('click', (e) => {
-    if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey) return;
-    const a = e.target.closest && e.target.closest('a[href*="sales-page/?specialist="]');
-    if (!a || a.target === '_blank') return;
-    e.preventDefault(); openBooking(a.getAttribute('href'));
-  });
+  // (تم إيقاف فتح النافذة المنبثقة تلقائياً: أزرار الحجز تنتقل مباشرة لصفحة الحجز. openBooking ما زالت متاحة عند الحاجة.)
 
   // ---------- الأسعار بعملة الزائر (تقريبي) مع خصم أول جلسة ----------
   const loadScript = (src) => new Promise((res) => { if (window.BWCUR) return res(); const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = res; document.head.appendChild(s); });
