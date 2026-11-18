@@ -149,7 +149,7 @@ const FEE_FIRST = 10, FEE_NEXT = 15; // أتعاب الأخصائي حسب ال�
 const PKG_EN = { 'استشارة سريعة': 'Quick Consultation', 'باقة الانطلاقة': 'Launch Package', 'باقة المرافقة': 'Companion Package', 'دعم فوري': 'Immediate Support', 'ادعم بوضوح': 'Support Bewoduh' };
 const pkg = (n) => EN ? (PKG_EN[n] || n) : n;
 
-let SESSIONS = [];
+let SESSIONS = [], ROOMS_ON = false;
 let ME = null, BOOKINGS = [], SLOTS = [], PROFILE = null, currentClient = null, AUTH_EMAIL = '';
 
 /* ---------- static chrome ---------- */
@@ -245,6 +245,7 @@ async function loadAll(){
     sb.from('booking_sessions').select('*').eq('specialist_id', ME.id).order('seq', { ascending: true }).limit(3000),
   ]);
   SESSIONS = ss.data || [];
+  try { const re = await sb.rpc('rooms_enabled'); ROOMS_ON = re.data === true; } catch (_) { ROOMS_ON = false; }
   BOOKINGS = b.data || []; SLOTS = s.data || []; PROFILE = p.data || null;
   if (PROFILE && PROFILE.timezone && BWTZ.isValid(PROFILE.timezone)) SPTZ = PROFILE.timezone;
   try {
@@ -292,7 +293,7 @@ function sessionRows(b) {
     return `<div class="srow">${head}${due ? `<span class="badge bad">${t('بانتظار تسجيلك', 'Awaiting your record')}</span>` : ''}
       <input class="inp" type="datetime-local" data-sess-at="${esc(x.id)}" value="${esc(toLocalInput(x.scheduled_at))}" style="padding:7px 10px; font-size:13px; max-width:210px;">
       <button class="btn2" type="button" data-sess-time="${esc(x.id)}">${t('حفظ الموعد', 'Save time')}</button>
-      ${x.scheduled_at ? `<button class="btn2" type="button" data-sess-join="${esc(x.id)}" style="background:#241D2E; color:#F3EEEA;">${t('ادخل الغرفة 🎥', 'Enter room 🎥')}</button>` : ''}
+      ${ROOMS_ON && x.scheduled_at ? `<button class="btn2" type="button" data-sess-join="${esc(x.id)}" style="background:#241D2E; color:#F3EEEA;">${t('ادخل الغرفة 🎥', 'Enter room 🎥')}</button>` : ''}
       <button class="btn" type="button" data-sess-done="${esc(x.id)}" style="padding:8px 16px; font-size:13.5px;">${t('تمّت الجلسة ✓', 'Session held ✓')}</button>
       <button class="btn2 danger" type="button" data-sess-ns="${esc(x.id)}">${t('لم يحضر المراجع', 'Client no-show')}</button></div>`;
   }).join('');

@@ -58,6 +58,7 @@ async function init() {
   const { data: info, error } = await supabaseClient.rpc('session_room_info', { p_token: TOKEN });
   if (error || !info || !info.ok) return msg('🔗', t('الرابط غير صالح', 'Invalid link'), t('لم نجد هذه الجلسة. تأكد من الرابط.', 'We could not find this session. Please check the link.'));
   const name = (EN ? info.specialist_name_en : '') || info.specialist_name || '';
+  if (info.rooms_enabled === false) return msg('📩', t('سيصلك رابط جلستك من فريق بوضوح', 'Your session link will be sent by the Bewoduh team'), t('نجهّز لك رابط الاجتماع ونرسله على بريدك أو واتساب قبل الموعد. للاستفسار: hello@bewoduh.com', 'We will send you the meeting link by email or WhatsApp before the session. Questions: hello@bewoduh.com'));
   if (!info.active) return msg('🗓', t('هذه الجلسة غير نشطة', 'This session is not active'), info.status === 'completed' ? t('انتهت هذه الجلسة. شكراً لك.', 'This session has ended. Thank you.') : t('تم إلغاء الجلسة أو لم يكتمل دفعها. تواصل معنا إن احتجت مساعدة: hello@bewoduh.com', 'This session was cancelled or its payment was not completed. Contact us if you need help: hello@bewoduh.com'));
   if (!info.scheduled_at) return msg('⏳', t('لم يُحدَّد موعد هذه الجلسة بعد', 'This session has no date yet'), t('سيصلك إيميل فيه الموعد ورابط الجلسة فور تحديده.', 'You will receive an email with the date and the session link as soon as it is set.'));
   const at = new Date(info.scheduled_at).getTime(), opens = new Date(info.opens_at).getTime(), closes = new Date(info.closes_at).getTime();
