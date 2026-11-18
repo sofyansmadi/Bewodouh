@@ -556,6 +556,10 @@
               <p id="spPhotoStatus" style="font-size:12.5px; color:var(--text-muted-light); margin-top:8px;">بدون صورة، يظهر رمز افتراضي في صفحة الفريق. تُحفظ الصورة عند الضغط على «حفظ».</p>
             </div>
             <div class="field">
+              <label for="spCountry">دولة الأخصائي (تظهر للزوار بجانب اسمه)</label>
+              <select id="spCountry" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"><option value="">— غير محددة —</option><option value="eg">مصر</option><option value="jo">الأردن</option><option value="sa">السعودية</option><option value="lb">لبنان</option><option value="ps">فلسطين</option><option value="tr">تركيا</option><option value="kw">الكويت</option><option value="sy">سوريا</option><option value="dz">الجزائر</option><option value="ae">الإمارات</option><option value="bh">البحرين</option><option value="tn">تونس</option><option value="es">إسبانيا</option><option value="om">عُمان</option><option value="iq">العراق</option><option value="ly">ليبيا</option><option value="ma">المغرب</option><option value="ye">اليمن</option><option value="qa">قطر</option><option value="sd">السودان</option><option value="gb">بريطانيا</option><option value="us">أمريكا</option><option value="de">ألمانيا</option><option value="ca">كندا</option></select>
+            </div>
+            <div class="field">
               <label for="spTimezone">المنطقة الزمنية للأخصائي</label>
               <select id="spTimezone" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"></select>
               <p style="font-size:12px; color:var(--text-muted-light); margin-top:6px;">تُفسَّر بها المواعيد التي تضيفها له من الأدمن، ويراها العميل بجانب توقيته.</p>
@@ -2324,6 +2328,7 @@ function startEditSpecialist(sp){
   document.getElementById('spLoginEmail').value = ''; spAcctOriginalEmail = ''; showAcctResult(''); document.getElementById('spAcctPw').value = '';
   document.getElementById('spTimezone').innerHTML = '<option value="">— غير محددة (يؤكدها الأخصائي بنفسه) —</option>' + BWTZ.optionsHtml(sp.timezone || '', false);
   document.getElementById('spTimezone').value = sp.timezone || '';
+  document.getElementById('spCountry').value = sp.country_code || '';
   refreshAcctStatus(sp.id);
   supabaseClient.from('specialist_accounts').select('email').eq('specialist_id', sp.id).maybeSingle()
     .then(({ data }) => { if (data) { document.getElementById('spLoginEmail').value = data.email; spAcctOriginalEmail = data.email; } });
@@ -2398,6 +2403,7 @@ specialistForm.addEventListener('submit', async (e) => {
     short_bio_en: document.getElementById('spShortBioEn').value.trim() || null,
     bio_en: document.getElementById('spBioEn').value.trim() || null,
     is_published: document.getElementById('spPublished').checked,
+    country_code: document.getElementById('spCountry').value || null,
     ...(document.getElementById('spTimezone').value ? { timezone: document.getElementById('spTimezone').value, timezone_confirmed: true } : {}),
   };
 
@@ -2665,6 +2671,6 @@ async function deleteExercise(id){
 }
 </script>
 
-<script src="/admin/admin-extra.js?v=6"></script>
+<script src="/admin/admin-extra.js?v=7"></script>
 </body>
 </html>

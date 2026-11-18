@@ -114,7 +114,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/supabase-config.js"></script>
-<script src="/team-ui.js?v=3"></script>
+<script src="/team-ui.js?v=4"></script>
 <script>
 async function loadSpecialist(){
   const params = new URLSearchParams(window.location.search);
@@ -148,7 +148,7 @@ async function loadSpecialist(){
   document.getElementById('profilePhoto').src = data.photo_url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
   document.getElementById('profilePhoto').alt = data.full_name;
   document.getElementById('profileName').textContent = data.full_name;
-  document.getElementById('profileRole').textContent = data.specialty;
+  document.getElementById('profileRole').innerHTML = BW.esc(data.specialty) + (BW.countryTag(data) ? ' <span style="margin-inline-start:10px; display:inline-block;">' + BW.countryTag(data) + '</span>' : '');
   document.getElementById('profileBio').textContent = data.bio;
   const facts = document.getElementById('profileFacts');
   const addFact = (text) => { const li = document.createElement('li'); li.textContent = '• ' + text; facts.appendChild(li); };

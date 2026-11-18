@@ -556,7 +556,7 @@
         const portalTxt = !p ? 'غير مربوط بالبوابة' : f.nologin ? 'لم يفعّل حسابه' : 'حسابه مفعّل ✓';
         return `<div class="app-tile" style="--c:${c}; --bg:${bg}; --bd:${bd};" tabindex="0" role="button" data-sp="${esc(sp.id)}">
           <div class="ph"><img class="pic" loading="lazy" src="${esc(sp.photo_url || SP_PLACEHOLDER)}" alt=""><span class="st">${sp.is_published ? 'منشور' : 'مخفي'}</span></div>
-          <div class="tb"><div class="nm">${esc(sp.full_name)}</div><div class="sp">${esc(sp.specialty)}</div>
+          <div class="tb"><div class="nm">${esc(sp.full_name)}</div>${sp.country_code ? `<div class="mt" style="display:flex; gap:6px; align-items:center;"><img src="https://flagcdn.com/w40/${esc(sp.country_code)}.png" alt="" width="18" style="border-radius:2px;" onerror="this.style.display='none'">${esc(sp.country_code.toUpperCase())}</div>` : '<div class="mt" style="color:#C0562E;">بدون دولة</div>'}<div class="sp">${esc(sp.specialty)}</div>
           <div class="mt" style="${f.nologin ? 'color:#C0562E; font-weight:700;' : ''}">${portalTxt}</div>
           <div class="mt">${slotN[sp.id] ? slotN[sp.id] + ' موعد متاح' : '<span style="color:#C0562E;">بدون مواعيد</span>'} · ${s.paid} جلسة مدفوعة</div></div></div>`;
       }).join('') || '<p style="color:var(--text-muted-light);">لا نتائج.</p>';

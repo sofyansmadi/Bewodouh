@@ -11,7 +11,7 @@
   const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23E6DFDA'/><circle cx='60' cy='46' r='20' fill='%23B8AEC0'/><path d='M20 120c0-26 18-42 40-42s40 16 40 42z' fill='%23B8AEC0'/></svg>";
   const get = (q) => fetch(BASE + q, { headers: H }).then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))));
 
-  const COLS = 'id,slug,full_name,full_name_en,specialty,specialty_en,short_bio,short_bio_en,bio,bio_en,photo_url,sort_order,years_experience,chat_enabled,chat_online,chat_rate_pts';
+  const COLS = 'id,slug,full_name,full_name_en,specialty,specialty_en,short_bio,short_bio_en,bio,bio_en,photo_url,country_code,sort_order,years_experience,chat_enabled,chat_online,chat_rate_pts';
   const loadTeam = () => get('specialists?select=' + COLS + '&is_published=eq.true&order=sort_order.asc');
 
   // أقرب المواعيد غير المحجوزة (بعد ٢٤ ساعة، كما تفرض صفحة الحجز) مجمّعة حسب الأخصائي
@@ -28,6 +28,9 @@
   }
 
   // النص الإنجليزي إن وُجد، وإلا الأصلي
+  // دولة الأخصائي (علم + اسم) تظهر بجانب اسمه
+  const COUNTRIES = { eg: ['مصر', 'Egypt'], jo: ['الأردن', 'Jordan'], sa: ['السعودية', 'Saudi Arabia'], lb: ['لبنان', 'Lebanon'], ps: ['فلسطين', 'Palestine'], tr: ['تركيا', 'Türkiye'], kw: ['الكويت', 'Kuwait'], sy: ['سوريا', 'Syria'], dz: ['الجزائر', 'Algeria'], ae: ['الإمارات', 'UAE'], bh: ['البحرين', 'Bahrain'], tn: ['تونس', 'Tunisia'], es: ['إسبانيا', 'Spain'], om: ['عُمان', 'Oman'], iq: ['العراق', 'Iraq'], ly: ['ليبيا', 'Libya'], ma: ['المغرب', 'Morocco'], ye: ['اليمن', 'Yemen'], qa: ['قطر', 'Qatar'], sd: ['السودان', 'Sudan'], gb: ['بريطانيا', 'UK'], us: ['أمريكا', 'USA'], de: ['ألمانيا', 'Germany'], ca: ['كندا', 'Canada'] };
+  const countryTag = (sp) => { const c = sp && sp.country_code; if (!c || !COUNTRIES[c]) return ''; return `<span class="bw-cty"><img src="https://flagcdn.com/w40/${c}.png" srcset="https://flagcdn.com/w80/${c}.png 2x" alt="" width="18" height="13" loading="lazy" onerror="this.style.display='none'">${esc(COUNTRIES[c][EN ? 1 : 0])}</span>`; };
   const loc = (sp) => EN
     ? { name: sp.full_name_en || sp.full_name, specialty: sp.specialty_en || sp.specialty, short: sp.short_bio_en || (sp.bio_en ? '' : (sp.short_bio || '')), bio: sp.bio_en || sp.bio || '' }
     : { name: sp.full_name, specialty: sp.specialty, short: sp.short_bio || '', bio: sp.bio || '' };
@@ -74,6 +77,7 @@
       <img class="specialist-photo" src="${esc(sp.photo_url || PLACEHOLDER)}" alt="${esc(l.name)}" loading="lazy">
       <div class="specialist-body">
         <div class="specialist-name">${esc(l.name)}</div>
+        <div class="bw-cty-row">${countryTag(sp)}</div>
         <div class="specialist-role">${esc(l.specialty)}</div>
         <p class="specialist-bio">${esc(snippet(l))}</p>
         ${availTag(slots)}
@@ -125,7 +129,7 @@
       const l = loc(sp);
       return `<a href="${profileHref(sp)}" class="bw-mini">
         <img src="${esc(sp.photo_url)}" alt="${esc(l.name)}" loading="lazy">
-        <div class="bw-mini-b"><div class="bw-mini-n">${esc(l.name)}</div><div class="bw-mini-r">${esc(l.specialty)}</div>${availTag(avail[sp.id])}</div></a>`;
+        <div class="bw-mini-b"><div class="bw-mini-n">${esc(l.name)}</div><div class="bw-cty-row">${countryTag(sp)}</div><div class="bw-mini-r">${esc(l.specialty)}</div>${availTag(avail[sp.id])}</div></a>`;
     }).join('');
   }
 
@@ -174,6 +178,9 @@
   .bw-mini:hover{ transform:translateY(-3px); }
   .bw-mini img{ width:100%; aspect-ratio:4/5; object-fit:cover; object-position:center 22%; display:block; background:var(--fog-dim,#E6DFDA); }
   .bw-mini-b{ padding:10px 12px 13px; }
+  .bw-cty{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-muted-light,#6B6072); line-height:1.4; }
+  .bw-cty img{ border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.12); display:block; }
+  .bw-cty-row{ margin:2px 0 5px; min-height:0; }
   .bw-mini-n{ font-family:'Noto Kufi Arabic',sans-serif; font-weight:700; font-size:13.5px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .bw-mini-r{ font-size:11.5px; color:var(--text-muted-light,#6B6072); line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .bw-link{ display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:14.5px; color:var(--clarity-dark,#7D5F27); text-decoration:underline; margin-top:6px; }
@@ -254,5 +261,5 @@
   new MutationObserver(hydrateAll).observe(document.documentElement, { childList: true, subtree: true });
   hydrateAll();
 
-  window.BW = { openBooking, loadTeam, loadAvailability, loc, fmtSlot, availTag, teamPage, homeStrip, quickBook, esc, PLACEHOLDER };
+  window.BW = { countryTag, openBooking, loadTeam, loadAvailability, loc, fmtSlot, availTag, teamPage, homeStrip, quickBook, esc, PLACEHOLDER };
 })();
