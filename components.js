@@ -229,6 +229,7 @@ class SiteFooter extends HTMLElement {
           <h4>${t('تواصل', 'Connect')}</h4>
           <a href="https://instagram.com" target="_blank" rel="noopener">${t('إنستغرام', 'Instagram')}</a>
           <a href="https://tiktok.com" target="_blank" rel="noopener">${t('تيك توك', 'TikTok')}</a>
+          <a href="https://wa.me/447832339216" target="_blank" rel="noopener">${t('واتساب', 'WhatsApp')} <bdi dir="ltr">+44 7832 339216</bdi></a>
           <a href="${h('/contact/')}">${t('راسلنا', 'Contact us')}</a>
         </div>
         <div class="footer-col">
@@ -264,6 +265,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
         ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}" ${linkStyle}>تمارين يومية</a>`}
         <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>
+        <a href="https://wa.me/447832339216" target="_blank" rel="noopener" ${linkStyle}>${t('واتساب', 'WhatsApp')} <bdi dir="ltr">+44 7832 339216</bdi></a>
         <a href="${h('/terms/')}" ${linkStyle}>${t('شروط الاستخدام', 'Terms of Use')}</a>
         <a href="${h('/privacy/')}" ${linkStyle}>${t('سياسة الخصوصية', 'Privacy Policy')}</a>
         <a href="#" data-bw-consent ${linkStyle}>${t('إعدادات الكوكيز', 'Cookie settings')}</a>
@@ -538,6 +540,14 @@ if (isRunningInApp()) {
     }
   });
 }
+
+/* زر واتساب العائم (whatsapp.js) */
+(function(){
+  if (document.querySelector('script[data-bw-wa]')) return;
+  var w = document.createElement('script');
+  w.src = '/whatsapp.js?v=1'; w.async = true; w.setAttribute('data-bw-wa', '1');
+  document.head.appendChild(w);
+})();
 
 /* تتبّع الحملات الإعلانية (يعمل فقط على صفحات الحجز والتسويق وبعد موافقة الزائر — انظر tracking.js) */
 (function(){

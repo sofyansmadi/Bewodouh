@@ -129,7 +129,8 @@
     ['bkName', 'bkEmail', 'bkPhone'].forEach(id => { const f = document.getElementById(id).closest('.field'); if (f && msgField) msgField.insertAdjacentElement('beforebegin', f); });
   }
 
-  /* ---------- كليك للأردن فقط ---------- */
+  /* ---------- كليك للأردن فقط (موقوف مؤقتاً: غيّر CLIQ_ENABLED إلى true لإعادته) ---------- */
+  const CLIQ_ENABLED = false;
   const cliqOpt = [...document.querySelectorAll('.pm-opt')].find(l => l.querySelector('input[value="cliq"]'));
   const phone = document.getElementById('bkPhone');
   function jordan() {
@@ -139,7 +140,7 @@
   }
   function gateCliq() {
     if (!cliqOpt) return;
-    const ok = jordan(); cliqOpt.style.display = ok ? '' : 'none';
+    const ok = CLIQ_ENABLED && jordan(); cliqOpt.style.display = ok ? '' : 'none';
     if (!ok) { const c = cliqOpt.querySelector('input'); if (c.checked) { const card = document.querySelector('input[name="bkPayMethod"][value="card"]'); if (card) card.checked = true; } }
   }
   gateCliq(); setInterval(gateCliq, 700);

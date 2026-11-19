@@ -58,7 +58,7 @@ async function init() {
   const { data: info, error } = await supabaseClient.rpc('session_room_info', { p_token: TOKEN });
   if (error || !info || !info.ok) return msg('🔗', t('الرابط غير صالح', 'Invalid link'), t('لم نجد هذه الجلسة. تأكد من الرابط.', 'We could not find this session. Please check the link.'));
   const name = (EN ? info.specialist_name_en : '') || info.specialist_name || '';
-  if (info.rooms_enabled === false) return msg('📩', t('سيصلك رابط جلستك من فريق بوضوح', 'Your session link will be sent by the Bewoduh team'), t('نجهّز لك رابط الاجتماع ونرسله على بريدك أو واتساب قبل الموعد. للاستفسار: hello@bewoduh.com', 'We will send you the meeting link by email or WhatsApp before the session. Questions: hello@bewoduh.com'));
+  if (info.rooms_enabled === false) return msg('📩', t('سيصلك رابط جلستك من فريق بوضوح', 'Your session link will be sent by the Bewoduh team'), t('نجهّز لك رابط الاجتماع ونرسله على بريدك أو واتساب قبل الموعد. للاستفسار: hello@bewoduh.com أو واتساب +44 7832 339216', 'We will send you the meeting link by email or WhatsApp before the session. Questions: hello@bewoduh.com or WhatsApp +44 7832 339216'));
   if (!info.active) return msg('🗓', t('هذه الجلسة غير نشطة', 'This session is not active'), info.status === 'completed' ? t('انتهت هذه الجلسة. شكراً لك.', 'This session has ended. Thank you.') : t('تم إلغاء الجلسة أو لم يكتمل دفعها. تواصل معنا إن احتجت مساعدة: hello@bewoduh.com', 'This session was cancelled or its payment was not completed. Contact us if you need help: hello@bewoduh.com'));
   if (!info.scheduled_at) return msg('⏳', t('لم يُحدَّد موعد هذه الجلسة بعد', 'This session has no date yet'), t('سيصلك إيميل فيه الموعد ورابط الجلسة فور تحديده.', 'You will receive an email with the date and the session link as soon as it is set.'));
   const at = new Date(info.scheduled_at).getTime(), opens = new Date(info.opens_at).getTime(), closes = new Date(info.closes_at).getTime();
@@ -77,7 +77,7 @@ async function init() {
     const now = Date.now() + drift;
     if (now < opens) { stateEl.innerHTML = `<div class="note">${t('تفتح الغرفة بعد', 'The room opens in')}</div><div class="count">${clock(opens - now)}</div>`; joinBtn.disabled = true; hint.textContent = t('سيتفعّل الزر تلقائياً عند فتح الغرفة. أبقِ هذه الصفحة مفتوحة.', 'The button turns on automatically when the room opens. Keep this page open.'); }
     else if (now <= closes) { stateEl.innerHTML = now < at ? `<div class="note">${t('تبدأ الجلسة بعد', 'The session starts in')}</div><div class="count">${clock(at - now)}</div>` : `<div class="note" style="color:var(--ok);font-weight:700;">${t('الجلسة جارية الآن', 'The session is in progress')}</div>`; joinBtn.disabled = false; hint.textContent = t('بعد الضغط ستُفتح غرفة الاجتماع بنافذة جديدة.', 'The meeting room opens in a new window.'); }
-    else { stateEl.innerHTML = ''; joinBtn.disabled = true; hint.textContent = t('انتهت مهلة دخول الغرفة. تواصل معنا إن لزم: hello@bewoduh.com', 'The room entry window has ended. Contact us if needed: hello@bewoduh.com'); clearInterval(timer); }
+    else { stateEl.innerHTML = ''; joinBtn.disabled = true; hint.textContent = t('انتهت مهلة دخول الغرفة. تواصل معنا إن لزم: hello@bewoduh.com أو واتساب +44 7832 339216', 'The room entry window has ended. Contact us if needed: hello@bewoduh.com or WhatsApp +44 7832 339216'); clearInterval(timer); }
   };
   tick(); const timer = setInterval(tick, 1000);
   joinBtn.addEventListener('click', async () => {
@@ -90,7 +90,7 @@ async function init() {
     if (!w) { err.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--clarity);font-weight:700;text-decoration:underline;">${t('اضغط هنا لفتح الغرفة', 'Click here to open the room')}</a>`; }
   });
 }
-init().catch((e) => { console.error('session page:', e); msg('⚠', t('تعذّر تحميل الصفحة', 'Could not load the page'), t('حدّث الصفحة أو تواصل معنا: hello@bewoduh.com', 'Reload the page or contact us: hello@bewoduh.com')); });
+init().catch((e) => { console.error('session page:', e); msg('⚠', t('تعذّر تحميل الصفحة', 'Could not load the page'), t('حدّث الصفحة أو تواصل معنا: hello@bewoduh.com أو واتساب +44 7832 339216', 'Reload the page or contact us: hello@bewoduh.com or WhatsApp +44 7832 339216')); });
 })();
 </script>
 <script src="/components.js"></script>

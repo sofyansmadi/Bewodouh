@@ -405,7 +405,7 @@ function renderHome() {
     if (!confirm(t('إلغاء الاشتراك؟ تبقى نقاطك المتبقية صالحة حتى نهاية الفترة الحالية.', 'Cancel this plan? Your remaining points stay valid until the end of the current period.'))) return;
     b.disabled = true;
     const { data, error } = await sb.functions.invoke('manage-subscription', { body: { subscription_id: b.dataset.cancel } });
-    if (error || !data || !data.ok) { alert(t('تعذّر الإلغاء الآن. تواصل معنا على hello@bewoduh.com', 'Could not cancel right now. Please contact hello@bewoduh.com')); b.disabled = false; return; }
+    if (error || !data || !data.ok) { alert(t('تعذّر الإلغاء الآن. تواصل معنا على hello@bewoduh.com أو واتساب +44 7832 339216', 'Could not cancel right now. Please contact hello@bewoduh.com or WhatsApp +44 7832 339216')); b.disabled = false; return; }
     await loadAll();
   }));
 }

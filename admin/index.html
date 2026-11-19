@@ -1305,7 +1305,7 @@ function buildAppsShell(){
       <select id="appTypeFilter">
         <option value="all">كل الأنواع</option>
         <option value="specialist"${appState.filter.type === 'specialist' ? ' selected' : ''}>أخصائي نفسي</option>
-        <option value="coach"${appState.filter.type === 'coach' ? ' selected' : ''}>مدرب حياة</option>
+        <option value="coach"${appState.filter.type === 'coach' ? ' selected' : ''}>مدرب مهارات حياة</option>
       </select>
       <select id="appCountryFilter">${countryOpts}</select>
       <span class="app-count" id="appCount"></span>
@@ -1350,7 +1350,7 @@ function renderAppTiles(){
       </div>
       <div class="tb">
         <div class="nm">${esc(a.full_name)}</div>
-        <div class="ty">${a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب حياة'}</div>
+        <div class="ty">${a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب مهارات حياة'}</div>
         <div class="sp">${esc(a.specialty)}</div>
         <div class="mt">${esc(ci.label)} · ${date}</div>
         ${sp ? `<div class="tm">${sp.is_published ? 'منشور في الفريق ✓' : 'في الفريق (مخفي)'}</div>` : ''}
@@ -1379,7 +1379,7 @@ function openAppModal(id){
   if (!a) return;
   const ci = countryInfo(a.country);
   const photo = a.photo_path && appState.photos[a.photo_path];
-  const typeLabel = a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب حياة';
+  const typeLabel = a.applicant_type === 'specialist' ? 'أخصائي نفسي' : 'مدرب مهارات حياة';
   const date = new Date(a.created_at).toLocaleDateString('ar-EG', { dateStyle: 'medium' });
   const link = /^https?:\/\//i.test(a.profile_link || '') ? `<a href="${esc(a.profile_link)}" target="_blank" rel="noopener noreferrer">${esc(a.profile_link)}</a>` : '—';
   const statusOptions = Object.entries(APP_STATUS_LABELS).map(([v, l]) => `<option value="${v}"${v === a.status ? ' selected' : ''}>${l}</option>`).join('');
