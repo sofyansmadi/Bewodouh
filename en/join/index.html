@@ -183,7 +183,7 @@
             </div>
             <div class="field">
               <label for="phone">Phone / WhatsApp number<span class="req" aria-hidden="true">*</span></label>
-              <input type="tel" id="phone" name="phone" required inputmode="tel" autocomplete="tel" pattern="[+0-9\s\-\(\)]{7,25}" maxlength="30" style="direction:ltr; text-align:left;">
+              <input type="tel" id="phone" name="phone" required inputmode="tel" autocomplete="tel" maxlength="30" style="direction:ltr; text-align:left;">
               <div class="hint">Include the country code, e.g. +962790000000</div>
             </div>
           </div>
@@ -208,7 +208,7 @@
             </div>
             <div class="field">
               <label for="years">Years of experience<span class="req" aria-hidden="true">*</span></label>
-              <input type="number" id="years" name="years_experience" required min="0" max="60" step="1" inputmode="numeric">
+              <input type="text" id="years" name="years_experience" required inputmode="numeric" maxlength="2" autocomplete="off" style="direction:ltr; text-align:left;">
             </div>
           </div>
           <div class="row-2">
@@ -264,7 +264,7 @@
         </fieldset>
 
         <div class="hp" aria-hidden="true">
-          <label>Leave this field empty <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></label>
+          <label>Leave this field empty <input type="text" id="hpField" name="hp_x7q" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore="true"></label>
         </div>
 
         <div class="field">
@@ -313,6 +313,13 @@ const certList = document.getElementById('certList');
 const certError = document.getElementById('certError');
 const bio = document.getElementById('bio');
 
+// أرقام عربية/فارسية -> إنجليزية (لوحات المفاتيح العربية تكتب ٠١٢٣ وكانت ترفضها خانات الأرقام)
+const normDigits = (v) => String(v || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const makeUuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16));
+// محاولة الإرسال تُستأنف بنفس المعرّف: إعادة المحاولة لا تعيد رفع الملفات ولا تترك مجلدات يتيمة
+let attemptId = null; const uploadedPaths = new Set();
+const resetAttempt = () => { attemptId = null; uploadedPaths.clear(); };
+
 const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
 const toArabic = (n) => String(n);
 const formatSize = (bytes) => bytes >= 1048576 ? toArabic((bytes / 1048576).toFixed(1)) + ' MB' : toArabic(Math.max(1, Math.round(bytes / 1024))) + ' KB';
@@ -358,7 +365,7 @@ photoInput.addEventListener('change', () => {
     photoInput.value = '';
     return;
   }
-  photoFile = file;
+  photoFile = file; resetAttempt();
   const img = document.createElement('img');
   img.alt = '';
   img.src = URL.createObjectURL(file);
@@ -368,13 +375,26 @@ photoInput.addEventListener('change', () => {
 
 // نصغّر الصورة (حد أقصى ١٢٠٠ بكسل) ونعيد ترميزها JPEG، وهذا يخفّف الحجم ويحذف بيانات الموقع من الصورة
 async function prepareProfilePhoto(file){
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-  const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
+  async function toSource(){
+    if (window.createImageBitmap) {
+      try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (_) {}
+      try { return await createImageBitmap(file); } catch (_) {}
+    }
+    return await new Promise((resolve, reject) => {
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode failed')); };
+      img.src = url;
+    });
+  }
+  const src = await toSource();
+  const w = src.width || src.naturalWidth, h = src.height || src.naturalHeight;
+  const scale = Math.min(1, 1200 / Math.max(w, h));
   const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
+  canvas.width = Math.max(1, Math.round(w * scale));
+  canvas.height = Math.max(1, Math.round(h * scale));
+  canvas.getContext('2d').drawImage(src, 0, 0, canvas.width, canvas.height);
+  if (src.close) src.close();
   return new Promise((resolve, reject) => {
     canvas.toBlob(b => b ? resolve(b) : reject(new Error('encode failed')), 'image/jpeg', 0.9);
   });
@@ -383,6 +403,7 @@ async function prepareProfilePhoto(file){
 // ---------- الشهادات (قائمة ملفات قابلة للحذف) ----------
 let certFiles = [];
 function renderCerts(){
+  resetAttempt();
   certList.replaceChildren();
   certFiles.forEach((file, i) => {
     const li = document.createElement('li');
@@ -419,14 +440,17 @@ certInput.addEventListener('change', () => {
 // ---------- الإرسال ----------
 async function uploadFile(path, blob, contentType){
   const { error } = await supabaseClient.storage.from(BUCKET).upload(path, blob, { contentType, upsert: false });
-  if (error) throw error;
+  if (error) {
+    const dup = String(error.statusCode || error.status || '') === '409' || /already exists|duplicate/i.test(error.message || '');
+    if (!dup) throw error;
+  }
 }
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   formError.classList.remove('active');
 
-  if (document.getElementById('website').value) { showSuccess(); return; }
+  if (document.getElementById('hpField').value) { showSuccess(); return; }
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
     showFormError('Could not connect to the service right now. Please try again shortly.');
@@ -443,27 +467,34 @@ form.addEventListener('submit', async (e) => {
   }
   if (!photoFile) { showFieldError(photoError, 'A profile photo is required.'); photoInput.focus(); return; }
 
+  // أرقام الهاتف وسنوات الخبرة: نقبل الأرقام العربية ونحوّلها
+  const phoneVal = normDigits(document.getElementById('phone').value).trim();
+  if (!/^[+0-9\s\-().]{6,30}$/.test(phoneVal) || phoneVal.replace(/\D/g, '').length < 6) { showFormError('Enter a valid phone number, with the country code (for example +962790000000).'); document.getElementById('phone').focus(); return; }
+  const yearsVal = parseInt(normDigits(document.getElementById('years').value).trim(), 10);
+  if (!(yearsVal >= 0 && yearsVal <= 60)) { showFormError('Years of experience must be a number between 0 and 60.'); document.getElementById('years').focus(); return; }
+
   submitBtn.disabled = true;
-  const applicationId = crypto.randomUUID();
   const totalFiles = 1 + certFiles.length;
   let done = 0;
   const progress = () => { uploadStatus.textContent = `Uploading files (${toArabic(done)} / ${toArabic(totalFiles)})...`; };
 
   try {
+    if (!attemptId) attemptId = makeUuid();
+    const applicationId = attemptId;
     progress();
     let photoBlob;
     try { photoBlob = await prepareProfilePhoto(photoFile); }
     catch { throw Object.assign(new Error('photo'), { userMessage: 'Could not read the profile photo. Try a JPG or PNG image.' }); }
 
     const photoPath = `${applicationId}/photo.jpg`;
-    await uploadFile(photoPath, photoBlob, 'image/jpeg');
+    if (!uploadedPaths.has(photoPath)) { await uploadFile(photoPath, photoBlob, 'image/jpeg'); uploadedPaths.add(photoPath); }
     done++; progress();
 
     const certificatePaths = [];
     for (let i = 0; i < certFiles.length; i++) {
       const file = certFiles[i];
       const path = `${applicationId}/cert-${i + 1}.${CERT_TYPES[file.type]}`;
-      await uploadFile(path, file, file.type);
+      if (!uploadedPaths.has(path)) { await uploadFile(path, file, file.type); uploadedPaths.add(path); }
       certificatePaths.push(path);
       done++; progress();
     }
@@ -475,10 +506,10 @@ form.addEventListener('submit', async (e) => {
       applicant_type: type,
       full_name: value('fullName'),
       email: value('email'),
-      phone: value('phone'),
+      phone: phoneVal,
       country: value('country'),
       specialty: value('specialty'),
-      years_experience: Number(document.getElementById('years').value),
+      years_experience: yearsVal,
       license_number: value('licenseNumber') || null,
       licensing_body: value('licensingBody') || null,
       bio: bioText,
@@ -488,6 +519,7 @@ form.addEventListener('submit', async (e) => {
     });
     if (error) throw error;
 
+    resetAttempt();
     showSuccess();
   } catch (err) {
     console.error('join submit:', err);
@@ -495,7 +527,9 @@ form.addEventListener('submit', async (e) => {
     submitBtn.disabled = false;
     if (err.userMessage) showFormError(err.userMessage);
     else if (err.code === '23505') showFormError('An application with this email address is already under review. We will contact you as soon as the review is complete.');
-    else showFormError('An error occurred while sending your application. Check your internet connection and try again.');
+    else if (err instanceof TypeError || navigator.onLine === false) showFormError('The connection dropped while sending. Your files are kept: check your internet and press Send again.');
+    else if (String(err.statusCode || '') === '413') showFormError('One of the files is too large (maximum 10 MB each). Remove it or upload a smaller one.');
+    else showFormError('An error occurred while sending your application. Press Send again; if it repeats, message us on WhatsApp +44 7832 339216 and we will help right away.');
   }
 });
 

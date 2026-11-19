@@ -824,7 +824,7 @@
       } catch (_) {}
       const act = side.querySelector('.admin-tab.active'); if (act) $('kxTitle').textContent = act.firstChild.textContent;
       try {
-        const { data } = await sb().auth.getUser();
+        const { data: sd } = await sb().auth.getSession(); const data = { user: sd && sd.session ? sd.session.user : null };
         const who = document.createElement('span'); who.className = 'kx-who';
         who.innerHTML = '<b>' + esc(data && data.user ? data.user.email : '') + '</b> · ' + (ADMIN_ACCESS.is_super ? 'مشرف عام' : 'مشرف');
         const lo = $('logoutBtn'); lo.parentNode.insertBefore(who, lo);

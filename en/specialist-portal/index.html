@@ -173,7 +173,10 @@ $('loginView').innerHTML = `
 $('unlinkedView').innerHTML = `
   <h1>${t('حسابك غير مرتبط بملف أخصائي', 'Your account is not linked to a specialist profile')}</h1>
   <p>${t('سجّلت الدخول، لكن هذا البريد غير مرتبط بأي ملف في فريق بوضوح. تأكد أنك دخلت بنفس البريد الذي قدّمت به طلب الانضمام، أو تواصل مع الإدارة على hello@bewoduh.com.', 'You are signed in, but this email is not linked to any profile in the Bewoduh team. Make sure you signed in with the email you used for your application, or contact us at hello@bewoduh.com.')}</p>
-  <button class="btn full" id="unlinkedLogout" type="button">${t('تسجيل الخروج', 'Sign out')}</button>`;
+  <p class="muted" style="margin:0 0 14px;">${t('سجّلت الدخول بالبريد:', 'You are signed in as:')} <b dir="ltr" id="unlinkedEmail"></b></p>
+  <p style="margin:0 0 14px; line-height:1.9;">${t('إن كنت قدّمت طلب الانضمام ببريد آخر فاخرج وادخل بذلك البريد. وإن كان هذا هو بريدك الصحيح فأرسل لنا رسالة واحدة وسنربط حسابك بملفك خلال وقت قصير.', 'If you applied with another email, sign out and sign in with that one. If this is the right email, send us one message and we will link your account to your profile shortly.')}</p>
+  <a class="btn full" id="unlinkedWa" target="_blank" rel="noopener" style="display:block; text-align:center; text-decoration:none; margin-bottom:10px;">${t('راسلنا على واتساب', 'Message us on WhatsApp')} ${'+44 7832 339216'}</a>
+  <button class="btn2 full" id="unlinkedLogout" type="button">${t('تسجيل الخروج', 'Sign out')}</button>`;
 const TABS = [['overview', t('نظرة عامة', 'Overview')], ['upcoming', t('القادمة والجارية', 'Upcoming & ongoing')], ['schedule', t('جدولي المتاح', 'My availability')], ['chat', t('المحادثات', 'Chats')], ['past', t('الجلسات السابقة', 'Past sessions')], ['cancelled', t('الملغاة', 'Cancelled')], ['clients', t('ملفات المراجعين', 'Client files')], ['profile', t('ملفي وبياناتي', 'My profile & details')]];
 $('tabs').innerHTML = TABS.map(([k, l], i) => `<button class="tab${i ? '' : ' active'}" data-tab="${k}">${l}${k === 'upcoming' ? ' <span class="count" id="cUpcoming">0</span>' : ''}${k === 'chat' ? ' <span class="count hidden" id="cChat">0</span>' : ''}</button>`).join('');
 
@@ -189,8 +192,17 @@ $('forgotLink').addEventListener('click', (e) => {
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = $('loginMsg'); msg.className = 'msg'; msg.textContent = '';
+  const lgBtn = e.target.querySelector('button[type=submit]'); if (lgBtn) lgBtn.disabled = true;
   const { error } = await sb.auth.signInWithPassword({ email: $('lgEmail').value.trim(), password: $('lgPass').value });
-  if (error) { msg.className = 'msg err'; msg.textContent = t('البريد أو كلمة السر غير صحيحة، أو لم يتم تأكيد البريد.', 'Wrong email or password, or the email has not been confirmed.'); return; }
+  if (lgBtn) lgBtn.disabled = false;
+  if (error) {
+    const signup = (EN ? '/en/signup/' : '/signup/') + '?next=portal', em = error.message || '';
+    msg.className = 'msg err';
+    if (/confirm/i.test(em)) msg.innerHTML = t('بريدك لم يُؤكَّد بعد. افتح صفحة إنشاء الحساب بنفس البريد واكتب رمز التأكيد: ', 'Your email is not confirmed yet. Open the sign-up page with the same email and enter the confirmation code: ') + `<a class="lnk" href="${signup}">${t('تأكيد البريد', 'Confirm email')}</a>`;
+    else if (/fetch|network|load failed/i.test(em)) msg.textContent = t('تعذّر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.', 'Could not connect. Check your internet and try again.');
+    else msg.innerHTML = t('البريد أو كلمة السر غير صحيحة. إن كانت أول مرة فأنشئ حسابك أولاً بنفس بريد طلب الانضمام: ', 'Wrong email or password. If this is your first time, create your account first with the same email as your application: ') + `<a class="lnk" href="${signup}">${t('إنشاء حساب', 'Create account')}</a>` + t('. وإن نسيت كلمة السر فاضغط «نسيت كلمة السر».', '. If you forgot your password, use “Forgot your password?”.');
+    return;
+  }
   start();
 });
 
@@ -200,7 +212,11 @@ async function start(){
   if (!sess.session) { show('loginView'); return; }
   AUTH_EMAIL = sess.session.user.email || '';
   const { data: access, error } = await sb.rpc('my_specialist_access');
-  if (error || !access) { show('unlinkedView'); return; }
+  if (error || !access) {
+    $('unlinkedEmail').textContent = AUTH_EMAIL;
+    $('unlinkedWa').href = 'https://wa.me/447832339216?text=' + encodeURIComponent(t('مرحباً بوضوح، أنا أخصائي/ة مقبول/ة في الفريق وسجّلت دخولي ببريد ', 'Hello Bewoduh, I am an accepted specialist and I signed in with the email ') + AUTH_EMAIL + t(' لكن حسابي غير مرتبط بملفي. أرجو ربطه.', ' but my account is not linked to my profile. Please link it.'));
+    show('unlinkedView'); return;
+  }
   ME = access;
   setHello();
   show('portalView');
