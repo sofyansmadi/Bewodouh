@@ -290,11 +290,12 @@
         <tr><td>Overall margin after specialist fees, payment fees and discounts</td><td class="num">58%</td></tr>
         <tr><td>Marketing spend as a share of revenue (years 1 to 5)</td><td class="num">30% · 26% · 22% · 20% · 18%</td></tr>
         <tr><td>Fixed annual costs (tech, accountant, legal, support)</td><td class="num">$9k · 14k · 22k · 32k · 42k</td></tr>
-        <tr><td>Estimated corporation tax on profit</td><td class="num">20%</td></tr>
+        <tr><td>Corporation tax (UK rates 2026/27)</td><td class="num">19% up to £50k · 25% above £250k · marginal relief in between</td></tr>
+        <tr><td>GBP exchange rate used</td><td class="num">$1 = £0.75 (estimate)</td></tr>
         <tr><td>Exchange rate used</td><td class="num">$1 = JOD 0.709</td></tr>
         <tr><td>Profit distribution</td><td class="num">Full net profit assumed distributed (simplified)</td></tr>
       </tbody></table></div>
-    <p class="note">In the conservative scenario losses occur in the first two years, covered by the funds raised. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers.</p>
+    <p class="note">In the conservative scenario losses occur in the first two years, covered by the funds raised. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
   </div>
 </section>
 
@@ -496,12 +497,15 @@
     } catch (e) { console.error('invest_stats', e); }
   })();
 
-  const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [9000, 14000, 22000, 32000, 42000], tax: 0.20,
+  // UK corporation tax 2026/27: 19% up to £50k, 25% above £250k, marginal relief (3/200) in between. Assumes no associated companies.
+  const GBP = 0.75;
+  const ukTax = (pUSD) => { const p = Math.max(pUSD, 0) * GBP; const t = p <= 50000 ? p * 0.19 : p >= 250000 ? p * 0.25 : p * 0.25 - (3 / 200) * (250000 - p); return t / GBP; };
+  const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [9000, 14000, 22000, 32000, 42000], tax: 0,
     scen: { cons: [15, 35, 65, 95, 130], base: [40, 110, 220, 360, 520], opt: [90, 260, 520, 860, 1250] } };
   function model(key) {
     let cum = 0, prevPos = 0; const rows = [];
     M.scen[key].forEach((o, i) => {
-      const rev = o * 12 * M.aov, pre = rev * M.gm - rev * M.mk[i] - M.fx[i], net = pre - Math.max(pre, 0) * M.tax;
+      const rev = o * 12 * M.aov, pre = rev * M.gm - rev * M.mk[i] - M.fx[i], net = pre - ukTax(pre);
       cum += net; const pos = Math.max(0, cum), payout = pos - prevPos; prevPos = pos;   // losses carried forward before any payout
       rows.push({ year: i + 1, orders: o, rev: rev * FX, net: net * FX, payout: Math.max(0, payout) * FX });
     });
