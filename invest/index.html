@@ -132,6 +132,14 @@
   .legal{font-size:12.5px;color:var(--text-muted-light);line-height:1.9;max-width:900px;}
   .legal b{color:var(--ink);}
   .partner-link{font-size:14px;margin-top:14px;text-align:center;}
+  .units[hidden]{display:none;}
+  .units{background:var(--ink);color:var(--fog);border-radius:20px;padding:22px 26px;margin:26px 0 8px;display:grid;grid-template-columns:auto 1fr;gap:10px 28px;align-items:center;}
+  .units .big{font-size:44px;font-weight:700;color:var(--clarity-soft);line-height:1.1;} .units .big small{font-size:16px;font-weight:500;color:var(--text-muted-dark);}
+  .units .meta{font-size:13.5px;color:var(--text-muted-dark);} .units .trk{height:12px;border-radius:100px;background:rgba(255,255,255,.14);overflow:hidden;margin-bottom:8px;} .units .trk i{display:block;height:100%;background:var(--clarity);border-radius:100px;transition:width .4s;}
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px;} .stg{background:var(--fog);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text-muted-light);} .stg b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px;}
+  .warnbox{background:#FDF3E8;border:1px solid #EBD3B5;border-radius:12px;padding:12px 16px;font-size:13.5px;color:#7D5F27;margin-top:12px;}
+  .card ol{padding-inline-start:22px;} .card ol li{margin-bottom:8px;}
+  @media (max-width:880px){ .units{grid-template-columns:1fr;} .stages{grid-template-columns:1fr;} }
   @media (max-width:880px){
     section{padding:52px 0;} .facts{grid-template-columns:repeat(2,1fr);} .g3,.stat-row,.steps,.tl,.result,.calc{grid-template-columns:1fr;}
     .g2,.offer,.two-col,.frow{grid-template-columns:1fr;} .al{grid-template-columns:110px 1fr 46px;}
@@ -372,6 +380,47 @@
   </div>
 </section>
 
+<!-- ============ PAYMENT + ALLOTMENT ============ -->
+<section id="payment" style="background:#fff;">
+  <div class="wrap">
+    <div class="eyebrow">الدفع وتثبيت الحصة</div>
+    <h2>كيف تدفع، وكيف تُثبَّت حصتك</h2>
+    <p class="lead">لا يتم أي دفع عبر الموقع. التحويل مصرفي فقط، وبعد توقيع الاتفاقية، وإلى حساب الشركة الرسمي. وحصتك لا تُعدّ ثابتة إلا بعد وصول المبلغ.</p>
+    <div class="units" id="units" hidden>
+      <div class="big"><span id="unitsLeft">—</span> <small>من <span id="unitsTotal">20</span> وحدة متاحة الآن</small></div>
+      <div><div class="trk"><i id="unitsBar" style="width:0%"></i></div><div class="meta">كل وحدة تساوي 1% من الشركة. يتحدث الرقم تلقائياً. الوحدة المحجوزة تُحسب مأخوذة حتى تُدفع أو تنتهي مهلة حجزها.</div></div>
+    </div>
+    <div class="grid g2" style="margin-top:22px;align-items:start;">
+      <div class="card"><h3>آلية الدفع</h3>
+        <ol>
+          <li>بعد التوقيع نرسل لك بالإيميل الرسمي تفاصيل حساب شركة لمسة المحدودة، ومرجعاً فريداً لاتفاقيتك (مثل <span dir="ltr">BW-INV-001</span>).</li>
+          <li>تحوّل المبلغ بالدينار خلال 7 أيام من التوقيع (المهلة تُحدَّد بالاتفاقية)، وتكتب المرجع في الحوالة.</li>
+          <li>يُثبَّت سعر صرف واضح بالاتفاقية، ويتحمل المرسل رسوم التحويل حتى يصل المبلغ كاملاً.</li>
+          <li>عند وصول المبلغ نؤكد لك باستلامه بإيصال رسمي، وتُفتح لوحة الشريك.</li>
+          <li>إن لم يصل المبلغ ضمن المهلة تنتهي صلاحية الحجز وتعود الوحدة إلى المتاح.</li>
+        </ol>
+        <div class="warnbox"><b>احذر الاحتيال:</b> لا تحوّل لأي حساب شخصي، ولا لأي حساب لم يصلك مكتوباً من إيميلنا الرسمي بعد التوقيع. وإن وصلتك أي رسالة تطلب دفعاً قبل التوقيع فهي ليست منا.</div>
+      </div>
+      <div class="card"><h3>مراحل تثبيت حصتك</h3>
+        <div class="stages">
+          <div class="stg"><b>1. محجوزة</b>وقّعت الاتفاقية وبانتظار التحويل. الحصة محفوظة لك خلال المهلة.</div>
+          <div class="stg"><b>2. مدفوعة</b>وصل المبلغ وأُصدر الإيصال. تُفتح لوحتك.</div>
+          <div class="stg"><b>3. مفعَّلة</b>أسهمك مُخصَّصة ومسجَّلة (الخيار الثاني)، أو سرى اتفاق الأرباح (الخيار الأول).</div>
+        </div>
+        <p style="margin-bottom:6px;"><b>الخيار الثاني (أسهم):</b></p>
+        <ul>
+          <li>قرار من مجلس الشركة بتخصيص أسهم جديدة لك، ولا تُخصَّص قبل وصول المبلغ.</li>
+          <li>تسجيل التخصيص لدى مسجّل الشركات البريطاني (Companies House) وفي سجل المساهمين.</li>
+          <li>إصدار شهادة أسهم باسمك، كل ذلك ضمن المدد التي يحددها القانون.</li>
+          <li>اتفاقية مساهمين تنظم الأولوية في الاكتتاب وقيود البيع والاطلاع على الحسابات.</li>
+        </ul>
+        <p style="margin:10px 0 6px;"><b>الخيار الأول (مشاركة بالأرباح):</b></p>
+        <ul><li>عقد فقط: لا أسهم ولا تسجيل لدى Companies House. حقك هو ما تنص عليه الاتفاقية، وأنت فيه دائن تعاقدي غير مضمون.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ USE OF FUNDS ============ -->
 <section class="dark" id="expansion">
   <div class="wrap">
@@ -518,6 +567,11 @@
     try {
       const { data } = await supabaseClient.rpc('invest_stats');
       if (!data) return;
+      if (data.units_total != null) {
+        const total = Number(data.units_total), taken = Number(data.units_taken || 0), left = Math.max(0, total - taken);
+        document.getElementById('unitsLeft').textContent = AR(left, left % 1 ? 1 : 0); document.getElementById('unitsTotal').textContent = AR(total);
+        document.getElementById('unitsBar').style.width = Math.min(100, taken / total * 100) + '%'; document.getElementById('units').hidden = false;
+      }
       document.querySelectorAll('#stats [data-k]').forEach(el => { const v = data[el.dataset.k]; if (v != null) el.textContent = AR(v); });
       if (data.first_paid_booking) {
         const d = new Date(data.first_paid_booking + 'T00:00:00');

@@ -120,6 +120,14 @@
   .msg{font-size:14px;margin-top:12px;min-height:20px;} .msg.err{color:var(--alert);} .msg.ok{color:var(--ok);font-weight:600;}
   .legal{font-size:12.5px;color:var(--text-muted-light);line-height:1.8;max-width:900px;} .legal b{color:var(--ink);}
   .partner-link{font-size:14px;margin-top:14px;text-align:center;}
+  .units[hidden]{display:none;}
+  .units{background:var(--ink);color:var(--fog);border-radius:20px;padding:22px 26px;margin:26px 0 8px;display:grid;grid-template-columns:auto 1fr;gap:10px 28px;align-items:center;}
+  .units .big{font-size:44px;font-weight:700;color:var(--clarity-soft);line-height:1.1;} .units .big small{font-size:16px;font-weight:500;color:var(--text-muted-dark);}
+  .units .meta{font-size:13.5px;color:var(--text-muted-dark);} .units .trk{height:12px;border-radius:100px;background:rgba(255,255,255,.14);overflow:hidden;margin-bottom:8px;} .units .trk i{display:block;height:100%;background:var(--clarity);border-radius:100px;transition:width .4s;}
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px;} .stg{background:var(--fog);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text-muted-light);} .stg b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px;}
+  .warnbox{background:#FDF3E8;border:1px solid #EBD3B5;border-radius:12px;padding:12px 16px;font-size:13.5px;color:#7D5F27;margin-top:12px;}
+  .card ol{padding-inline-start:22px;} .card ol li{margin-bottom:8px;}
+  @media (max-width:880px){ .units{grid-template-columns:1fr;} .stages{grid-template-columns:1fr;} }
   @media (max-width:880px){
     section{padding:52px 0;} .facts{grid-template-columns:repeat(2,1fr);} .g3,.stat-row,.steps,.tl,.result,.calc{grid-template-columns:1fr;}
     .g2,.offer,.two-col,.frow{grid-template-columns:1fr;} .al{grid-template-columns:110px 1fr 46px;}
@@ -349,6 +357,46 @@
   </div>
 </section>
 
+<section id="payment" style="background:#fff;">
+  <div class="wrap">
+    <div class="eyebrow">Payment &amp; share allotment</div>
+    <h2>How you pay, and how your stake is secured</h2>
+    <p class="lead">No payment is taken through the website. Payment is by bank transfer only, after the agreement is signed, to the company's official account. Your stake is not secured until the money has arrived.</p>
+    <div class="units" id="units" hidden>
+      <div class="big"><span id="unitsLeft">—</span> <small>of <span id="unitsTotal">20</span> units available now</small></div>
+      <div><div class="trk"><i id="unitsBar" style="width:0%"></i></div><div class="meta">Each unit equals 1% of the company. The number updates automatically. A reserved unit counts as taken until it is paid for or its reservation lapses.</div></div>
+    </div>
+    <div class="grid g2" style="margin-top:22px;align-items:start;">
+      <div class="card"><h3>How payment works</h3>
+        <ol>
+          <li>After signing, we email you the official account details of LAMSA LTD and a unique reference for your agreement (for example <span dir="ltr">BW-INV-001</span>).</li>
+          <li>You transfer the amount in dinars within 7 days of signing (the deadline is set in the agreement), quoting the reference.</li>
+          <li>A clear exchange rate is fixed in the agreement, and the sender bears the transfer fees so the full amount arrives.</li>
+          <li>When the funds arrive we confirm with an official receipt, and your partner dashboard is opened.</li>
+          <li>If the money does not arrive within the deadline, the reservation lapses and the unit returns to availability.</li>
+        </ol>
+        <div class="warnbox"><b>Beware of fraud:</b> never transfer to a personal account, or to any account that did not reach you in writing from our official email after signing. Any message asking for payment before signing is not from us.</div>
+      </div>
+      <div class="card"><h3>How your stake is secured</h3>
+        <div class="stages">
+          <div class="stg"><b>1. Reserved</b>You signed and we await the transfer. The stake is held for you during the deadline.</div>
+          <div class="stg"><b>2. Paid</b>The funds arrived and a receipt was issued. Your dashboard opens.</div>
+          <div class="stg"><b>3. Active</b>Your shares are allotted and registered (Option 2), or the profit-share agreement is in force (Option 1).</div>
+        </div>
+        <p style="margin-bottom:6px;"><b>Option 2 (shares):</b></p>
+        <ul>
+          <li>A board resolution to allot new shares to you; shares are not allotted before the funds arrive.</li>
+          <li>The allotment is filed with Companies House and entered in the register of members.</li>
+          <li>A share certificate is issued in your name, all within the deadlines set by law.</li>
+          <li>A shareholders' agreement covers pre-emption rights, transfer restrictions and access to the accounts.</li>
+        </ul>
+        <p style="margin:10px 0 6px;"><b>Option 1 (profit share):</b></p>
+        <ul><li>A contract only: no shares and no Companies House filing. Your right is what the agreement says, and you are an unsecured contractual creditor.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="dark" id="expansion">
   <div class="wrap">
     <div class="eyebrow">Expansion plan</div>
@@ -489,6 +537,11 @@
     try {
       const { data } = await supabaseClient.rpc('invest_stats');
       if (!data) return;
+      if (data.units_total != null) {
+        const total = Number(data.units_total), taken = Number(data.units_taken || 0), left = Math.max(0, total - taken);
+        document.getElementById('unitsLeft').textContent = N(left, left % 1 ? 1 : 0); document.getElementById('unitsTotal').textContent = N(total);
+        document.getElementById('unitsBar').style.width = Math.min(100, taken / total * 100) + '%'; document.getElementById('units').hidden = false;
+      }
       document.querySelectorAll('#stats [data-k]').forEach(el => { const v = data[el.dataset.k]; if (v != null) el.textContent = N(v); });
       if (data.first_paid_booking) {
         const d = new Date(data.first_paid_booking + 'T00:00:00');

@@ -974,6 +974,17 @@
   /* ---------- المستثمرون والشركاء (للمشرف العام فقط) ---------- */
   const INQ_ST = { new: ['جديد', '#C0562E'], contacted: ['تم التواصل', '#7D5F27'], in_talks: ['قيد التفاوض', '#4A3B5C'], signed: ['وُقّع', '#2E6B45'], declined: ['اعتذر', '#6B6072'] };
   const OPT_LABEL = { profit_share: 'شراكة بالأرباح ٥ سنوات', equity: 'حصة ثابتة', undecided: 'لم يحدد' };
+  const STAGE = { reserved: ['محجوز', '#FDF3E8', '#7D5F27'], paid: ['مدفوع', '#E6EEF8', '#2C5C8F'], active: ['مفعَّل', '#E1F0E6', '#2E6B45'], cancelled: ['ملغى', '#EEE', '#6B6072'] };
+  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const addDaysISO = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+  const isOverdue = (p) => p.stage === 'reserved' && p.reserved_until && p.reserved_until < todayISO();
+  function unitsSummary(partners) {
+    const live = partners.filter(p => p.status === 'active' && p.stage !== 'cancelled');
+    const sum = (st) => live.filter(p => p.stage === st).reduce((a, p) => a + Number(p.percent || 0), 0);
+    const r = sum('reserved'), pd = sum('paid'), ac = sum('active'), left = 20 - r - pd - ac, over = live.filter(isOverdue).length;
+    const box = (label, val, color) => `<div class="kx-kpi"><b style="color:${color};">${num(val, 2)}٪</b><span>${label}</span></div>`;
+    return `<div class="kx-kpis" style="margin-bottom:14px;">${box('محجوزة (بانتظار التحويل)', r, '#7D5F27')}${box('مدفوعة', pd, '#2C5C8F')}${box('مفعَّلة', ac, '#2E6B45')}${box('المتاح للبيع من 20٪', left, left < 0 ? '#B5555B' : '#241D2E')}</div>${over ? `<div class="kx-warn">⚠ ${num(over)} حجز انتهت مهلته ولم يُدفع. ألغِه ليرجع للمتاح.</div>` : ''}${left < 0 ? '<div class="kx-warn" style="background:#FBECEC;border-color:#E8B9B9;color:#B5555B;">⚠ المجموع تجاوز 20٪. راجع الحصص.</div>' : ''}`;
+  }
   async function loadInvestors() {
     const el = $('tab-investors');
     el.innerHTML = '<h2 class="section-title">المستثمرون والشركاء</h2><p class="section-sub">جارٍ التحميل...</p>';
@@ -1005,12 +1016,14 @@
         </tbody></table></div></div>
 
       <div class="kx-card"><h3>الشركاء (${partners.length})</h3>
+        ${unitsSummary(partners)}
         <p class="section-sub" style="margin-top:-4px;">يسجّل الشريك دخوله إلى <b>/partner/</b> بنفس البريد المسجَّل هنا. إن لم يكن لديه حساب فليُنشئه من <span dir="ltr" style="user-select:all;">https://bewoduh.com/signup/?next=partner</span> ويؤكّده بالرمز. لا يرى الشريك إلا ملخص اتفاقيته وتقاريره السنوية المنشورة.</p>
         <button type="button" class="btn-primary" id="ptNew" style="width:auto; margin:0 0 12px;">+ شريك جديد</button>
-        <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>الشريك</th><th>الاتفاقية</th><th>الفترة</th><th>الحالة</th><th></th></tr></thead><tbody>
+        <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>الشريك</th><th>الاتفاقية</th><th>المرحلة والدفع</th><th>الحالة</th><th></th></tr></thead><tbody>
         ${partners.length ? partners.map(p => `<tr><td><b>${esc(p.full_name)}</b><div style="font-size:12px;" dir="ltr">${esc(p.email)}</div></td>
           <td>${p.option === 'equity' ? 'حصة ثابتة' : 'شراكة بالأرباح ٥ سنوات'} · ${num(p.percent, 2)}٪${p.amount_jod != null ? ' · ' + num(p.amount_jod) + ' د.أ' : ''}</td>
-          <td style="font-size:12.5px;">${p.start_date ? fmtD(p.start_date) : '—'}${p.option === 'profit_share' && p.end_date ? ' ← ' + fmtD(p.end_date) : ''}</td>
+          <td style="font-size:12.5px;"><span class="kx-st" style="--bg:${(STAGE[p.stage] || STAGE.reserved)[1]};--c:${(STAGE[p.stage] || STAGE.reserved)[2]};">${(STAGE[p.stage] || STAGE.reserved)[0]}</span>${isOverdue(p) ? ' <b style="color:#B5555B;">انتهت المهلة</b>' : ''}
+            <div dir="ltr" style="margin-top:3px;">${esc(p.payment_ref || '—')}</div>${p.stage === 'reserved' && p.reserved_until ? `<div>حتى ${fmtD(p.reserved_until)}</div>` : ''}${p.option === 'equity' && p.stage === 'active' ? `<div>${p.ch_filed_at ? '✓ مُودع لدى Companies House' : '⚠ لم يُودَع بعد لدى Companies House'}</div>` : ''}</td>
           <td>${p.status === 'active' ? '<span class="kx-st" style="--bg:#E1F0E6;--c:#2E6B45;">فعّال</span>' : '<span class="kx-st">منتهٍ</span>'}</td>
           <td><button type="button" class="btn-secondary" data-pe="${esc(p.id)}" style="padding:5px 12px;">تعديل</button> <button type="button" class="btn-secondary" data-pd="${esc(p.id)}" style="padding:5px 12px;color:var(--alert);">حذف</button></td></tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted-light);">لا يوجد شركاء بعد.</td></tr>'}
         </tbody></table></div></div>
@@ -1030,8 +1043,8 @@
     const copyLink = async (path) => { const link = 'https://bewoduh.com' + path; try { await navigator.clipboard.writeText(link); toast('تم نسخ الرابط', 'ok'); } catch (_) { prompt('انسخ الرابط:', link); } };
     $('invCopyAr').addEventListener('click', () => copyLink('/invest/'));
     $('invCopyEn').addEventListener('click', () => copyLink('/en/invest/'));
-    $('ptNew').addEventListener('click', () => editPartner(null));
-    el.querySelectorAll('[data-pe]').forEach(b => b.addEventListener('click', () => editPartner(partners.find(x => x.id === b.dataset.pe))));
+    $('ptNew').addEventListener('click', () => editPartner(null, partners));
+    el.querySelectorAll('[data-pe]').forEach(b => b.addEventListener('click', () => editPartner(partners.find(x => x.id === b.dataset.pe), partners)));
     el.querySelectorAll('[data-pd]').forEach(b => b.addEventListener('click', async () => { if (!confirm('حذف هذا الشريك؟ سيفقد الوصول إلى اللوحة فوراً. (لإنهاء اتفاقية بدون حذف السجل استخدم «تعديل» ثم الحالة «منتهٍ».)')) return; const { error } = await sb().from('partners').delete().eq('id', b.dataset.pd); if (error) toast('تعذّر الحذف', 'err'); loadInvestors(); }));
     $('rpNew').addEventListener('click', () => editReport(null, reports));
     el.querySelectorAll('[data-re]').forEach(b => b.addEventListener('click', () => editReport(reports.find(x => x.id === b.dataset.re), reports)));
@@ -1041,8 +1054,10 @@
       const { error } = await sb().from('partner_reports').delete().eq('id', r.id); if (error) toast('تعذّر الحذف', 'err'); loadInvestors();
     }));
   }
-  function editPartner(p) {
-    const v = p || { option: 'profit_share', status: 'active' };
+  function editPartner(p, all) {
+    all = all || [];
+    const nextRef = 'BW-INV-' + String(all.length + 1).padStart(3, '0');
+    const v = p || { option: 'profit_share', status: 'active', stage: 'reserved', reserved_until: addDaysISO(7), payment_ref: nextRef };
     const f = (id, label, val, type, extra) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type || 'text'}" value="${esc(val == null ? '' : val)}" ${extra || ''}></div>`;
     const mm = modal(`<div class="hd"><h3>${p ? 'تعديل شريك' : 'شريك جديد'}</h3><button type="button" class="kx-x" aria-label="إغلاق">&times;</button></div>
       <div class="kx-two">${f('ptName', 'الاسم الكامل *', v.full_name, 'text', 'maxlength="120"')}${f('ptEmail', 'البريد (للدخول) *', v.email, 'email', 'dir="ltr" maxlength="254"')}</div>
@@ -1050,16 +1065,33 @@
         ${f('ptPct', 'النسبة (٪) *', v.percent, 'number', 'min="0.01" max="20" step="0.01"')}</div>
       <div class="kx-two">${f('ptAmt', 'المبلغ المدفوع (د.أ)', v.amount_jod, 'number', 'min="0" step="0.01"')}<div class="field"><label for="ptSt">الحالة</label><select id="ptSt"><option value="active"${v.status === 'active' ? ' selected' : ''}>فعّال</option><option value="ended"${v.status === 'ended' ? ' selected' : ''}>منتهٍ</option></select></div></div>
       <div class="kx-two">${f('ptStart', 'تاريخ البدء', v.start_date, 'date')}${f('ptEnd', 'تاريخ الانتهاء (يُحسب ٥ سنوات تلقائياً للخيار الأول)', v.end_date, 'date')}</div>
+      <div class="kx-card" style="margin:6px 0 14px;background:var(--fog);"><h3>الدفع وتثبيت الحصة</h3>
+        <div class="kx-two"><div class="field"><label for="ptStage">المرحلة</label><select id="ptStage">${Object.entries(STAGE).map(([k, x]) => `<option value="${k}"${v.stage === k ? ' selected' : ''}>${x[0]}</option>`).join('')}</select></div>
+          ${f('ptRef', 'مرجع الحوالة (يكتبه المستثمر)', v.payment_ref, 'text', 'dir="ltr" maxlength="40"')}</div>
+        <div class="kx-two">${f('ptResUntil', 'مهلة الحجز تنتهي', v.reserved_until, 'date')}${f('ptPaidAt', 'تاريخ وصول المبلغ', v.paid_at, 'date')}</div>
+        <p style="font-size:12px;color:var(--text-muted-light);margin:0 0 8px;">لوحة الشريك لا تفتح له إلا بعد المرحلة «مدفوع». الحجز المنتهي لا يُلغى تلقائياً: ألغِه يدوياً ليرجع للمتاح.</p>
+        <div id="ptEqBox"><div class="kx-two">${f('ptShares', 'عدد الأسهم المخصَّصة', v.shares_allotted, 'number', 'min="0" step="1"')}${f('ptCert', 'رقم شهادة الأسهم', v.certificate_no, 'text', 'maxlength="40"')}</div>
+          <div class="kx-two">${f('ptAllotAt', 'تاريخ التخصيص', v.allotted_at, 'date')}${f('ptChAt', 'تاريخ إيداع التخصيص لدى Companies House', v.ch_filed_at, 'date')}</div></div>
+      </div>
       <div class="field"><label for="ptNotes">ملاحظات داخلية</label><textarea id="ptNotes" rows="2" maxlength="500">${esc(v.notes || '')}</textarea></div>
       <button type="button" class="btn-primary" id="ptSave" style="width:auto;">حفظ</button> <span id="ptMsg" style="font-size:13px;color:var(--alert);"></span>`);
     const q = (id) => mm.el.querySelector('#' + id);
+    const syncEq = () => { q('ptEqBox').style.display = q('ptOpt').value === 'equity' ? '' : 'none'; };
+    q('ptOpt').addEventListener('change', syncEq); syncEq();
     q('ptSave').addEventListener('click', async () => {
       const email = q('ptEmail').value.trim().toLowerCase(), name = q('ptName').value.trim(), pct = parseFloat(q('ptPct').value), opt = q('ptOpt').value;
       if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || !(pct > 0 && pct <= 20)) { q('ptMsg').textContent = 'اكتب الاسم والبريد ونسبة بين 0 و20.'; return; }
       let start = q('ptStart').value || null, end = q('ptEnd').value || null;
       if (opt === 'profit_share' && start && !end) { const d = new Date(start + 'T00:00:00Z'); d.setUTCFullYear(d.getUTCFullYear() + 5); end = d.toISOString().slice(0, 10); }
       if (opt === 'equity') end = null;
-      const row = { email, full_name: name, option: opt, percent: pct, amount_jod: q('ptAmt').value === '' ? null : parseFloat(q('ptAmt').value), start_date: start, end_date: end, status: q('ptSt').value, notes: q('ptNotes').value.trim() || null };
+      const stage = q('ptStage').value, stNew = (q('ptSt').value === 'active' && stage !== 'cancelled');
+      const others = all.filter(x => (!p || x.id !== p.id) && x.status === 'active' && x.stage !== 'cancelled').reduce((a, x) => a + Number(x.percent || 0), 0);
+      if (stNew && others + pct > 20.0001) { q('ptMsg').textContent = 'المجموع سيتجاوز 20٪ (الحصص الأخرى ' + num(others, 2) + '٪). لا يمكن بيع أكثر من المعروض.'; return; }
+      let paidAt = q('ptPaidAt').value || null; if ((stage === 'paid' || stage === 'active') && !paidAt) paidAt = todayISO();
+      const row = { email, full_name: name, option: opt, percent: pct, amount_jod: q('ptAmt').value === '' ? null : parseFloat(q('ptAmt').value), start_date: start, end_date: end, status: q('ptSt').value, notes: q('ptNotes').value.trim() || null,
+        stage, payment_ref: q('ptRef').value.trim() || null, reserved_until: q('ptResUntil').value || null, paid_at: paidAt,
+        shares_allotted: opt === 'equity' && q('ptShares').value !== '' ? parseInt(q('ptShares').value, 10) : null, certificate_no: opt === 'equity' ? (q('ptCert').value.trim() || null) : null,
+        allotted_at: opt === 'equity' ? (q('ptAllotAt').value || null) : null, ch_filed_at: opt === 'equity' ? (q('ptChAt').value || null) : null };
       q('ptSave').disabled = true;
       const { error } = p ? await sb().from('partners').update(row).eq('id', p.id) : await sb().from('partners').insert(row);
       q('ptSave').disabled = false;
