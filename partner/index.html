@@ -6,10 +6,11 @@
 <title>لوحة الشريك — بوضوح</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{--ink:#241D2E;--fog:#F3EEEA;--fog-dim:#E6DFDA;--clarity:#C9A15F;--clarity-soft:#E4C98A;--alert:#B5555B;--ok:#2E6B45;--muted:#6B6072;--text:#2A2130;}
   *{box-sizing:border-box;margin:0;padding:0;}
+  .kv b{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;}
   body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--fog);color:var(--text);line-height:1.9;min-height:100vh;}
   h1,h2,h3{font-family:'Noto Kufi Arabic',sans-serif;}
   a{color:#7D5F27;}
@@ -77,8 +78,8 @@
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id), sb = (typeof supabaseClient !== 'undefined') ? supabaseClient : null;
-  const AR = (n) => Number(n).toLocaleString('ar-EG', { maximumFractionDigits: 2 });
-  const fmtD = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('ar-JO', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+  const AR = (n) => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const fmtD = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('ar-JO-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function show(v) { ['loginView', 'unlinkedView', 'dashView'].forEach(x => $(x).classList.toggle('hidden', x !== v)); $('logout').classList.toggle('hidden', v === 'loginView'); }
   async function logout() { if (sb) await sb.auth.signOut(); show('loginView'); }
@@ -113,8 +114,8 @@
       show('unlinkedView'); return;
     }
     $('hello').textContent = 'مرحباً ' + p.full_name;
-    const optTxt = p.option === 'equity' ? 'حصة ثابتة في الشركة' : 'شراكة بالأرباح لمدة ٥ سنوات';
-    $('agree').innerHTML = [['نوع الاتفاقية', optTxt], ['نسبة حصتك', AR(p.percent) + '٪'], ['المبلغ المستثمَر', p.amount_jod != null ? AR(p.amount_jod) + ' د.أ' : '—'], ['تاريخ البدء', fmtD(p.start_date)], ['تاريخ الانتهاء', p.option === 'equity' ? 'دائمة' : fmtD(p.end_date)]]
+    const optTxt = p.option === 'equity' ? 'حصة ثابتة في الشركة' : 'شراكة بالأرباح لمدة 5 سنوات';
+    $('agree').innerHTML = [['نوع الاتفاقية', optTxt], ['نسبة حصتك', AR(p.percent) + '%'], ['المبلغ المستثمَر', p.amount_jod != null ? AR(p.amount_jod) + ' د.أ' : '—'], ['تاريخ البدء', fmtD(p.start_date)], ['تاريخ الانتهاء', p.option === 'equity' ? 'دائمة' : fmtD(p.end_date)]]
       .map(([k, v]) => `<div class="kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
     const { data: reps } = await sb.rpc('my_partner_reports');
     const list = Array.isArray(reps) ? reps : [];

@@ -986,12 +986,19 @@
     const inq = qi.data || [], partners = qp.data || [], reports = qr.data || [];
     const wa = (ph) => 'https://wa.me/' + String(ph || '').replace(/[^\d]/g, '').replace(/^00/, '');
     el.innerHTML = `<h2 class="section-title">المستثمرون والشركاء</h2>
-      <p class="section-sub">صفحة العرض: <a href="/invest/" target="_blank" rel="noopener">/invest/</a> (غير مفهرسة ولا مرتبطة بالقائمة). لوحة الشريك: <a href="/partner/" target="_blank" rel="noopener">/partner/</a>. هذا القسم ظاهر للمشرف العام فقط.</p>
+      <p class="section-sub">صفحات العرض غير مفهرسة ولا مرتبطة بالقائمة، ويراها فقط من يملك الرابط. هذا القسم ظاهر للمشرف العام فقط.</p>
+      <div class="kx-bar" style="margin-bottom:18px;">
+        <a class="btn-primary" href="/invest/" target="_blank" rel="noopener" style="width:auto; text-decoration:none; padding:10px 20px;">فتح صفحة الاستثمار (عربي)</a>
+        <a class="btn-primary" href="/en/invest/" target="_blank" rel="noopener" style="width:auto; text-decoration:none; padding:10px 20px;">Open investment page (English)</a>
+        <a class="btn-secondary" href="/partner/" target="_blank" rel="noopener" style="text-decoration:none; padding:10px 18px;">لوحة الشريك</a>
+        <button type="button" class="btn-secondary" id="invCopyAr" style="padding:10px 18px;">نسخ الرابط العربي</button>
+        <button type="button" class="btn-secondary" id="invCopyEn" style="padding:10px 18px;">نسخ الرابط الإنجليزي</button>
+      </div>
 
       <div class="kx-card"><h3>طلبات الاهتمام (${inq.length})</h3>
         <div class="table-scroll" style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>التاريخ</th><th>الاسم والتواصل</th><th>الخيار</th><th>الحالة</th><th>ملاحظاتي</th></tr></thead><tbody>
         ${inq.length ? inq.map(r => `<tr><td>${fmtDT(r.created_at)}</td>
-          <td><b>${esc(r.full_name)}</b><div style="font-size:12px;">${esc(r.country)} · <a href="mailto:${esc(r.email)}">${esc(r.email)}</a> · <a href="${esc(wa(r.phone))}" target="_blank" rel="noopener">${esc(r.phone)}</a></div>${r.message ? `<div style="font-size:12px;color:var(--text-muted-light);max-width:340px;">${esc(r.message)}</div>` : ''}</td>
+          <td><b>${esc(r.full_name)}</b> <span class="kx-st" style="--bg:#EEE8F5;--c:#4A3B5C;">${r.lang === 'en' ? 'EN' : 'AR'}</span><div style="font-size:12px;">${esc(r.country)} · <a href="mailto:${esc(r.email)}">${esc(r.email)}</a> · <a href="${esc(wa(r.phone))}" target="_blank" rel="noopener">${esc(r.phone)}</a></div>${r.message ? `<div style="font-size:12px;color:var(--text-muted-light);max-width:340px;">${esc(r.message)}</div>` : ''}</td>
           <td>${esc(OPT_LABEL[r.option_pref] || r.option_pref)}${r.percent_wanted != null ? ' · ' + num(r.percent_wanted, 1) + '٪' : ''}</td>
           <td><select data-inq="${esc(r.id)}" class="kx-inq-st">${Object.entries(INQ_ST).map(([k, v]) => `<option value="${k}"${r.status === k ? ' selected' : ''}>${v[0]}</option>`).join('')}</select></td>
           <td><input type="text" data-note="${esc(r.id)}" value="${esc(r.admin_notes || '')}" maxlength="500" style="min-width:160px;"></td></tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted-light);">لا توجد طلبات بعد.</td></tr>'}
@@ -1020,6 +1027,9 @@
 
     el.querySelectorAll('[data-inq]').forEach(sel => sel.addEventListener('change', async () => { const { error } = await sb().from('investor_inquiries').update({ status: sel.value }).eq('id', sel.dataset.inq); toast(error ? 'تعذّر الحفظ' : 'تم الحفظ', error ? 'err' : 'ok'); }));
     el.querySelectorAll('[data-note]').forEach(inp => inp.addEventListener('change', async () => { const { error } = await sb().from('investor_inquiries').update({ admin_notes: inp.value.trim() || null }).eq('id', inp.dataset.note); toast(error ? 'تعذّر الحفظ' : 'تم الحفظ', error ? 'err' : 'ok'); }));
+    const copyLink = async (path) => { const link = 'https://bewoduh.com' + path; try { await navigator.clipboard.writeText(link); toast('تم نسخ الرابط', 'ok'); } catch (_) { prompt('انسخ الرابط:', link); } };
+    $('invCopyAr').addEventListener('click', () => copyLink('/invest/'));
+    $('invCopyEn').addEventListener('click', () => copyLink('/en/invest/'));
     $('ptNew').addEventListener('click', () => editPartner(null));
     el.querySelectorAll('[data-pe]').forEach(b => b.addEventListener('click', () => editPartner(partners.find(x => x.id === b.dataset.pe))));
     el.querySelectorAll('[data-pd]').forEach(b => b.addEventListener('click', async () => { if (!confirm('حذف هذا الشريك؟ سيفقد الوصول إلى اللوحة فوراً. (لإنهاء اتفاقية بدون حذف السجل استخدم «تعديل» ثم الحالة «منتهٍ».)')) return; const { error } = await sb().from('partners').delete().eq('id', b.dataset.pd); if (error) toast('تعذّر الحذف', 'err'); loadInvestors(); }));
