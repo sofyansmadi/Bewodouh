@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الشراكة والاستثمار في بوضوح</title>
+<meta name="description" content="دعوة لمستثمرين ذوي خبرة للمشاركة في ٢٠٪ من بوضوح: خيارا مشاركة، توقعات مبنية على فرضيات معلنة، وتقارير مالية سنوية عبر لوحة الشريك.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C; --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --rose:#8B6F7E; --alert:#B5555B; --ok:#2E6B45;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4; --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:16px; --max:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--fog);color:var(--text-on-light);line-height:1.9;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.kufi{font-family:'Noto Kufi Arabic',sans-serif;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px;}
+  section{padding:72px 0;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--clarity);font-weight:600;margin-bottom:14px;}
+  .eyebrow::before{content:"";width:20px;height:1px;background:var(--clarity);}
+  h2{font-size:clamp(24px,3.4vw,34px);line-height:1.5;margin-bottom:14px;color:var(--ink);}
+  .lead{font-size:17px;color:var(--text-muted-light);max-width:760px;}
+  .dark{background:var(--ink);color:var(--text-on-dark);}
+  .dark h2{color:var(--fog);} .dark .lead{color:var(--text-muted-dark);}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--clarity);color:var(--ink);font-weight:700;font-size:15px;padding:14px 30px;border-radius:100px;border:none;cursor:pointer;text-decoration:none;font-family:inherit;transition:transform .15s,box-shadow .15s;}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px -10px rgba(201,161,95,.8);}
+  .btn.ghost{background:transparent;color:var(--fog);border:1.5px solid rgba(237,231,227,.4);} .btn.ghost:hover{box-shadow:none;border-color:var(--clarity);}
+  .btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+
+  /* hero */
+  .hero{background:linear-gradient(120deg,#241D2E 0%,#372C46 55%,#5B4A86 100%);color:var(--fog);padding:84px 0 70px;}
+  .hero h1{font-size:clamp(30px,5vw,50px);line-height:1.4;font-weight:900;margin-bottom:18px;max-width:820px;}
+  .hero h1 em{font-style:normal;color:var(--clarity-soft);}
+  .hero p.sub{font-size:18px;color:var(--text-muted-dark);max-width:700px;margin-bottom:28px;}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+  .warn-pill{display:inline-block;font-size:13px;color:var(--clarity-soft);border:1px solid rgba(228,201,138,.45);background:rgba(201,161,95,.12);padding:6px 16px;border-radius:100px;}
+  .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px;}
+  .fact{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:18px;}
+  .fact b{display:block;font-family:'Noto Kufi Arabic',sans-serif;font-size:26px;color:var(--clarity-soft);line-height:1.3;}
+  .fact span{font-size:13px;color:var(--text-muted-dark);}
+
+  /* generic cards */
+  .grid{display:grid;gap:18px;} .g2{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:repeat(3,1fr);}
+  .card{background:#fff;border:1px solid var(--fog-dim);border-radius:var(--radius);padding:24px;}
+  .card h3{font-size:18px;margin-bottom:8px;color:var(--ink);}
+  .card p,.card li{font-size:14.5px;color:var(--text-muted-light);}
+  .card ul{padding-inline-start:20px;} .card li{margin-bottom:6px;}
+  .dark .card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);} .dark .card h3{color:var(--fog);} .dark .card p,.dark .card li{color:var(--text-muted-dark);}
+
+  /* stats */
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px;}
+  .stat{background:#fff;border:1px solid var(--fog-dim);border-radius:var(--radius);padding:18px 20px;}
+  .stat b{display:block;font-family:'Noto Kufi Arabic',sans-serif;font-size:28px;color:var(--ink);} .stat span{font-size:13.5px;color:var(--text-muted-light);}
+  .honest{margin-top:22px;background:#FBF3E4;border:1px solid #E7D3A5;border-radius:var(--radius);padding:16px 20px;font-size:14.5px;color:#5E4A1E;}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--fog-dim);background:#fff;}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px;}
+  th,td{padding:12px 16px;text-align:start;border-bottom:1px solid var(--fog-dim);} th{background:#F8F4F1;font-weight:700;color:var(--ink);font-size:13.5px;} tr:last-child td{border-bottom:none;}
+  td.num,th.num{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .neg{color:var(--alert);font-weight:600;} .pos{color:var(--ok);font-weight:600;}
+  .note{font-size:13px;color:var(--text-muted-light);margin-top:10px;}
+
+  /* offer */
+  .offer{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:30px;}
+  .opt{position:relative;background:#fff;border:2px solid var(--fog-dim);border-radius:20px;padding:28px;}
+  .opt.feat{border-color:var(--clarity);}
+  .opt .tag{position:absolute;top:-13px;inset-inline-start:24px;background:var(--clarity);color:var(--ink);font-size:12.5px;font-weight:700;padding:3px 14px;border-radius:100px;}
+  .opt h3{font-size:20px;margin-bottom:6px;color:var(--ink);}
+  .price{font-family:'Noto Kufi Arabic',sans-serif;font-size:36px;font-weight:900;color:var(--ink);line-height:1.3;margin:10px 0 2px;} .price small{font-size:15px;font-weight:500;color:var(--text-muted-light);}
+  .usd{font-size:13px;color:var(--text-muted-light);margin-bottom:14px;}
+  .opt ul{list-style:none;} .opt li{position:relative;padding-inline-start:26px;font-size:14.5px;margin-bottom:8px;}
+  .opt li::before{content:"✓";position:absolute;inset-inline-start:0;color:var(--ok);font-weight:700;}
+  .opt li.no::before{content:"✕";color:var(--alert);}
+  .summary{margin-top:26px;}
+
+  /* scenarios */
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--fog-dim);border-radius:100px;padding:4px;gap:4px;margin:6px 0 18px;flex-wrap:wrap;}
+  .seg button{border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:600;padding:8px 20px;border-radius:100px;cursor:pointer;color:var(--text-muted-light);}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--fog);}
+  .bars{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:end;height:200px;margin:18px 0 6px;padding:0 4px;}
+  .bar{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px;}
+  .bar i{display:block;width:100%;max-width:70px;border-radius:8px 8px 0 0;background:var(--clarity);min-height:3px;transition:height .3s;}
+  .bar i.loss{background:var(--alert);} .bar span{font-size:12px;color:var(--text-muted-light);text-align:center;line-height:1.4;} .bar b{font-size:12.5px;color:var(--ink);}
+  .calc{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:6px 0 16px;}
+  .calc label{font-size:13px;font-weight:600;display:block;margin-bottom:4px;color:var(--ink);}
+  .calc select,.calc input{width:100%;border:1.5px solid var(--fog-dim);border-radius:12px;padding:10px 12px;font-family:inherit;font-size:15px;background:#fff;color:var(--text-on-light);}
+  .result{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .res{background:var(--ink);color:var(--fog);border-radius:14px;padding:16px 18px;} .res b{display:block;font-family:'Noto Kufi Arabic',sans-serif;font-size:24px;color:var(--clarity-soft);line-height:1.4;} .res span{font-size:13px;color:var(--text-muted-dark);}
+
+  /* use of funds + timeline */
+  .alloc{display:grid;gap:12px;margin-top:6px;}
+  .al{display:grid;grid-template-columns:150px 1fr 54px;gap:12px;align-items:center;font-size:14px;}
+  .al .tr{height:12px;border-radius:100px;background:rgba(255,255,255,.12);overflow:hidden;} .al .tr i{display:block;height:100%;background:var(--clarity);border-radius:100px;}
+  .al b{color:var(--clarity-soft);text-align:end;}
+  .tl{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:28px;}
+  .ph{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:20px;}
+  .ph .when{font-size:12.5px;color:var(--clarity-soft);font-weight:700;margin-bottom:6px;} .ph h3{font-size:16px;color:var(--fog);margin-bottom:8px;} .ph li{font-size:13.5px;color:var(--text-muted-dark);margin-bottom:5px;} .ph ul{padding-inline-start:18px;}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px;counter-reset:s;}
+  .step{background:#fff;border:1px solid var(--fog-dim);border-radius:var(--radius);padding:22px;position:relative;counter-increment:s;}
+  .step::before{content:counter(s);position:absolute;top:-14px;inset-inline-start:20px;width:30px;height:30px;border-radius:50%;background:var(--clarity);color:var(--ink);font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Noto Kufi Arabic',sans-serif;}
+  .step h3{font-size:16px;margin:6px 0 6px;color:var(--ink);} .step p{font-size:14px;color:var(--text-muted-light);}
+  .two-col{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px;}
+  .yes h3{color:var(--ok)!important;} .nope h3{color:var(--alert)!important;}
+
+  /* dashboard mock */
+  .mock{background:#fff;border:1px solid var(--fog-dim);border-radius:20px;padding:22px;box-shadow:0 20px 50px -30px rgba(36,29,46,.5);}
+  .mock .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--fog-dim);font-size:14.5px;} .mock .row:last-child{border-bottom:none;}
+  .mock .pdf{font-size:12px;font-weight:700;background:var(--ink);color:var(--fog);padding:4px 14px;border-radius:100px;}
+
+  details{background:#fff;border:1px solid var(--fog-dim);border-radius:14px;padding:14px 20px;margin-bottom:10px;}
+  summary{cursor:pointer;font-weight:700;color:var(--ink);font-size:15.5px;} details p{margin-top:8px;font-size:14.5px;color:var(--text-muted-light);}
+
+  /* form */
+  .form-card{background:#fff;border:1px solid var(--fog-dim);border-radius:22px;padding:30px;max-width:760px;margin:26px auto 0;}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;} .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:5px;color:var(--ink);}
+  .field input,.field select,.field textarea{width:100%;border:1.5px solid var(--fog-dim);border-radius:12px;padding:11px 14px;font-family:inherit;font-size:15px;background:var(--fog);color:var(--text-on-light);}
+  .field textarea{min-height:96px;resize:vertical;} .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--clarity);outline-offset:1px;background:#fff;}
+  .ltr{direction:ltr;text-align:right;}
+  .ack{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--text-muted-light);margin:6px 0 16px;} .ack input{margin-top:6px;width:18px;height:18px;flex:none;accent-color:var(--clarity);}
+  .hp{position:absolute;inset-inline-start:-9999px;width:1px;height:1px;overflow:hidden;}
+  .msg{font-size:14px;margin-top:12px;min-height:20px;} .msg.err{color:var(--alert);} .msg.ok{color:var(--ok);font-weight:600;}
+  .legal{font-size:12.5px;color:var(--text-muted-light);line-height:1.9;max-width:900px;}
+  .legal b{color:var(--ink);}
+  .partner-link{font-size:14px;margin-top:14px;text-align:center;}
+  @media (max-width:880px){
+    section{padding:52px 0;} .facts{grid-template-columns:repeat(2,1fr);} .g3,.stat-row,.steps,.tl,.result,.calc{grid-template-columns:1fr;}
+    .g2,.offer,.two-col,.frow{grid-template-columns:1fr;} .al{grid-template-columns:110px 1fr 46px;}
+  }
+</style>
+</head>
+<body>
+
+<site-nav></site-nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">دعوة شراكة محدودة · ٢٠٪ فقط</div>
+    <h1>شاركنا في بناء <em>منصة الدعم النفسي العربية</em> منذ بدايتها</h1>
+    <p class="sub">نفتح ٢٠٪ من بوضوح لعدد قليل من الشركاء الذين يؤمنون بالفكرة مبكراً: تذاكر صغيرة، خياران واضحان، وتقارير مالية سنوية تصلك عبر لوحة خاصة بالشركاء.</p>
+    <div class="cta">
+      <a class="btn" href="#interest">أبدِ اهتمامك</a>
+      <a class="btn ghost" href="#offer">اطّلع على العرض</a>
+    </div>
+    <span class="warn-pill">مرحلة مبكرة جداً: الاستثمار هنا عالي المخاطر وقد تخسر كامل المبلغ</span>
+    <div class="facts" aria-label="ملخص العرض">
+      <div class="fact"><b>٢٠٪</b><span>إجمالي الحصص المطروحة</span></div>
+      <div class="fact"><b>١٬٠٠٠ د.أ</b><span>لكل ١٪ — شراكة بالأرباح ٥ سنوات</span></div>
+      <div class="fact"><b>٢٬٠٠٠ د.أ</b><span>لكل ١٪ — حصة ثابتة في الشركة</span></div>
+      <div class="fact"><b>سنوي</b><span>تقرير مالي لكل شريك عبر لوحته</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ ABOUT ============ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">من نحن</div>
+    <h2>بوضوح: جلسات نفسية بالعربية، بأخصائيين تُراجَع مؤهلاتهم</h2>
+    <p class="lead">منصة تربط من يبحث عن دعم نفسي أو إرشاد بأخصائيين ومدربي مهارات حياة، عبر جلسات عن بُعد باللغة العربية، لكل العالم العربي والجاليات العربية في الخارج. تُدار المنصة من شركة لمسة المحدودة (LAMSA LTD)، المسجلة في إنجلترا وويلز برقم 17517932.</p>
+    <div class="grid g3" style="margin-top:28px;">
+      <div class="card"><h3>المشكلة</h3><p>الدعم النفسي بالعربية محدود ومتفرق، وغالباً مكلف أو صعب الوصول، ولا توجد تجربة حجز ودفع ومتابعة موثوقة في مكان واحد.</p></div>
+      <div class="card"><h3>ما نبنيه</h3><p>سوق رقمي واضح: العميل يختار الأخصائي والموعد بتوقيته، يدفع بأمان، ويتابع جلساته ويقيّمها. والأخصائي يدير مواعيده وأتعابه من بوابة خاصة.</p></div>
+      <div class="card"><h3>كيف نربح</h3><p>العميل يدفع سعر الجلسة أو الباقة، والأخصائي يستلم أتعاباً ثابتة عن كل جلسة تُسجَّل، وتبقى للمنصة الفرق بعد رسوم الدفع والخصومات.</p></div>
+    </div>
+    <div class="card" style="margin-top:18px;"><h3>ما هو جاهز تقنياً اليوم</h3>
+      <ul>
+        <li>حجز بمواعيد حقيقية مع تحويل تلقائي لفرق التوقيت، ودفع بالبطاقة، وعرض الأسعار بعدة عملات.</li>
+        <li>بوابة للأخصائيين (مواعيد، حجوزات، تسجيل الجلسات)، ولوحة تحكم للإدارة، وتتبّع مستحقات الأخصائيين.</li>
+        <li>نظام تقييم بعد كل جلسة ومتابعة رأي المستفيدين، وأكواد خصم وحملات إعلانية مع قياس مصدر كل حجز.</li>
+        <li>محادثة مدفوعة بالدقيقة وتطبيق جوال: مبنيان ويُطلقان تدريجياً بعد تمويل التشغيل.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRACTION (live) ============ -->
+<section style="background:#fff;">
+  <div class="wrap">
+    <div class="eyebrow">أين نحن اليوم</div>
+    <h2>الأرقام كما هي، بدون تجميل</h2>
+    <p class="lead">بنينا أولاً جانب العرض (الأخصائيين)، ثم فتحنا الحجز للجمهور مؤخراً. لذلك الإيرادات حتى الآن رمزية، وما نقيسه حالياً هو قوة الشبكة وبدايات الطلب.</p>
+    <div class="stat-row" id="stats" aria-live="polite">
+      <div class="stat"><b data-k="specialists">—</b><span>أخصائياً ومدرباً منشورين على المنصة</span></div>
+      <div class="stat"><b data-k="countries">—</b><span>دولة يقيم فيها فريقنا</span></div>
+      <div class="stat"><b data-k="applications">—</b><span>طلب انضمام وصلنا من أخصائيين</span></div>
+      <div class="stat"><b data-k="users">—</b><span>حساب مسجَّل في المنصة</span></div>
+      <div class="stat"><b data-k="sessions_done">—</b><span>جلسات أُنجزت وسُجّلت</span></div>
+      <div class="stat"><b data-k="paying_clients">—</b><span>عميل دفع حتى الآن</span></div>
+    </div>
+    <div class="honest" id="honest"><b>بصراحة:</b> أول حجز مدفوع كان في <span id="firstPaid">نوفمبر ٢٠٢٦</span>، والإيرادات المحققة حتى اليوم لا تغطي أي تكاليف تشغيل. نحن في مرحلة التحقق من الطلب بعد إطلاق الحجز. هذه الأرقام تُحدَّث تلقائياً من قاعدة بيانات المنصة.</div>
+  </div>
+</section>
+
+<!-- ============ UNIT ECONOMICS ============ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">نموذج الربح</div>
+    <h2>اقتصاديات كل حجز</h2>
+    <p class="lead">أتعاب الأخصائي ثابتة وواضحة: ١٠ دولارات عن أول جلسة مع كل عميل، و١٥ دولاراً عن كل جلسة لاحقة معه. وتبقى للمنصة الفرق.</p>
+    <div class="tbl-wrap" style="margin-top:22px;"><table>
+      <thead><tr><th>الباقة</th><th class="num">سعر العميل</th><th class="num">أتعاب الأخصائي</th><th class="num">يتبقى للمنصة</th><th class="num">الهامش</th></tr></thead>
+      <tbody>
+        <tr><td>استشارة سريعة (جلسة)</td><td class="num">$35</td><td class="num">$10</td><td class="num">$25</td><td class="num">٧١٪</td></tr>
+        <tr><td>دعم فوري (جلسة)</td><td class="num">$70</td><td class="num">$10</td><td class="num">$60</td><td class="num">٨٦٪</td></tr>
+        <tr><td>باقة الانطلاقة (٤ جلسات)</td><td class="num">$150</td><td class="num">$55</td><td class="num">$95</td><td class="num">٦٣٪</td></tr>
+        <tr><td>باقة المرافقة (٨ جلسات)</td><td class="num">$300</td><td class="num">$115</td><td class="num">$185</td><td class="num">٦٢٪</td></tr>
+      </tbody></table></div>
+    <p class="note">الهامش قبل رسوم بوابة الدفع (نحو ٣٪) وقبل الخصومات الترويجية. في التوقعات أدناه نستخدم هامشاً إجمالياً مخفَّضاً قدره ٥٨٪ ليشمل الرسوم والخصومات.</p>
+  </div>
+</section>
+
+<!-- ============ OFFER ============ -->
+<section id="offer" class="dark">
+  <div class="wrap">
+    <div class="eyebrow">العرض</div>
+    <h2>٢٠٪ من بوضوح، بخيارين</h2>
+    <p class="lead">كل ١٪ هي وحدة واحدة، والمعروض ٢٠ وحدة بالمجموع. تختار خياراً واحداً لكل اتفاقية، والحد الأدنى وحدة واحدة (١٪).</p>
+    <div class="offer">
+      <div class="opt" style="color:var(--text-on-light);">
+        <h3>الخيار الأول: شراكة بالأرباح لمدة ٥ سنوات</h3>
+        <div class="price">١٬٠٠٠ د.أ <small>لكل ١٪</small></div>
+        <div class="usd">نحو ١٬٤١٠ دولار لكل ١٪</div>
+        <ul>
+          <li>تحصل كل سنة على نسبة حصتك من صافي ربح الشركة بعد الضريبة، طوال ٥ سنوات من تاريخ التوقيع.</li>
+          <li>يُدفع نصيبك مرة واحدة سنوياً خلال ٦٠ يوماً من اعتماد الحسابات السنوية.</li>
+          <li>الخسائر تُرحَّل وتُخصم من أرباح السنوات التالية قبل أي توزيع (صيغة متحفظة).</li>
+          <li>تقرير مالي سنوي عبر لوحة الشريك.</li>
+          <li class="no">لا أسهم ولا تصويت ولا ملكية في الشركة.</li>
+          <li class="no">ينتهي الاتفاق بعد السنة الخامسة ولا يُردّ أصل المبلغ.</li>
+        </ul>
+      </div>
+      <div class="opt feat" style="color:var(--text-on-light);">
+        <span class="tag">ملكية دائمة</span>
+        <h3>الخيار الثاني: حصة ثابتة في الشركة</h3>
+        <div class="price">٢٬٠٠٠ د.أ <small>لكل ١٪</small></div>
+        <div class="usd">نحو ٢٬٨٢٠ دولار لكل ١٪</div>
+        <ul>
+          <li>أسهم عادية مسجّلة باسمك في شركة لمسة المحدودة بنسبة حصتك، دائمة ولا ينتهي أجلها.</li>
+          <li>نصيبك من الأرباح الموزَّعة كلما قرر مجلس الشركة التوزيع.</li>
+          <li>حق الأولوية في الاكتتاب بحصتك عند إصدار أسهم جديدة، وحق الاطلاع على الحسابات.</li>
+          <li>حقوق تصويت كأي مساهم بنسبة حصتك (حصة أقلية).</li>
+          <li>تقرير مالي سنوي عبر لوحة الشريك.</li>
+          <li class="no">لا يوجد سوق جاهز لبيع الحصة، وقد يصعب الخروج. التسعير يعني تقييماً للشركة بنحو ٢٠٠٬٠٠٠ د.أ.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tbl-wrap summary"><table style="color:var(--text-on-light);">
+      <thead><tr><th>ماذا يعني العرض بالأرقام</th><th class="num">الخيار الأول</th><th class="num">الخيار الثاني</th></tr></thead>
+      <tbody>
+        <tr><td>سعر ١٪</td><td class="num">١٬٠٠٠ د.أ</td><td class="num">٢٬٠٠٠ د.أ</td></tr>
+        <tr><td>إجمالي ما يُجمع إن بِيعت ٢٠٪ كاملة بهذا الخيار</td><td class="num">٢٠٬٠٠٠ د.أ</td><td class="num">٤٠٬٠٠٠ د.أ</td></tr>
+        <tr><td>التقييم الضمني للشركة (سعر ١٪ × ١٠٠)</td><td class="num">١٠٠٬٠٠٠ د.أ</td><td class="num">٢٠٠٬٠٠٠ د.أ</td></tr>
+        <tr><td>مدة الحق</td><td class="num">٥ سنوات</td><td class="num">دائم</td></tr>
+      </tbody></table></div>
+    <p class="note" style="color:var(--text-muted-dark);">المبلغ الفعلي يتراوح بين ٢٠٬٠٠٠ و٤٠٬٠٠٠ دينار بحسب مزيج الخيارين. الشروط الكاملة تُحدَّد في الاتفاقية الموقّعة، وما هنا ملخص لها.</p>
+  </div>
+</section>
+
+<!-- ============ PROJECTIONS ============ -->
+<section id="projections">
+  <div class="wrap">
+    <div class="eyebrow">التوقعات</div>
+    <h2>ماذا قد يعني ذلك لك خلال ٥ سنوات؟</h2>
+    <p class="lead">هذه <b>تقديرات افتراضية</b> بُنيت على فرضيات معلنة أدناه، وليست وعداً ولا تنبؤاً مؤكداً. اخترنا ثلاثة سيناريوهات حتى ترى الصورة كاملة، بما فيها الحالة المتحفظة التي قد لا تعيد لك أكثر من جزء صغير من المبلغ.</p>
+    <div class="seg" role="group" aria-label="السيناريو" id="scenSeg">
+      <button type="button" data-s="cons" aria-pressed="false">متحفظ</button>
+      <button type="button" data-s="base" aria-pressed="true">أساسي</button>
+      <button type="button" data-s="opt" aria-pressed="false">متفائل</button>
+    </div>
+    <div class="card">
+      <h3 id="scenTitle">صافي الربح السنوي بعد الضريبة (د.أ)</h3>
+      <div class="bars" id="bars" aria-hidden="true"></div>
+      <div class="tbl-wrap" style="margin-top:14px;border:none;"><table id="proj">
+        <thead><tr><th>السنة</th><th class="num">حجوزات مدفوعة/شهر (متوسط)</th><th class="num">الإيرادات</th><th class="num">صافي الربح بعد الضريبة</th></tr></thead>
+        <tbody></tbody></table></div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h3>احسب نصيبك</h3>
+      <div class="calc">
+        <div><label for="cOpt">الخيار</label><select id="cOpt"><option value="A">الأول: شراكة بالأرباح ٥ سنوات</option><option value="B">الثاني: حصة ثابتة</option></select></div>
+        <div><label for="cPct">النسبة (٪)</label><input id="cPct" type="number" min="1" max="20" step="1" value="1" inputmode="numeric"></div>
+        <div><label for="cScen">السيناريو</label><select id="cScen"><option value="cons">متحفظ</option><option value="base" selected>أساسي</option><option value="opt">متفائل</option></select></div>
+      </div>
+      <div class="result">
+        <div class="res"><b id="rCost">—</b><span>المبلغ الذي تدفعه</span></div>
+        <div class="res"><b id="rPay">—</b><span>إجمالي أرباحك المقدَّرة خلال ٥ سنوات</span></div>
+        <div class="res"><b id="rMult">—</b><span>المضاعف مقابل ما دفعت</span></div>
+      </div>
+      <p class="note" id="rNote"></p>
+    </div>
+
+    <h3 class="kufi" style="margin:30px 0 10px;font-size:18px;">الفرضيات المستخدمة (قابلة للمراجعة والنقاش)</h3>
+    <div class="tbl-wrap"><table>
+      <tbody>
+        <tr><td>متوسط قيمة الحجز المدفوع</td><td class="num">٨٥ دولاراً</td></tr>
+        <tr><td>الهامش الإجمالي بعد أتعاب الأخصائيين ورسوم الدفع والخصومات</td><td class="num">٥٨٪</td></tr>
+        <tr><td>الإنفاق التسويقي من الإيرادات (السنوات ١ إلى ٥)</td><td class="num">٣٠٪ · ٢٦٪ · ٢٢٪ · ٢٠٪ · ١٨٪</td></tr>
+        <tr><td>تكاليف ثابتة سنوية (تقنية، محاسب، قانوني، دعم)</td><td class="num">٩ · ١٤ · ٢٢ · ٣٢ · ٤٢ ألف دولار</td></tr>
+        <tr><td>ضريبة الشركات المقدَّرة على الربح</td><td class="num">٢٠٪</td></tr>
+        <tr><td>سعر الصرف المستخدم</td><td class="num">١ دولار = ٠٫٧٠٩ دينار</td></tr>
+        <tr><td>توزيع الأرباح</td><td class="num">يُفترض توزيع كامل صافي الربح (مبسّط)</td></tr>
+      </tbody></table></div>
+    <p class="note">في السيناريو المتحفظ تتحقق خسائر في السنتين الأوليين، تغطيها الأموال المجموعة. الأرقام الفعلية قد تكون أقل أو أكثر بكثير، وقد لا تتحقق أرباح أصلاً. أداء الماضي القصير للمنصة لا يؤكد هذه الأرقام.</p>
+  </div>
+</section>
+
+<!-- ============ WHY ============ -->
+<section style="background:#fff;">
+  <div class="wrap">
+    <div class="eyebrow">لماذا بوضوح</div>
+    <h2>مزايا الشراكة معنا</h2>
+    <div class="grid g3" style="margin-top:26px;">
+      <div class="card"><h3>دخول مبكر بتذكرة صغيرة</h3><p>تبدأ من ١٬٠٠٠ دينار، بتسعير مناسب لمرحلة ما قبل الإيرادات، قبل أن تكبر الشركة وترتفع قيمتها إن نجحت.</p></div>
+      <div class="card"><h3>سوق لغته العربية</h3><p>الطلب على دعم نفسي موثوق بالعربية في ازدياد، والمعروض المنظَّم رقمياً قليل. نركّز على هذا الفراغ تحديداً.</p></div>
+      <div class="card"><h3>نموذج خفيف الأصول</h3><p>لا مخزون ولا مقرات. الأخصائيون يعملون عن بُعد وأتعابهم متغيّرة مع كل جلسة، فتكاليفنا تنمو مع الإيراد.</p></div>
+      <div class="card"><h3>شبكة أخصائيين جاهزة</h3><p>عشرات الأخصائيين والمدربين من عدة دول انضموا فعلاً، وطلبات الانضمام تتواصل دون إعلان مدفوع للعرض.</p></div>
+      <div class="card"><h3>تقنية مبنية ومشغَّلة</h3><p>الحجز والدفع والمتابعة والتقييم والتتبع الإعلاني تعمل اليوم، فالتمويل يذهب للنمو لا لبناء الأساسات.</p></div>
+      <div class="card"><h3>شفافية تصلك بنفسها</h3><p>لوحة خاصة بالشركاء تعرض تقريراً مالياً سنوياً لكل سنة، فلا تحتاج أن تسأل لتعرف.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS + GUARANTEES ============ -->
+<section id="process">
+  <div class="wrap">
+    <div class="eyebrow">كيف يتم الاتفاق</div>
+    <h2>من الاهتمام إلى التوقيع</h2>
+    <div class="steps">
+      <div class="step"><h3>أبدِ اهتمامك</h3><p>تعبّئ النموذج أدناه بالخيار والنسبة التي تفكر بها. لا التزام عليك.</p></div>
+      <div class="step"><h3>مكالمة وتعارف</h3><p>نتحدث معك، نجيب عن أسئلتك، ونرسل لك مسودة الاتفاقية والأرقام التفصيلية.</p></div>
+      <div class="step"><h3>تحقق من الهوية</h3><p>نطلب إثبات هوية وصفة المستثمر قبل المتابعة، كما تفعل أي شركة جادة.</p></div>
+      <div class="step"><h3>قراءة وتوقيع</h3><p>تتاح لك مدة كافية لقراءة الاتفاقية واستشارة محاميك، ثم يوقَّع الطرفان نسخة مكتوبة.</p></div>
+      <div class="step"><h3>تحويل المبلغ</h3><p>تُحوَّل القيمة إلى حساب الشركة الرسمي فقط بعد التوقيع، وتصلك إيصالات رسمية.</p></div>
+      <div class="step"><h3>تفعيل حقوقك</h3><p>في الخيار الثاني تُخصَّص الأسهم وتُسجَّل رسمياً، وفي الأول يبدأ سريان الاتفاق. وتُفتح لك لوحة الشريك.</p></div>
+    </div>
+    <div class="two-col">
+      <div class="card yes"><h3>ما نلتزم به كتابياً</h3>
+        <ul>
+          <li>اتفاقية مكتوبة موقّعة، تُراجَع قانونياً، وتخضع لقانون إنجلترا وويلز (بلد تسجيل الشركة).</li>
+          <li>تسجيل رسمي للأسهم في الخيار الثاني: سجل المساهمين وإشعار التخصيص لدى مسجّل الشركات البريطاني (Companies House).</li>
+          <li>تقرير مالي سنوي لكل شريك عبر اللوحة، واطلاع على الحسابات المعتمدة.</li>
+          <li>استخدام الأموال وفق خطة التوسع المنشورة هنا، وإبلاغ الشركاء بأي تغيير جوهري عنها.</li>
+          <li>معاملة الشركاء من الفئة نفسها بالشروط نفسها.</li>
+        </ul>
+      </div>
+      <div class="card nope"><h3>ما لا نضمنه (وهذا مهم)</h3>
+        <ul>
+          <li>لا نضمن أرباحاً ولا عائداً بأي نسبة.</li>
+          <li>لا نضمن استرداد أصل المبلغ، وقد تخسره كاملاً.</li>
+          <li>لا نضمن سيولة: قد لا تجد من يشتري حصتك لاحقاً.</li>
+          <li>في الخيار الثاني قد تتراجع نسبتك إذا أُصدرت أسهم جديدة ولم تشارك فيها.</li>
+          <li>الأرقام المستقبلية في هذه الصفحة تقديرات، لا ضمانات.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE OF FUNDS ============ -->
+<section class="dark" id="expansion">
+  <div class="wrap">
+    <div class="eyebrow">خطة التوسع</div>
+    <h2>أين يذهب المبلغ المستثمَر؟</h2>
+    <p class="lead">النسب أدناه تنطبق على أي مبلغ يُجمع (بين ٢٠٬٠٠٠ و٤٠٬٠٠٠ دينار). ما نبدأ به أولاً هو ما يثبت الطلب ويخفض كلفة اكتساب العميل.</p>
+    <div class="grid g2" style="margin-top:28px;align-items:start;">
+      <div class="alloc">
+        <div class="al"><span>نمو العملاء</span><div class="tr"><i style="width:40%"></i></div><b>٤٠٪</b></div>
+        <div class="al"><span>المنتج والتقنية</span><div class="tr"><i style="width:20%"></i></div><b>٢٠٪</b></div>
+        <div class="al"><span>التشغيل والدعم</span><div class="tr"><i style="width:15%"></i></div><b>١٥٪</b></div>
+        <div class="al"><span>احتياطي تشغيلي</span><div class="tr"><i style="width:15%"></i></div><b>١٥٪</b></div>
+        <div class="al"><span>قانوني ومحاسبة</span><div class="tr"><i style="width:10%"></i></div><b>١٠٪</b></div>
+      </div>
+      <div class="card"><h3>ماذا تعني كل بنود الإنفاق</h3>
+        <ul>
+          <li><b>نمو العملاء:</b> إعلانات مدفوعة، محتوى عربي، شراكات مع جامعات ومؤثرين، وأكواد الخصم للتجربة الأولى.</li>
+          <li><b>المنتج والتقنية:</b> إطلاق التطبيق والمحادثة الفورية، وتحسين الحجز، والأمان والاستضافة.</li>
+          <li><b>التشغيل والدعم:</b> دعم العملاء، متابعة جودة الجلسات، وتفعيل الأخصائيين الجدد.</li>
+          <li><b>الاحتياطي:</b> يغطي أشهر تشغيل إن تأخر الإيراد عن التوقع.</li>
+          <li><b>القانوني والمحاسبة:</b> محاسب معتمد، ومحامٍ، وسياسات خصوصية وشروط، وصياغة اتفاقيات الشركاء.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tl">
+      <div class="ph"><div class="when">الأشهر ٠ إلى ٦</div><h3>إثبات الطلب</h3>
+        <ul><li>إطلاق حملات إعلانية صغيرة ومقاسة بدقة.</li><li>تحسين تحويل الزوار إلى حجوزات.</li><li>تفعيل جميع الأخصائيين المنشورين وجداولهم.</li><li>توظيف دعم عملاء بدوام جزئي.</li></ul></div>
+      <div class="ph"><div class="when">الأشهر ٦ إلى ١٢</div><h3>تكرار الحجز</h3>
+        <ul><li>إطلاق المحادثة الفورية والتطبيق.</li><li>باقات المرافقة والعودة للعميل.</li><li>أول تقرير مالي سنوي للشركاء.</li></ul></div>
+      <div class="ph"><div class="when">السنتان ٢ و٣</div><h3>التوسع الجغرافي</h3>
+        <ul><li>التركيز على الخليج والجاليات العربية في أوروبا وأمريكا.</li><li>شراكات مع جامعات وشركات لبرامج دعم الموظفين.</li><li>توسيع الفريق التشغيلي.</li></ul></div>
+      <div class="ph"><div class="when">السنتان ٤ و٥</div><h3>الترسّخ</h3>
+        <ul><li>مواد وبرامج ذاتية الخدمة بجانب الجلسات.</li><li>دراسة جولة تمويل لاحقة أو توزيع أرباح أعلى.</li><li>تقييم الخيارات الاستراتيجية مع الشركاء.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARTNER DASHBOARD ============ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">لوحة الشريك</div>
+    <h2>تقاريرك المالية السنوية في مكان واحد</h2>
+    <p class="lead">كل شريك يحصل على حساب في لوحة خاصة، وهي مخصصة لشيء واحد: الاطلاع على التقرير المالي السنوي للشركة وتحميله. لا تحتاج أن تطلبه من أحد، ولا يطّلع أحد غيرك على حسابك.</p>
+    <div class="grid g2" style="margin-top:26px;align-items:center;">
+      <div class="mock" aria-label="مثال توضيحي للوحة الشريك">
+        <div class="row"><b>التقرير المالي السنوي ٢٠٢٧</b><span class="pdf">PDF ↓</span></div>
+        <div class="row"><b>التقرير المالي السنوي ٢٠٢٦</b><span class="pdf">PDF ↓</span></div>
+        <div class="row" style="color:var(--text-muted-light);font-size:13px;">مثال توضيحي. التقارير الفعلية تُنشر بعد اعتماد الحسابات السنوية.</div>
+      </div>
+      <div class="card"><h3>ماذا ترى في اللوحة؟</h3>
+        <ul>
+          <li>ملخص اتفاقيتك: الخيار والنسبة والمبلغ والتواريخ.</li>
+          <li>قائمة التقارير المالية السنوية، لكل تقرير ملخص وملف PDF للتحميل.</li>
+          <li>دخول بالبريد وكلمة السر نفسها، مع استعادة كلمة السر برمز على البريد.</li>
+        </ul>
+        <p style="margin-top:12px;"><a href="/partner/" class="btn" style="padding:10px 24px;font-size:14px;">دخول الشركاء</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RISKS + FAQ ============ -->
+<section style="background:#fff;">
+  <div class="wrap">
+    <div class="eyebrow">قبل أن تقرر</div>
+    <h2>المخاطر بوضوح</h2>
+    <div class="grid g2" style="margin-top:22px;">
+      <div class="card"><h3>مخاطر الأعمال</h3><ul>
+        <li>الشركة في مرحلة مبكرة جداً، والإيراد الحالي رمزي.</li>
+        <li>قد لا ينمو الطلب كما نتوقع، أو ترتفع كلفة اكتساب العميل.</li>
+        <li>الاعتماد على عدد من الأخصائيين لجودة التجربة.</li>
+        <li>مجال الصحة النفسية حساس تنظيمياً وسمعياً.</li></ul></div>
+      <div class="card"><h3>مخاطر الاستثمار</h3><ul>
+        <li>قد تخسر كامل المبلغ.</li>
+        <li>لا سوق لبيع الحصة، والسيولة محدودة جداً.</li>
+        <li>قد تُخفَّف نسبتك بإصدار أسهم جديدة.</li>
+        <li>الأرباح قد تُعاد استثمارها بدل توزيعها (في الخيار الثاني)، وقد تتأثر بالضرائب وتغيّر العملات.</li></ul></div>
+    </div>
+    <h2 style="margin-top:44px;">أسئلة شائعة</h2>
+    <details><summary>ما الفرق الجوهري بين الخيارين؟</summary><p>الأول مشاركة في أرباح ٥ سنوات بلا ملكية وبلا استرداد لأصل المبلغ، بسعر أقل. الثاني ملكية دائمة لأسهم مسجّلة بسعر أعلى للـ١٪، وتستمر حقوقك فيه بعد السنة الخامسة.</p></details>
+    <details><summary>هل أستطيع شراء أكثر من ١٪؟</summary><p>نعم، حتى سقف الـ٢٠٪ المعروضة بالمجموع. إن زادت الطلبات عن المعروض تُوزَّع الحصص بحسب أسبقية الاتفاق الموقّع.</p></details>
+    <details><summary>متى أحصل على الأرباح؟</summary><p>مرة واحدة سنوياً، بعد اعتماد الحسابات السنوية. وفي الخيار الثاني يرتبط التوزيع بقرار الشركة ولا يُضمن.</p></details>
+    <details><summary>من يستطيع الاستثمار؟</summary><p>هذه الدعوة موجّهة لمستثمرين ذوي خبرة أو ملاءة مالية، يفهمون مخاطر الشركات الناشئة. نطلب منك إقراراً بذلك وإثبات هوية قبل التوقيع.</p></details>
+    <details><summary>هل أحتاج محامياً؟</summary><p>ننصحك بذلك بشدة. سنرسل لك مسودة الاتفاقية لتراجعها مع مستشارك القانوني والمالي قبل التوقيع.</p></details>
+    <details><summary>كيف أدفع، ولمن؟</summary><p>بتحويل مصرفي إلى حساب شركة لمسة المحدودة الرسمي، بعد توقيع الاتفاقية فقط. لن نطلب منك دفع أي مبلغ قبل ذلك.</p></details>
+  </div>
+</section>
+
+<!-- ============ INTEREST FORM ============ -->
+<section id="interest">
+  <div class="wrap">
+    <div style="text-align:center;">
+      <div class="eyebrow">الخطوة الأولى</div>
+      <h2>أبدِ اهتمامك</h2>
+      <p class="lead" style="margin:0 auto;">نموذج اهتمام فقط، ولا يُلزمك بشيء ولا يُلزمنا. سنتواصل معك خلال ٣ أيام عمل.</p>
+    </div>
+    <div class="form-card">
+      <form id="inqForm" novalidate>
+        <div class="frow">
+          <div class="field"><label for="iName">الاسم الكامل *</label><input id="iName" type="text" required maxlength="120" autocomplete="name"></div>
+          <div class="field"><label for="iEmail">البريد الإلكتروني *</label><input id="iEmail" class="ltr" type="email" required maxlength="254" autocomplete="email" autocapitalize="off"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label for="iPhone">الهاتف / واتساب (مع رمز الدولة) *</label><input id="iPhone" class="ltr" type="tel" required maxlength="30" inputmode="tel" autocomplete="tel" placeholder="+962..."></div>
+          <div class="field"><label for="iCountry">بلد الإقامة *</label><input id="iCountry" type="text" required maxlength="80" autocomplete="country-name"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label for="iOpt">الخيار الذي يهمّك</label><select id="iOpt"><option value="undecided">لم أقرر بعد</option><option value="profit_share">الأول: شراكة بالأرباح ٥ سنوات</option><option value="equity">الثاني: حصة ثابتة</option></select></div>
+          <div class="field"><label for="iPct">النسبة المرغوبة (٪)</label><input id="iPct" type="text" inputmode="numeric" maxlength="4" placeholder="من ١ إلى ٢٠" class="ltr"></div>
+        </div>
+        <div class="field"><label for="iMsg">أي ملاحظة أو سؤال (اختياري)</label><textarea id="iMsg" maxlength="1500"></textarea></div>
+        <div class="hp" aria-hidden="true"><label>اترك فارغاً <input type="text" id="iHp" name="hp_z9" tabindex="-1" autocomplete="off" data-lpignore="true"></label></div>
+        <label class="ack"><input type="checkbox" id="iAck" required><span>أقرّ بأنني مستثمر ذو خبرة أو ملاءة مالية، وأفهم أن الاستثمار في شركة ناشئة عالي المخاطر وقد أخسر كامل المبلغ، وأن هذه الصفحة ليست نصيحة استثمارية ولا عرضاً ملزماً.</span></label>
+        <button class="btn" type="submit" id="iBtn">أرسل اهتمامي</button>
+        <div class="msg" id="iMsgBox" role="status" aria-live="polite"></div>
+      </form>
+      <div id="iDone" class="msg ok" style="display:none;font-size:16px;line-height:2;"></div>
+    </div>
+    <p class="partner-link">شريك حالي؟ <a href="/partner/" style="color:#7D5F27;font-weight:700;">ادخل إلى لوحتك</a></p>
+  </div>
+</section>
+
+<!-- ============ LEGAL ============ -->
+<section style="padding:36px 0 56px;background:#fff;">
+  <div class="wrap legal">
+    <p><b>تنبيه قانوني مهم.</b> هذه الصفحة معلومات عامة عن دعوة للمشاركة في شركة لمسة المحدودة (LAMSA LTD)، شركة خاصة محدودة مسجّلة في إنجلترا وويلز برقم 17517932، وليست عرضاً للجمهور ولا ترويجاً مالياً مرخّصاً، ولم تُراجَع أو تُعتمد من أي جهة تنظيمية. هي موجّهة فقط إلى مستثمرين ذوي خبرة أو ملاءة مالية يتواصلون معنا بمبادرتهم. ما ورد فيها ليس نصيحة استثمارية أو مالية أو ضريبية أو قانونية، فاستشر مختصاً مستقلاً قبل أي قرار. التوقعات المستقبلية تقديرات افتراضية قد لا تتحقق. الاستثمار في الشركات الناشئة ينطوي على مخاطر عالية، وقد تخسر كامل المبلغ المستثمَر. لا يوجد أي التزام قانوني إلا بما يرد في اتفاقية مكتوبة وموقّعة من الطرفين.</p>
+  </div>
+</section>
+
+<site-footer></site-footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  const FX = 0.709;
+  const AR = (n, d) => Number(n).toLocaleString('ar-EG', { maximumFractionDigits: d == null ? 0 : d });
+  const normDigits = (v) => String(v || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+
+  /* ---------- live numbers ---------- */
+  (async function () {
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+    try {
+      const { data } = await supabaseClient.rpc('invest_stats');
+      if (!data) return;
+      document.querySelectorAll('#stats [data-k]').forEach(el => { const v = data[el.dataset.k]; if (v != null) el.textContent = AR(v); });
+      if (data.first_paid_booking) {
+        const d = new Date(data.first_paid_booking + 'T00:00:00');
+        document.getElementById('firstPaid').textContent = d.toLocaleDateString('ar-JO', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+    } catch (e) { console.error('invest_stats', e); }
+  })();
+
+  /* ---------- projection model ---------- */
+  const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [9000, 14000, 22000, 32000, 42000], tax: 0.20,
+    scen: { cons: [15, 35, 65, 95, 130], base: [40, 110, 220, 360, 520], opt: [90, 260, 520, 860, 1250] } };
+  function model(key) {
+    let cum = 0, prevPos = 0; const rows = [];
+    M.scen[key].forEach((o, i) => {
+      const rev = o * 12 * M.aov, pre = rev * M.gm - rev * M.mk[i] - M.fx[i], net = pre - Math.max(pre, 0) * M.tax;
+      cum += net; const pos = Math.max(0, cum), payout = pos - prevPos; prevPos = pos;   // الخسائر تُرحَّل قبل أي توزيع
+      rows.push({ year: i + 1, orders: o, rev: rev * FX, net: net * FX, payout: Math.max(0, payout) * FX });
+    });
+    return rows;
+  }
+  let cur = 'base';
+  function drawScenario() {
+    const rows = model(cur), max = Math.max(...rows.map(r => Math.abs(r.net)), 1);
+    document.getElementById('bars').innerHTML = rows.map(r => `<div class="bar"><b>${AR(r.net)}</b><i class="${r.net < 0 ? 'loss' : ''}" style="height:${Math.max(2, Math.abs(r.net) / max * 150)}px"></i><span>السنة ${AR(r.year)}</span></div>`).join('');
+    document.querySelector('#proj tbody').innerHTML = rows.map(r => `<tr><td>السنة ${AR(r.year)}</td><td class="num">${AR(r.orders)}</td><td class="num">${AR(r.rev)} د.أ</td><td class="num ${r.net < 0 ? 'neg' : 'pos'}">${r.net < 0 ? '−' : ''}${AR(Math.abs(r.net))} د.أ</td></tr>`).join('');
+    document.querySelectorAll('#scenSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === cur ? 'true' : 'false'));
+  }
+  document.getElementById('scenSeg').addEventListener('click', (e) => { const b = e.target.closest('button[data-s]'); if (!b) return; cur = b.dataset.s; document.getElementById('cScen').value = cur; drawScenario(); calc(); });
+
+  function calc() {
+    const opt = document.getElementById('cOpt').value, pct = Math.min(20, Math.max(1, parseInt(normDigits(document.getElementById('cPct').value), 10) || 1)), sc = document.getElementById('cScen').value;
+    const cost = pct * (opt === 'A' ? 1000 : 2000), pay = model(sc).reduce((s, r) => s + r.payout, 0) * pct / 100, mult = pay / cost;
+    document.getElementById('rCost').textContent = AR(cost) + ' د.أ';
+    document.getElementById('rPay').textContent = AR(pay) + ' د.أ';
+    document.getElementById('rMult').textContent = AR(mult, mult < 1 ? 2 : 1) + '×';
+    document.getElementById('rNote').textContent = opt === 'A'
+      ? 'الخيار الأول ينتهي بعد ٥ سنوات ولا يُردّ أصل المبلغ، فالمضاعف أعلاه هو كل ما تحصل عليه. إذا كان أقل من ١ فمعناه أنك لن تستردّ ما دفعت.'
+      : 'في الخيار الثاني تستمر حصتك وأرباحها بعد السنة الخامسة، وهذا غير محسوب هنا. وتبقى قيمة الحصة وإمكانية بيعها غير مضمونتين. الرقم يفترض توزيع كامل صافي الربح.';
+  }
+  ['cOpt', 'cPct', 'cScen'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
+  drawScenario(); calc();
+
+  /* ---------- interest form ---------- */
+  const form = document.getElementById('inqForm'), box = document.getElementById('iMsgBox'), btn = document.getElementById('iBtn');
+  const say = (t, ok) => { box.textContent = t; box.className = 'msg ' + (ok ? 'ok' : 'err'); };
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); say('');
+    if (document.getElementById('iHp').value) { done(); return; }                      // روبوت: نُظهر نجاحاً ولا نحفظ
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) { say('تعذّر الاتصال حالياً. راسلنا على واتساب +44 7832 339216.'); return; }
+    const v = (id) => document.getElementById(id).value.trim();
+    const phone = normDigits(v('iPhone')), pctRaw = normDigits(v('iPct')), pct = pctRaw ? parseFloat(pctRaw) : null;
+    if (v('iName').length < 2 || !v('iCountry')) { say('اكتب اسمك وبلد إقامتك.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('iEmail'))) { say('اكتب بريداً إلكترونياً صحيحاً.'); return; }
+    if (!/^[+0-9\s\-().]{6,30}$/.test(phone) || phone.replace(/\D/g, '').length < 6) { say('اكتب رقم هاتف صحيحاً مع رمز الدولة.'); return; }
+    if (pct != null && !(pct >= 1 && pct <= 20)) { say('النسبة لازم تكون بين ١ و٢٠.'); return; }
+    if (!document.getElementById('iAck').checked) { say('يلزم الإقرار بفهم المخاطر قبل الإرسال.'); return; }
+    btn.disabled = true;
+    try {
+      const { data, error } = await supabaseClient.rpc('submit_investor_inquiry', { p_name: v('iName'), p_email: v('iEmail'), p_phone: phone, p_country: v('iCountry'), p_option: v('iOpt'), p_percent: pct, p_message: v('iMsg') || null, p_ack: true });
+      if (error) throw error;
+      if (!data || !data.ok) { say(data && data.error === 'busy' ? 'وصلتنا طلبات كثيرة الآن. حاول بعد ساعة أو راسلنا على واتساب.' : 'تحقق من البيانات وأعد المحاولة.'); btn.disabled = false; return; }
+      done();
+    } catch (err) {
+      console.error('inquiry', err); say('تعذّر الإرسال. تأكد من الإنترنت وأعد المحاولة، أو راسلنا على واتساب +44 7832 339216.'); btn.disabled = false;
+    }
+  });
+  function done() {
+    form.style.display = 'none';
+    const d = document.getElementById('iDone'); d.style.display = 'block';
+    d.textContent = 'وصلنا اهتمامك، شكراً لك. سنتواصل معك خلال ٣ أيام عمل على بريدك أو واتساب. وتذكّر: هذا ليس التزاماً من أي طرف.';
+    d.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+})();
+</script>
+
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

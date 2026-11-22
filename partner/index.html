@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الشريك — بوضوح</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#241D2E;--fog:#F3EEEA;--fog-dim:#E6DFDA;--clarity:#C9A15F;--clarity-soft:#E4C98A;--alert:#B5555B;--ok:#2E6B45;--muted:#6B6072;--text:#2A2130;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--fog);color:var(--text);line-height:1.9;min-height:100vh;}
+  h1,h2,h3{font-family:'Noto Kufi Arabic',sans-serif;}
+  a{color:#7D5F27;}
+  header.top{background:var(--ink);color:var(--fog);padding:16px 0;}
+  .wrap{max-width:860px;margin:0 auto;padding:0 22px;}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{font-family:'Noto Kufi Arabic',sans-serif;font-weight:900;font-size:22px;color:var(--fog);text-decoration:none;} .brand span{color:var(--clarity);}
+  .linkbtn{background:none;border:1px solid rgba(237,231,227,.4);color:var(--fog);border-radius:100px;padding:6px 18px;font-family:inherit;font-size:13px;cursor:pointer;}
+  main{padding:34px 0 60px;}
+  .card{background:#fff;border:1px solid var(--fog-dim);border-radius:18px;padding:26px;margin-bottom:18px;}
+  h1{font-size:26px;color:var(--ink);margin-bottom:6px;} h2{font-size:19px;color:var(--ink);margin-bottom:12px;}
+  .muted{color:var(--muted);font-size:14px;}
+  .hidden{display:none!important;}
+  .field{margin-bottom:14px;} .field label{display:block;font-weight:600;font-size:14px;margin-bottom:5px;}
+  .field input{width:100%;border:1.5px solid var(--fog-dim);border-radius:12px;padding:11px 14px;font-family:inherit;font-size:15px;background:var(--fog);direction:ltr;text-align:left;}
+  .field input:focus{outline:2px solid var(--clarity);outline-offset:1px;background:#fff;}
+  .btn{display:inline-flex;justify-content:center;background:var(--clarity);color:var(--ink);font-weight:700;font-size:15px;padding:12px 28px;border:none;border-radius:100px;cursor:pointer;font-family:inherit;text-decoration:none;}
+  .btn.full{width:100%;} .btn:disabled{opacity:.6;}
+  .msg{font-size:14px;margin-top:12px;min-height:20px;} .msg.err{color:var(--alert);}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;} .kv{background:var(--fog);border-radius:12px;padding:12px 16px;} .kv span{display:block;font-size:12.5px;color:var(--muted);} .kv b{font-size:17px;color:var(--ink);}
+  .rep{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 0;border-bottom:1px solid var(--fog-dim);} .rep:last-child{border-bottom:none;}
+  .rep b{display:block;font-size:16px;color:var(--ink);} .rep p{font-size:13.5px;color:var(--muted);margin-top:2px;}
+  .rep .btn{padding:8px 22px;font-size:13.5px;flex:none;}
+  .empty{padding:24px 0;text-align:center;color:var(--muted);}
+  @media (max-width:560px){.grid{grid-template-columns:1fr;} .rep{flex-direction:column;align-items:flex-start;}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap bar"><a class="brand" href="/">بوضوح<span>.</span></a><button class="linkbtn hidden" id="logout" type="button">تسجيل الخروج</button></div></header>
+<main><div class="wrap">
+
+  <section id="loginView" class="card hidden" style="max-width:460px;margin-inline:auto;">
+    <h1>دخول الشركاء</h1>
+    <p class="muted" style="margin-bottom:18px;">لوحة خاصة بشركاء بوضوح للاطلاع على التقارير المالية السنوية. ادخل بالبريد الذي سجّلناه لك في الاتفاقية.</p>
+    <form id="loginForm">
+      <div class="field"><label for="lgEmail">البريد الإلكتروني</label><input id="lgEmail" type="email" required autocomplete="email"></div>
+      <div class="field"><label for="lgPass">كلمة السر</label><input id="lgPass" type="password" required autocomplete="current-password"></div>
+      <p style="margin:-4px 0 14px;font-size:13px;"><a href="#" id="forgot">نسيت كلمة السر؟</a></p>
+      <button class="btn full" type="submit">دخول</button>
+      <div class="msg err" id="loginMsg"></div>
+    </form>
+    <p style="margin-top:16px;font-size:13px;">أول مرة؟ <a href="/signup/?next=partner">أنشئ حسابك بنفس البريد المسجَّل في الاتفاقية</a> وأكّده بالرمز، وستصل إلى لوحتك مباشرة.</p>
+  </section>
+
+  <section id="unlinkedView" class="card hidden">
+    <h1>حسابك غير مرتبط باتفاقية شراكة</h1>
+    <p class="muted" style="margin-bottom:12px;">سجّلت الدخول بالبريد <b dir="ltr" id="unEmail"></b>، لكنه غير مسجّل كشريك فعّال. إن كان هذا بريدك الصحيح فراسلنا ونربطه، وإن كان مسجّلاً عندنا ببريد آخر فاخرج وادخل به.</p>
+    <a class="btn" id="unWa" target="_blank" rel="noopener">راسلنا على واتساب</a>
+  </section>
+
+  <section id="dashView" class="hidden">
+    <h1 id="hello"></h1>
+    <p class="muted" style="margin-bottom:20px;">هذه اللوحة مخصصة للاطلاع على التقارير المالية السنوية لبوضوح.</p>
+    <div class="card"><h2>ملخص اتفاقيتك</h2><div class="grid" id="agree"></div></div>
+    <div class="card"><h2>التقارير المالية السنوية</h2><div id="reports"></div></div>
+    <p class="muted" style="font-size:12.5px;">هذه التقارير سرّية وللاطلاع الشخصي فقط. الأرقام المستقبلية فيها تقديرات لا ضمانات. لأي استفسار راسلنا على واتساب <span dir="ltr">+44 7832 339216</span> أو hello@bewoduh.com.</p>
+  </section>
+
+</div></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script src="/password-reset.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id), sb = (typeof supabaseClient !== 'undefined') ? supabaseClient : null;
+  const AR = (n) => Number(n).toLocaleString('ar-EG', { maximumFractionDigits: 2 });
+  const fmtD = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('ar-JO', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function show(v) { ['loginView', 'unlinkedView', 'dashView'].forEach(x => $(x).classList.toggle('hidden', x !== v)); $('logout').classList.toggle('hidden', v === 'loginView'); }
+  async function logout() { if (sb) await sb.auth.signOut(); show('loginView'); }
+  $('logout').addEventListener('click', logout);
+  $('forgot').addEventListener('click', (e) => { e.preventDefault(); openPasswordReset({ lang: 'ar', email: $('lgEmail').value, onDone: (em) => { $('lgEmail').value = em; $('lgPass').focus(); } }); });
+
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); const m = $('loginMsg'); m.textContent = '';
+    if (!sb) { m.textContent = 'تعذّر الاتصال بالخدمة.'; return; }
+    const b = e.target.querySelector('button[type=submit]'); b.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: $('lgEmail').value.trim(), password: $('lgPass').value });
+    b.disabled = false;
+    if (error) {
+      const em = error.message || '';
+      m.innerHTML = /confirm/i.test(em) ? 'بريدك لم يُؤكَّد بعد. <a href="/signup/?next=partner">أكّده من هنا</a>.'
+        : /fetch|network|load failed/i.test(em) ? 'تعذّر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.'
+        : 'البريد أو كلمة السر غير صحيحة. إن كانت أول مرة فأنشئ حسابك أولاً، وإن نسيت كلمة السر فاضغط «نسيت كلمة السر».';
+      return;
+    }
+    start();
+  });
+
+  async function start() {
+    if (!sb) { show('loginView'); return; }
+    const { data: sess } = await sb.auth.getSession();
+    if (!sess.session) { show('loginView'); return; }
+    const email = sess.session.user.email || '';
+    const { data: p, error } = await sb.rpc('my_partner');
+    if (error || !p) {
+      $('unEmail').textContent = email;
+      $('unWa').href = 'https://wa.me/447832339216?text=' + encodeURIComponent('مرحباً بوضوح، أنا شريك وسجّلت دخولي ببريد ' + email + ' لكن حسابي غير مرتبط باتفاقيتي. أرجو ربطه.');
+      show('unlinkedView'); return;
+    }
+    $('hello').textContent = 'مرحباً ' + p.full_name;
+    const optTxt = p.option === 'equity' ? 'حصة ثابتة في الشركة' : 'شراكة بالأرباح لمدة ٥ سنوات';
+    $('agree').innerHTML = [['نوع الاتفاقية', optTxt], ['نسبة حصتك', AR(p.percent) + '٪'], ['المبلغ المستثمَر', p.amount_jod != null ? AR(p.amount_jod) + ' د.أ' : '—'], ['تاريخ البدء', fmtD(p.start_date)], ['تاريخ الانتهاء', p.option === 'equity' ? 'دائمة' : fmtD(p.end_date)]]
+      .map(([k, v]) => `<div class="kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
+    const { data: reps } = await sb.rpc('my_partner_reports');
+    const list = Array.isArray(reps) ? reps : [];
+    $('reports').innerHTML = list.length ? list.map(r => `<div class="rep"><div><b>${esc(r.title)}</b>${r.summary ? `<p>${esc(r.summary)}</p>` : ''}</div>${r.file_path ? `<button class="btn" type="button" data-f="${esc(r.file_path)}">تحميل PDF</button>` : ''}</div>`).join('')
+      : '<div class="empty">لم يُنشر أي تقرير سنوي بعد. سيظهر هنا فور اعتماد الحسابات السنوية.</div>';
+    show('dashView');
+  }
+  $('reports').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-f]'); if (!b) return;
+    b.disabled = true; const t = b.textContent; b.textContent = '...';
+    const { data, error } = await sb.storage.from('partner-reports').createSignedUrl(b.dataset.f, 120);
+    b.disabled = false; b.textContent = t;
+    if (error || !data) { alert('تعذّر تحميل الملف الآن. حاول مرة أخرى أو راسلنا.'); return; }
+    window.open(data.signedUrl, '_blank', 'noopener');
+  });
+  start();
+})();
+</script>
+</body>
+</html>

@@ -75,6 +75,7 @@
     { id: 'payouts', label: 'مستحقات الأخصائيين', perm: 'bookings', after: 'sessions' },
     { id: 'feedback', label: 'آراء المستفيدين', perm: 'bookings', after: 'payouts' },
     { id: 'banner', label: 'بانر الرئيسية', perm: 'pages', after: 'promos' },
+    { id: 'investors', label: 'المستثمرون والشركاء', perm: 'super', after: 'admins' },
   ];
   const tabsBar = document.querySelector('.admin-tabs');
   const panelHost = $('tab-packages').parentNode;
@@ -761,7 +762,7 @@
     ['الأخصائيون', ['team', 'applications']],
     ['العملاء', ['users']],
     ['العروض والمحتوى', ['packages', 'promos', 'banner', 'articles', 'static-pages', 'exercises']],
-    ['النظام', ['points', 'admins']],
+    ['النظام', ['points', 'admins', 'investors']],
   ];
   const dash = $('dashboard'), oldTabs = dash.querySelector('.admin-tabs');
   const shell = document.createElement('div'); shell.className = 'kx-shell';
@@ -969,5 +970,127 @@
       [['source', 'campaign', 'content', 'visitors', 'cta_clicks', 'booking_views', 'checkouts', 'bookings', 'paid', 'revenue_usd']].concat(rows.map(r => [r.utm_source, r.utm_campaign, r.utm_content, r.visitors, r.cta_clicks, r.booking_views, r.checkouts, r.bookings, r.paid_bookings, r.revenue_usd]))));
   }
 
-  const LOADERS = { campaigns: loadCampaigns, analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner, feedback: loadFeedback };
+
+  /* ---------- المستثمرون والشركاء (للمشرف العام فقط) ---------- */
+  const INQ_ST = { new: ['جديد', '#C0562E'], contacted: ['تم التواصل', '#7D5F27'], in_talks: ['قيد التفاوض', '#4A3B5C'], signed: ['وُقّع', '#2E6B45'], declined: ['اعتذر', '#6B6072'] };
+  const OPT_LABEL = { profit_share: 'شراكة بالأرباح ٥ سنوات', equity: 'حصة ثابتة', undecided: 'لم يحدد' };
+  async function loadInvestors() {
+    const el = $('tab-investors');
+    el.innerHTML = '<h2 class="section-title">المستثمرون والشركاء</h2><p class="section-sub">جارٍ التحميل...</p>';
+    const [qi, qp, qr] = await Promise.all([
+      sb().from('investor_inquiries').select('*').order('created_at', { ascending: false }).limit(500),
+      sb().from('partners').select('*').order('created_at', { ascending: true }),
+      sb().from('partner_reports').select('*').order('year', { ascending: false }),
+    ]);
+    if (qi.error || qp.error || qr.error) { el.innerHTML = '<h2 class="section-title">المستثمرون والشركاء</h2><p class="section-sub">تعذّر التحميل (هذا القسم للمشرف العام فقط).</p>'; console.error(qi.error || qp.error || qr.error); return; }
+    const inq = qi.data || [], partners = qp.data || [], reports = qr.data || [];
+    const wa = (ph) => 'https://wa.me/' + String(ph || '').replace(/[^\d]/g, '').replace(/^00/, '');
+    el.innerHTML = `<h2 class="section-title">المستثمرون والشركاء</h2>
+      <p class="section-sub">صفحة العرض: <a href="/invest/" target="_blank" rel="noopener">/invest/</a> (غير مفهرسة ولا مرتبطة بالقائمة). لوحة الشريك: <a href="/partner/" target="_blank" rel="noopener">/partner/</a>. هذا القسم ظاهر للمشرف العام فقط.</p>
+
+      <div class="kx-card"><h3>طلبات الاهتمام (${inq.length})</h3>
+        <div class="table-scroll" style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>التاريخ</th><th>الاسم والتواصل</th><th>الخيار</th><th>الحالة</th><th>ملاحظاتي</th></tr></thead><tbody>
+        ${inq.length ? inq.map(r => `<tr><td>${fmtDT(r.created_at)}</td>
+          <td><b>${esc(r.full_name)}</b><div style="font-size:12px;">${esc(r.country)} · <a href="mailto:${esc(r.email)}">${esc(r.email)}</a> · <a href="${esc(wa(r.phone))}" target="_blank" rel="noopener">${esc(r.phone)}</a></div>${r.message ? `<div style="font-size:12px;color:var(--text-muted-light);max-width:340px;">${esc(r.message)}</div>` : ''}</td>
+          <td>${esc(OPT_LABEL[r.option_pref] || r.option_pref)}${r.percent_wanted != null ? ' · ' + num(r.percent_wanted, 1) + '٪' : ''}</td>
+          <td><select data-inq="${esc(r.id)}" class="kx-inq-st">${Object.entries(INQ_ST).map(([k, v]) => `<option value="${k}"${r.status === k ? ' selected' : ''}>${v[0]}</option>`).join('')}</select></td>
+          <td><input type="text" data-note="${esc(r.id)}" value="${esc(r.admin_notes || '')}" maxlength="500" style="min-width:160px;"></td></tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted-light);">لا توجد طلبات بعد.</td></tr>'}
+        </tbody></table></div></div>
+
+      <div class="kx-card"><h3>الشركاء (${partners.length})</h3>
+        <p class="section-sub" style="margin-top:-4px;">يسجّل الشريك دخوله إلى <b>/partner/</b> بنفس البريد المسجَّل هنا. إن لم يكن لديه حساب فليُنشئه من <span dir="ltr" style="user-select:all;">https://bewoduh.com/signup/?next=partner</span> ويؤكّده بالرمز. لا يرى الشريك إلا ملخص اتفاقيته وتقاريره السنوية المنشورة.</p>
+        <button type="button" class="btn-primary" id="ptNew" style="width:auto; margin:0 0 12px;">+ شريك جديد</button>
+        <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>الشريك</th><th>الاتفاقية</th><th>الفترة</th><th>الحالة</th><th></th></tr></thead><tbody>
+        ${partners.length ? partners.map(p => `<tr><td><b>${esc(p.full_name)}</b><div style="font-size:12px;" dir="ltr">${esc(p.email)}</div></td>
+          <td>${p.option === 'equity' ? 'حصة ثابتة' : 'شراكة بالأرباح ٥ سنوات'} · ${num(p.percent, 2)}٪${p.amount_jod != null ? ' · ' + num(p.amount_jod) + ' د.أ' : ''}</td>
+          <td style="font-size:12.5px;">${p.start_date ? fmtD(p.start_date) : '—'}${p.option === 'profit_share' && p.end_date ? ' ← ' + fmtD(p.end_date) : ''}</td>
+          <td>${p.status === 'active' ? '<span class="kx-st" style="--bg:#E1F0E6;--c:#2E6B45;">فعّال</span>' : '<span class="kx-st">منتهٍ</span>'}</td>
+          <td><button type="button" class="btn-secondary" data-pe="${esc(p.id)}" style="padding:5px 12px;">تعديل</button> <button type="button" class="btn-secondary" data-pd="${esc(p.id)}" style="padding:5px 12px;color:var(--alert);">حذف</button></td></tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted-light);">لا يوجد شركاء بعد.</td></tr>'}
+        </tbody></table></div></div>
+
+      <div class="kx-card"><h3>التقارير المالية السنوية (${reports.length})</h3>
+        <p class="section-sub" style="margin-top:-4px;">ترفع ملف PDF لكل سنة، ولا يراه الشركاء إلا بعد تفعيل «منشور». الملفات في مساحة خاصة لا يصل إليها غير الشركاء الفعّالين.</p>
+        <button type="button" class="btn-primary" id="rpNew" style="width:auto; margin:0 0 12px;">+ تقرير سنوي</button>
+        <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>السنة</th><th>العنوان</th><th>الملف</th><th>النشر</th><th></th></tr></thead><tbody>
+        ${reports.length ? reports.map(r => `<tr><td><b>${num(r.year)}</b></td><td>${esc(r.title)}${r.summary ? `<div style="font-size:12px;color:var(--text-muted-light);max-width:320px;">${esc(r.summary)}</div>` : ''}</td>
+          <td>${r.file_path ? '<span class="kx-st" style="--bg:#E1F0E6;--c:#2E6B45;">PDF مرفوع</span>' : '<span class="kx-st">بلا ملف</span>'}</td>
+          <td>${r.published ? '<span class="kx-st" style="--bg:#E1F0E6;--c:#2E6B45;">منشور</span>' : '<span class="kx-st">مسودة</span>'}</td>
+          <td><button type="button" class="btn-secondary" data-re="${esc(r.id)}" style="padding:5px 12px;">تعديل</button> <button type="button" class="btn-secondary" data-rd="${esc(r.id)}" style="padding:5px 12px;color:var(--alert);">حذف</button></td></tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted-light);">لا توجد تقارير بعد.</td></tr>'}
+        </tbody></table></div></div>`;
+
+    el.querySelectorAll('[data-inq]').forEach(sel => sel.addEventListener('change', async () => { const { error } = await sb().from('investor_inquiries').update({ status: sel.value }).eq('id', sel.dataset.inq); toast(error ? 'تعذّر الحفظ' : 'تم الحفظ', error ? 'err' : 'ok'); }));
+    el.querySelectorAll('[data-note]').forEach(inp => inp.addEventListener('change', async () => { const { error } = await sb().from('investor_inquiries').update({ admin_notes: inp.value.trim() || null }).eq('id', inp.dataset.note); toast(error ? 'تعذّر الحفظ' : 'تم الحفظ', error ? 'err' : 'ok'); }));
+    $('ptNew').addEventListener('click', () => editPartner(null));
+    el.querySelectorAll('[data-pe]').forEach(b => b.addEventListener('click', () => editPartner(partners.find(x => x.id === b.dataset.pe))));
+    el.querySelectorAll('[data-pd]').forEach(b => b.addEventListener('click', async () => { if (!confirm('حذف هذا الشريك؟ سيفقد الوصول إلى اللوحة فوراً. (لإنهاء اتفاقية بدون حذف السجل استخدم «تعديل» ثم الحالة «منتهٍ».)')) return; const { error } = await sb().from('partners').delete().eq('id', b.dataset.pd); if (error) toast('تعذّر الحذف', 'err'); loadInvestors(); }));
+    $('rpNew').addEventListener('click', () => editReport(null, reports));
+    el.querySelectorAll('[data-re]').forEach(b => b.addEventListener('click', () => editReport(reports.find(x => x.id === b.dataset.re), reports)));
+    el.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', async () => {
+      const r = reports.find(x => x.id === b.dataset.rd); if (!confirm('حذف تقرير ' + r.year + ' نهائياً مع ملفه؟')) return;
+      if (r.file_path) await sb().storage.from('partner-reports').remove([r.file_path]);
+      const { error } = await sb().from('partner_reports').delete().eq('id', r.id); if (error) toast('تعذّر الحذف', 'err'); loadInvestors();
+    }));
+  }
+  function editPartner(p) {
+    const v = p || { option: 'profit_share', status: 'active' };
+    const f = (id, label, val, type, extra) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type || 'text'}" value="${esc(val == null ? '' : val)}" ${extra || ''}></div>`;
+    const mm = modal(`<div class="hd"><h3>${p ? 'تعديل شريك' : 'شريك جديد'}</h3><button type="button" class="kx-x" aria-label="إغلاق">&times;</button></div>
+      <div class="kx-two">${f('ptName', 'الاسم الكامل *', v.full_name, 'text', 'maxlength="120"')}${f('ptEmail', 'البريد (للدخول) *', v.email, 'email', 'dir="ltr" maxlength="254"')}</div>
+      <div class="kx-two"><div class="field"><label for="ptOpt">نوع الاتفاقية</label><select id="ptOpt"><option value="profit_share"${v.option === 'profit_share' ? ' selected' : ''}>شراكة بالأرباح ٥ سنوات</option><option value="equity"${v.option === 'equity' ? ' selected' : ''}>حصة ثابتة</option></select></div>
+        ${f('ptPct', 'النسبة (٪) *', v.percent, 'number', 'min="0.01" max="20" step="0.01"')}</div>
+      <div class="kx-two">${f('ptAmt', 'المبلغ المدفوع (د.أ)', v.amount_jod, 'number', 'min="0" step="0.01"')}<div class="field"><label for="ptSt">الحالة</label><select id="ptSt"><option value="active"${v.status === 'active' ? ' selected' : ''}>فعّال</option><option value="ended"${v.status === 'ended' ? ' selected' : ''}>منتهٍ</option></select></div></div>
+      <div class="kx-two">${f('ptStart', 'تاريخ البدء', v.start_date, 'date')}${f('ptEnd', 'تاريخ الانتهاء (يُحسب ٥ سنوات تلقائياً للخيار الأول)', v.end_date, 'date')}</div>
+      <div class="field"><label for="ptNotes">ملاحظات داخلية</label><textarea id="ptNotes" rows="2" maxlength="500">${esc(v.notes || '')}</textarea></div>
+      <button type="button" class="btn-primary" id="ptSave" style="width:auto;">حفظ</button> <span id="ptMsg" style="font-size:13px;color:var(--alert);"></span>`);
+    const q = (id) => mm.el.querySelector('#' + id);
+    q('ptSave').addEventListener('click', async () => {
+      const email = q('ptEmail').value.trim().toLowerCase(), name = q('ptName').value.trim(), pct = parseFloat(q('ptPct').value), opt = q('ptOpt').value;
+      if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || !(pct > 0 && pct <= 20)) { q('ptMsg').textContent = 'اكتب الاسم والبريد ونسبة بين 0 و20.'; return; }
+      let start = q('ptStart').value || null, end = q('ptEnd').value || null;
+      if (opt === 'profit_share' && start && !end) { const d = new Date(start + 'T00:00:00Z'); d.setUTCFullYear(d.getUTCFullYear() + 5); end = d.toISOString().slice(0, 10); }
+      if (opt === 'equity') end = null;
+      const row = { email, full_name: name, option: opt, percent: pct, amount_jod: q('ptAmt').value === '' ? null : parseFloat(q('ptAmt').value), start_date: start, end_date: end, status: q('ptSt').value, notes: q('ptNotes').value.trim() || null };
+      q('ptSave').disabled = true;
+      const { error } = p ? await sb().from('partners').update(row).eq('id', p.id) : await sb().from('partners').insert(row);
+      q('ptSave').disabled = false;
+      if (error) { q('ptMsg').textContent = /duplicate|unique/i.test(error.message || '') ? 'هذا البريد مسجَّل كشريك من قبل.' : 'تعذّر الحفظ: ' + error.message; return; }
+      mm.close(); loadInvestors();
+    });
+  }
+  function editReport(r, all) {
+    const v = r || { published: false, year: new Date().getFullYear() - 1 };
+    const mm = modal(`<div class="hd"><h3>${r ? 'تعديل تقرير ' + v.year : 'تقرير مالي سنوي جديد'}</h3><button type="button" class="kx-x" aria-label="إغلاق">&times;</button></div>
+      <div class="kx-two"><div class="field"><label for="rpYear">السنة المالية *</label><input id="rpYear" type="number" min="2026" max="2100" value="${esc(v.year)}"${r ? ' disabled' : ''}></div>
+        <div class="field"><label for="rpTitle">العنوان *</label><input id="rpTitle" type="text" maxlength="160" value="${esc(v.title || '')}" placeholder="التقرير المالي السنوي ${esc(v.year)}"></div></div>
+      <div class="field"><label for="rpSum">ملخص قصير يظهر للشريك</label><textarea id="rpSum" rows="3" maxlength="600">${esc(v.summary || '')}</textarea></div>
+      <div class="field"><label>ملف PDF (حتى 20 ميغابايت)</label>
+        <p id="rpCur" style="font-size:12.5px;color:var(--text-muted-light);margin:0 0 6px;">${v.file_path ? 'يوجد ملف مرفوع. اختر ملفاً جديداً لاستبداله.' : 'لم يُرفع ملف بعد.'}</p>
+        <input type="file" id="rpFile" accept="application/pdf"></div>
+      <label style="display:flex;gap:8px;align-items:center;margin:8px 0 16px;font-size:14px;"><input type="checkbox" id="rpPub"${v.published ? ' checked' : ''} style="width:auto;"> منشور (يراه الشركاء الفعّالون)</label>
+      <button type="button" class="btn-primary" id="rpSave" style="width:auto;">حفظ</button> <span id="rpMsg" style="font-size:13px;color:var(--alert);"></span>`);
+    const q = (id) => mm.el.querySelector('#' + id);
+    q('rpSave').addEventListener('click', async () => {
+      const year = parseInt(q('rpYear').value, 10), title = q('rpTitle').value.trim(), file = q('rpFile').files[0];
+      if (!(year >= 2026) || title.length < 3) { q('rpMsg').textContent = 'اكتب السنة والعنوان.'; return; }
+      if (!r && all.some(x => x.year === year)) { q('rpMsg').textContent = 'يوجد تقرير لهذه السنة. عدّله بدل إنشاء جديد.'; return; }
+      if (file && (file.type !== 'application/pdf' || file.size > 20 * 1048576)) { q('rpMsg').textContent = 'الملف يجب أن يكون PDF بحجم أقصاه 20 ميغابايت.'; return; }
+      if (q('rpPub').checked && !file && !(r && r.file_path)) { q('rpMsg').textContent = 'ارفع ملف PDF قبل النشر.'; return; }
+      q('rpSave').disabled = true; q('rpMsg').textContent = file ? 'جارٍ رفع الملف...' : '';
+      let file_path = r ? r.file_path : null;
+      if (file) {
+        const path = year + '/annual-report-' + year + '-' + Date.now() + '.pdf';
+        const up = await sb().storage.from('partner-reports').upload(path, file, { contentType: 'application/pdf', upsert: false });
+        if (up.error) { console.error(up.error); q('rpMsg').textContent = 'تعذّر رفع الملف.'; q('rpSave').disabled = false; return; }
+        if (r && r.file_path) await sb().storage.from('partner-reports').remove([r.file_path]);
+        file_path = path;
+      }
+      const pub = q('rpPub').checked, row = { title, summary: q('rpSum').value.trim() || null, file_path, published: pub, published_at: pub ? ((r && r.published_at) || new Date().toISOString()) : null };
+      const { error } = r ? await sb().from('partner_reports').update(row).eq('id', r.id) : await sb().from('partner_reports').insert({ ...row, year });
+      q('rpSave').disabled = false;
+      if (error) { console.error(error); q('rpMsg').textContent = 'تعذّر الحفظ: ' + error.message; return; }
+      mm.close(); loadInvestors();
+    });
+  }
+
+  const LOADERS = { campaigns: loadCampaigns, analytics: loadAnalytics, sessions: loadSessions, payouts: loadPayouts, banner: loadBanner, feedback: loadFeedback, investors: loadInvestors };
 })();
