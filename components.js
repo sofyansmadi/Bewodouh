@@ -55,6 +55,8 @@ const STYLE_FIX = `
   site-footer{ display:block; background:var(--ink); color:var(--text-muted-dark); padding:44px 0 28px; text-align:center; font-size:12.5px; }
   site-footer .brand{ display:block; margin-bottom:10px; font-size:18px; }
   site-footer[variant="rich"]{ padding:56px 0 32px; text-align:initial; }
+  site-footer a.footer-invest{ display:inline-block !important; border:1.5px solid #C9A15F; color:#E4C98A !important; padding:5px 16px; border-radius:100px; font-weight:700; margin-top:4px; transition:.2s; }
+  site-footer a.footer-invest:hover{ background:#C9A15F; color:#241D2E !important; }
   .nav-account-icon{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,.15); color:#B7ACC4; transition:.2s; flex-shrink:0; }
   .nav-account-icon svg{ width:16px; height:16px; }
   .nav-account-icon:hover{ border-color:#C9A15F; color:#F3EEEA; }
@@ -224,6 +226,7 @@ class SiteFooter extends HTMLElement {
           <a href="${h('/faq/')}">${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
           <a href="${h('/daily-exercises/')}">${t('تمارين يومية', 'Daily exercises')}</a>
           <a href="${h('/sales-page/')}">${t('احجز استشارة', 'Book a Consultation')}</a>
+          <a href="${h('/invest/')}" class="footer-invest">${t('الشراكة والاستثمار', 'Partner & invest')}</a>
         </div>
         <div class="footer-col">
           <h4>${t('تواصل', 'Connect')}</h4>
@@ -265,6 +268,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
         <a href="${h('/daily-exercises/')}" ${linkStyle}>${t('تمارين يومية', 'Daily exercises')}</a>
         <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>
+        <a href="${h('/invest/')}" class="footer-invest">${t('الشراكة والاستثمار', 'Partner & invest')}</a>
         <a href="https://wa.me/447832339216" target="_blank" rel="noopener" ${linkStyle}>${t('واتساب', 'WhatsApp')} <bdi dir="ltr">+44 7832 339216</bdi></a>
         <a href="${h('/terms/')}" ${linkStyle}>${t('شروط الاستخدام', 'Terms of Use')}</a>
         <a href="${h('/privacy/')}" ${linkStyle}>${t('سياسة الخصوصية', 'Privacy Policy')}</a>
