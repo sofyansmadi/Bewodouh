@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partner &amp; invest in Bewoduh</title>
-<meta name="description" content="An invitation to experienced investors to take part in 20% of Bewoduh: two participation options, projections built on stated assumptions, and annual financial reports through a partner dashboard.">
+<meta name="description" content="An invitation to experienced investors to take part in 20% of Bewoduh's profits under written agreements: two participation options, projections built on stated assumptions, and annual financial reports through a partner dashboard.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -120,6 +120,7 @@
   .msg{font-size:14px;margin-top:12px;min-height:20px;} .msg.err{color:var(--alert);} .msg.ok{color:var(--ok);font-weight:600;}
   .legal{font-size:12.5px;color:var(--text-muted-light);line-height:1.8;max-width:900px;} .legal b{color:var(--ink);}
   .partner-link{font-size:14px;margin-top:14px;text-align:center;}
+  .stat-row.four{grid-template-columns:repeat(4,1fr);} .hero .reg{font-size:14.5px;color:var(--text-muted-dark);margin:-12px 0 22px;max-width:700px;}
   .units[hidden]{display:none;}
   .units{background:var(--ink);color:var(--fog);border-radius:20px;padding:22px 26px;margin:26px 0 8px;display:grid;grid-template-columns:auto 1fr;gap:10px 28px;align-items:center;}
   .units .big{font-size:44px;font-weight:700;color:var(--clarity-soft);line-height:1.1;} .units .big small{font-size:16px;font-weight:500;color:var(--text-muted-dark);}
@@ -129,7 +130,8 @@
   .card ol{padding-inline-start:22px;} .card ol li{margin-bottom:8px;}
   @media (max-width:880px){ .units{grid-template-columns:1fr;} .stages{grid-template-columns:1fr;} }
   @media (max-width:880px){
-    section{padding:52px 0;} .facts{grid-template-columns:repeat(2,1fr);} .g3,.stat-row,.steps,.tl,.result,.calc{grid-template-columns:1fr;}
+    section{padding:52px 0;}
+    .stat-row.four{grid-template-columns:repeat(2,1fr);} .facts{grid-template-columns:repeat(2,1fr);} .g3,.stat-row,.steps,.tl,.result,.calc{grid-template-columns:1fr;}
     .g2,.offer,.two-col,.frow{grid-template-columns:1fr;} .al{grid-template-columns:110px 1fr 46px;}
   }
 </style>
@@ -142,16 +144,17 @@
   <div class="wrap">
     <div class="eyebrow">A limited partnership invitation · 20% only</div>
     <h1>Help us build the <em>Arabic-language mental health platform</em> from day one</h1>
-    <p class="sub">We are opening 20% of Bewoduh to a small number of partners who believe in the idea early: small tickets, two clear options, and annual financial reports delivered through a dashboard made for partners.</p>
+    <p class="sub">We are opening 20% of Bewoduh's profits, through written agreements, to a small number of partners who believe in the idea early: small tickets, two clear options, and annual financial reports delivered through a dashboard made for partners.</p>
+    <p class="reg">Bewoduh is a project registered within LAMSA LTD, registered in England and Wales.</p>
     <div class="cta">
       <a class="btn" href="#interest">Register your interest</a>
       <a class="btn ghost" href="#offer">See the offer</a>
     </div>
     <span class="warn-pill">Very early stage: this is a high-risk investment</span>
     <div class="facts" aria-label="Offer summary">
-      <div class="fact"><b>20%</b><span>Total equity on offer</span></div>
+      <div class="fact"><b>20%</b><span>Total share of profits on offer</span></div>
       <div class="fact"><b>JOD 1,000</b><span>per 1% — 5-year profit-share agreement</span></div>
-      <div class="fact"><b>JOD 2,000</b><span>per 1% — fixed shareholding</span></div>
+      <div class="fact"><b>JOD 2,000</b><span>per 1% — fixed stake under a permanent agreement</span></div>
       <div class="fact"><b>Yearly</b><span>financial report in your own dashboard</span></div>
     </div>
   </div>
@@ -161,7 +164,7 @@
   <div class="wrap">
     <div class="eyebrow">About us</div>
     <h2>Bewoduh: therapy sessions in Arabic, with specialists whose credentials we review</h2>
-    <p class="lead">A platform that connects people looking for psychological support or guidance with psychology specialists and life skills coaches, through online sessions in Arabic, for the Arab world and Arabs abroad. It is operated by LAMSA LTD, registered in England and Wales, No. 17517932.</p>
+    <p class="lead">A platform that connects people looking for psychological support or guidance with psychology specialists and life skills coaches, through online sessions in Arabic, for the Arab world and Arabs abroad. Bewoduh is a project registered within LAMSA LTD, registered in England and Wales, No. 17517932.</p>
     <div class="grid g3" style="margin-top:28px;">
       <div class="card"><h3>The problem</h3><p>Mental health support in Arabic is scarce and scattered, often expensive or hard to reach, and there is no trusted way to book, pay and follow up in one place.</p></div>
       <div class="card"><h3>What we are building</h3><p>A clear digital marketplace: the client picks a specialist and a time in their own time zone, pays securely, then follows and rates their sessions. Specialists manage their schedule and fees from a dedicated portal.</p></div>
@@ -181,17 +184,15 @@
 <section style="background:#fff;">
   <div class="wrap">
     <div class="eyebrow">Where we are today</div>
-    <h2>The numbers as they are, unpolished</h2>
-    <p class="lead">We built the supply side first (specialists), then opened booking to the public only recently. Revenue is therefore still symbolic; what we are measuring now is the strength of the network and the first signs of demand.</p>
-    <div class="stat-row" id="stats" aria-live="polite">
+    <h2>The strength of the network today</h2>
+    <p class="lead">We built the supply side first (specialists) and prepared the platform technically, so what we show here is the strength of the network. Detailed financial information is shared with serious prospects during the discussion stage, before any signing.</p>
+    <div class="stat-row four" id="stats" aria-live="polite">
       <div class="stat"><b data-k="specialists">—</b><span>specialists and coaches published on the platform</span></div>
       <div class="stat"><b data-k="countries">—</b><span>countries our team lives in</span></div>
       <div class="stat"><b data-k="applications">—</b><span>applications received from specialists</span></div>
       <div class="stat"><b data-k="users">—</b><span>registered accounts</span></div>
-      <div class="stat"><b data-k="sessions_done">—</b><span>sessions delivered and recorded</span></div>
-      <div class="stat"><b data-k="paying_clients">—</b><span>clients who have paid so far</span></div>
     </div>
-    <div class="honest"><b>To be clear:</b> our first paid booking was on <span id="firstPaid">November 2026</span>, and revenue to date does not cover any operating costs. We are at the stage of validating demand after launching booking. These numbers update automatically from the platform's database.</div>
+    <div class="honest"><b>Note:</b> the platform is at a very early stage. Detailed financial and operating data is shared with qualified prospects during the discussion and before signing, and is not published here. The numbers above update automatically from the platform's database.</div>
   </div>
 </section>
 
@@ -215,8 +216,8 @@
 <section id="offer" class="dark">
   <div class="wrap">
     <div class="eyebrow">The offer</div>
-    <h2>20% of Bewoduh, in two options</h2>
-    <p class="lead">Each 1% is one unit, and 20 units are offered in total. You choose one option per agreement, and the minimum is one unit (1%).</p>
+    <h2>20% of Bewoduh's profits, in two options (agreements)</h2>
+    <p class="lead">What is offered is a total of 20% of Bewoduh's net profit, divided into 20 units (each unit is 1%). All of it is sold under <b>written agreements</b> between the investor and LAMSA LTD, not as shares in the company. You choose one option per agreement, and the minimum is one unit (1%).</p>
     <div class="offer">
       <div class="opt" style="color:var(--text-on-light);">
         <h3>Option 1: 5-year profit-share agreement</h3>
@@ -227,22 +228,21 @@
           <li>Your share is paid once a year, within 60 days of the annual accounts being approved.</li>
           <li>Losses are carried forward and deducted from later profits before any payout (a conservative formula).</li>
           <li>An annual financial report through the partner dashboard.</li>
-          <li class="no">No shares, no vote, no ownership in the company.</li>
+          <li class="no">A contractual agreement only: no shares, no vote, and nothing registered in your name at Companies House.</li>
           <li class="no">The agreement ends after year 5 and the original amount is not repaid.</li>
         </ul>
       </div>
       <div class="opt feat" style="color:var(--text-on-light);">
-        <span class="tag">Permanent ownership</span>
-        <h3>Option 2: fixed shareholding</h3>
+        <span class="tag">Permanent agreement</span>
+        <h3>Option 2: fixed stake under an agreement (permanent)</h3>
         <div class="price">JOD 2,000 <small>per 1%</small></div>
         <div class="usd">about $2,820 per 1%</div>
         <ul>
-          <li>Ordinary shares registered in your name in LAMSA LTD for your percentage, permanent and with no end date.</li>
-          <li>Your share of profits whenever the board decides to distribute dividends.</li>
-          <li>Pre-emption right to subscribe for your share of any new shares, and the right to see the accounts.</li>
-          <li>Voting rights like any shareholder, in proportion to your stake (a minority stake).</li>
+          <li>Each year you receive your fixed percentage, set in the text of the agreement, of the company's net profit after tax, with no end date, for as long as the agreement remains in force.</li>
+          <li>Your share is paid once a year, within 60 days of the annual accounts being approved, and losses are carried forward before any payout.</li>
           <li>An annual financial report through the partner dashboard.</li>
-          <li class="no">There is no ready market to sell the stake, so exiting may be hard. The price implies a company valuation of about JOD 200,000.</li>
+          <li class="no">A contractual agreement only: no shares, no vote, and nothing registered in your name at Companies House.</li>
+          <li class="no">There is no ready market to transfer your right to someone else, so exiting may be hard. What happens to your right if the project or company is sold is set in the agreement before signing.</li>
         </ul>
       </div>
     </div>
@@ -251,8 +251,8 @@
       <tbody>
         <tr><td>Price of 1%</td><td class="num">JOD 1,000</td><td class="num">JOD 2,000</td></tr>
         <tr><td>Total raised if the full 20% is sold under this option</td><td class="num">JOD 20,000</td><td class="num">JOD 40,000</td></tr>
-        <tr><td>Implied company valuation (price of 1% × 100)</td><td class="num">JOD 100,000</td><td class="num">JOD 200,000</td></tr>
-        <tr><td>Duration of the right</td><td class="num">5 years</td><td class="num">Permanent</td></tr>
+        <tr><td>Implied project valuation (price of 1% × 100)</td><td class="num">JOD 100,000</td><td class="num">JOD 200,000</td></tr>
+        <tr><td>Duration of the right</td><td class="num">5 years</td><td class="num">Permanent (while the agreement is in force)</td></tr>
       </tbody></table></div>
     <p class="note" style="color:var(--text-muted-dark);">The actual amount raised will fall between JOD 20,000 and JOD 40,000 depending on the mix of the two options. The full terms are set in the signed agreement; what you see here is a summary.</p>
   </div>
@@ -279,7 +279,7 @@
     <div class="card" style="margin-top:18px;">
       <h3>Work out your share</h3>
       <div class="calc">
-        <div><label for="cOpt">Option</label><select id="cOpt"><option value="A">1: 5-year profit-share</option><option value="B">2: fixed shareholding</option></select></div>
+        <div><label for="cOpt">Option</label><select id="cOpt"><option value="A">1: 5-year profit-share</option><option value="B">2: fixed stake (permanent)</option></select></div>
         <div><label for="cPct">Percentage (%)</label><input id="cPct" type="number" min="1" max="20" step="1" value="1" inputmode="numeric"></div>
         <div><label for="cScen">Scenario</label><select id="cScen"><option value="cons">Conservative</option><option value="base" selected>Base</option><option value="opt">Optimistic</option></select></div>
       </div>
@@ -312,7 +312,7 @@
     <div class="eyebrow">Why Bewoduh</div>
     <h2>Advantages of partnering with us</h2>
     <div class="grid g3" style="margin-top:26px;">
-      <div class="card"><h3>Early entry, small ticket</h3><p>Start from JOD 1,000, priced for a pre-revenue stage, before the company grows and gains value, if it succeeds.</p></div>
+      <div class="card"><h3>Early entry, small ticket</h3><p>Start from JOD 1,000, priced for a pre-revenue stage, before the project grows and its profits increase, if it succeeds.</p></div>
       <div class="card"><h3>A market in Arabic</h3><p>Demand for trusted mental health support in Arabic is rising, while the digitally organised supply is small. We focus on exactly that gap.</p></div>
       <div class="card"><h3>Asset-light model</h3><p>No inventory and no premises. Specialists work remotely and are paid per session, so our costs grow with revenue.</p></div>
       <div class="card"><h3>A ready specialist network</h3><p>Dozens of specialists and coaches from several countries have already joined, and applications keep coming without any paid advertising for supply.</p></div>
@@ -332,13 +332,13 @@
       <div class="step"><h3>Identity checks</h3><p>We ask for proof of identity and investor status before going further, as any serious company does.</p></div>
       <div class="step"><h3>Read and sign</h3><p>You get enough time to read the agreement and consult your lawyer, then both parties sign a written copy.</p></div>
       <div class="step"><h3>Transfer the funds</h3><p>The amount is transferred to the company's official account only after signing, and you receive official receipts.</p></div>
-      <div class="step"><h3>Your rights start</h3><p>Under Option 2, the shares are allotted and formally registered; under Option 1, the agreement takes effect. Your partner dashboard is opened.</p></div>
+      <div class="step"><h3>Your rights start</h3><p>Under both options the agreement takes effect when the funds arrive, your stake is entered in the company's register of partners, and your partner dashboard is opened.</p></div>
     </div>
     <div class="two-col">
       <div class="card yes"><h3>What we commit to in writing</h3>
         <ul>
           <li>A signed written agreement, legally reviewed and governed by the law of England and Wales (where the company is registered).</li>
-          <li>Formal registration of shares under Option 2: the register of members and the allotment filing at Companies House.</li>
+          <li>Your name, percentage and transfer reference entered in the register of partners kept by LAMSA LTD, and a signed copy of the agreement in your hands.</li>
           <li>An annual financial report for each partner through the dashboard, and sight of the approved accounts.</li>
           <li>Use of funds in line with the expansion plan published here, and telling partners about any material change to it.</li>
           <li>Treating partners in the same class on the same terms.</li>
@@ -348,8 +348,8 @@
         <ul>
           <li>We do not guarantee profit or any rate of return.</li>
           <li>We do not guarantee the return of your original amount, and you may lose all of it.</li>
-          <li>We do not guarantee liquidity: you may not find a buyer for your stake later.</li>
-          <li>Under Option 2 your percentage may be diluted if new shares are issued and you do not take part.</li>
+          <li>We do not guarantee that you can transfer or sell your right to anyone else: the agreement decides that.</li>
+          <li>Your right is contractual: if the company fails, you are an unsecured contractual creditor.</li>
           <li>Future figures on this page are estimates, not guarantees.</li>
         </ul>
       </div>
@@ -364,7 +364,7 @@
     <p class="lead">No payment is taken through the website. Payment is by bank transfer only, after the agreement is signed, to the company's official account. Your stake is not secured until the money has arrived.</p>
     <div class="units" id="units" hidden>
       <div class="big"><span id="unitsLeft">—</span> <small>of <span id="unitsTotal">20</span> units available now</small></div>
-      <div><div class="trk"><i id="unitsBar" style="width:0%"></i></div><div class="meta">Each unit equals 1% of the company. The number updates automatically. A reserved unit counts as taken until it is paid for or its reservation lapses.</div></div>
+      <div><div class="trk"><i id="unitsBar" style="width:0%"></i></div><div class="meta">Each unit equals 1% of the company's profits. The number updates automatically. A reserved unit counts as taken until it is paid for or its reservation lapses.</div></div>
     </div>
     <div class="grid g2" style="margin-top:22px;align-items:start;">
       <div class="card"><h3>How payment works</h3>
@@ -381,17 +381,16 @@
         <div class="stages">
           <div class="stg"><b>1. Reserved</b>You signed and we await the transfer. The stake is held for you during the deadline.</div>
           <div class="stg"><b>2. Paid</b>The funds arrived and a receipt was issued. Your dashboard opens.</div>
-          <div class="stg"><b>3. Active</b>Your shares are allotted and registered (Option 2), or the profit-share agreement is in force (Option 1).</div>
+          <div class="stg"><b>3. Active</b>The agreement is in force and your stake is entered in the company's register of partners.</div>
         </div>
-        <p style="margin-bottom:6px;"><b>Option 2 (shares):</b></p>
+        <p style="margin-bottom:6px;"><b>How your stake is secured (both options):</b></p>
         <ul>
-          <li>A board resolution to allot new shares to you; shares are not allotted before the funds arrive.</li>
-          <li>The allotment is filed with Companies House and entered in the register of members.</li>
-          <li>A share certificate is issued in your name, all within the deadlines set by law.</li>
-          <li>A shareholders' agreement covers pre-emption rights, transfer restrictions and access to the accounts.</li>
+          <li>Both parties sign the agreement and you keep a signed copy.</li>
+          <li>When the funds arrive, your stake (name, percentage, date, reference) is entered in the register of partners kept by LAMSA LTD.</li>
+          <li>No shares are issued and nothing is filed at Companies House: your right is entirely contractual.</li>
+          <li>We never sell more than 20% in total (see the counter above); if demand exceeds supply, stakes are ordered by signed agreements.</li>
+          <li>Because the right is contractual, its strength is the strength of the agreement itself, and if the company fails you are an unsecured contractual creditor.</li>
         </ul>
-        <p style="margin:10px 0 6px;"><b>Option 1 (profit share):</b></p>
-        <ul><li>A contract only: no shares and no Companies House filing. Your right is what the agreement says, and you are an unsecured contractual creditor.</li></ul>
       </div>
     </div>
   </div>
@@ -462,20 +461,20 @@
     <h2>The risks, plainly</h2>
     <div class="grid g2" style="margin-top:22px;">
       <div class="card"><h3>Business risks</h3><ul>
-        <li>The company is at a very early stage and current revenue is symbolic.</li>
+        <li>The company is at a very early stage and has not yet shown it can generate profit.</li>
         <li>Demand may not grow as we expect, or the cost of acquiring a client may rise.</li>
         <li>The quality of the experience depends on a number of specialists.</li>
         <li>Mental health is a sensitive field for regulation and reputation.</li></ul></div>
       <div class="card"><h3>Investment risks</h3><ul>
         <li>You may lose the entire amount.</li>
-        <li>There is no market to sell the stake, and liquidity is very limited.</li>
-        <li>Your percentage may be diluted by new share issues.</li>
+        <li>Your right is contractual: there are no shares to sell on a market, and transferring it or exiting is very limited.</li>
+        <li>You are an unsecured contractual creditor: if the company fails you may receive nothing.</li>
         <li>Profits may be reinvested rather than distributed (under Option 2), and may be affected by taxes and currency changes.</li></ul></div>
     </div>
     <h2 style="margin-top:44px;">Frequently asked questions</h2>
-    <details><summary>What is the core difference between the two options?</summary><p>Option 1 is a 5-year share in profits with no ownership and no repayment of the original amount, at a lower price. Option 2 is permanent ownership of registered shares at a higher price per 1%, and your rights continue after year 5.</p></details>
-    <details><summary>Can I buy more than 1%?</summary><p>Yes, up to the 20% on offer in total. If requests exceed what is offered, shares are allocated in the order of signed agreements.</p></details>
-    <details><summary>When do I receive profits?</summary><p>Once a year, after the annual accounts are approved. Under Option 2, distributions depend on a company decision and are not guaranteed.</p></details>
+    <details><summary>What is the core difference between the two options?</summary><p>Both are contractual agreements for a share of net profit, with no shares. Option 1 lasts 5 years at a lower price and ends with no repayment of the original amount. Option 2 is permanent while the agreement is in force, at a higher price per 1%.</p></details>
+    <details><summary>Can I buy more than 1%?</summary><p>Yes, up to the 20% on offer in total. If requests exceed what is offered, stakes are allocated in the order of signed agreements.</p></details>
+    <details><summary>When do I receive profits?</summary><p>Once a year, after the annual accounts are approved. Only if profits are made, which is not guaranteed.</p></details>
     <details><summary>Who can invest?</summary><p>This invitation is aimed at experienced or high-net-worth investors who understand the risks of early-stage companies. We ask you to confirm this and to provide proof of identity before signing.</p></details>
     <details><summary>Do I need a lawyer?</summary><p>We strongly recommend it. We will send you the draft agreement to review with your legal and financial advisers before signing.</p></details>
     <details><summary>How do I pay, and to whom?</summary><p>By bank transfer to the official account of LAMSA LTD, only after the agreement is signed. We will never ask you to pay anything before that.</p></details>
@@ -500,7 +499,7 @@
           <div class="field"><label for="iCountry">Country of residence *</label><input id="iCountry" type="text" required maxlength="80" autocomplete="country-name"></div>
         </div>
         <div class="frow">
-          <div class="field"><label for="iOpt">Option you are considering</label><select id="iOpt"><option value="undecided">Not decided yet</option><option value="profit_share">1: 5-year profit-share</option><option value="equity">2: fixed shareholding</option></select></div>
+          <div class="field"><label for="iOpt">Option you are considering</label><select id="iOpt"><option value="undecided">Not decided yet</option><option value="profit_share">1: 5-year profit-share</option><option value="equity">2: fixed stake (permanent)</option></select></div>
           <div class="field"><label for="iPct">Percentage wanted (%)</label><input id="iPct" type="text" inputmode="numeric" maxlength="4" placeholder="1 to 20"></div>
         </div>
         <div class="field"><label for="iMsg">Any note or question (optional)</label><textarea id="iMsg" maxlength="1500"></textarea></div>
@@ -517,7 +516,7 @@
 
 <section style="padding:36px 0 56px;background:#fff;">
   <div class="wrap legal">
-    <p><b>Important legal notice.</b> This page is general information about an invitation to take part in LAMSA LTD, a private limited company registered in England and Wales, No. 17517932. It is not an offer to the public or an authorised financial promotion, and has not been reviewed or approved by any regulator. It is directed only at experienced or high-net-worth investors who contact us on their own initiative. Nothing here is investment, financial, tax or legal advice, so take independent advice before any decision. Forward-looking figures are hypothetical estimates that may not materialise. Investing in early-stage companies carries a high risk, and you may lose the entire amount invested. No legal commitment exists except what is set out in a written agreement signed by both parties.</p>
+    <p><b>Important legal notice.</b> This page is general information about an invitation to take part in the profits of the Bewoduh project, registered within LAMSA LTD, a private limited company registered in England and Wales, No. 17517932. It is not an offer to the public or an authorised financial promotion, what is offered is a set of contractual agreements, not shares in the company, and the page has not been reviewed or approved by any regulator. It is directed only at experienced or high-net-worth investors who contact us on their own initiative. Nothing here is investment, financial, tax or legal advice, so take independent advice before any decision. Forward-looking figures are hypothetical estimates that may not materialise. Investing in early-stage companies carries a high risk, and you may lose the entire amount invested. No legal commitment exists except what is set out in a written agreement signed by both parties.</p>
   </div>
 </section>
 
@@ -543,10 +542,6 @@
         document.getElementById('unitsBar').style.width = Math.min(100, taken / total * 100) + '%'; document.getElementById('units').hidden = false;
       }
       document.querySelectorAll('#stats [data-k]').forEach(el => { const v = data[el.dataset.k]; if (v != null) el.textContent = N(v); });
-      if (data.first_paid_booking) {
-        const d = new Date(data.first_paid_booking + 'T00:00:00');
-        document.getElementById('firstPaid').textContent = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      }
     } catch (e) { console.error('invest_stats', e); }
   })();
 
@@ -581,7 +576,7 @@
     document.getElementById('rMult').textContent = N(mult, mult < 1 ? 2 : 1) + '×';
     document.getElementById('rNote').textContent = opt === 'A'
       ? 'Option 1 ends after 5 years and the original amount is not repaid, so the multiple above is everything you receive. If it is below 1, you would not get back what you paid.'
-      : 'Under Option 2 your stake and its profits continue after year 5, which is not counted here. The value of the stake and the ability to sell it are not guaranteed. The figure assumes the full net profit is distributed.';
+      : 'Under Option 2 your right continues after year 5 for as long as the agreement remains in force, which is not counted here. The ability to transfer your right or exit is not guaranteed. The figure assumes the full net profit is distributed.';
   }
   ['cOpt', 'cPct', 'cScen'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
   drawScenario(); calc();

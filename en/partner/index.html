@@ -114,7 +114,7 @@
       show('unlinkedView'); return;
     }
     $('hello').textContent = 'Welcome, ' + p.full_name;
-    const optTxt = p.option === 'equity' ? 'Fixed shareholding' : '5-year profit-share agreement';
+    const optTxt = p.option === 'equity' ? 'Fixed stake under an agreement (permanent)' : '5-year profit-share agreement';
     $('agree').innerHTML = [['Agreement type', optTxt], ['Your stake', AR(p.percent) + '%'], ['Amount invested', p.amount_jod != null ? 'JOD ' + AR(p.amount_jod) : '—'], ['Start date', fmtD(p.start_date)], ['End date', p.option === 'equity' ? 'Permanent' : fmtD(p.end_date)]]
       .map(([k, v]) => `<div class="kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
     const { data: reps } = await sb.rpc('my_partner_reports');

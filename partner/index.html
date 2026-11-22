@@ -114,7 +114,7 @@
       show('unlinkedView'); return;
     }
     $('hello').textContent = 'مرحباً ' + p.full_name;
-    const optTxt = p.option === 'equity' ? 'حصة ثابتة في الشركة' : 'شراكة بالأرباح لمدة 5 سنوات';
+    const optTxt = p.option === 'equity' ? 'حصة ثابتة بموجب اتفاقية (دائمة)' : 'شراكة بالأرباح لمدة 5 سنوات';
     $('agree').innerHTML = [['نوع الاتفاقية', optTxt], ['نسبة حصتك', AR(p.percent) + '%'], ['المبلغ المستثمَر', p.amount_jod != null ? AR(p.amount_jod) + ' د.أ' : '—'], ['تاريخ البدء', fmtD(p.start_date)], ['تاريخ الانتهاء', p.option === 'equity' ? 'دائمة' : fmtD(p.end_date)]]
       .map(([k, v]) => `<div class="kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
     const { data: reps } = await sb.rpc('my_partner_reports');
