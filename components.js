@@ -219,15 +219,15 @@ class SiteFooter extends HTMLElement {
           <a href="${h('/quizzes/')}">${t('الاختبارات', 'Quizzes')}</a>
           <a href="${h('/about/')}">${t('من نحن', 'About')}</a>
           <a href="${h('/team/')}">${t('فريق بوضوح', 'Our Team')}</a>
-          ${IS_EN ? '' : `<a href="${h('/join/')}">انضم إلينا</a>`}
+          <a href="${h('/join/')}">${t('انضم إلينا', 'Join us')}</a>
           <a href="${h('/specialist-portal/')}">${t('دخول الأخصائيين', 'Specialists sign in')}</a>
           <a href="${h('/faq/')}">${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
-          ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}">تمارين يومية</a>`}
+          <a href="${h('/daily-exercises/')}">${t('تمارين يومية', 'Daily exercises')}</a>
           <a href="${h('/sales-page/')}">${t('احجز استشارة', 'Book a Consultation')}</a>
         </div>
         <div class="footer-col">
           <h4>${t('تواصل', 'Connect')}</h4>
-          <a href="https://instagram.com" target="_blank" rel="noopener">${t('إنستغرام', 'Instagram')}</a>
+          <a href="https://www.instagram.com/Bewoduh" target="_blank" rel="noopener">${t('إنستغرام', 'Instagram')}</a>
           <a href="https://tiktok.com" target="_blank" rel="noopener">${t('تيك توك', 'TikTok')}</a>
           <a href="https://wa.me/447832339216" target="_blank" rel="noopener">${t('واتساب', 'WhatsApp')} <bdi dir="ltr">+44 7832 339216</bdi></a>
           <a href="${h('/contact/')}">${t('راسلنا', 'Contact us')}</a>
@@ -240,7 +240,7 @@ class SiteFooter extends HTMLElement {
         </div>
       </div>
       <p class="footer-bottom">${t(
-        '©Bewodouh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.',
+        '©Bewoduh 2026 بوضوح — كل المحتوى توعوي وليس بديلاً عن استشارة أو علاج نفسي مختص.',
         '©Bewoduh 2026 — All content is educational and is not a substitute for consultation or treatment by a mental health professional.'
       )}</p>
       ${this.emergencyLine()}
@@ -260,10 +260,10 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/quizzes/')}" ${linkStyle}>${t('الاختبارات', 'Quizzes')}</a>
         <a href="${h('/about/')}" ${linkStyle}>${t('من نحن', 'About')}</a>
         <a href="${h('/team/')}" ${linkStyle}>${t('فريق بوضوح', 'Our Team')}</a>
-        ${IS_EN ? '' : `<a href="${h('/join/')}" ${linkStyle}>انضم إلينا</a>`}
+        <a href="${h('/join/')}" ${linkStyle}>${t('انضم إلينا', 'Join us')}</a>
         <a href="${h('/specialist-portal/')}" ${linkStyle}>${t('دخول الأخصائيين', 'Specialists sign in')}</a>
         <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
-        ${IS_EN ? '' : `<a href="${h('/daily-exercises/')}" ${linkStyle}>تمارين يومية</a>`}
+        <a href="${h('/daily-exercises/')}" ${linkStyle}>${t('تمارين يومية', 'Daily exercises')}</a>
         <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>
         <a href="https://wa.me/447832339216" target="_blank" rel="noopener" ${linkStyle}>${t('واتساب', 'WhatsApp')} <bdi dir="ltr">+44 7832 339216</bdi></a>
         <a href="${h('/terms/')}" ${linkStyle}>${t('شروط الاستخدام', 'Terms of Use')}</a>

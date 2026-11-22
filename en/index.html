@@ -218,11 +218,20 @@
   .newsletter-form button:hover{ background:var(--clarity-soft); }
   .newsletter-note{ margin-top:14px; font-size:12px; color:var(--text-muted-dark); }
 
+  /* ---------- FOOTER ---------- */
+  .footer-grid{ display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr; gap:32px; padding-bottom:36px; border-bottom:1px solid rgba(255,255,255,.08); }
+  .footer-brand p{ font-size:14px; margin-top:14px; max-width:36ch; }
+  .footer-col h4{ font-size:13px; color:var(--fog); margin-bottom:16px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+  .footer-col a{ display:block; font-size:14px; margin-bottom:10px; color:var(--text-muted-dark); transition:.2s; }
+  .footer-col a:hover{ color:var(--clarity-soft); }
+  .footer-bottom{ padding-top:24px; font-size:12.5px; text-align:center; }
+
   /* reveal on scroll */
   .reveal{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
   .reveal.in{ opacity:1; transform:translateY(0); }
 
   @media (max-width:780px){
+    .footer-grid{ grid-template-columns:1fr; gap:28px; }
     .nav-links{ display:none; }
     .values-grid{ grid-template-columns:1fr; }
     .pillars-grid{ grid-template-columns:1fr; }
