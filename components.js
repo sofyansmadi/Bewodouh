@@ -73,6 +73,13 @@ const STYLE_FIX = `
   site-nav .nav-links a.nav-cta:hover{ background:#E4C98A; color:#241D2E; }
   site-nav .lang-switch{ border:1.5px solid rgba(255,255,255,.18); color:#B7ACC4; border-radius:100px; padding:5px 13px; font-size:12.5px; font-weight:700; text-decoration:none; transition:.2s; line-height:1.6; flex-shrink:0; }
   site-nav .lang-switch:hover{ border-color:#C9A15F; color:#F3EEEA; }
+  site-nav .nav-spec{ display:inline-flex; align-items:center; gap:6px; border:1.5px solid rgba(201,161,95,.55); color:#E4C98A; border-radius:100px; padding:6px 14px; font-size:12.5px; font-weight:700; text-decoration:none; white-space:nowrap; transition:.2s; }
+  site-nav .nav-spec svg{ width:14px; height:14px; }
+  site-nav .nav-spec:hover{ background:#C9A15F; border-color:#C9A15F; color:#241D2E; }
+  site-nav .nav-spec:focus-visible{ outline:2px solid #C9A15F; outline-offset:2px; }
+  site-nav .nav-links a{ white-space:nowrap; }
+  @media (max-width:1040px){ site-nav .nav-links{ gap:14px; } site-nav .nav-actions{ gap:10px; } site-nav .nav-spec{ padding:8px; } site-nav .nav-spec-t{ display:none; } site-nav .wrap{ padding-inline:16px; } }
+  @media (max-width:780px){ site-nav .nav-spec{ display:none; } }
   site-nav .nav-burger{ display:none; width:38px; height:38px; border-radius:50%; border:1.5px solid rgba(255,255,255,.18); background:none; cursor:pointer; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:0; flex-shrink:0; }
   site-nav .nav-burger span{ display:block; width:16px; height:1.5px; background:#B7ACC4; border-radius:2px; transition:transform .2s, opacity .2s; }
   site-nav .nav-burger[aria-expanded="true"] span:nth-child(1){ transform:translateY(5.5px) rotate(45deg); }
@@ -83,6 +90,7 @@ const STYLE_FIX = `
   site-nav .mobile-menu.open{ display:block; }
   site-nav .mobile-menu a{ display:block; padding:14px 4px; color:#EDE7E3; font-size:16px; font-weight:600; border-bottom:1px solid rgba(255,255,255,.07); text-decoration:none; }
   site-nav .mobile-menu a.active{ color:#E4C98A; }
+  site-nav .mobile-menu a.mm-spec{ color:#E4C98A; }
   site-nav .mobile-menu a.mm-cta{ margin-top:18px; text-align:center; background:#C9A15F; color:#241D2E; border-radius:100px; border:none; padding:13px; }
   @media (max-width:780px){ site-nav .nav-links{ display:none; } site-nav .nav-burger{ display:flex; } }
   @media (min-width:781px){ site-nav .mobile-menu{ display:none !important; } }
@@ -125,12 +133,17 @@ class SiteNav extends HTMLElement {
     const langSwitchHtml = isRunningInApp() ? '' : `
         <a href="${counterpart}" class="lang-switch" id="langSwitch" lang="${IS_EN ? 'ar' : 'en'}" hreflang="${IS_EN ? 'ar' : 'en'}" aria-label="${IS_EN ? 'التبديل إلى العربية' : 'Switch to English'}">${IS_EN ? 'عربي' : 'EN'}</a>`;
 
+    // دخول الأخصائيين: ظاهر بالهيدر (سطح المكتب) وبقائمة الموبايل، لا بالفوتر
+    const specLinkHtml = isRunningInApp() ? '' : `
+        <a href="${appHref(lp('/specialist-portal/'))}" class="nav-spec" title="${t('دخول الأخصائيين', 'Specialists sign in')}" aria-label="${t('دخول الأخصائيين', 'Specialists sign in')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg><span class="nav-spec-t">${t('دخول الأخصائيين', 'Specialists sign in')}</span></a>`;
+
     // قائمة الموبايل (همبرغر): تظهر تحت عرض 780px بدل الروابط المخفية
     const burgerHtml = isRunningInApp() ? '' : `
         <button type="button" class="nav-burger" id="navBurger" aria-label="${t('القائمة', 'Menu')}" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>`;
     const menuHtml = isRunningInApp() ? '' : `
     <nav class="mobile-menu" id="mobileMenu" aria-label="${t('القائمة الرئيسية', 'Main menu')}">
       ${links.map(l => `<a href="${appHref(lp(l.href))}"${l.key && l.key === active ? ' class="active"' : ''}>${l.label}</a>`).join('')}
+      <a href="${appHref(lp('/specialist-portal/'))}" class="mm-spec">${t('دخول الأخصائيين', 'Specialists sign in')}</a>
       <a href="${appHref(lp('/sales-page/'))}" class="mm-cta">${t('احجز استشارة', 'Book a Consultation')}</a>
     </nav>`;
 
@@ -142,6 +155,7 @@ class SiteNav extends HTMLElement {
           ${linksHtml}
           <a href="${appHref(lp('/sales-page/'))}" class="nav-cta">${t('احجز استشارة', 'Book a Consultation')}</a>
         </div>
+        ${specLinkHtml}
         ${langSwitchHtml}
         ${accountIconHtml}
         ${burgerHtml}
@@ -222,7 +236,6 @@ class SiteFooter extends HTMLElement {
           <a href="${h('/about/')}">${t('من نحن', 'About')}</a>
           <a href="${h('/team/')}">${t('فريق بوضوح', 'Our Team')}</a>
           <a href="${h('/join/')}">${t('انضم إلينا', 'Join us')}</a>
-          <a href="${h('/specialist-portal/')}">${t('دخول الأخصائيين', 'Specialists sign in')}</a>
           <a href="${h('/faq/')}">${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
           <a href="${h('/daily-exercises/')}">${t('تمارين يومية', 'Daily exercises')}</a>
           <a href="${h('/sales-page/')}">${t('احجز استشارة', 'Book a Consultation')}</a>
@@ -264,7 +277,6 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/about/')}" ${linkStyle}>${t('من نحن', 'About')}</a>
         <a href="${h('/team/')}" ${linkStyle}>${t('فريق بوضوح', 'Our Team')}</a>
         <a href="${h('/join/')}" ${linkStyle}>${t('انضم إلينا', 'Join us')}</a>
-        <a href="${h('/specialist-portal/')}" ${linkStyle}>${t('دخول الأخصائيين', 'Specialists sign in')}</a>
         <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
         <a href="${h('/daily-exercises/')}" ${linkStyle}>${t('تمارين يومية', 'Daily exercises')}</a>
         <a href="${h('/sales-page/')}" ${linkStyle}>${t('احجز استشارة', 'Book a Consultation')}</a>

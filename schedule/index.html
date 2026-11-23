@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مواعيد جلساتك — بوضوح</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#241D2E; --ink-soft:#372C46; --fog:#F3EEEA; --fog-dim:#E6DFDA; --clarity:#C9A15F; --clarity-soft:#E4C98A; --alert:#B5555B; --ok:#2E6B45;
+    --text-muted-light:#6B6072; --text-on-light:#2A2130; --max:640px; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans Arabic', sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.9; -webkit-font-smoothing:antialiased; }
+  h1,h2,.kufi{ font-family:'Noto Kufi Arabic', sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 20px; }
+  main{ padding:34px 0 90px; }
+  .card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; padding:26px 24px; box-shadow:0 24px 50px -34px rgba(36,29,46,.3); }
+  .head h1{ font-size:20px; line-height:1.5; margin-bottom:4px; }
+  .head p{ font-size:13.5px; color:var(--text-muted-light); }
+  .paid{ display:flex; gap:10px; align-items:flex-start; background:#EEF6F0; border:1px solid #CFE3D5; color:#1F4F33; border-radius:14px; padding:12px 14px; margin:16px 0 6px; font-size:13.5px; line-height:1.8; }
+  .paid svg{ flex:none; width:20px; height:20px; margin-top:3px; }
+  .ok-banner{ background:#EEF6F0; border:1px solid #CFE3D5; color:#1F4F33; border-radius:14px; padding:12px 14px; margin:16px 0 0; font-size:13.5px; font-weight:600; }
+  .list{ display:grid; gap:10px; margin:18px 0 4px; }
+  .srow{ display:flex; align-items:center; gap:14px; border:1.5px solid var(--fog-dim); border-radius:16px; padding:13px 15px; background:#fff; }
+  .srow.is-open{ border-color:var(--clarity); background:#FFFCF6; }
+  .sno{ flex:none; width:38px; height:38px; border-radius:50%; background:var(--ink); color:var(--clarity-soft); display:grid; place-items:center; font-family:'IBM Plex Sans',sans-serif; font-weight:700; font-size:15px; }
+  .srow.done .sno{ background:var(--fog-dim); color:var(--text-muted-light); }
+  .sinfo{ flex:1; min-width:0; }
+  .sinfo b{ display:block; font-size:14.5px; }
+  .sinfo small{ display:block; color:var(--text-muted-light); font-size:12.5px; }
+  .sinfo small.pending{ color:#8A5A12; font-weight:600; }
+  .num{ font-family:'IBM Plex Sans',sans-serif; font-variant-numeric:tabular-nums; }
+  .pill{ flex:none; border:none; border-radius:100px; padding:9px 18px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer; background:var(--clarity); color:var(--ink); }
+  .pill.ghost{ background:transparent; border:1.5px solid var(--clarity); color:#7D5F27; }
+  .badge{ flex:none; font-size:12px; font-weight:700; padding:4px 12px; border-radius:100px; background:var(--fog); color:var(--text-muted-light); }
+  .badge.ok{ background:#E7F2EA; color:var(--ok); }
+  .picker{ margin-top:16px; border-top:1px dashed var(--fog-dim); padding-top:18px; }
+  .picker h2{ font-size:16px; margin-bottom:4px; }
+  .picker .sub{ font-size:12.5px; color:var(--text-muted-light); margin-bottom:12px; }
+  .tzrow{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:12.5px; color:var(--text-muted-light); margin-bottom:14px; }
+  .tzrow select{ font-family:inherit; font-size:12.5px; padding:6px 10px; border-radius:10px; border:1.5px solid var(--fog-dim); background:#fff; max-width:100%; }
+  .days{ display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px; scrollbar-width:thin; }
+  .day{ flex:none; border:1.5px solid var(--fog-dim); background:#fff; border-radius:14px; padding:8px 14px; font-family:inherit; cursor:pointer; text-align:center; min-width:74px; }
+  .day small{ display:block; font-size:11.5px; color:var(--text-muted-light); }
+  .day b{ font-size:14px; }
+  .day.on{ border-color:var(--ink); background:var(--ink); color:#fff; }
+  .day.on small{ color:var(--clarity-soft); }
+  .times{ display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; }
+  .time{ border:1.5px solid var(--fog-dim); background:#fff; border-radius:12px; padding:9px 6px; font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:14px; cursor:pointer; font-variant-numeric:tabular-nums; }
+  .time:hover{ border-color:var(--clarity); }
+  .time.on{ background:var(--clarity); border-color:var(--clarity); color:var(--ink); }
+  .actions{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .btn{ flex:1; min-width:150px; background:var(--clarity); color:var(--ink); border:none; border-radius:100px; padding:14px 22px; font-family:inherit; font-weight:700; font-size:15.5px; cursor:pointer; }
+  .btn:disabled{ background:var(--fog-dim); color:var(--text-muted-light); cursor:default; }
+  .btn.ghost{ background:transparent; border:1.5px solid var(--fog-dim); color:var(--text-muted-light); flex:0 0 auto; min-width:0; }
+  .chosen{ margin-top:14px; font-size:14px; padding:10px 14px; border-radius:12px; background:var(--fog); }
+  .err{ color:var(--alert); font-size:13.5px; margin-top:10px; min-height:20px; }
+  .empty{ background:var(--fog); border-radius:14px; padding:16px; font-size:13.5px; color:var(--text-muted-light); }
+  .empty a{ color:#7D5F27; font-weight:700; text-decoration:underline; }
+  .foot{ font-size:12.5px; color:var(--text-muted-light); margin-top:18px; line-height:1.8; }
+  .big{ font-size:44px; margin-bottom:6px; text-align:center; }
+  .center{ text-align:center; }
+</style>
+</head>
+<body>
+<site-nav></site-nav>
+<main><div class="wrap"><div class="card" id="box"><p class="center" style="color:var(--text-muted-light);" id="loading"></p></div></div></main>
+<app-bottom-nav></app-bottom-nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script src="/tz-utils.js"></script>
+<script>
+(function () {
+const EN = document.documentElement.lang === 'en';
+const t = (ar, en) => EN ? en : ar;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const box = document.getElementById('box');
+document.title = t('مواعيد جلساتك — بوضوح', 'Schedule your sessions — Bewoduh');
+document.getElementById('loading').textContent = t('جارٍ التحميل...', 'Loading...');
+const TOKEN = new URLSearchParams(location.search).get('c') || '';
+const LOC = EN ? 'en-GB' : 'ar-JO-u-nu-latn';
+const WA = '<a href="https://wa.me/447832339216" target="_blank" rel="noopener"><bdi dir="ltr">+44 7832 339216</bdi></a>';
+const HOUR = 3600e3;
+
+const S = { info: null, tz: 'Asia/Amman', pick: null, day: null, slot: null, busy: false, flash: '' };
+
+const msg = (icon, title, text) => {
+  box.innerHTML = `<div class="big">${icon}</div><h1 class="kufi center" style="font-size:20px;margin-bottom:8px;">${esc(title)}</h1><p class="center" style="color:var(--text-muted-light);">${text}</p><p class="center" style="margin-top:20px;"><a href="${EN ? '/en/' : '/'}" style="color:var(--clarity);font-weight:700;text-decoration:underline;">${t('العودة للرئيسية', 'Back to home')}</a></p>`;
+};
+
+const fmtDT = (iso) => BWTZ.fmtDateTime(iso, S.tz, LOC);
+const fmtTime = (iso) => BWTZ.fmtTime(iso, S.tz, LOC);
+const fmtDayLong = (iso) => BWTZ.fmtDay(iso, S.tz, LOC);
+
+function bounds(seq) {
+  const ss = S.info.sessions;
+  const prev = ss.filter(x => x.seq < seq && x.scheduled_at).map(x => +new Date(x.scheduled_at));
+  const next = ss.filter(x => x.seq > seq && x.scheduled_at).map(x => +new Date(x.scheduled_at));
+  return { lo: prev.length ? Math.max(...prev) + HOUR : 0, hi: next.length ? Math.min(...next) - HOUR : Infinity };
+}
+function slotsFor(seq) {
+  const b = bounds(seq);
+  return (S.info.slots || []).filter(x => { const ts = +new Date(x.starts_at); return ts >= b.lo && ts <= b.hi; });
+}
+
+function render() {
+  const i = S.info;
+  const spName = i.specialist ? ((EN ? i.specialist.name_en : i.specialist.name) || i.specialist.name || '') : '';
+  const total = i.sessions.length;
+  const rows = i.sessions.map(s => {
+    const done = s.status !== 'scheduled';
+    const open = S.pick === s.seq;
+    let info, act = '';
+    if (done) { info = `<small>${t('منتهية', 'Finished')}</small>`; act = `<span class="badge ok">${t('تمّت', 'Done')} ✓</span>`; }
+    else if (s.scheduled_at) {
+      info = `<small class="num">${esc(fmtDT(s.scheduled_at))}</small>`;
+      if (s.can_change) act = `<button type="button" class="pill ghost" data-pick="${s.seq}">${t('غيّر الموعد', 'Change date')}</button>`;
+      else act = `<span class="badge">${t('محدَّدة', 'Booked')}</span>`;
+    } else {
+      info = `<small class="pending">${t('لم يُحدَّد موعدها بعد', 'No date chosen yet')}</small>`;
+      act = s.can_change ? `<button type="button" class="pill" data-pick="${s.seq}">${t('اختر الموعد', 'Choose date')}</button>` : '';
+    }
+    return `<div class="srow${done ? ' done' : ''}${open ? ' is-open' : ''}"><div class="sno">${s.seq}</div><div class="sinfo"><b>${esc(t('الجلسة ', 'Session ')) }<span class="num">${s.seq}</span> ${esc(t('من ', 'of '))}<span class="num">${total}</span></b>${info}</div>${act}</div>`;
+  }).join('');
+
+  box.innerHTML = `<div class="head"><h1>${esc(t('مواعيد جلساتك', 'Schedule your sessions'))}</h1><p>${esc(i.package || '')}${spName ? ' · ' + esc(t('مع ', 'with ') + spName) : ''}</p></div>
+    <div class="paid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>${t('باقتك مدفوعة بالكامل. اختيار مواعيد جلساتك لا يتطلب أي دفع إضافي، فقط اختر الوقت المناسب لك.', 'Your package is fully paid. Choosing your session dates needs no extra payment, just pick the time that suits you.')}</span></div>
+    ${S.flash ? `<div class="ok-banner" role="status">${esc(S.flash)}</div>` : ''}
+    <div class="list">${rows}</div>
+    <div id="pickerHost"></div>
+    <p class="foot">${t('يمكنك تغيير موعد أي جلسة قادمة حتى ٢٤ ساعة قبلها. للجلسة الأولى أو لأي مساعدة راسلنا على واتساب ', 'You can change the date of any upcoming session up to 24 hours before it. For the first session, or any help, message us on WhatsApp ')}${WA}.</p>`;
+  box.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => { S.pick = +b.dataset.pick; S.day = null; S.slot = null; S.flash = ''; render(); const h = document.getElementById('pickerHost'); if (h) h.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }));
+  if (S.pick) renderPicker();
+}
+
+function renderPicker() {
+  const host = document.getElementById('pickerHost'); if (!host) return;
+  const seq = S.pick, slots = slotsFor(seq);
+  if (!S.info.specialist) { host.innerHTML = `<div class="picker"><div class="empty">${t('لم يُحدَّد أخصائي لباقتك بعد. تواصل معنا وسنرتّب لك الأمر: ', 'No specialist has been assigned to your package yet. Contact us and we will sort it out: ')}${WA}</div></div>`; return; }
+  if (!slots.length) { host.innerHTML = `<div class="picker"><h2>${esc(t('الجلسة ', 'Session ') + seq)}</h2><div class="empty">${t('لا توجد مواعيد متاحة عند الأخصائي في هذه الفترة حالياً. تواصل معنا على واتساب ', 'The specialist has no free times in this period right now. Message us on WhatsApp ')}${WA}${t(' وسنرتّب لك موعداً.', ' and we will arrange one for you.')}</div><div class="actions"><button type="button" class="btn ghost" id="cancelPick">${t('إغلاق', 'Close')}</button></div></div>`; document.getElementById('cancelPick').onclick = () => { S.pick = null; render(); }; return; }
+  const byDay = {};
+  slots.forEach(x => { const k = BWTZ.dayKey(x.starts_at, S.tz); (byDay[k] = byDay[k] || []).push(x); });
+  const keys = Object.keys(byDay).sort();
+  if (!S.day || !byDay[S.day]) S.day = keys[0];
+  const dayChips = keys.map(k => { const first = byDay[k][0].starts_at; return `<button type="button" class="day${k === S.day ? ' on' : ''}" data-day="${k}"><small>${esc(BWTZ.fmtDay(first, S.tz, LOC, { weekday: 'short', day: undefined, month: undefined }))}</small><b class="num">${esc(BWTZ.fmtDay(first, S.tz, LOC, { weekday: undefined, day: 'numeric', month: 'short' }))}</b></button>`; }).join('');
+  const times = byDay[S.day].map(x => `<button type="button" class="time${S.slot === x.id ? ' on' : ''}" data-slot="${x.id}">${esc(fmtTime(x.starts_at))}</button>`).join('');
+  const chosen = S.slot ? slots.find(x => x.id === S.slot) : null;
+  host.innerHTML = `<div class="picker">
+    <h2>${esc(t('اختر موعد الجلسة ', 'Choose the date of session ') + seq)}</h2>
+    <p class="sub">${t('المواعيد المعروضة هي الأوقات الفارغة عند الأخصائي، بعد ٢٤ ساعة من الآن على الأقل.', 'These are the specialist’s free times, at least 24 hours from now.')}</p>
+    <div class="tzrow"><label for="tzSel">${t('التوقيت المعروض:', 'Times shown in:')}</label><select id="tzSel">${BWTZ.optionsHtml(S.tz, EN)}</select></div>
+    <div class="days" role="tablist">${dayChips}</div>
+    <div class="times">${times}</div>
+    ${chosen ? `<div class="chosen">${t('الموعد المختار: ', 'Selected: ')}<b class="num">${esc(fmtDT(chosen.starts_at))}</b></div>` : ''}
+    <div class="err" id="pickErr" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" id="confirmBtn" ${chosen && !S.busy ? '' : 'disabled'}>${S.busy ? t('جارٍ التثبيت...', 'Saving...') : t('ثبّت هذا الموعد', 'Confirm this date')}</button><button type="button" class="btn ghost" id="cancelPick">${t('إلغاء', 'Cancel')}</button></div>
+  </div>`;
+  host.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => { S.day = b.dataset.day; S.slot = null; renderPicker(); }));
+  host.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => { S.slot = b.dataset.slot; renderPicker(); }));
+  document.getElementById('tzSel').addEventListener('change', (e) => { S.tz = e.target.value; S.day = null; S.slot = null; render(); });
+  document.getElementById('cancelPick').addEventListener('click', () => { S.pick = null; S.slot = null; render(); });
+  document.getElementById('confirmBtn').addEventListener('click', confirmPick);
+}
+
+const ERR = {
+  slot_unavailable: t('هذا الموعد حُجز للتو. اختر موعداً آخر من القائمة.', 'That time was just taken. Please pick another one.'),
+  before_previous: t('يجب أن تكون هذه الجلسة بعد موعد الجلسة السابقة بساعة على الأقل.', 'This session must be at least one hour after your previous session.'),
+  after_next: t('يجب أن تكون هذه الجلسة قبل موعد الجلسة التالية بساعة على الأقل.', 'This session must be at least one hour before your next session.'),
+  too_late: t('لا يمكن تغيير موعد جلسة تبدأ خلال أقل من ٢٤ ساعة. راسلنا على واتساب +44 7832 339216.', 'A session starting within 24 hours can’t be changed here. Please message us on WhatsApp +44 7832 339216.'),
+  already_done: t('هذه الجلسة انتهت أصلاً.', 'This session has already taken place.'),
+  not_active: t('هذا الحجز غير نشط. تواصل معنا إن احتجت مساعدة.', 'This booking is not active. Contact us if you need help.'),
+  no_specialist: t('لم يُحدَّد أخصائي لباقتك بعد. تواصل معنا على واتساب +44 7832 339216.', 'No specialist has been assigned to your package yet. Contact us on WhatsApp +44 7832 339216.'),
+};
+
+async function confirmPick() {
+  if (S.busy || !S.slot) return;
+  S.busy = true; renderPicker();
+  const seq = S.pick;
+  const { data, error } = await supabaseClient.rpc('client_schedule_session', { p_token: TOKEN, p_seq: seq, p_slot: S.slot });
+  S.busy = false;
+  if (error) {
+    const m = (error.message || '').match(/slot_unavailable|before_previous|after_next|too_late|already_done|not_active|no_specialist/);
+    if (m && m[0] === 'slot_unavailable') await reload();
+    renderPicker();
+    const el = document.getElementById('pickErr'); if (el) el.textContent = (m && ERR[m[0]]) || t('تعذّر تثبيت الموعد. حاول مرة أخرى أو تواصل معنا على واتساب +44 7832 339216.', 'Could not save the date. Please try again or message us on WhatsApp +44 7832 339216.');
+    return;
+  }
+  await reload();
+  S.flash = t('تم تثبيت موعد الجلسة ' + seq + ': ', 'Session ' + seq + ' is booked: ') + fmtDT(data) + t('. ستصلك رسالة تأكيد على بريدك خلال دقائق، ويصل الأخصائي إشعار أيضاً.', '. A confirmation email will reach you within minutes, and the specialist is notified too.');
+  S.pick = null; S.slot = null; S.day = null;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function reload() {
+  const { data, error } = await supabaseClient.rpc('client_schedule_info', { p_token: TOKEN });
+  if (!error && data) S.info = data;
+}
+
+async function init() {
+  if (!supabaseClient || !/^[0-9a-f-]{36}$/i.test(TOKEN)) return msg('🔗', t('الرابط غير صالح', 'Invalid link'), esc(t('افتح الرابط كاملاً من الرسالة التي وصلتك، أو من صفحة حسابك.', 'Please open the full link from the email we sent you, or from your account page.')));
+  const { data, error } = await supabaseClient.rpc('client_schedule_info', { p_token: TOKEN });
+  if (error || !data) {
+    const inactive = /not_active/.test((error && error.message) || '');
+    return msg(inactive ? '🗓' : '🔗', inactive ? t('هذا الحجز غير نشط', 'This booking is not active') : t('الرابط غير صالح', 'Invalid link'), inactive ? esc(t('الحجز ملغى أو لم يكتمل دفعه. للمساعدة: hello@bewoduh.com', 'This booking was cancelled or not paid. For help: hello@bewoduh.com')) : esc(t('لم نجد هذا الحجز. تأكد من الرابط.', 'We could not find this booking. Please check the link.')));
+  }
+  S.info = data;
+  const dz = BWTZ.detect();
+  S.tz = BWTZ.isValid(dz) ? dz : (data.client_tz && BWTZ.isValid(data.client_tz) ? data.client_tz : 'Asia/Amman');
+  if (data.sessions.length < 2) return msg('✅', t('حجزك جلسة واحدة', 'Your booking is a single session'), esc(t('لا توجد جلسات إضافية لاختيار موعدها.', 'There are no extra sessions to schedule.')));
+  const firstOpen = data.sessions.find(s => s.can_change && !s.scheduled_at);
+  render();
+  if (firstOpen) { S.pick = firstOpen.seq; render(); }
+}
+init().catch((e) => { console.error('schedule page:', e); msg('⚠', t('تعذّر تحميل الصفحة', 'Could not load the page'), esc(t('حدّث الصفحة أو تواصل معنا: hello@bewoduh.com', 'Reload the page or contact us: hello@bewoduh.com'))); });
+})();
+</script>
+<script src="/components.js"></script>
+</body>
+</html>

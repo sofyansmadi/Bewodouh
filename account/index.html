@@ -311,6 +311,27 @@ async function loadMyBookings(email){
     }
     list.appendChild(row);
   });
+  // باقات متعددة الجلسات: زر لاختيار مواعيد الجلسات (الباقة مدفوعة بالكامل، لا دفع إضافي)
+  try {
+    const { data: pk } = await supabaseClient.rpc('my_package_bookings');
+    (pk || []).slice().reverse().forEach(p => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#FBF3E4; border:1px solid #E8D5AE; border-radius:14px; padding:14px 16px; margin-bottom:14px; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; justify-content:space-between;';
+      const txt = document.createElement('div');
+      txt.style.cssText = 'font-size:13.5px; line-height:1.8;';
+      const strong = document.createElement('b');
+      strong.textContent = pkgName(p.package);
+      const rest = document.createElement('span');
+      rest.textContent = (p.unscheduled > 0 ? 'باقي ' + p.unscheduled + ' من جلساتك بدون موعد، وباقتك مدفوعة بالكامل (لا دفع إضافي).' : 'كل جلساتك لها مواعيد. يمكنك تعديل أي موعد قادم حتى ٢٤ ساعة قبله.');
+      txt.append(strong, document.createElement('br'), rest);
+      const go = document.createElement('a');
+      go.href = '/schedule/?c=' + encodeURIComponent(p.token);
+      go.textContent = p.unscheduled > 0 ? 'اختر مواعيد جلساتك' : 'عدّل المواعيد';
+      go.style.cssText = 'font-family:inherit; font-weight:700; font-size:13px; padding:8px 18px; border-radius:100px; background:var(--ink,#241D2E); color:#fff; text-decoration:none;';
+      card.append(txt, go);
+      list.prepend(card);
+    });
+  } catch (_) {}
   document.getElementById('bookingsCard').style.display = 'block';
 }
 
