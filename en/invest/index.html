@@ -177,7 +177,7 @@
           <tr><td>Individual consultations</td><td>Live today</td><td>45-minute session at $35, urgent at $70</td><td>Included</td></tr>
           <tr><td>Session packages</td><td>Live today</td><td>4 sessions for $150, 8 sessions for $300</td><td>Included</td></tr>
           <tr><td>Specialized training courses for specialists</td><td>Being launched, no cohorts sold yet</td><td>JOD 150 per participant, about JOD 100 net profit per participant (management estimate)</td><td>Included (cohorts of 20, assumption)</td></tr>
-          <tr><td>Annual corporate contracts (companies and universities)</td><td>Planned, no contracts signed yet</td><td>Annual contract with a minimum of 200 sessions, billed at $30 per session used</td><td>Optional in the calculator below (assumption)</td></tr>
+          <tr><td>Annual corporate contracts (companies and universities)</td><td>Planned, no contracts signed yet</td><td>Annual contract with a minimum of 200 sessions, billed at $30 per session used</td><td>Included as a forecast (you can untick it in the calculator below)</td></tr>
           <tr><td>Paid per-minute chat</td><td>Being launched</td><td>Points system</td><td>Not included</td></tr>
         </tbody></table></div>
     </div>
@@ -294,7 +294,7 @@
         <div><label for="cPct">Percentage (%)</label><input id="cPct" type="number" min="1" max="20" step="1" value="1" inputmode="numeric"></div>
         <div><label for="cScen">Scenario</label><select id="cScen"><option value="cons">Conservative</option><option value="base" selected>Base</option><option value="opt">Optimistic</option></select></div>
       </div>
-      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;margin:0 0 14px;cursor:pointer;"><input type="checkbox" id="cB2B" style="margin-top:6px;"><span>Include annual corporate contracts (preliminary assumption, no contracts signed yet)</span></label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;margin:0 0 14px;cursor:pointer;"><input type="checkbox" id="cB2B" checked style="margin-top:6px;"><span>Include annual corporate contracts (preliminary forecast, no contracts signed yet). Untick to see the numbers without them.</span></label>
       <div class="result">
         <div class="res"><b id="rCost">—</b><span>Amount you pay</span></div>
         <div class="res"><b id="rPay">—</b><span>Estimated total profit share over 5 years</span></div>
@@ -312,14 +312,14 @@
         <tr><td>Fixed annual operating costs (tech, accountant, legal, support)</td><td class="num">$9k · 14k · 22k · 32k · 42k</td></tr>
         <tr><td>General Manager (founder) salary — included in the figures</td><td class="num">JOD 500 per month (JOD 6,000 a year), starting in month 4 (first 3 months deferred), held flat</td></tr>
         <tr><td>Operations Manager salary — included in the figures</td><td class="num">JOD 300 per month (JOD 3,600 a year), from year 2, held flat</td></tr>
-        <tr><td>Corporate contracts (if enabled in the calculator)</td><td class="num">$30 per session · 200 sessions per contract · 52% margin · 15% sales cost · active contracts (base): 0 · 3 · 7 · 12 · 18</td></tr>
+        <tr><td>Corporate contracts (included as a forecast, can be unticked in the calculator)</td><td class="num">$30 per session · 200 sessions per contract · 52% margin · 15% sales cost · active contracts (base): 0 · 3 · 7 · 12 · 18</td></tr>
         <tr><td>Training courses for specialists (included)</td><td class="num">JOD 150 per participant · JOD 100 net · cohorts of 20 · cohorts a year (base): 2 · 3 · 5 · 7 · 9. Estimates not yet tested with real sales</td></tr>
         <tr><td>Corporation tax (UK rates 2026/27)</td><td class="num">19% up to £50k · 25% above £250k · marginal relief in between</td></tr>
         <tr><td>GBP exchange rate used</td><td class="num">$1 = £0.75 (estimate)</td></tr>
         <tr><td>Exchange rate used</td><td class="num">$1 = JOD 0.709</td></tr>
         <tr><td>Profit distribution</td><td class="num">Full net profit assumed distributed (simplified)</td></tr>
       </tbody></table></div>
-    <p class="note">In the conservative scenario losses occur in the first four years, covered by the funds raised, and no profit is distributed to partners during the five years. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
+    <p class="note">In the conservative scenario losses occur in the first three years, covered by the funds raised, and no profit is distributed to partners during the five years. All figures here are forecasts, including the training courses and corporate contracts, which have not been delivered yet. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
   </div>
 </section>
 
