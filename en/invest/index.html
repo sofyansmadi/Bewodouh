@@ -176,7 +176,8 @@
         <tbody>
           <tr><td>Individual consultations</td><td>Live today</td><td>45-minute session at $35, urgent at $70</td><td>Included</td></tr>
           <tr><td>Session packages</td><td>Live today</td><td>4 sessions for $150, 8 sessions for $300</td><td>Included</td></tr>
-          <tr><td>Annual corporate contracts (companies and universities)</td><td>Planned, no contracts signed yet</td><td>Annual contract with a minimum of 150 sessions, billed at $30 per session used</td><td>Optional in the calculator below (assumption)</td></tr>
+          <tr><td>Specialized training courses for specialists</td><td>Being launched, no cohorts sold yet</td><td>JOD 150 per participant, about JOD 100 net profit per participant (management estimate)</td><td>Included (cohorts of 20, assumption)</td></tr>
+          <tr><td>Annual corporate contracts (companies and universities)</td><td>Planned, no contracts signed yet</td><td>Annual contract with a minimum of 200 sessions, billed at $30 per session used</td><td>Optional in the calculator below (assumption)</td></tr>
           <tr><td>Paid per-minute chat</td><td>Being launched</td><td>Points system</td><td>Not included</td></tr>
         </tbody></table></div>
     </div>
@@ -311,13 +312,14 @@
         <tr><td>Fixed annual operating costs (tech, accountant, legal, support)</td><td class="num">$9k · 14k · 22k · 32k · 42k</td></tr>
         <tr><td>General Manager (founder) salary — included in the figures</td><td class="num">JOD 500 per month (JOD 6,000 a year), starting in month 4 (first 3 months deferred), held flat</td></tr>
         <tr><td>Operations Manager salary — included in the figures</td><td class="num">JOD 300 per month (JOD 3,600 a year), from year 2, held flat</td></tr>
-        <tr><td>Corporate contracts (if enabled in the calculator)</td><td class="num">$30 per session · 150 sessions per contract · 52% margin · 15% sales cost · active contracts (base): 0 · 2 · 5 · 9 · 14</td></tr>
+        <tr><td>Corporate contracts (if enabled in the calculator)</td><td class="num">$30 per session · 200 sessions per contract · 52% margin · 15% sales cost · active contracts (base): 0 · 3 · 7 · 12 · 18</td></tr>
+        <tr><td>Training courses for specialists (included)</td><td class="num">JOD 150 per participant · JOD 100 net · cohorts of 20 · cohorts a year (base): 2 · 3 · 5 · 7 · 9. Estimates not yet tested with real sales</td></tr>
         <tr><td>Corporation tax (UK rates 2026/27)</td><td class="num">19% up to £50k · 25% above £250k · marginal relief in between</td></tr>
         <tr><td>GBP exchange rate used</td><td class="num">$1 = £0.75 (estimate)</td></tr>
         <tr><td>Exchange rate used</td><td class="num">$1 = JOD 0.709</td></tr>
         <tr><td>Profit distribution</td><td class="num">Full net profit assumed distributed (simplified)</td></tr>
       </tbody></table></div>
-    <p class="note">In the conservative scenario losses occur in all five years, covered by the funds raised, and no profit is distributed to partners during the five years. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
+    <p class="note">In the conservative scenario losses occur in the first four years, covered by the funds raised, and no profit is distributed to partners during the five years. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
   </div>
 </section>
 
@@ -563,13 +565,15 @@
   const GBP = 0.75;
   const ukTax = (pUSD) => { const p = Math.max(pUSD, 0) * GBP; const t = p <= 50000 ? p * 0.19 : p >= 250000 ? p * 0.25 : p * 0.25 - (3 / 200) * (250000 - p); return t / GBP; };
   const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [15347, 27540, 35540, 45540, 55540], tax: 0,
-    b2b: { price: 30, sessions: 150, gm: .52, sales: .15, n: { cons: [0, 1, 2, 3, 5], base: [0, 2, 5, 9, 14], opt: [0, 4, 10, 20, 35] } },
+    b2b: { price: 30, sessions: 200, gm: .52, sales: .15, n: { cons: [0, 1, 2, 4, 6], base: [0, 3, 7, 12, 18], opt: [0, 5, 14, 28, 45] } },
+    train: { cohort: 20, priceJOD: 150, netJOD: 100, n: { cons: [1, 1, 2, 2, 3], base: [2, 3, 5, 7, 9], opt: [3, 6, 10, 15, 20] } },   // training courses for specialists (management estimate)
     scen: { cons: [15, 35, 65, 95, 130], base: [40, 110, 220, 360, 520], opt: [90, 260, 520, 860, 1250] } };
   function model(key) {
     let cum = 0, prevPos = 0; const rows = [];
     M.scen[key].forEach((o, i) => {
       const chk = document.getElementById('cB2B'), b = chk && chk.checked ? M.b2b.n[key][i] * M.b2b.sessions * M.b2b.price : 0;   // corporate contracts (assumption), optional
-      const rev0 = o * 12 * M.aov, rev = rev0 + b, pre = rev0 * M.gm + b * M.b2b.gm - rev0 * M.mk[i] - b * M.b2b.sales - M.fx[i], net = pre - ukTax(pre);
+      const np = M.train.n[key][i] * M.train.cohort, tRev = np * M.train.priceJOD / FX, tNet = np * M.train.netJOD / FX;
+      const rev0 = o * 12 * M.aov, rev = rev0 + b + tRev, pre = rev0 * M.gm + b * M.b2b.gm + tNet - rev0 * M.mk[i] - b * M.b2b.sales - M.fx[i], net = pre - ukTax(pre);
       cum += net; const pos = Math.max(0, cum), payout = pos - prevPos; prevPos = pos;   // losses carried forward before any payout
       rows.push({ year: i + 1, orders: o, rev: rev * FX, net: net * FX, payout: Math.max(0, payout) * FX });
     });
