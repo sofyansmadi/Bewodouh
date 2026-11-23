@@ -170,6 +170,16 @@
       <div class="card"><h3>What we are building</h3><p>A clear digital marketplace: the client picks a specialist and a time in their own time zone, pays securely, then follows and rates their sessions. Specialists manage their schedule and fees from a dedicated portal.</p></div>
       <div class="card"><h3>How we earn</h3><p>The client pays the price of a session or package. The specialist receives a fixed fee for each recorded session, and the platform keeps the difference after payment fees and discounts.</p></div>
     </div>
+    <div class="card" style="margin-top:18px;"><h3>Revenue sources: current and expected</h3>
+      <div class="tbl-wrap" style="margin-top:10px;"><table>
+        <thead><tr><th>Source</th><th>Status</th><th>How it works</th><th>In the numbers</th></tr></thead>
+        <tbody>
+          <tr><td>Individual consultations</td><td>Live today</td><td>45-minute session at $35, urgent at $70</td><td>Included</td></tr>
+          <tr><td>Session packages</td><td>Live today</td><td>4 sessions for $150, 8 sessions for $300</td><td>Included</td></tr>
+          <tr><td>Annual corporate contracts (companies and universities)</td><td>Planned, no contracts signed yet</td><td>Annual contract with a minimum of 150 sessions, billed at $30 per session used</td><td>Optional in the calculator below (assumption)</td></tr>
+          <tr><td>Paid per-minute chat</td><td>Being launched</td><td>Points system</td><td>Not included</td></tr>
+        </tbody></table></div>
+    </div>
     <div class="card" style="margin-top:18px;"><h3>What is already built</h3>
       <ul>
         <li>Booking with real availability and automatic time-zone conversion, card payments, and prices in several currencies.</li>
@@ -283,6 +293,7 @@
         <div><label for="cPct">Percentage (%)</label><input id="cPct" type="number" min="1" max="20" step="1" value="1" inputmode="numeric"></div>
         <div><label for="cScen">Scenario</label><select id="cScen"><option value="cons">Conservative</option><option value="base" selected>Base</option><option value="opt">Optimistic</option></select></div>
       </div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;margin:0 0 14px;cursor:pointer;"><input type="checkbox" id="cB2B" style="margin-top:6px;"><span>Include annual corporate contracts (preliminary assumption, no contracts signed yet)</span></label>
       <div class="result">
         <div class="res"><b id="rCost">—</b><span>Amount you pay</span></div>
         <div class="res"><b id="rPay">—</b><span>Estimated total profit share over 5 years</span></div>
@@ -300,6 +311,7 @@
         <tr><td>Fixed annual operating costs (tech, accountant, legal, support)</td><td class="num">$9k · 14k · 22k · 32k · 42k</td></tr>
         <tr><td>General Manager (founder) salary — included in the figures</td><td class="num">JOD 500 per month (JOD 6,000 a year), starting in month 4 (first 3 months deferred), held flat</td></tr>
         <tr><td>Operations Manager salary — included in the figures</td><td class="num">JOD 300 per month (JOD 3,600 a year), from year 2, held flat</td></tr>
+        <tr><td>Corporate contracts (if enabled in the calculator)</td><td class="num">$30 per session · 150 sessions per contract · 52% margin · 15% sales cost · active contracts (base): 0 · 2 · 5 · 9 · 14</td></tr>
         <tr><td>Corporation tax (UK rates 2026/27)</td><td class="num">19% up to £50k · 25% above £250k · marginal relief in between</td></tr>
         <tr><td>GBP exchange rate used</td><td class="num">$1 = £0.75 (estimate)</td></tr>
         <tr><td>Exchange rate used</td><td class="num">$1 = JOD 0.709</td></tr>
@@ -551,11 +563,13 @@
   const GBP = 0.75;
   const ukTax = (pUSD) => { const p = Math.max(pUSD, 0) * GBP; const t = p <= 50000 ? p * 0.19 : p >= 250000 ? p * 0.25 : p * 0.25 - (3 / 200) * (250000 - p); return t / GBP; };
   const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [15347, 27540, 35540, 45540, 55540], tax: 0,
+    b2b: { price: 30, sessions: 150, gm: .52, sales: .15, n: { cons: [0, 1, 2, 3, 5], base: [0, 2, 5, 9, 14], opt: [0, 4, 10, 20, 35] } },
     scen: { cons: [15, 35, 65, 95, 130], base: [40, 110, 220, 360, 520], opt: [90, 260, 520, 860, 1250] } };
   function model(key) {
     let cum = 0, prevPos = 0; const rows = [];
     M.scen[key].forEach((o, i) => {
-      const rev = o * 12 * M.aov, pre = rev * M.gm - rev * M.mk[i] - M.fx[i], net = pre - ukTax(pre);
+      const chk = document.getElementById('cB2B'), b = chk && chk.checked ? M.b2b.n[key][i] * M.b2b.sessions * M.b2b.price : 0;   // corporate contracts (assumption), optional
+      const rev0 = o * 12 * M.aov, rev = rev0 + b, pre = rev0 * M.gm + b * M.b2b.gm - rev0 * M.mk[i] - b * M.b2b.sales - M.fx[i], net = pre - ukTax(pre);
       cum += net; const pos = Math.max(0, cum), payout = pos - prevPos; prevPos = pos;   // losses carried forward before any payout
       rows.push({ year: i + 1, orders: o, rev: rev * FX, net: net * FX, payout: Math.max(0, payout) * FX });
     });
@@ -580,7 +594,7 @@
       ? 'Option 1 ends after 5 years and the original amount is not repaid, so the multiple above is everything you receive. If it is below 1, you would not get back what you paid.'
       : 'Under Option 2 your right continues after year 5 for as long as the agreement remains in force, which is not counted here. The ability to transfer your right or exit is not guaranteed. The figure assumes the full net profit is distributed.';
   }
-  ['cOpt', 'cPct', 'cScen'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
+  ['cOpt', 'cPct', 'cScen', 'cB2B'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen' || id === 'cB2B') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
   drawScenario(); calc();
 
   const form = document.getElementById('inqForm'), box = document.getElementById('iMsgBox'), btn = document.getElementById('iBtn');

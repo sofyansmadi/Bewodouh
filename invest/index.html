@@ -187,6 +187,16 @@
       <div class="card"><h3>ما نبنيه</h3><p>سوق رقمي واضح: العميل يختار الأخصائي والموعد بتوقيته، يدفع بأمان، ويتابع جلساته ويقيّمها. والأخصائي يدير مواعيده وأتعابه من بوابة خاصة.</p></div>
       <div class="card"><h3>كيف نربح</h3><p>العميل يدفع سعر الجلسة أو الباقة، والأخصائي يستلم أتعاباً ثابتة عن كل جلسة تُسجَّل، وتبقى للمنصة الفرق بعد رسوم الدفع والخصومات.</p></div>
     </div>
+    <div class="card" style="margin-top:18px;"><h3>مصادر الدخل: القائمة والمتوقعة</h3>
+      <div class="tbl-wrap" style="margin-top:10px;"><table>
+        <thead><tr><th>المصدر</th><th>الحالة</th><th>كيف يعمل</th><th>في الأرقام</th></tr></thead>
+        <tbody>
+          <tr><td>الاستشارات الفردية</td><td>يعمل اليوم</td><td>جلسة 45 دقيقة بـ35$، وعاجلة بـ70$</td><td>مدرج</td></tr>
+          <tr><td>باقات الجلسات</td><td>يعمل اليوم</td><td>4 جلسات بـ150$، و8 جلسات بـ300$</td><td>مدرج</td></tr>
+          <tr><td>عقود مؤسسية سنوية (شركات وجامعات)</td><td>مخطط، ولا عقود موقعة بعد</td><td>عقد سنوي بحد أدنى 150 جلسة، وتُحتسب الجلسات المطلوبة بسعر 30$ للجلسة</td><td>اختياري في الحاسبة أدناه (افتراض)</td></tr>
+          <tr><td>المحادثة المدفوعة بالدقيقة</td><td>قيد الإطلاق</td><td>نظام نقاط</td><td>غير مدرج</td></tr>
+        </tbody></table></div>
+    </div>
     <div class="card" style="margin-top:18px;"><h3>ما هو جاهز تقنياً اليوم</h3>
       <ul>
         <li>حجز بمواعيد حقيقية مع تحويل تلقائي لفرق التوقيت، ودفع بالبطاقة، وعرض الأسعار بعدة عملات.</li>
@@ -304,6 +314,7 @@
         <div><label for="cPct">النسبة (%)</label><input id="cPct" type="number" min="1" max="20" step="1" value="1" inputmode="numeric"></div>
         <div><label for="cScen">السيناريو</label><select id="cScen"><option value="cons">متحفظ</option><option value="base" selected>أساسي</option><option value="opt">متفائل</option></select></div>
       </div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;margin:0 0 14px;cursor:pointer;"><input type="checkbox" id="cB2B" style="margin-top:6px;"><span>تضمين العقود المؤسسية السنوية (افتراض مبدئي، ولا عقود موقعة بعد)</span></label>
       <div class="result">
         <div class="res"><b id="rCost">—</b><span>المبلغ الذي تدفعه</span></div>
         <div class="res"><b id="rPay">—</b><span>إجمالي أرباحك المقدَّرة خلال 5 سنوات</span></div>
@@ -321,6 +332,7 @@
         <tr><td>تكاليف ثابتة تشغيلية سنوية (تقنية، محاسب، قانوني، دعم)</td><td class="num">9 · 14 · 22 · 32 · 42 ألف دولار</td></tr>
         <tr><td>راتب المدير العام (المؤسس) — مشمول في الأرقام</td><td class="num">500 د.أ شهرياً (6,000 د.أ سنوياً)، تبدأ من الشهر الرابع (تأجيل أول 3 أشهر)، وثابتة</td></tr>
         <tr><td>راتب مسؤول العمليات — مشمول في الأرقام</td><td class="num">300 د.أ شهرياً (3,600 د.أ سنوياً)، من السنة الثانية وثابت</td></tr>
+        <tr><td>العقود المؤسسية (إن فُعّلت في الحاسبة)</td><td class="num">30$ للجلسة · 150 جلسة للعقد · هامش 52% · تكلفة مبيعات 15% · العقود النشطة (أساسي): 0 · 2 · 5 · 9 · 14</td></tr>
         <tr><td>ضريبة الشركات (معدلات المملكة المتحدة 2026/27)</td><td class="num">19% حتى 50 ألف جنيه · 25% فوق 250 ألف · تخفيف تدريجي بينهما</td></tr>
         <tr><td>سعر صرف الجنيه الإسترليني</td><td class="num">1 دولار = 0.75 جنيه (تقدير)</td></tr>
         <tr><td>سعر الصرف المستخدم</td><td class="num">1 دولار = 0.709 دينار</td></tr>
@@ -582,11 +594,13 @@
   const GBP = 0.75;
   const ukTax = (pUSD) => { const p = Math.max(pUSD, 0) * GBP; const t = p <= 50000 ? p * 0.19 : p >= 250000 ? p * 0.25 : p * 0.25 - (3 / 200) * (250000 - p); return t / GBP; };
   const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [15347, 27540, 35540, 45540, 55540], tax: 0,
+    b2b: { price: 30, sessions: 150, gm: .52, sales: .15, n: { cons: [0, 1, 2, 3, 5], base: [0, 2, 5, 9, 14], opt: [0, 4, 10, 20, 35] } },
     scen: { cons: [15, 35, 65, 95, 130], base: [40, 110, 220, 360, 520], opt: [90, 260, 520, 860, 1250] } };
   function model(key) {
     let cum = 0, prevPos = 0; const rows = [];
     M.scen[key].forEach((o, i) => {
-      const rev = o * 12 * M.aov, pre = rev * M.gm - rev * M.mk[i] - M.fx[i], net = pre - ukTax(pre);
+      const chk = document.getElementById('cB2B'), b = chk && chk.checked ? M.b2b.n[key][i] * M.b2b.sessions * M.b2b.price : 0;   // corporate contracts (assumption), optional
+      const rev0 = o * 12 * M.aov, rev = rev0 + b, pre = rev0 * M.gm + b * M.b2b.gm - rev0 * M.mk[i] - b * M.b2b.sales - M.fx[i], net = pre - ukTax(pre);
       cum += net; const pos = Math.max(0, cum), payout = pos - prevPos; prevPos = pos;   // الخسائر تُرحَّل قبل أي توزيع
       rows.push({ year: i + 1, orders: o, rev: rev * FX, net: net * FX, payout: Math.max(0, payout) * FX });
     });
@@ -611,7 +625,7 @@
       ? 'الخيار الأول ينتهي بعد 5 سنوات ولا يُردّ أصل المبلغ، فالمضاعف أعلاه هو كل ما تحصل عليه. إذا كان أقل من 1 فمعناه أنك لن تستردّ ما دفعت.'
       : 'في الخيار الثاني يستمر حقك بعد السنة الخامسة ما دام الاتفاق ساريّاً، وهذا غير محسوب هنا. وتبقى إمكانية نقل حقك أو الخروج منه غير مضمونة. الرقم يفترض توزيع كامل صافي الربح.';
   }
-  ['cOpt', 'cPct', 'cScen'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
+  ['cOpt', 'cPct', 'cScen', 'cB2B'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen' || id === 'cB2B') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
   drawScenario(); calc();
 
   /* ---------- interest form ---------- */
