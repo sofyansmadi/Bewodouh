@@ -178,7 +178,8 @@
           <tr><td>Session packages</td><td>Live today</td><td>4 sessions for $150, 8 sessions for $300</td><td>Included</td></tr>
           <tr><td>Specialized training courses for specialists</td><td>Being launched, no cohorts sold yet</td><td>JOD 150 per participant, about JOD 100 net profit per participant (management estimate)</td><td>Included (cohorts of 20, assumption)</td></tr>
           <tr><td>Annual corporate contracts (companies and universities)</td><td>Planned, no contracts signed yet</td><td>Annual contract with a minimum of 200 sessions, billed at $30 per session used</td><td>Included as a forecast (you can untick it in the calculator below)</td></tr>
-          <tr><td>Paid per-minute chat</td><td>Being launched</td><td>Points system</td><td>Not included</td></tr>
+          <tr><td>Paid per-minute chat</td><td>Built, being launched (not activated yet)</td><td>Points sold in packs from $15 to $80 and monthly subscriptions from $27 to $110</td><td>Included as a forecast (can be unticked in the calculator)</td></tr>
+          <tr><td>Funded programme partnerships (NGOs, foundations, CSR)</td><td>Planned, none signed yet</td><td>A partner funds sessions for its beneficiaries at $30 per session</td><td>Included as a forecast (can be unticked in the calculator)</td></tr>
         </tbody></table></div>
     </div>
     <div class="card" style="margin-top:18px;"><h3>What is already built</h3>
@@ -295,6 +296,7 @@
         <div><label for="cScen">Scenario</label><select id="cScen"><option value="cons">Conservative</option><option value="base" selected>Base</option><option value="opt">Optimistic</option></select></div>
       </div>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;margin:0 0 14px;cursor:pointer;"><input type="checkbox" id="cB2B" checked style="margin-top:6px;"><span>Include annual corporate contracts (preliminary forecast, no contracts signed yet). Untick to see the numbers without them.</span></label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;margin:0 0 14px;cursor:pointer;"><input type="checkbox" id="cX" checked style="margin-top:6px;"><span>Include paid chat and funded partnerships (preliminary forecasts, not yet activated or signed).</span></label>
       <div class="result">
         <div class="res"><b id="rCost">—</b><span>Amount you pay</span></div>
         <div class="res"><b id="rPay">—</b><span>Estimated total profit share over 5 years</span></div>
@@ -313,13 +315,15 @@
         <tr><td>General Manager (founder) salary — included in the figures</td><td class="num">JOD 500 per month (JOD 6,000 a year), starting in month 4 (first 3 months deferred), held flat</td></tr>
         <tr><td>Operations Manager salary — included in the figures</td><td class="num">JOD 300 per month (JOD 3,600 a year), from year 2, held flat</td></tr>
         <tr><td>Corporate contracts (included as a forecast, can be unticked in the calculator)</td><td class="num">$30 per session · 200 sessions per contract · 52% margin · 15% sales cost · active contracts (base): 0 · 3 · 7 · 12 · 18</td></tr>
+        <tr><td>Paid chat (included as a forecast)</td><td class="num">$50 a year per paying user · 33% margin after the specialist share (assumed 50%) · paying users (base): 25 · 150 · 400 · 800 · 1,400</td></tr>
+        <tr><td>Funded partnerships (included as a forecast)</td><td class="num">$30 per session · 300 sessions per partnership · 52% margin · 10% sales cost · active partnerships (base): 0 · 1 · 3 · 5 · 8</td></tr>
         <tr><td>Training courses for specialists (included)</td><td class="num">JOD 150 per participant · JOD 100 net · cohorts of 20 · cohorts a year (base): 2 · 3 · 5 · 7 · 9. Estimates not yet tested with real sales</td></tr>
         <tr><td>Corporation tax (UK rates 2026/27)</td><td class="num">19% up to £50k · 25% above £250k · marginal relief in between</td></tr>
         <tr><td>GBP exchange rate used</td><td class="num">$1 = £0.75 (estimate)</td></tr>
         <tr><td>Exchange rate used</td><td class="num">$1 = JOD 0.709</td></tr>
         <tr><td>Profit distribution</td><td class="num">Full net profit assumed distributed (simplified)</td></tr>
       </tbody></table></div>
-    <p class="note">In the conservative scenario losses occur in the first three years, covered by the funds raised, and no profit is distributed to partners during the five years. All figures here are forecasts, including the training courses and corporate contracts, which have not been delivered yet. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
+    <p class="note">In the conservative scenario losses occur in the first two years, covered by the funds raised, and only a very small amount is distributed in year five. All figures here are forecasts, including the training courses, corporate contracts, paid chat and partnerships, none of which has been delivered yet. If these new sources do not materialise, profits will be much lower. Actual figures may be much lower or higher, and there may be no profit at all. The platform's short track record does not confirm these numbers. The tax shown is UK corporation tax only, assuming the company is managed in the UK with no associated companies; it excludes any Jordanian corporate tax and any tax you owe personally on what you receive.</p>
   </div>
 </section>
 
@@ -566,14 +570,17 @@
   const ukTax = (pUSD) => { const p = Math.max(pUSD, 0) * GBP; const t = p <= 50000 ? p * 0.19 : p >= 250000 ? p * 0.25 : p * 0.25 - (3 / 200) * (250000 - p); return t / GBP; };
   const M = { aov: 85, gm: 0.58, mk: [.30, .26, .22, .20, .18], fx: [15347, 27540, 35540, 45540, 55540], tax: 0,
     b2b: { price: 30, sessions: 200, gm: .52, sales: .15, n: { cons: [0, 1, 2, 4, 6], base: [0, 3, 7, 12, 18], opt: [0, 5, 14, 28, 45] } },
+    chat: { spend: 50, gm: .33, mkt: .10, n: { cons: [0, 50, 120, 250, 450], base: [25, 150, 400, 800, 1400], opt: [80, 300, 900, 2000, 4000] } },   // paid chat (forecast)
+    part: { price: 30, sessions: 300, gm: .52, sales: .10, n: { cons: [0, 0, 1, 2, 3], base: [0, 1, 3, 5, 8], opt: [0, 2, 6, 12, 20] } },   // funded partnerships (forecast)
     train: { cohort: 20, priceJOD: 150, netJOD: 100, n: { cons: [1, 1, 2, 2, 3], base: [2, 3, 5, 7, 9], opt: [3, 6, 10, 15, 20] } },   // training courses for specialists (management estimate)
     scen: { cons: [15, 35, 65, 95, 130], base: [40, 110, 220, 360, 520], opt: [90, 260, 520, 860, 1250] } };
   function model(key) {
     let cum = 0, prevPos = 0; const rows = [];
     M.scen[key].forEach((o, i) => {
       const chk = document.getElementById('cB2B'), b = chk && chk.checked ? M.b2b.n[key][i] * M.b2b.sessions * M.b2b.price : 0;   // corporate contracts (assumption), optional
+      const cx = document.getElementById('cX'), useX = !!(cx && cx.checked), cU = useX ? M.chat.n[key][i] * M.chat.spend : 0, pR = useX ? M.part.n[key][i] * M.part.sessions * M.part.price : 0;
       const np = M.train.n[key][i] * M.train.cohort, tRev = np * M.train.priceJOD / FX, tNet = np * M.train.netJOD / FX;
-      const rev0 = o * 12 * M.aov, rev = rev0 + b + tRev, pre = rev0 * M.gm + b * M.b2b.gm + tNet - rev0 * M.mk[i] - b * M.b2b.sales - M.fx[i], net = pre - ukTax(pre);
+      const rev0 = o * 12 * M.aov, rev = rev0 + b + tRev + cU + pR, pre = rev0 * M.gm + b * M.b2b.gm + tNet + cU * M.chat.gm + pR * M.part.gm - rev0 * M.mk[i] - b * M.b2b.sales - cU * M.chat.mkt - pR * M.part.sales - M.fx[i], net = pre - ukTax(pre);
       cum += net; const pos = Math.max(0, cum), payout = pos - prevPos; prevPos = pos;   // losses carried forward before any payout
       rows.push({ year: i + 1, orders: o, rev: rev * FX, net: net * FX, payout: Math.max(0, payout) * FX });
     });
@@ -598,7 +605,7 @@
       ? 'Option 1 ends after 5 years and the original amount is not repaid, so the multiple above is everything you receive. If it is below 1, you would not get back what you paid.'
       : 'Under Option 2 your right continues after year 5 for as long as the agreement remains in force, which is not counted here. The ability to transfer your right or exit is not guaranteed. The figure assumes the full net profit is distributed.';
   }
-  ['cOpt', 'cPct', 'cScen', 'cB2B'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen' || id === 'cB2B') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
+  ['cOpt', 'cPct', 'cScen', 'cB2B', 'cX'].forEach(id => document.getElementById(id).addEventListener('input', () => { if (id === 'cScen' || id === 'cB2B' || id === 'cX') { cur = document.getElementById('cScen').value; drawScenario(); } calc(); }));
   drawScenario(); calc();
 
   const form = document.getElementById('inqForm'), box = document.getElementById('iMsgBox'), btn = document.getElementById('iBtn');
