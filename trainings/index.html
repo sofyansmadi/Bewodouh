@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تدريبات وورش — بوضوح</title>
+<meta name="description" content="ورش وتدريبات مباشرة يقدّمها فريق بوضوح. اطّلع على التفاصيل واحجز مقعدك وادفع مباشرة.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241D2E; --ink-soft:#372C46; --plum:#4A3B5C;
+    --fog:#F3EEEA; --fog-dim:#E6DFDA;
+    --clarity:#C9A15F; --clarity-soft:#E4C98A; --gold-deep:#7D5F27; --rose:#8B6F7E; --alert:#B5555B; --ok:#2E6B45;
+    --text-on-dark:#EDE7E3; --text-muted-dark:#B7ACC4;
+    --text-on-light:#2A2130; --text-muted-light:#6B6072;
+    --radius:16px; --max:1120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ font-family:'IBM Plex Sans Arabic',system-ui,sans-serif; background:var(--fog); color:var(--text-on-light); line-height:1.85; -webkit-font-smoothing:antialiased; }
+  html[lang="en"] body{ font-family:'IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif; }
+  h1,h2,h3,.kufi{ font-family:'Noto Kufi Arabic',sans-serif; }
+  html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3, html[lang="en"] .kufi{ font-family:'IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif; letter-spacing:-.01em; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 22px; }
+  .num{ font-variant-numeric:tabular-nums; unicode-bidi:isolate; }
+
+  /* ---- hero ---- */
+  .hero{ background:radial-gradient(120% 90% at 80% 0%, var(--ink-soft) 0%, var(--ink) 55%, #1A1522 100%); padding:64px 0 54px; text-align:center; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--clarity-soft); font-weight:600; margin-bottom:12px; }
+  .eyebrow::before{ content:""; width:20px; height:1px; background:var(--clarity); }
+  .hero h1{ color:var(--fog); font-size:clamp(28px,4.6vw,44px); font-weight:900; line-height:1.4; max-width:22ch; margin:0 auto; }
+  .hero p{ color:var(--text-muted-dark); font-size:16px; max-width:56ch; margin:14px auto 0; }
+
+  .hero.compact{ padding:22px 0 20px; } .hero.compact h1, .hero.compact p{ display:none; } .hero.compact .eyebrow{ margin:0; }
+  main{ padding:40px 0 90px; }
+  .loading{ text-align:center; color:var(--text-muted-light); padding:60px 0; }
+
+  /* ---- list ---- */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:22px; }
+  .card{ background:#fff; border:1px solid var(--fog-dim); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; transition:transform .2s, box-shadow .2s, border-color .2s; }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 18px 40px -22px rgba(36,29,46,.45); border-color:var(--clarity); }
+  .card .ph{ aspect-ratio:1/1; background:var(--ink) center/cover no-repeat; position:relative; }
+  .card .ph .tag{ position:absolute; inset-block-start:12px; inset-inline-start:12px; background:rgba(36,29,46,.88); color:var(--clarity-soft); font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:100px; backdrop-filter:blur(4px); }
+  .card .bd{ padding:20px 22px 22px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .card h3{ font-size:19px; font-weight:900; line-height:1.55; }
+  .card .meta{ display:flex; flex-wrap:wrap; gap:8px 16px; font-size:13.5px; color:var(--text-muted-light); }
+  .card .meta span{ display:inline-flex; align-items:center; gap:6px; }
+  .card .foot{ margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:8px; }
+  .from{ font-size:13px; color:var(--text-muted-light); }
+  .from b{ display:block; font-size:21px; color:var(--ink); font-family:'IBM Plex Sans Arabic',sans-serif; line-height:1.3; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; background:var(--clarity); color:var(--ink); font-weight:700; font-size:15px; padding:12px 24px; border-radius:100px; border:none; cursor:pointer; transition:.2s; }
+  .btn:hover{ background:var(--clarity-soft); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; }
+  .btn.ghost{ background:transparent; border:1.5px solid var(--fog-dim); color:var(--ink); }
+  .btn.ghost:hover{ border-color:var(--clarity); }
+  .btn.block{ width:100%; padding:15px 24px; font-size:16.5px; }
+  .empty{ text-align:center; background:#fff; border:1px dashed var(--fog-dim); border-radius:20px; padding:54px 24px; color:var(--text-muted-light); }
+  .empty b{ display:block; font-size:19px; color:var(--ink); margin-bottom:6px; font-family:'Noto Kufi Arabic',sans-serif; }
+
+  /* ---- detail ---- */
+  .back{ display:inline-flex; align-items:center; gap:6px; color:var(--text-muted-light); font-size:14px; margin-bottom:18px; }
+  .back:hover{ color:var(--ink); }
+  .detail{ display:grid; grid-template-columns:minmax(0,1fr) 400px; gap:34px; align-items:start; }
+  @media (max-width:980px){ .detail{ grid-template-columns:1fr; } }
+  .poster{ width:100%; border-radius:22px; display:block; box-shadow:0 22px 50px -26px rgba(36,29,46,.6); background:var(--ink); aspect-ratio:1/1; object-fit:cover; }
+  .kicker{ color:var(--gold-deep); font-weight:700; font-size:14px; margin-top:26px; }
+  .d-title{ font-size:clamp(25px,3.6vw,34px); font-weight:900; line-height:1.5; margin:4px 0 10px; color:var(--ink); }
+  .d-sum{ font-size:16.5px; color:var(--text-on-light); max-width:62ch; }
+  .facts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:24px 0 8px; }
+  .fact{ background:#fff; border:1px solid var(--fog-dim); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start; }
+  .fact svg{ width:22px; height:22px; flex:none; color:var(--clarity); margin-top:3px; }
+  .fact small{ display:block; color:var(--text-muted-light); font-size:12.5px; line-height:1.5; }
+  .fact b{ display:block; font-size:15px; line-height:1.55; color:var(--ink); }
+  .fact i{ display:block; font-style:normal; font-size:12.5px; color:var(--text-muted-light); margin-top:2px; }
+  .sec{ margin-top:38px; }
+  .sec h2{ font-size:22px; font-weight:900; margin-bottom:14px; color:var(--ink); display:flex; align-items:center; gap:10px; }
+  .sec h2::before{ content:""; width:6px; height:22px; border-radius:3px; background:var(--clarity); }
+  .topics{ list-style:none; display:grid; gap:10px; counter-reset:t; }
+  .topics li{ counter-increment:t; display:flex; gap:14px; align-items:center; background:#fff; border:1px solid var(--fog-dim); border-radius:14px; padding:13px 16px; font-weight:500; }
+  .topics li::before{ content:counter(t); width:32px; height:32px; flex:none; border-radius:50%; background:var(--ink); color:var(--clarity-soft); display:grid; place-items:center; font-weight:700; font-size:14px; font-family:'IBM Plex Sans Arabic',sans-serif; }
+  .note-box{ background:#fff; border:1px solid var(--fog-dim); border-radius:14px; padding:16px 18px; display:flex; gap:12px; }
+  .note-box + .note-box{ margin-top:10px; }
+  .note-box svg{ width:22px; height:22px; flex:none; color:var(--clarity); margin-top:3px; }
+  .pkgs{ display:grid; grid-template-columns:repeat(auto-fit,minmax(235px,1fr)); gap:14px; }
+  .pk{ position:relative; text-align:start; background:#fff; border:2px solid var(--fog-dim); border-radius:18px; padding:20px 18px 18px; cursor:pointer; transition:.18s; display:flex; flex-direction:column; gap:10px; color:inherit; font-size:inherit; }
+  .pk:hover{ border-color:var(--clarity-soft); }
+  .pk[aria-checked="true"]{ border-color:var(--clarity); background:rgba(201,161,95,.09); box-shadow:0 0 0 3px rgba(201,161,95,.18); }
+  .pk .best{ position:absolute; inset-block-start:-11px; inset-inline-start:16px; background:var(--ink); color:var(--clarity-soft); font-size:12px; font-weight:700; padding:2px 12px; border-radius:100px; }
+  .pk .nm{ font-weight:700; font-size:16px; line-height:1.5; color:var(--ink); }
+  .pk .pr{ font-size:28px; font-weight:700; color:var(--ink); line-height:1.1; font-family:'IBM Plex Sans Arabic',sans-serif; }
+  .pk .pr small{ font-size:13px; font-weight:500; color:var(--text-muted-light); margin-inline-start:4px; }
+  .pk .usd{ font-size:12.5px; color:var(--text-muted-light); margin-top:-6px; }
+  .pk ul{ list-style:none; display:grid; gap:6px; font-size:13.5px; color:var(--text-on-light); }
+  .pk li{ display:flex; gap:8px; align-items:flex-start; line-height:1.6; }
+  .pk li::before{ content:""; width:16px; height:16px; flex:none; margin-top:4px; background:var(--ok); border-radius:50%; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; }
+  .pk .pick{ margin-top:auto; font-size:13.5px; font-weight:700; color:var(--gold-deep); }
+
+  /* ---- booking card ---- */
+  .book{ position:sticky; top:84px; background:#fff; border:1px solid var(--fog-dim); border-radius:22px; padding:24px 22px; box-shadow:0 24px 50px -30px rgba(36,29,46,.5); }
+  @media (min-width:981px){ .book{ max-height:calc(100vh - 104px); overflow-y:auto; scrollbar-width:thin; } }
+  @media (max-width:980px){ .book{ position:static; } }
+  .book h2{ font-size:21px; font-weight:900; color:var(--ink); }
+  .seats{ display:flex; align-items:center; gap:10px; margin:10px 0 4px; font-size:14px; font-weight:600; }
+  .seats .bar{ flex:1; height:8px; border-radius:100px; background:var(--fog-dim); overflow:hidden; }
+  .seats .bar i{ display:block; height:100%; background:linear-gradient(90deg,var(--clarity),var(--clarity-soft)); border-radius:100px; }
+  .seats.low{ color:#9C3F47; } .seats.low .bar i{ background:#C0562E; }
+  .sel{ background:var(--fog); border-radius:12px; padding:10px 14px; margin:12px 0 4px; font-size:14px; display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .sel b{ color:var(--ink); }
+  .sel a{ color:var(--gold-deep); font-weight:700; font-size:13px; white-space:nowrap; cursor:pointer; }
+  .fld{ margin-top:14px; }
+  .fld label, .fld .lbl{ display:block; font-size:13.5px; font-weight:600; color:var(--ink); margin-bottom:5px; }
+  .fld label em, .fld .lbl em{ color:var(--alert); font-style:normal; }
+  .fld .hint{ font-size:12.5px; color:var(--text-muted-light); margin-top:4px; line-height:1.6; }
+  input[type=text],input[type=email],input[type=tel],select,textarea{ width:100%; font-family:inherit; font-size:15px; color:var(--text-on-light); background:#fff; border:1.5px solid var(--fog-dim); border-radius:12px; padding:11px 13px; transition:border-color .15s, box-shadow .15s; }
+  textarea{ resize:vertical; min-height:84px; line-height:1.7; }
+  input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--clarity); box-shadow:0 0 0 3px rgba(201,161,95,.2); }
+  input.bad,select.bad,textarea.bad{ border-color:var(--alert); }
+  .opts{ display:grid; gap:8px; }
+  .opt{ display:flex; gap:10px; align-items:flex-start; border:1.5px solid var(--fog-dim); border-radius:12px; padding:10px 12px; cursor:pointer; font-size:14px; line-height:1.6; transition:.15s; }
+  .opt:hover{ border-color:var(--clarity-soft); }
+  .opt:has(input:checked){ border-color:var(--clarity); background:rgba(201,161,95,.08); }
+  .opt input{ margin-top:5px; accent-color:var(--gold-deep); flex:none; }
+  .opt small{ display:block; color:var(--text-muted-light); font-size:12.5px; }
+  .opt.off{ opacity:.5; cursor:not-allowed; }
+  .sum{ margin-top:18px; background:var(--ink); color:var(--text-on-dark); border-radius:16px; padding:16px 18px; }
+  .sum .row{ display:flex; justify-content:space-between; gap:10px; font-size:14px; color:var(--text-muted-dark); }
+  .sum .row + .row{ margin-top:4px; }
+  .sum .tot{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-top:8px; padding-top:10px; border-top:1px solid rgba(255,255,255,.14); }
+  .sum .tot b{ font-size:28px; color:var(--clarity-soft); font-family:'IBM Plex Sans Arabic',sans-serif; line-height:1.2; }
+  .sum .usd{ font-size:12.5px; color:var(--text-muted-dark); margin-top:6px; line-height:1.6; }
+  .chk{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; margin-top:16px; line-height:1.7; }
+  .chk input{ margin-top:6px; accent-color:var(--gold-deep); flex:none; width:17px; height:17px; }
+  .err{ background:#F6E5E7; color:#9C3F47; border-radius:12px; padding:10px 14px; font-size:14px; margin-top:14px; }
+  .secure{ display:flex; gap:8px; justify-content:center; align-items:center; color:var(--text-muted-light); font-size:12.5px; margin-top:12px; text-align:center; }
+  .wa-link{ display:block; text-align:center; margin-top:10px; font-size:13.5px; color:var(--gold-deep); font-weight:600; }
+  .closed{ background:#F6E5E7; border-radius:14px; padding:16px 18px; text-align:center; color:#7a2f37; font-weight:600; margin-top:14px; }
+  .hp{ position:absolute; inset-inline-start:-9999px; width:1px; height:1px; opacity:0; }
+
+  /* ---- result / return panel ---- */
+  .res{ max-width:640px; margin:10px auto 0; background:#fff; border:1px solid var(--fog-dim); border-radius:24px; padding:34px 28px; text-align:center; box-shadow:0 24px 50px -30px rgba(36,29,46,.45); }
+  .res .ic{ width:68px; height:68px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; background:#DCEFE3; color:var(--ok); }
+  .res .ic.warn{ background:#FBF1DC; color:var(--gold-deep); }
+  .res .ic svg{ width:34px; height:34px; }
+  .res h2{ font-size:24px; font-weight:900; color:var(--ink); }
+  .res p{ color:var(--text-muted-light); margin-top:8px; }
+  .res dl{ text-align:start; margin:20px 0 6px; display:grid; grid-template-columns:auto 1fr; gap:8px 18px; font-size:14.5px; background:var(--fog); padding:16px 18px; border-radius:14px; }
+  .res dt{ color:var(--text-muted-light); } .res dd{ color:var(--ink); font-weight:600; }
+  .res .acts{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+
+  /* ---- mobile sticky CTA ---- */
+  .mbar{ display:none; }
+  @media (max-width:980px){
+    .mbar{ display:flex; position:fixed; inset-inline:0; bottom:0; z-index:60; background:rgba(255,255,255,.96); backdrop-filter:blur(8px); border-top:1px solid var(--fog-dim); padding:10px 16px calc(10px + env(safe-area-inset-bottom)); align-items:center; justify-content:space-between; gap:12px; }
+    .mbar .from{ font-size:12.5px; } .mbar .from b{ font-size:18px; }
+    body.has-mbar{ padding-bottom:78px; }
+  }
+  .reveal{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{ scroll-behavior:auto; } }
+</style>
+<!-- seo:start -->
+<link rel="canonical" href="https://bewoduh.com/trainings/">
+<link rel="alternate" hreflang="ar" href="https://bewoduh.com/trainings/">
+<link rel="alternate" hreflang="en" href="https://bewoduh.com/en/trainings/">
+<link rel="alternate" hreflang="x-default" href="https://bewoduh.com/trainings/">
+<meta property="og:site_name" content="بوضوح">
+<meta property="og:type" content="website">
+<meta property="og:title" content="تدريبات وورش — بوضوح">
+<meta property="og:description" content="ورش وتدريبات مباشرة يقدّمها فريق بوضوح. اطّلع على التفاصيل واحجز مقعدك وادفع مباشرة.">
+<meta property="og:url" content="https://bewoduh.com/trainings/">
+<meta property="og:image" content="https://bewoduh.com/images/trainings/research-roadmap.jpg">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- seo:end -->
+</head>
+<body>
+
+<site-nav active="trainings"></site-nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow" id="eyebrow"></span>
+    <h1 id="heroTitle"></h1>
+    <p id="heroLede"></p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" id="app"><div class="loading" id="loading"></div></div>
+</main>
+
+<div class="mbar" id="mbar" hidden>
+  <div class="from" id="mbarFrom"></div>
+  <button class="btn" id="mbarBtn" type="button"></button>
+</div>
+
+<site-footer></site-footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  const EN = document.documentElement.lang === 'en';
+  const L = (ar, en) => (EN ? en : ar);
+  const BASE = EN ? '/en/trainings/' : '/trainings/';
+  const WA = (window.BW_WHATSAPP && window.BW_WHATSAPP.number) || '447832339216';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const f = (o, k) => (EN && o[k + '_en']) || o[k] || '';
+  const arr = (o, k) => ((EN && o[k + '_en'] && o[k + '_en'].length) ? o[k + '_en'] : o[k]) || [];
+  const N = (n, d) => Number(n).toLocaleString('en-US', { maximumFractionDigits: d == null ? 2 : d });
+  const LOC = EN ? 'en-GB' : 'ar-JO-u-nu-latn';
+  const qs = new URLSearchParams(location.search);
+  const ICON = {
+    cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    pc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.4 3.2-5 6.5-5s5.9 1.6 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 15.3c2 .6 3.3 2.1 3.5 4.7"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    hourglass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg>',
+  };
+
+  /* ---------- أوقات ---------- */
+  const tzLocal = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })();
+  const fmtDate = (iso, tz) => new Date(iso).toLocaleDateString(LOC, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: tz || 'Asia/Amman' });
+  const fmtTime = (iso, tz) => new Date(iso).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit', timeZone: tz || 'Asia/Amman', timeZoneName: 'short' });
+  const fmtShort = (iso) => new Date(iso).toLocaleDateString(LOC, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Amman' });
+  const endIso = (t) => new Date(new Date(t.starts_at).getTime() + t.duration_min * 60000).toISOString();
+  const durText = (m) => (m % 60 === 0 ? (m / 60 === 3 ? L('3 ساعات متواصلة', '3 continuous hours') : (m / 60) + L(' ساعة', ' hours')) : m + L(' دقيقة', ' minutes'));
+  const gcal = (t) => {
+    const z = (iso) => iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const p = new URLSearchParams({ action: 'TEMPLATE', text: f(t, 'title'), dates: z(t.starts_at) + '/' + z(endIso(t)), details: f(t, 'summary') + '\n' + location.origin + BASE + '?t=' + t.slug, location: f(t, 'location') });
+    return 'https://calendar.google.com/calendar/render?' + p.toString();
+  };
+
+  /* ---------- نصوص ثابتة ---------- */
+  $('eyebrow').textContent = L('تدريبات وورش بوضوح', 'Bewoduh trainings & workshops');
+  $('heroTitle').textContent = L('تعلّم مع مختصين، واحجز مقعدك بسهولة', 'Learn with specialists. Book your seat in minutes.');
+  $('heroLede').textContent = L('ورش وتدريبات مباشرة يقدّمها فريق بوضوح. اختر التدريب، اطّلع على كل التفاصيل، وادفع مباشرة لتأكيد مقعدك.', 'Live workshops and trainings from the Bewoduh team. Pick a training, read all the details, and pay directly to confirm your seat.');
+  $('loading').textContent = L('جارٍ التحميل...', 'Loading...');
+
+  const app = $('app');
+  const sb = (typeof supabaseClient !== 'undefined') ? supabaseClient : null;
+  const ERR = {
+    sold_out: L('عذراً، اكتملت المقاعد.', 'Sorry, the workshop is full.'),
+    already_registered: L('هذا البريد الإلكتروني مسجّل ومدفوع مسبقاً في هذا التدريب.', 'This email is already registered and paid for this training.'),
+    early_over: L('انتهى خصم التسجيل المبكر. اختر خياراً آخر.', 'The early-bird discount has ended. Please choose another option.'),
+    group_names_required: L('يرجى كتابة أسماء الزملاء أو الأصدقاء المسجّلين معك.', 'Please write the names of the friends or colleagues registering with you.'),
+    registration_closed: L('انتهى التسجيل في هذا التدريب.', 'Registration for this training is closed.'),
+    too_many_requests: L('محاولات كثيرة. حاول لاحقاً أو تواصل معنا عبر واتساب.', 'Too many attempts. Please try later or contact us on WhatsApp.'),
+    invalid_whatsapp: L('رقم الواتساب غير صحيح. اكتبه مع رمز الدولة.', 'The WhatsApp number looks wrong. Include the country code.'),
+    invalid_email: L('البريد الإلكتروني غير صحيح.', 'The email address looks wrong.'),
+    invalid_name: L('يرجى كتابة الاسم الكامل.', 'Please write your full name.'),
+  };
+
+  /* ---------- جلب البيانات ---------- */
+  async function loadAll() {
+    if (!sb) throw new Error('no-supabase');
+    const { data, error } = await sb.from('trainings').select('*, training_packages(*)').eq('is_published', true).order('sort_order', { ascending: true }).order('starts_at', { ascending: true });
+    if (error) throw error;
+    return (data || []).map((t) => ({ ...t, pk: (t.training_packages || []).sort((a, b) => a.sort_order - b.sort_order) }));
+  }
+  const seatsOf = async (id) => { try { const { data } = await sb.rpc('training_seats', { p_training: id }); return data || null; } catch (e) { return null; } };
+  const isOpen = (t) => t.registration_open && new Date(t.starts_at).getTime() > Date.now();
+  const minPrice = (t) => (t.pk.length ? Math.min(...t.pk.map((p) => Number(p.price_jod))) : 0);
+
+  /* ---------- القائمة ---------- */
+  async function renderList(list) {
+    document.title = L('تدريبات وورش — بوضوح', 'Trainings & workshops — Bewoduh');
+    if (!list.length) {
+      app.innerHTML = '<div class="empty"><b>' + L('لا توجد تدريبات معلنة الآن', 'No trainings announced right now') + '</b>' + L('تابعنا، سنعلن عن التدريب القادم قريباً.', 'Stay tuned — the next one will be announced soon.') + '</div>';
+      return;
+    }
+    app.innerHTML = '<div class="grid">' + list.map((t) => {
+      const open = isOpen(t);
+      return '<a class="card reveal" href="' + BASE + '?t=' + encodeURIComponent(t.slug) + '">' +
+        '<div class="ph" role="img" aria-label="' + esc(f(t, 'title')) + '" style="background-image:url(\'' + esc(t.image_url || '/images/og-cover.jpg') + '\')">' +
+        '<span class="tag">' + esc(f(t, 'kicker') || L('ورشة', 'Workshop')) + '</span></div>' +
+        '<div class="bd"><h3>' + esc(f(t, 'title')) + '</h3>' +
+        '<div class="meta"><span>' + ICON.cal.replace('<svg', '<svg width="16" height="16"') + esc(fmtShort(t.starts_at)) + '</span>' +
+        '<span>' + ICON.clock.replace('<svg', '<svg width="16" height="16"') + esc(fmtTime(t.starts_at)) + '</span>' +
+        '<span>' + ICON.pc.replace('<svg', '<svg width="16" height="16"') + esc(f(t, 'location')) + '</span></div>' +
+        '<div class="meta"><span class="seat-' + t.id + '"></span></div>' +
+        '<div class="foot"><div class="from">' + L('تبدأ من', 'From') + '<b class="num">' + N(minPrice(t)) + ' ' + L('د.أ', 'JOD') + '</b></div>' +
+        '<span class="btn">' + (open ? L('التفاصيل والحجز', 'Details & booking') : L('التفاصيل', 'Details')) + '</span></div></div></a>';
+    }).join('') + '</div>';
+    observeReveal();
+    list.forEach(async (t) => {
+      const s = await seatsOf(t.id); const el = app.querySelector('.seat-' + t.id); if (!el || !s) return;
+      const left = Math.max(0, s.seats - s.taken);
+      el.innerHTML = ICON.users.replace('<svg', '<svg width="16" height="16"') + (!isOpen(t) ? L('انتهى التسجيل', 'Registration closed') : (left === 0 ? L('اكتملت المقاعد', 'Fully booked') : L('متبقّي ', 'Seats left: ') + '<b class="num">' + left + '</b>' + L(' من ', ' of ') + '<span class="num">' + s.seats + '</span>'));
+    });
+  }
+
+  /* ---------- التفاصيل ---------- */
+  const S = { t: null, pkg: null, kind: 'none', seats: null };
+  const earlyOk = (t) => t.early_until && Date.now() <= new Date(t.early_until).getTime() && t.early_pct > 0;
+  const pctNow = () => (S.kind === 'early' ? S.t.early_pct : (S.kind === 'group' || S.kind === 'colleagues') ? S.t.group_pct : 0);
+  const r2 = (x) => Math.round(x * 100) / 100;
+
+  function renderDetail(t) {
+    document.querySelector('.hero').classList.add('compact');
+    S.t = t; S.pkg = (t.pk.find((p) => p.is_featured) || t.pk[0] || {}).id || null; S.kind = 'none';
+    const title = f(t, 'title'); document.title = title + ' — ' + L('بوضوح', 'Bewoduh');
+    const open = isOpen(t);
+    const local = tzLocal && tzLocal !== 'Asia/Amman' ? fmtTime(t.starts_at, tzLocal) : '';
+    const localD = tzLocal && tzLocal !== 'Asia/Amman' ? fmtDate(t.starts_at, tzLocal) : '';
+    const topics = arr(t, 'topics');
+    const facts =
+      '<div class="fact">' + ICON.cal + '<div><small>' + L('التاريخ', 'Date') + '</small><b>' + esc(fmtDate(t.starts_at)) + '</b></div></div>' +
+      '<div class="fact">' + ICON.clock + '<div><small>' + L('الوقت (بتوقيت الأردن)', 'Time (Jordan)') + '</small><b class="num">' + esc(fmtTime(t.starts_at)) + '</b><i>' + esc(durText(t.duration_min)) + (local ? ' · ' + L('بتوقيتك: ', 'Your time: ') + esc(localD === fmtDate(t.starts_at) ? '' : localD + ' ') + esc(local) : '') + '</i></div></div>' +
+      '<div class="fact">' + ICON.pc + '<div><small>' + L('المكان', 'Where') + '</small><b>' + esc(f(t, 'location')) + '</b></div></div>' +
+      '<div class="fact">' + ICON.users + '<div><small>' + L('المقاعد', 'Seats') + '</small><b class="num" id="factSeats">…</b></div></div>';
+    const pk = t.pk.map((p) => (
+      '<button type="button" class="pk" role="radio" data-pk="' + p.id + '" aria-checked="false">' +
+      (p.is_featured ? '<span class="best">' + L('الأكثر طلباً', 'Most popular') + '</span>' : '') +
+      '<span class="nm">' + esc(f(p, 'name')) + '</span>' +
+      '<span class="pr num">' + N(p.price_jod) + '<small>' + L('د.أ', 'JOD') + '</small></span>' +
+      '<span class="usd num">≈ $' + N(r2(p.price_jod / t.jod_per_usd), 0) + ' USD</span>' +
+      '<ul>' + arr(p, 'features').map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' +
+      '<span class="pick">' + (open ? L('اختر هذه الباقة', 'Choose this package') : '') + '</span></button>')).join('');
+
+    app.innerHTML =
+      '<a class="back" href="' + BASE + '">' + (EN ? '←' : '→') + ' ' + L('كل التدريبات', 'All trainings') + '</a>' +
+      '<div class="detail"><div class="main">' +
+      '<img class="poster" src="' + esc(t.image_url || '/images/og-cover.jpg') + '" alt="' + esc(title) + '" fetchpriority="high">' +
+      '<div class="kicker">' + esc(f(t, 'kicker')) + '</div>' +
+      '<h2 class="d-title">' + esc(title) + '</h2>' +
+      '<p class="d-sum">' + esc(f(t, 'summary')) + '</p>' +
+      '<div class="facts">' + facts + '</div>' +
+      '<p style="margin-top:6px"><a class="from" style="color:var(--gold-deep);font-weight:600" href="' + esc(gcal(t)) + '" target="_blank" rel="noopener">' + L('أضف الموعد إلى تقويم جوجل ←', 'Add to Google Calendar →') + '</a></p>' +
+      (f(t, 'audience') ? '<section class="sec"><h2>' + L('لمن هذه الورشة؟', 'Who is it for?') + '</h2><div class="note-box">' + ICON.user + '<div>' + esc(f(t, 'audience')) + '</div></div></section>' : '') +
+      (topics.length ? '<section class="sec"><h2>' + L('محاور الورشة', 'What we will cover') + '</h2><ol class="topics">' + topics.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></section>' : '') +
+      '<section class="sec"><h2>' + L('عن التنظيم', 'About the format') + '</h2>' +
+      (f(t, 'supervisor') ? '<div class="note-box">' + ICON.mic + '<div>' + esc(f(t, 'supervisor')) + '</div></div>' : '') +
+      (f(t, 'format_note') ? '<div class="note-box">' + ICON.pc + '<div>' + esc(f(t, 'format_note')) + '</div></div>' : '') +
+      '<div class="note-box">' + ICON.check + '<div>' + L('الورشة تنظّمها منصة بوضوح التابعة لشركة لمسة المحدودة (LAMSA LTD)، المسجّلة في إنجلترا وويلز برقم 17517932.', 'Organised by Bewoduh, operated by LAMSA LTD, registered in England and Wales (no. 17517932).') + '</div></div></section>' +
+      '<section class="sec" id="packages"><h2>' + L('اختر باقتك', 'Choose your package') + '</h2><div class="pkgs" role="radiogroup">' + pk + '</div></section>' +
+      '</div>' +
+      '<aside class="book" id="book"><h2>' + L('احجز مقعدك', 'Reserve your seat') + '</h2>' +
+      '<div class="seats" id="seatsBar"></div>' +
+      (open ? formHtml(t) : '<div class="closed">' + L('انتهى التسجيل في هذا التدريب.', 'Registration for this training is closed.') + '</div><a class="wa-link" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، أود الاستفسار عن التدريب القادم', 'Hello, I would like to ask about the next training')) + '" target="_blank" rel="noopener">' + L('تواصل معنا عبر واتساب', 'Contact us on WhatsApp') + '</a>') +
+      '</aside></div>';
+
+    app.querySelectorAll('.pk').forEach((b) => b.addEventListener('click', () => { S.pkg = b.dataset.pk; syncPkg(); if (open && matchMedia('(max-width:980px)').matches) $('book').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    syncPkg();
+    if (open) wireForm(t);
+    observeReveal();
+    jsonLd(t);
+    setupMobileBar(t, open);
+    seatsOf(t.id).then((s) => { S.seats = s; paintSeats(); });
+    if (qs.get('canceled') === '1' && qs.get('r')) cancelBanner(qs.get('r'));
+  }
+
+  function paintSeats() {
+    const s = S.seats, t = S.t; const bar = $('seatsBar'), fs = $('factSeats'); if (!s) { if (fs) fs.textContent = String(t.seats); return; }
+    const left = Math.max(0, s.seats - s.taken), pct = s.seats ? Math.round(s.taken / s.seats * 100) : 0;
+    if (fs) fs.textContent = (left === 0 ? L('اكتملت', 'Full') : L('متبقّي ', 'Left: ') + left + L(' من ', ' of ') + s.seats);
+    if (bar) { bar.className = 'seats' + (left <= 3 ? ' low' : ''); bar.innerHTML = '<span class="num">' + (left === 0 ? L('اكتملت المقاعد', 'Fully booked') : L('متبقّي ', 'Seats left: ') + left + L(' من ', ' of ') + s.seats) + '</span><span class="bar"><i style="width:' + pct + '%"></i></span>'; }
+    if (left === 0 && $('regForm')) {
+      $('regForm').hidden = true;
+      bar.insertAdjacentHTML('afterend', '<div class="closed" id="soldOut">' + L('اكتملت المقاعد. تواصل معنا ليتم إضافتك لقائمة الانتظار.', 'The workshop is full. Contact us to join the waiting list.') + '</div><a class="wa-link" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، أود الانضمام لقائمة الانتظار للتدريب: ', 'Hello, I would like to join the waiting list for: ') + f(t, 'title')) + '" target="_blank" rel="noopener">' + L('قائمة الانتظار عبر واتساب', 'Waiting list on WhatsApp') + '</a>');
+    }
+  }
+
+  function syncPkg() {
+    app.querySelectorAll('.pk').forEach((b) => b.setAttribute('aria-checked', b.dataset.pk === S.pkg ? 'true' : 'false'));
+    const p = (S.t.pk.find((x) => x.id === S.pkg) || {});
+    const sel = $('selPkg'); if (sel) sel.innerHTML = '<span>' + L('الباقة: ', 'Package: ') + '<b>' + esc(f(p, 'name')) + '</b></span><a href="#packages" id="chgPkg">' + L('تغيير', 'Change') + '</a>';
+    const ch = $('chgPkg'); if (ch) ch.addEventListener('click', (e) => { e.preventDefault(); $('packages').scrollIntoView({ behavior: 'smooth' }); });
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const box = $('sumBox'); if (!box) return;
+    const t = S.t, p = t.pk.find((x) => x.id === S.pkg); if (!p) return;
+    const pct = pctNow(), base = Number(p.price_jod), fin = r2(base * (100 - pct) / 100), usd = r2(fin / t.jod_per_usd);
+    box.innerHTML = '<div class="row"><span>' + esc(f(p, 'name')) + '</span><span class="num">' + N(base) + ' ' + L('د.أ', 'JOD') + '</span></div>' +
+      (pct ? '<div class="row"><span>' + L('الخصم', 'Discount') + ' <span class="num">' + pct + '%</span></span><span class="num">− ' + N(r2(base - fin)) + ' ' + L('د.أ', 'JOD') + '</span></div>' : '') +
+      '<div class="tot"><span>' + L('الإجمالي', 'Total') + '</span><b class="num">' + N(fin) + ' ' + L('د.أ', 'JOD') + '</b></div>' +
+      '<div class="usd" id="usdNote">' + (methodVal() === 'card' ? L('يُسحب من بطاقتك بالدولار الأمريكي: ', 'Your card is charged in US dollars: ') + '<b class="num">$' + N(usd) + '</b>' + L(' (حسب سعر الصرف المعتمد لدينا).', ' (at our fixed rate).') : L('سنزوّدك بتفاصيل الدفع عبر واتساب.', 'We will send you the payment details on WhatsApp.')) + '</div>';
+    const mf = $('mbarFrom'); if (mf) mf.innerHTML = L('الإجمالي', 'Total') + '<b class="num">' + N(fin) + ' ' + L('د.أ', 'JOD') + '</b>';
+    const sb2 = $('submitBtn'); if (sb2) sb2.textContent = methodVal() === 'card' ? L('تأكيد التسجيل والدفع', 'Confirm & pay') : L('إرسال الطلب', 'Send request');
+  }
+  const methodVal = () => { const x = document.querySelector('input[name=method]:checked'); return x ? x.value : 'card'; };
+
+  function formHtml(t) {
+    const ea = earlyOk(t);
+    const opt = (n, v, label, sub, extra) => '<label class="opt' + (extra || '') + '"><input type="radio" name="' + n + '" value="' + v + '"' + (v === 'none' || (n === 'method' && v === 'card') ? ' checked' : '') + '><span>' + label + (sub ? '<small>' + sub + '</small>' : '') + '</span></label>';
+    const sel = (id, items) => '<select id="' + id + '" required><option value="">' + L('اختر...', 'Select...') + '</option>' + items.map((x) => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select>';
+    return '<div class="sel" id="selPkg"></div>' +
+      '<form id="regForm" novalidate autocomplete="on">' +
+      '<div class="fld"><label for="fName">' + L('الاسم الكامل كما تريده في الشهادة', 'Full name as it should appear on the certificate') + ' <em>*</em></label><input type="text" id="fName" autocomplete="name" required maxlength="120"></div>' +
+      '<div class="fld"><label for="fWa">' + L('رقم الواتساب مع رمز الدولة', 'WhatsApp number with country code') + ' <em>*</em></label><input type="tel" id="fWa" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="+962 7X XXX XXXX" required maxlength="25"><div class="hint">' + L('للتواصل وتأكيد الحجز وإرسال رابط الورشة.', 'For contact, booking confirmation and sending the workshop link.') + '</div></div>' +
+      '<div class="fld"><label for="fMail">' + L('البريد الإلكتروني', 'Email') + ' <em>*</em></label><input type="email" id="fMail" autocomplete="email" dir="ltr" required maxlength="254"><div class="hint">' + L('لإرسال رابط جوجل ميت والشهادة ومادة المحاضرات.', 'To send the Google Meet link, certificate and lecture materials.') + '</div></div>' +
+      '<div class="fld"><label for="fCountry">' + L('بلد الإقامة واسم الجامعة', 'Country of residence and university') + ' <em>*</em></label><input type="text" id="fCountry" required maxlength="200"></div>' +
+      '<div class="fld"><label for="fLevel">' + L('المرحلة الدراسية الحالية', 'Current study level') + ' <em>*</em></label>' + sel('fLevel', [['master', L('طالب أو طالبة ماجستير', 'Master\'s student')], ['phd', L('طالب أو طالبة دكتوراه', 'PhD student')], ['graduate', L('خريج أو خريجة / باحث أو باحثة مستقلة', 'Graduate / independent researcher')]]) + '</div>' +
+      '<div class="fld"><label for="fSpec">' + L('التخصص الدقيق', 'Specialisation') + ' <em>*</em></label>' + sel('fSpec', [['clinical', L('علم النفس الإكلينيكي أو العام أو التربوي', 'Clinical, general or educational psychology')], ['counselling', L('الإرشاد النفسي والأسري', 'Counselling (individual and family)')], ['social', L('العلوم الاجتماعية', 'Social sciences')], ['other', L('تخصص آخر', 'Other')]]) + '</div>' +
+      '<div class="fld"><label for="fStage">' + L('في أي مرحلة وصلت في بحثك أو رسالتك؟', 'Where are you in your research or thesis?') + ' <em>*</em></label>' + sel('fStage', [['not_started', L('لم أبدأ بعد / مرحلة اختيار العنوان', 'Not started / choosing a title')], ['proposal', L('مرحلة إعداد الخطة البحثية', 'Preparing the research proposal')], ['framework', L('كتابة الإطار النظري والدراسات السابقة', 'Writing the theoretical framework and literature review')], ['fieldwork', L('التطبيق الميداني والتحليل الإحصائي والنتائج', 'Fieldwork, statistical analysis and results')], ['final', L('المراجعة النهائية والتدقيق المنهجي', 'Final review and methodological check')]]) + '</div>' +
+      '<div class="fld"><label for="fChal">' + L('ما أكثر تحدٍّ تواجهه في بحثك وتتمنى أن تركّز عليه الورشة؟', 'What is your biggest research challenge you would like the workshop to focus on?') + ' <em>*</em></label><textarea id="fChal" required maxlength="1500"></textarea></div>' +
+      '<div class="fld"><span class="lbl">' + L('هل ينطبق عليك أحد الخصومات؟', 'Does any discount apply to you?') + ' <em>*</em></span><div class="opts" id="discOpts">' +
+      opt('disc', 'none', L('لا يوجد، السعر الأساسي', 'No discount, standard price')) +
+      (ea ? opt('disc', 'early', L('خصم التسجيل المبكر ', 'Early-bird discount ') + '<b class="num">' + t.early_pct + '%</b>', L('ينتهي ', 'Ends ') + esc(fmtShort(t.early_until))) : '') +
+      (t.group_pct > 0 ? opt('disc', 'group', L('خصم مجموعات الأصدقاء ', 'Friends group discount ') + '<b class="num">' + t.group_pct + '%</b>') + opt('disc', 'colleagues', L('خصم زملاء التخصص ', 'Classmates / colleagues discount ') + '<b class="num">' + t.group_pct + '%</b>') : '') +
+      '</div></div>' +
+      '<div class="fld" id="groupFld" hidden><label for="fGroup">' + L('أسماء الزملاء المسجّلين معك (كاملة)', 'Full names of the friends or colleagues registering with you') + ' <em>*</em></label><textarea id="fGroup" maxlength="600"></textarea><div class="hint">' + L('يُراجع الفريق الأسماء قبل اعتماد الخصم.', 'Our team checks the names before the discount is honoured.') + '</div></div>' +
+      '<div class="fld"><span class="lbl">' + L('طريقة الدفع', 'Payment method') + '</span><div class="opts">' +
+      opt('method', 'card', L('بطاقة بنكية (دفع فوري وآمن)', 'Bank card (instant & secure)'), L('تأكيد المقعد فور الدفع، من الأردن ومن كل الدول.', 'Seat confirmed right after payment, from Jordan and abroad.')) +
+      opt('method', 'other', L('طريقة أخرى (كليك / تحويل بنكي / ويسترن يونيون)', 'Another way (CliQ / bank transfer / Western Union)'), L('نتواصل معك عبر واتساب بتفاصيل الدفع. نحجز لك المقعد 12 ساعة.', 'We contact you on WhatsApp with payment details and hold your seat for 12 hours.')) +
+      '</div></div>' +
+      '<div class="sum" id="sumBox"></div>' +
+      '<label class="chk"><input type="checkbox" id="fTerms" required><span>' + esc(f(t, 'terms') || L('أوافق على شروط التسجيل.', 'I agree to the registration terms.')) + ' <span style="color:var(--text-muted-light)">' + L('(انظر ', '(see ') + '<a href="' + (EN ? '/en/terms/' : '/terms/') + '" style="text-decoration:underline" target="_blank" rel="noopener">' + L('الشروط', 'terms') + '</a>' + L(' و', ' and ') + '<a href="' + (EN ? '/en/privacy/' : '/privacy/') + '" style="text-decoration:underline" target="_blank" rel="noopener">' + L('الخصوصية', 'privacy') + '</a>)</span></span></label>' +
+      '<input class="hp" type="text" id="fHp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+      '<div class="err" id="regErr" hidden role="alert"></div>' +
+      '<button class="btn block" id="submitBtn" type="submit" style="margin-top:16px"></button>' +
+      '<div class="secure">' + ICON.lock + '<span>' + L('الدفع بالبطاقة عبر Stripe. لا نخزّن بيانات بطاقتك.', 'Card payments are processed by Stripe. We never store your card details.') + '</span></div>' +
+      '<a class="wa-link" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، لدي سؤال عن التدريب: ', 'Hello, I have a question about the training: ') + f(t, 'title')) + '" target="_blank" rel="noopener">' + L('عندك سؤال؟ اسألنا على واتساب', 'Questions? Ask us on WhatsApp') + '</a></form>';
+  }
+
+  const normDigits = (s) => String(s).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+
+  function wireForm(t) {
+    const form = $('regForm');
+    form.addEventListener('change', (e) => {
+      if (e.target.name === 'disc') { S.kind = e.target.value; $('groupFld').hidden = !(S.kind === 'group' || S.kind === 'colleagues'); updateSummary(); }
+      if (e.target.name === 'method') updateSummary();
+      if (e.target.classList) e.target.classList.remove('bad');
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = $('regErr'); err.hidden = true;
+      const need = ['fName', 'fWa', 'fMail', 'fCountry', 'fLevel', 'fSpec', 'fStage', 'fChal'];
+      let bad = null;
+      need.forEach((id) => { const el = $(id); const ok = el.value.trim().length > 0 && (id !== 'fMail' || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value.trim())); el.classList.toggle('bad', !ok); if (!ok && !bad) bad = el; });
+      const grp = S.kind === 'group' || S.kind === 'colleagues';
+      if (grp && $('fGroup').value.trim().length < 3) { $('fGroup').classList.add('bad'); bad = bad || $('fGroup'); }
+      if (bad) { err.textContent = L('يرجى تعبئة الحقول المطلوبة بشكل صحيح.', 'Please fill in the required fields correctly.'); err.hidden = false; bad.focus(); return; }
+      if (!$('fTerms').checked) { err.textContent = L('يرجى الموافقة على شروط التسجيل للمتابعة.', 'Please accept the registration terms to continue.'); err.hidden = false; return; }
+      if ($('fHp').value) return; // روبوت
+      const btn = $('submitBtn'); const label = btn.textContent; btn.disabled = true; btn.textContent = L('جارٍ الإرسال...', 'Sending...');
+      const method = methodVal();
+      try {
+        const { data, error } = await sb.rpc('register_training', {
+          p_training: t.id, p_package: S.pkg, p_full_name: $('fName').value.trim(), p_whatsapp: normDigits($('fWa').value.trim()), p_email: $('fMail').value.trim(),
+          p_country_univ: $('fCountry').value.trim(), p_level: $('fLevel').value, p_specialization: $('fSpec').value, p_stage: $('fStage').value, p_challenge: $('fChal').value.trim(),
+          p_discount_kind: S.kind, p_group_names: grp ? $('fGroup').value.trim() : null, p_method: method, p_lang: EN ? 'en' : 'ar',
+        });
+        if (error) { const code = String(error.message || '').replace(/^.*?([a-z_]{4,})\s*$/, '$1'); throw new Error(ERR[code] ? code : 'x'); }
+        if (method === 'other') { showOther(t, data); return; }
+        btn.textContent = L('جارٍ تحويلك إلى صفحة الدفع...', 'Taking you to the payment page...');
+        const r = await sb.functions.invoke('create-training-checkout', { body: { registration_id: data.id } });
+        if (r.error || !r.data || !r.data.url) { showPayRetry(data.id); return; }
+        location.href = r.data.url;
+      } catch (ex) {
+        err.textContent = ERR[ex.message] || L('تعذّر إرسال الطلب. حاول مرة أخرى أو تواصل معنا عبر واتساب.', 'We could not send your request. Please try again or contact us on WhatsApp.');
+        err.hidden = false; btn.disabled = false; btn.textContent = label;
+        if (ex.message === 'sold_out') seatsOf(t.id).then((s) => { S.seats = s; paintSeats(); });
+      }
+    });
+    updateSummary();
+  }
+
+  function panel(kind, icon, title, body, dl, acts) {
+    app.innerHTML = '<div class="res"><div class="ic ' + (kind === 'warn' ? 'warn' : '') + '">' + icon + '</div><h2>' + title + '</h2>' + (body ? '<p>' + body + '</p>' : '') + (dl || '') + '<div class="acts">' + (acts || '') + '</div></div>';
+    document.querySelector('.hero').classList.add('compact'); document.body.classList.remove('has-mbar'); $('mbar').hidden = true; window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  const dlHtml = (rows) => '<dl>' + rows.map((r) => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('') + '</dl>';
+
+  function showOther(t, d) {
+    const p = t.pk.find((x) => x.id === S.pkg) || {};
+    panel('warn', ICON.hourglass, L('استلمنا طلبك، مقعدك محجوز', 'Request received, your seat is held'),
+      L('سيتواصل معك فريقنا عبر واتساب قريباً بتفاصيل الدفع. نحجز لك المقعد 12 ساعة، ويُعتمد نهائياً فور إتمام الدفع.', 'Our team will WhatsApp you shortly with the payment details. Your seat is held for 12 hours and confirmed once payment is complete.'),
+      dlHtml([[L('التدريب', 'Training'), esc(f(t, 'title'))], [L('الباقة', 'Package'), esc(f(p, 'name'))], [L('المبلغ', 'Amount'), '<span class="num">' + N(d.final_jod) + ' ' + L('د.أ', 'JOD') + '</span>'], [L('الموعد', 'When'), esc(fmtDate(t.starts_at)) + ' · <span class="num">' + esc(fmtTime(t.starts_at)) + '</span>']]),
+      '<a class="btn" target="_blank" rel="noopener" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، سجّلت في ورشة ', 'Hello, I registered for ') + f(t, 'title') + L(' وأريد تفاصيل الدفع', ' and would like the payment details')) + '">' + L('تواصل معنا الآن على واتساب', 'Message us on WhatsApp now') + '</a><a class="btn ghost" href="' + BASE + '">' + L('كل التدريبات', 'All trainings') + '</a>');
+  }
+  function showPayRetry(id) {
+    panel('warn', ICON.hourglass, L('تم تسجيل طلبك، بقي الدفع', 'Registered. Payment is the last step'),
+      L('تعذّر فتح صفحة الدفع الآن. مقعدك محجوز لمدة قصيرة، جرّب مرة أخرى.', 'We could not open the payment page just now. Your seat is held for a short time, please try again.'), '',
+      '<button class="btn" id="retryPay" type="button">' + L('أكمل الدفع', 'Complete payment') + '</button><a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/' + WA + '">' + L('تواصل معنا', 'Contact us') + '</a>');
+    $('retryPay').addEventListener('click', () => payFor(id, $('retryPay')));
+  }
+  async function payFor(id, btn) {
+    btn.disabled = true; const old = btn.textContent; btn.textContent = L('جارٍ التحويل...', 'Redirecting...');
+    const r = await sb.functions.invoke('create-training-checkout', { body: { registration_id: id } });
+    if (r.error || !r.data || !r.data.url) {
+      btn.disabled = false; btn.textContent = old;
+      let msg = L('انتهت مهلة هذا الطلب. يمكنك التسجيل من جديد.', 'This request has expired. You can register again.');
+      btn.insertAdjacentHTML('afterend', '<p style="margin-top:10px;color:#9C3F47;font-size:14px">' + msg + '</p>'); return;
+    }
+    location.href = r.data.url;
+  }
+  async function cancelBanner(id) {
+    const { data } = await sb.rpc('training_reg_status', { p_id: id });
+    if (!data || data.status !== 'pending' || data.expired) return;
+    const form = $('regForm'); if (!form) return;
+    form.insertAdjacentHTML('beforebegin', '<div class="err" style="background:#FBF1DC;color:#7D5F27" id="cancelBox">' + L('لم تكتمل عملية الدفع. مقعدك ما زال محجوزاً لوقت قصير.', 'The payment was not completed. Your seat is still held for a short time.') + ' <button class="btn" id="cancelPay" type="button" style="margin-top:8px;padding:8px 18px;font-size:14px">' + L('أكمل الدفع', 'Complete payment') + '</button></div>');
+    $('cancelPay').addEventListener('click', () => payFor(id, $('cancelPay')));
+  }
+
+  /* ---------- العودة بعد الدفع ---------- */
+  async function renderReturn(id) {
+    let d = null, tries = 0;
+    const get = async () => { const r = await sb.rpc('training_reg_status', { p_id: id }); return r.data || null; };
+    d = await get();
+    if (!d) { renderFallback(); return; }
+    while (qs.get('paid') === '1' && d.status === 'pending' && tries < 10) { // انتظار وصول تأكيد Stripe
+      panel('warn', ICON.hourglass, L('نؤكّد دفعتك...', 'Confirming your payment...'), L('لحظات فقط، لا تغلق الصفحة.', 'Just a moment, please keep this page open.'));
+      await new Promise((r) => setTimeout(r, 2500)); d = await get() || d; tries++;
+    }
+    document.title = L('تسجيلك — بوضوح', 'Your registration — Bewoduh');
+    const rows = [[L('التدريب', 'Training'), esc(EN && d.title_en ? d.title_en : d.title)], [L('الباقة', 'Package'), esc(EN && d.package_en ? d.package_en : d.package)], [L('الموعد', 'When'), esc(fmtDate(d.starts_at)) + ' · <span class="num">' + esc(fmtTime(d.starts_at)) + '</span>'], [L('المبلغ', 'Amount'), '<span class="num">' + N(d.final_jod) + ' ' + L('د.أ', 'JOD') + '</span>']];
+    const links = '<a class="btn" href="' + BASE + '">' + L('كل التدريبات', 'All trainings') + '</a>';
+    if (d.status === 'paid') {
+      panel('ok', ICON.check, L('تم تأكيد مقعدك', 'Your seat is confirmed'), L('شكراً لك. أرسلنا إيصال الدفع إلى بريدك، وسنرسل لك رابط الورشة ومادتها عبر البريد وواتساب قبل الموعد.', 'Thank you. We emailed your receipt, and will send the workshop link and materials by email and WhatsApp before the session.'), dlHtml(rows), links);
+    } else if (d.status === 'pending') {
+      panel('warn', ICON.hourglass, d.method === 'other' ? L('طلبك قيد الانتظار', 'Your request is pending') : L('لم نستلم الدفع بعد', 'We have not received the payment yet'),
+        d.method === 'other' ? L('سيتواصل معك فريقنا عبر واتساب بتفاصيل الدفع. يُعتمد المقعد فور إتمام الدفع.', 'Our team will WhatsApp you the payment details. The seat is confirmed once payment is complete.') : L('إن كنت قد دفعت للتو، فسيصلك تأكيد بالبريد خلال دقائق. وإلا يمكنك إكمال الدفع الآن.', 'If you have just paid, a confirmation email will arrive within minutes. Otherwise you can complete the payment now.'),
+        dlHtml(rows), (d.method !== 'other' && !d.expired ? '<button class="btn" id="payNow" type="button">' + L('أكمل الدفع', 'Complete payment') + '</button>' : '') + links);
+      const pn = $('payNow'); if (pn) pn.addEventListener('click', () => payFor(id, pn));
+    } else {
+      panel('warn', ICON.hourglass, L('انتهى هذا الطلب', 'This request has ended'), L('أُلغي الطلب لعدم إتمام الدفع في الوقت المحدد. يمكنك التسجيل من جديد إن كانت هناك مقاعد.', 'The request was cancelled because payment was not completed in time. You can register again if seats remain.'), dlHtml(rows), '<a class="btn" href="' + BASE + '?t=' + encodeURIComponent(d.slug) + '">' + L('التسجيل من جديد', 'Register again') + '</a>');
+    }
+  }
+  function renderFallback() { init(true); }
+
+  /* ---------- مساعدات ---------- */
+  function jsonLd(t) {
+    try {
+      const o = { '@context': 'https://schema.org', '@type': 'Event', name: f(t, 'title'), description: f(t, 'summary'), startDate: t.starts_at, endDate: endIso(t),
+        eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', eventStatus: 'https://schema.org/EventScheduled', image: location.origin + (t.image_url || ''),
+        location: { '@type': 'VirtualLocation', url: location.origin + BASE + '?t=' + t.slug }, organizer: { '@type': 'Organization', name: 'Bewoduh', url: 'https://bewoduh.com' },
+        offers: t.pk.map((p) => ({ '@type': 'Offer', name: f(p, 'name'), price: String(p.price_jod), priceCurrency: 'JOD', availability: 'https://schema.org/InStock', url: location.origin + BASE + '?t=' + t.slug })) };
+      const s = document.createElement('script'); s.type = 'application/ld+json'; s.textContent = JSON.stringify(o); document.head.appendChild(s);
+    } catch (e) {}
+  }
+  function setupMobileBar(t, open) {
+    const bar = $('mbar'); if (!open) return;
+    bar.hidden = false; document.body.classList.add('has-mbar'); $('mbarBtn').textContent = L('احجز مقعدك', 'Reserve your seat');
+    $('mbarBtn').addEventListener('click', () => $('book').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    const io = new IntersectionObserver((es) => { bar.style.display = es[0].isIntersecting ? 'none' : ''; }, { threshold: .15 }); io.observe($('book'));
+    updateSummary();
+  }
+  function observeReveal() {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  }
+
+  async function init(skipReturn) {
+    try {
+      if (!skipReturn && qs.get('r') && qs.get('canceled') !== '1') { await renderReturn(qs.get('r')); return; }
+      const list = await loadAll();
+      const slug = qs.get('t');
+      const t = slug && list.find((x) => x.slug === slug);
+      if (t) renderDetail(t); else renderList(list);
+    } catch (e) {
+      console.error(e);
+      app.innerHTML = '<div class="empty"><b>' + L('تعذّر تحميل الصفحة', 'Could not load the page') + '</b>' + L('تحقق من اتصالك وحاول مجدداً، أو تواصل معنا عبر واتساب.', 'Check your connection and try again, or contact us on WhatsApp.') + '</div>';
+    }
+  }
+  init();
+})();
+</script>
+
+<app-bottom-nav></app-bottom-nav>
+<script>
+  document.write('<scr' + 'ipt src="/components.js?v=' + Date.now() + '"></scr' + 'ipt>');
+</script>
+</body>
+</html>

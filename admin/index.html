@@ -857,8 +857,8 @@ const dashboard = document.getElementById('dashboard');
 const logoutBtn = document.getElementById('logoutBtn');
 const loginError = document.getElementById('loginError');
 
-const TAB_PERMISSION = { packages: 'packages', promos: 'packages', points: 'packages', articles: 'articles', bookings: 'bookings', team: 'team', applications: 'applications', slots: 'slots', users: 'users', 'static-pages': 'pages', exercises: 'exercises', admins: 'super' };
-const PERMISSION_LABELS = { bookings: 'الحجوزات', applications: 'طلبات الانضمام', team: 'الفريق (الأخصائيون)', slots: 'المواعيد المتاحة', articles: 'المقالات', packages: 'الباقات والأسعار', pages: 'الصفحات الثابتة (الشروط والخصوصية والأسئلة)', exercises: 'تمارين يومية', users: 'قائمة المستخدمين' };
+const TAB_PERMISSION = { packages: 'packages', promos: 'packages', points: 'packages', articles: 'articles', bookings: 'bookings', team: 'team', applications: 'applications', slots: 'slots', users: 'users', 'static-pages': 'pages', exercises: 'exercises', trainings: 'trainings', admins: 'super' };
+const PERMISSION_LABELS = { bookings: 'الحجوزات', applications: 'طلبات الانضمام', team: 'الفريق (الأخصائيون)', slots: 'المواعيد المتاحة', articles: 'المقالات', packages: 'الباقات والأسعار', pages: 'الصفحات الثابتة (الشروط والخصوصية والأسئلة)', exercises: 'تمارين يومية', users: 'قائمة المستخدمين', trainings: 'التدريبات والورش (إضافة وتعديل ومتابعة التسجيلات)' };
 let ADMIN_ACCESS = { is_admin: false, is_super: false, permissions: [] };
 const canAccess = (tab) => ADMIN_ACCESS.is_super || (TAB_PERMISSION[tab] !== 'super' && ADMIN_ACCESS.permissions.includes(TAB_PERMISSION[tab]));
 
@@ -2672,5 +2672,6 @@ async function deleteExercise(id){
 </script>
 
 <script src="/admin/admin-extra.js?v=15"></script>
+<script src="/admin/admin-trainings.js?v=1"></script>
 </body>
 </html>

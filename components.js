@@ -110,6 +110,7 @@ class SiteNav extends HTMLElement {
       { href: '/blog/', label: t('المدونة', 'Blog'), key: 'blog' },
       { href: '/quizzes/', label: t('الاختبارات', 'Quizzes'), key: 'quizzes' },
       { href: '/team/', label: t('فريق بوضوح', 'Our Team'), key: 'team' },
+      { href: '/trainings/', label: t('تدريبات', 'Trainings'), key: 'trainings' },
       { href: '/about/', label: t('من نحن', 'About'), key: 'about' },
     ];
     if (!IS_EN) links.push({ href: '/join/', label: 'انضم إلينا', key: 'join' });
@@ -235,6 +236,7 @@ class SiteFooter extends HTMLElement {
           <a href="${h('/quizzes/')}">${t('الاختبارات', 'Quizzes')}</a>
           <a href="${h('/about/')}">${t('من نحن', 'About')}</a>
           <a href="${h('/team/')}">${t('فريق بوضوح', 'Our Team')}</a>
+          <a href="${h('/trainings/')}">${t('تدريبات وورش', 'Trainings & workshops')}</a>
           <a href="${h('/join/')}">${t('انضم إلينا', 'Join us')}</a>
           <a href="${h('/faq/')}">${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
           <a href="${h('/daily-exercises/')}">${t('تمارين يومية', 'Daily exercises')}</a>
@@ -276,6 +278,7 @@ class SiteFooter extends HTMLElement {
         <a href="${h('/quizzes/')}" ${linkStyle}>${t('الاختبارات', 'Quizzes')}</a>
         <a href="${h('/about/')}" ${linkStyle}>${t('من نحن', 'About')}</a>
         <a href="${h('/team/')}" ${linkStyle}>${t('فريق بوضوح', 'Our Team')}</a>
+        <a href="${h('/trainings/')}" ${linkStyle}>${t('تدريبات وورش', 'Trainings & workshops')}</a>
         <a href="${h('/join/')}" ${linkStyle}>${t('انضم إلينا', 'Join us')}</a>
         <a href="${h('/faq/')}" ${linkStyle}>${t('الأسئلة الأكثر شيوعاً', 'FAQ')}</a>
         <a href="${h('/daily-exercises/')}" ${linkStyle}>${t('تمارين يومية', 'Daily exercises')}</a>

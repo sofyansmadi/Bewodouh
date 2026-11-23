@@ -504,4 +504,10 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://bewoduh.com/terms/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://bewoduh.com/en/terms/"/>
   </url>
+  <url>
+    <loc>https://bewoduh.com/trainings/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://bewoduh.com/trainings/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bewoduh.com/en/trainings/"/>
+  </url>
 </urlset>
