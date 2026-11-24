@@ -61,16 +61,31 @@
   document.head.appendChild(css);
 
   /* ---------- تسجيل التبويب ---------- */
-  const bar = document.querySelector('.admin-tabs');
   const host = $('tab-packages').parentNode;
   TAB_PERMISSION.trainings = 'trainings';
   const btn = document.createElement('button'); btn.className = 'admin-tab'; btn.dataset.tab = 'trainings'; btn.textContent = 'التدريبات والورش';
-  const after = bar.querySelector('[data-tab="bookings"]');
-  bar.insertBefore(btn, after ? after.nextElementSibling : null);
+  // نضعه بالقائمة الجانبية بقسم خاص تحت «العمليات اليومية» (وإلا بآخر القائمة)
+  const side = document.querySelector('.kx-side') || document.querySelector('.admin-tabs');
+  const anchor = side && side.querySelector('[data-tab="slots"]');
+  const head = document.createElement('div'); head.className = 'kx-gh'; head.textContent = 'التدريبات والورش';
+  if (anchor) { anchor.insertAdjacentElement('afterend', head); head.insertAdjacentElement('afterend', btn); } else if (side) { side.appendChild(head); side.appendChild(btn); }
+  const badge = document.createElement('span'); badge.className = 'kx-badge'; btn.appendChild(badge);
+  // نخفي العنوان إذا الصلاحية غير متاحة (السكربت الرئيسي يخفي الزر)
+  new MutationObserver(() => { head.style.display = btn.style.display === 'none' ? 'none' : ''; }).observe(btn, { attributes: true, attributeFilter: ['style'] });
+  async function loadBadge() {
+    try {
+      const r = await sb().from('training_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('payment_method', 'other');
+      if (!r.error) { badge.textContent = String(r.count || 0); badge.classList.toggle('on', (r.count || 0) > 0); badge.title = 'طلبات دفع بطريقة أخرى بانتظار التأكيد'; }
+    } catch (e) { /* لا شيء */ }
+  }
+  setTimeout(loadBadge, 4000); setInterval(loadBadge, 120000);
   const panel = document.createElement('div'); panel.id = 'tab-trainings'; panel.className = 'admin-tab-panel'; panel.style.display = 'none'; host.appendChild(panel);
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', (ev) => {
     document.querySelectorAll('.admin-tab').forEach((x) => x.classList.remove('active')); btn.classList.add('active');
     document.querySelectorAll('.admin-tab-panel').forEach((p) => (p.style.display = 'none')); panel.style.display = 'block';
+    const ti = $('kxTitle'); if (ti) ti.textContent = 'التدريبات والورش';
+    const sh = document.querySelector('.kx-shell'); if (sh) sh.classList.remove('open'); const ov = document.querySelector('.kx-ovl'); if (ov) ov.classList.remove('on');
+    try { if (ev.isTrusted) { localStorage.setItem('kx_tab', 'trainings'); history.replaceState(null, '', '#trainings'); } } catch (_) {}
     loadTrainings();
   });
 
