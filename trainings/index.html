@@ -156,6 +156,7 @@
     .mbar{ display:flex; position:fixed; inset-inline:0; bottom:0; z-index:60; background:rgba(255,255,255,.96); backdrop-filter:blur(8px); border-top:1px solid var(--fog-dim); padding:10px 16px calc(10px + env(safe-area-inset-bottom)); align-items:center; justify-content:space-between; gap:12px; }
     .mbar .from{ font-size:12.5px; } .mbar .from b{ font-size:18px; }
     body.has-mbar{ padding-bottom:78px; }
+    body.has-mbar .bw-wa{ bottom:calc(92px + env(safe-area-inset-bottom)) !important; }
   }
   .reveal{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease; }
   .reveal.in{ opacity:1; transform:none; }
