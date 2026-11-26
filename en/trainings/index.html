@@ -269,7 +269,9 @@
   }
   const seatsOf = async (id) => { try { const { data } = await sb.rpc('training_seats', { p_training: id }); return data || null; } catch (e) { return null; } };
   const isOpen = (t) => t.registration_open && new Date(t.starts_at).getTime() > Date.now();
-  const minPrice = (t) => (t.pk.length ? Math.min(...t.pk.map((p) => Number(p.price_jod))) : 0);
+  const minPrice = (t) => { const a = t.pk.map((p) => Number(p.price_jod)).filter((x) => x > 0); return a.length ? Math.min(...a) : 0; };
+  const REQ = (t) => t.price_mode === 'on_request';   // الرسوم تُرسل بعد التسجيل: لا دفع على الصفحة
+  const CL = (t) => t.form_type === 'clinical';
 
   /* ---------- القائمة ---------- */
   async function renderList(list) {
@@ -284,18 +286,18 @@
         '<div class="ph" role="img" aria-label="' + esc(f(t, 'title')) + '" style="background-image:url(\'' + esc(t.image_url || '/images/og-cover.jpg') + '\')">' +
         '<span class="tag">' + esc(f(t, 'kicker') || L('ورشة', 'Workshop')) + '</span></div>' +
         '<div class="bd"><h3>' + esc(f(t, 'title')) + '</h3>' +
-        '<div class="meta"><span>' + ICON.cal.replace('<svg', '<svg width="16" height="16"') + esc(fmtShort(t.starts_at)) + '</span>' +
-        '<span>' + ICON.clock.replace('<svg', '<svg width="16" height="16"') + esc(fmtTime(t.starts_at)) + '</span>' +
+        '<div class="meta"><span>' + ICON.cal.replace('<svg', '<svg width="16" height="16"') + (f(t, 'duration_text') ? L('يبدأ ', 'Starts ') : '') + esc(fmtShort(t.starts_at)) + '</span>' +
+        '<span>' + ICON.clock.replace('<svg', '<svg width="16" height="16"') + esc(f(t, 'duration_text') || fmtTime(t.starts_at)) + '</span>' +
         '<span>' + ICON.pc.replace('<svg', '<svg width="16" height="16"') + esc(f(t, 'location')) + '</span></div>' +
         '<div class="meta"><span class="seat-' + t.id + '"></span></div>' +
-        '<div class="foot"><div class="from">' + L('تبدأ من', 'From') + '<b class="num">' + N(minPrice(t)) + ' ' + L('د.أ', 'JOD') + '</b></div>' +
+        '<div class="foot"><div class="from">' + (REQ(t) ? L('الرسوم', 'Fee') + '<b>' + L('رمزية', 'Nominal') + '</b>' : L('تبدأ من', 'From') + '<b class="num">' + N(minPrice(t)) + ' ' + L('د.أ', 'JOD') + '</b>') + '</div>' +
         '<span class="btn">' + (open ? L('التفاصيل والحجز', 'Details & booking') : L('التفاصيل', 'Details')) + '</span></div></div></a>';
     }).join('') + '</div>';
     observeReveal();
     list.forEach(async (t) => {
       const s = await seatsOf(t.id); const el = app.querySelector('.seat-' + t.id); if (!el || !s) return;
       const left = Math.max(0, s.seats - s.taken);
-      el.innerHTML = ICON.users.replace('<svg', '<svg width="16" height="16"') + (!isOpen(t) ? L('انتهى التسجيل', 'Registration closed') : (left === 0 ? L('اكتملت المقاعد', 'Fully booked') : L('متبقّي ', 'Seats left: ') + '<b class="num">' + left + '</b>' + L(' من ', ' of ') + '<span class="num">' + s.seats + '</span>'));
+      el.innerHTML = ICON.users.replace('<svg', '<svg width="16" height="16"') + (!isOpen(t) ? L('انتهى التسجيل', 'Registration closed') : (t.show_seats === false && left > 0 ? L('المقاعد محدودة جداً', 'Very limited seats') : left === 0 ? L('اكتملت المقاعد', 'Fully booked') : L('متبقّي ', 'Seats left: ') + '<b class="num">' + left + '</b>' + L(' من ', ' of ') + '<span class="num">' + s.seats + '</span>'));
     });
   }
 
@@ -313,11 +315,14 @@
     const local = tzLocal && tzLocal !== 'Asia/Amman' ? fmtTime(t.starts_at, tzLocal) : '';
     const localD = tzLocal && tzLocal !== 'Asia/Amman' ? fmtDate(t.starts_at, tzLocal) : '';
     const topics = arr(t, 'topics');
+    const sched = f(t, 'schedule_text');
+    const fact = (ic, small, big, extra) => '<div class="fact">' + ic + '<div><small>' + small + '</small>' + big + (extra || '') + '</div></div>';
     const facts =
-      '<div class="fact">' + ICON.cal + '<div><small>' + L('التاريخ', 'Date') + '</small><b>' + esc(fmtDate(t.starts_at)) + '</b></div></div>' +
-      '<div class="fact">' + ICON.clock + '<div><small>' + L('الوقت (بتوقيت الأردن)', 'Time (Jordan)') + '</small><b class="num">' + esc(fmtTime(t.starts_at)) + '</b><i>' + esc(durText(t.duration_min)) + (local ? ' · ' + L('بتوقيتك: ', 'Your time: ') + esc(localD === fmtDate(t.starts_at) ? '' : localD + ' ') + esc(local) : '') + '</i></div></div>' +
-      '<div class="fact">' + ICON.pc + '<div><small>' + L('المكان', 'Where') + '</small><b>' + esc(f(t, 'location')) + '</b></div></div>' +
-      '<div class="fact">' + ICON.users + '<div><small>' + L('المقاعد', 'Seats') + '</small><b class="num" id="factSeats">…</b></div></div>';
+      fact(ICON.cal, sched ? L('تاريخ البدء', 'Starts') : L('التاريخ', 'Date'), '<b>' + esc(fmtDate(t.starts_at)) + '</b>', f(t, 'duration_text') ? '<i>' + L('المدة: ', 'Duration: ') + esc(f(t, 'duration_text')) + '</i>' : '') +
+      (sched ? fact(ICON.clock, L('المواعيد', 'Schedule'), '<b>' + esc(sched) + '</b>', local ? '<i>' + L('أول لقاء بتوقيتك: ', 'First session in your time: ') + esc(localD === fmtDate(t.starts_at) ? '' : localD + ' ') + esc(local) + '</i>' : '')
+        : fact(ICON.clock, L('الوقت (بتوقيت الأردن)', 'Time (Jordan)'), '<b class="num">' + esc(fmtTime(t.starts_at)) + '</b>', '<i>' + esc(durText(t.duration_min)) + (local ? ' · ' + L('بتوقيتك: ', 'Your time: ') + esc(localD === fmtDate(t.starts_at) ? '' : localD + ' ') + esc(local) : '') + '</i>')) +
+      fact(ICON.pc, L('المكان', 'Where'), '<b>' + esc(f(t, 'location')) + '</b>') +
+      fact(ICON.users, L('المقاعد', 'Seats'), '<b class="num" id="factSeats">…</b>');
     const pk = t.pk.map((p) => (
       '<button type="button" class="pk" role="radio" data-pk="' + p.id + '" aria-checked="false">' +
       (p.is_featured ? '<span class="best">' + L('الأكثر طلباً', 'Most popular') + '</span>' : '') +
@@ -336,13 +341,15 @@
       '<p class="d-sum">' + esc(f(t, 'summary')) + '</p>' +
       '<div class="facts">' + facts + '</div>' +
       '<p style="margin-top:6px"><a class="from" style="color:var(--gold-deep);font-weight:600" href="' + esc(gcal(t)) + '" target="_blank" rel="noopener">' + L('أضف الموعد إلى تقويم جوجل ←', 'Add to Google Calendar →') + '</a></p>' +
-      (f(t, 'audience') ? '<section class="sec"><h2>' + L('لمن هذه الورشة؟', 'Who is it for?') + '</h2><div class="note-box">' + ICON.user + '<div>' + esc(f(t, 'audience')) + '</div></div></section>' : '') +
-      (topics.length ? '<section class="sec"><h2>' + L('محاور الورشة', 'What we will cover') + '</h2><ol class="topics">' + topics.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></section>' : '') +
+      (f(t, 'audience') ? '<section class="sec"><h2>' + (CL(t) ? L('لمن هذا البرنامج؟', 'Who is it for?') : L('لمن هذه الورشة؟', 'Who is it for?')) + '</h2><div class="note-box">' + ICON.user + '<div>' + esc(f(t, 'audience')) + '</div></div></section>' : '') +
+      (topics.length ? '<section class="sec"><h2>' + esc(f(t, 'topics_title') || L('محاور الورشة', 'What we will cover')) + '</h2><ol class="topics">' + topics.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></section>' : '') +
+      (arr(t, 'perks').length ? '<section class="sec"><h2>' + L('امتيازات المشاركين', 'What every trainee gets') + '</h2>' + arr(t, 'perks').map((x) => '<div class="note-box">' + ICON.check + '<div>' + esc(x) + '</div></div>').join('') + '</section>' : '') +
       '<section class="sec"><h2>' + L('عن التنظيم', 'About the format') + '</h2>' +
       (f(t, 'supervisor') ? '<div class="note-box">' + ICON.mic + '<div>' + esc(f(t, 'supervisor')) + '</div></div>' : '') +
       (f(t, 'format_note') ? '<div class="note-box">' + ICON.pc + '<div>' + esc(f(t, 'format_note')) + '</div></div>' : '') +
-      '<div class="note-box">' + ICON.check + '<div>' + L('الورشة تنظّمها منصة بوضوح التابعة لشركة لمسة المحدودة (LAMSA LTD)، المسجّلة في إنجلترا وويلز برقم 17517932.', 'Organised by Bewoduh, operated by LAMSA LTD, registered in England and Wales (no. 17517932).') + '</div></div></section>' +
-      '<section class="sec" id="packages"><h2>' + L('اختر باقتك', 'Choose your package') + '</h2><div class="pkgs" role="radiogroup">' + pk + '</div></section>' +
+      '<div class="note-box">' + ICON.check + '<div>' + L('ينظّمه فريق منصة بوضوح التابعة لشركة لمسة المحدودة (LAMSA LTD)، المسجّلة في إنجلترا وويلز برقم 17517932.', 'Organised by Bewoduh, operated by LAMSA LTD, registered in England and Wales (no. 17517932).') + '</div></div></section>' +
+      (REQ(t) ? '<section class="sec" id="packages"><h2>' + L('الرسوم', 'Fees') + '</h2><div class="note-box">' + ICON.check + '<div>' + L('رسوم رمزية. أرسل طلب التسجيل، ويتواصل معك فريقنا بتفاصيل الرسوم وطريقة الدفع لتثبيت مقعدك.', 'A nominal fee. Send your registration request and our team will contact you with the fee details and how to pay to secure your seat.') + '</div></div></section>'
+        : '<section class="sec" id="packages"><h2>' + L('اختر باقتك', 'Choose your package') + '</h2><div class="pkgs" role="radiogroup">' + pk + '</div></section>') +
       '</div>' +
       '<aside class="book" id="book"><h2>' + L('احجز مقعدك', 'Reserve your seat') + '</h2>' +
       '<div class="seats" id="seatsBar"></div>' +
@@ -362,7 +369,9 @@
   function paintSeats() {
     const s = S.seats, t = S.t; const bar = $('seatsBar'), fs = $('factSeats'); if (!s) { if (fs) fs.textContent = String(t.seats); return; }
     const left = Math.max(0, s.seats - s.taken), pct = s.seats ? Math.round(s.taken / s.seats * 100) : 0;
-    if (fs) fs.textContent = (left === 0 ? L('اكتملت', 'Full') : L('متبقّي ', 'Left: ') + left + L(' من ', ' of ') + s.seats);
+    const hide = t.show_seats === false;
+    if (fs) fs.textContent = (left === 0 ? L('اكتملت', 'Full') : hide ? L('محدودة جداً', 'Very limited') : L('متبقّي ', 'Left: ') + left + L(' من ', ' of ') + s.seats);
+    if (bar && hide && left > 0) { bar.className = 'seats'; bar.innerHTML = '<span>' + L('المقاعد محدودة جداً', 'Very limited seats') + '</span>'; return; }
     if (bar) { bar.className = 'seats' + (left <= 3 ? ' low' : ''); bar.innerHTML = '<span class="num">' + (left === 0 ? L('اكتملت المقاعد', 'Fully booked') : L('متبقّي ', 'Seats left: ') + left + L(' من ', ' of ') + s.seats) + '</span><span class="bar"><i style="width:' + pct + '%"></i></span>'; }
     if (left === 0 && $('regForm')) {
       $('regForm').hidden = true;
@@ -373,12 +382,17 @@
   function syncPkg() {
     app.querySelectorAll('.pk').forEach((b) => b.setAttribute('aria-checked', b.dataset.pk === S.pkg ? 'true' : 'false'));
     const p = (S.t.pk.find((x) => x.id === S.pkg) || {});
-    const sel = $('selPkg'); if (sel) sel.innerHTML = '<span>' + L('الباقة: ', 'Package: ') + '<b>' + esc(f(p, 'name')) + '</b></span><a href="#packages" id="chgPkg">' + L('تغيير', 'Change') + '</a>';
+    const sel = $('selPkg'); if (sel && REQ(S.t)) sel.hidden = true; if (sel) sel.innerHTML = '<span>' + L('الباقة: ', 'Package: ') + '<b>' + esc(f(p, 'name')) + '</b></span><a href="#packages" id="chgPkg">' + L('تغيير', 'Change') + '</a>';
     const ch = $('chgPkg'); if (ch) ch.addEventListener('click', (e) => { e.preventDefault(); $('packages').scrollIntoView({ behavior: 'smooth' }); });
     updateSummary();
   }
 
   function updateSummary() {
+    if (REQ(S.t)) {
+      const mf0 = $('mbarFrom'); if (mf0) mf0.innerHTML = L('الرسوم', 'Fee') + '<b>' + L('رمزية', 'Nominal') + '</b>';
+      const b0 = $('submitBtn'); if (b0) b0.textContent = L('إرسال طلب التسجيل', 'Send registration request');
+      return;
+    }
     const box = $('sumBox'); if (!box) return;
     const t = S.t, p = t.pk.find((x) => x.id === S.pkg); if (!p) return;
     const pct = pctNow(), base = Number(p.price_jod), fin = r2(base * (100 - pct) / 100), usd = r2(fin / t.jod_per_usd);
@@ -399,13 +413,13 @@
       '<form id="regForm" novalidate autocomplete="on">' +
       '<div class="fld"><label for="fName">' + L('الاسم الكامل كما تريده في الشهادة', 'Full name as it should appear on the certificate') + ' <em>*</em></label><input type="text" id="fName" autocomplete="name" required maxlength="120"></div>' +
       '<div class="fld"><label for="fWa">' + L('رقم الواتساب مع رمز الدولة', 'WhatsApp number with country code') + ' <em>*</em></label><input type="tel" id="fWa" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="+962 7X XXX XXXX" required maxlength="25"><div class="hint">' + L('للتواصل وتأكيد الحجز وإرسال رابط الورشة.', 'For contact, booking confirmation and sending the workshop link.') + '</div></div>' +
-      '<div class="fld"><label for="fMail">' + L('البريد الإلكتروني', 'Email') + ' <em>*</em></label><input type="email" id="fMail" autocomplete="email" dir="ltr" required maxlength="254"><div class="hint">' + L('لإرسال رابط جوجل ميت والشهادة ومادة المحاضرات.', 'To send the Google Meet link, certificate and lecture materials.') + '</div></div>' +
+      '<div class="fld"><label for="fMail">' + L('البريد الإلكتروني', 'Email') + ' <em>*</em></label><input type="email" id="fMail" autocomplete="email" dir="ltr" required maxlength="254"><div class="hint">' + L('لإرسال رابط جوجل ميت وتفاصيل التدريب.', 'To send the Google Meet link and training details.') + '</div></div>' +
       '<div class="fld"><label for="fCountry">' + L('بلد الإقامة واسم الجامعة', 'Country of residence and university') + ' <em>*</em></label><input type="text" id="fCountry" required maxlength="200"></div>' +
-      '<div class="fld"><label for="fLevel">' + L('المرحلة الدراسية الحالية', 'Current study level') + ' <em>*</em></label>' + sel('fLevel', [['master', L('طالب أو طالبة ماجستير', 'Master\'s student')], ['phd', L('طالب أو طالبة دكتوراه', 'PhD student')], ['graduate', L('خريج أو خريجة / باحث أو باحثة مستقلة', 'Graduate / independent researcher')]]) + '</div>' +
+      '<div class="fld"><label for="fLevel">' + L('المرحلة الدراسية الحالية', 'Current study level') + ' <em>*</em></label>' + sel('fLevel', (CL(t) ? [['bachelor', L('طالب أو طالبة بكالوريوس', 'Bachelor\'s student')]] : []).concat([['master', L('طالب أو طالبة ماجستير', 'Master\'s student')], ['phd', L('طالب أو طالبة دكتوراه', 'PhD student')], ['graduate', CL(t) ? L('خريج أو خريجة', 'Graduate') : L('خريج أو خريجة / باحث أو باحثة مستقلة', 'Graduate / independent researcher')]])) + '</div>' +
       '<div class="fld"><label for="fSpec">' + L('التخصص الدقيق', 'Specialisation') + ' <em>*</em></label>' + sel('fSpec', [['clinical', L('علم النفس الإكلينيكي أو العام أو التربوي', 'Clinical, general or educational psychology')], ['counselling', L('الإرشاد النفسي والأسري', 'Counselling (individual and family)')], ['social', L('العلوم الاجتماعية', 'Social sciences')], ['other', L('تخصص آخر', 'Other')]]) + '</div>' +
-      '<div class="fld"><label for="fStage">' + L('في أي مرحلة وصلت في بحثك أو رسالتك؟', 'Where are you in your research or thesis?') + ' <em>*</em></label>' + sel('fStage', [['not_started', L('لم أبدأ بعد / مرحلة اختيار العنوان', 'Not started / choosing a title')], ['proposal', L('مرحلة إعداد الخطة البحثية', 'Preparing the research proposal')], ['framework', L('كتابة الإطار النظري والدراسات السابقة', 'Writing the theoretical framework and literature review')], ['fieldwork', L('التطبيق الميداني والتحليل الإحصائي والنتائج', 'Fieldwork, statistical analysis and results')], ['final', L('المراجعة النهائية والتدقيق المنهجي', 'Final review and methodological check')]]) + '</div>' +
-      '<div class="fld"><label for="fChal">' + L('ما أكثر تحدٍّ تواجهه في بحثك وتتمنى أن تركّز عليه الورشة؟', 'What is your biggest research challenge you would like the workshop to focus on?') + ' <em>*</em></label><textarea id="fChal" required maxlength="1500"></textarea></div>' +
-      '<div class="fld"><span class="lbl">' + L('هل ينطبق عليك أحد الخصومات؟', 'Does any discount apply to you?') + ' <em>*</em></span><div class="opts" id="discOpts">' +
+      (CL(t) ? '' : '<div class="fld"><label for="fStage">' + L('في أي مرحلة وصلت في بحثك أو رسالتك؟', 'Where are you in your research or thesis?') + ' <em>*</em></label>' + sel('fStage', [['not_started', L('لم أبدأ بعد / مرحلة اختيار العنوان', 'Not started / choosing a title')], ['proposal', L('مرحلة إعداد الخطة البحثية', 'Preparing the research proposal')], ['framework', L('كتابة الإطار النظري والدراسات السابقة', 'Writing the theoretical framework and literature review')], ['fieldwork', L('التطبيق الميداني والتحليل الإحصائي والنتائج', 'Fieldwork, statistical analysis and results')], ['final', L('المراجعة النهائية والتدقيق المنهجي', 'Final review and methodological check')]]) + '</div>') +
+      '<div class="fld"><label for="fChal">' + (CL(t) ? L('ما الذي تأمل أن يضيفه لك البرنامج؟', 'What do you hope to gain from the program?') : L('ما أكثر تحدٍّ تواجهه في بحثك وتتمنى أن تركّز عليه الورشة؟', 'What is your biggest research challenge you would like the workshop to focus on?')) + ' <em>*</em></label><textarea id="fChal" required maxlength="1500"></textarea></div>' +
+      (REQ(t) ? '' : '<div class="fld"><span class="lbl">' + L('هل ينطبق عليك أحد الخصومات؟', 'Does any discount apply to you?') + ' <em>*</em></span><div class="opts" id="discOpts">' +
       opt('disc', 'none', L('لا يوجد، السعر الأساسي', 'No discount, standard price')) +
       (ea ? opt('disc', 'early', L('خصم التسجيل المبكر ', 'Early-bird discount ') + '<b class="num">' + t.early_pct + '%</b>', L('ينتهي ', 'Ends ') + esc(fmtShort(t.early_until))) : '') +
       (t.group_pct > 0 ? opt('disc', 'group', L('خصم مجموعات الأصدقاء ', 'Friends group discount ') + '<b class="num">' + t.group_pct + '%</b>') + opt('disc', 'colleagues', L('خصم زملاء التخصص ', 'Classmates / colleagues discount ') + '<b class="num">' + t.group_pct + '%</b>') : '') +
@@ -415,12 +429,12 @@
       opt('method', 'card', L('بطاقة بنكية (دفع فوري وآمن)', 'Bank card (instant & secure)'), L('تأكيد المقعد فور الدفع، من الأردن ومن كل الدول.', 'Seat confirmed right after payment, from Jordan and abroad.')) +
       opt('method', 'other', L('طريقة أخرى (كليك / تحويل بنكي / ويسترن يونيون)', 'Another way (CliQ / bank transfer / Western Union)'), L('نتواصل معك عبر واتساب بتفاصيل الدفع. نحجز لك المقعد 12 ساعة.', 'We contact you on WhatsApp with payment details and hold your seat for 12 hours.')) +
       '</div></div>' +
-      '<div class="sum" id="sumBox"></div>' +
+      '<div class="sum" id="sumBox"></div>') +
       '<label class="chk"><input type="checkbox" id="fTerms" required><span>' + esc(f(t, 'terms') || L('أوافق على شروط التسجيل.', 'I agree to the registration terms.')) + ' <span style="color:var(--text-muted-light)">' + L('(انظر ', '(see ') + '<a href="' + (EN ? '/en/terms/' : '/terms/') + '" style="text-decoration:underline" target="_blank" rel="noopener">' + L('الشروط', 'terms') + '</a>' + L(' و', ' and ') + '<a href="' + (EN ? '/en/privacy/' : '/privacy/') + '" style="text-decoration:underline" target="_blank" rel="noopener">' + L('الخصوصية', 'privacy') + '</a>)</span></span></label>' +
       '<input class="hp" type="text" id="fHp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
       '<div class="err" id="regErr" hidden role="alert"></div>' +
       '<button class="btn block" id="submitBtn" type="submit" style="margin-top:16px"></button>' +
-      '<div class="secure">' + ICON.lock + '<span>' + L('الدفع بالبطاقة عبر Stripe. لا نخزّن بيانات بطاقتك.', 'Card payments are processed by Stripe. We never store your card details.') + '</span></div>' +
+      (REQ(t) ? '<div class="secure">' + L('لا يوجد دفع الآن. نتواصل معك بتفاصيل الرسوم.', 'No payment now. We will contact you with the fee details.') + '</div>' : '<div class="secure">' + ICON.lock + '<span>' + L('الدفع بالبطاقة عبر Stripe. لا نخزّن بيانات بطاقتك.', 'Card payments are processed by Stripe. We never store your card details.') + '</span></div>') +
       '<a class="wa-link" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، لدي سؤال عن التدريب: ', 'Hello, I have a question about the training: ') + f(t, 'title')) + '" target="_blank" rel="noopener">' + L('عندك سؤال؟ اسألنا على واتساب', 'Questions? Ask us on WhatsApp') + '</a></form>';
   }
 
@@ -436,7 +450,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const err = $('regErr'); err.hidden = true;
-      const need = ['fName', 'fWa', 'fMail', 'fCountry', 'fLevel', 'fSpec', 'fStage', 'fChal'];
+      const need = ['fName', 'fWa', 'fMail', 'fCountry', 'fLevel', 'fSpec', 'fStage', 'fChal'].filter((id) => $(id));
       let bad = null;
       need.forEach((id) => { const el = $(id); const ok = el.value.trim().length > 0 && (id !== 'fMail' || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value.trim())); el.classList.toggle('bad', !ok); if (!ok && !bad) bad = el; });
       const grp = S.kind === 'group' || S.kind === 'colleagues';
@@ -449,10 +463,11 @@
       try {
         const { data, error } = await sb.rpc('register_training', {
           p_training: t.id, p_package: S.pkg, p_full_name: $('fName').value.trim(), p_whatsapp: normDigits($('fWa').value.trim()), p_email: $('fMail').value.trim(),
-          p_country_univ: $('fCountry').value.trim(), p_level: $('fLevel').value, p_specialization: $('fSpec').value, p_stage: $('fStage').value, p_challenge: $('fChal').value.trim(),
+          p_country_univ: $('fCountry').value.trim(), p_level: $('fLevel').value, p_specialization: $('fSpec').value, p_stage: $('fStage') ? $('fStage').value : null, p_challenge: $('fChal').value.trim(),
           p_discount_kind: S.kind, p_group_names: grp ? $('fGroup').value.trim() : null, p_method: method, p_lang: EN ? 'en' : 'ar',
         });
         if (error) { const code = String(error.message || '').replace(/^.*?([a-z_]{4,})\s*$/, '$1'); throw new Error(ERR[code] ? code : 'x'); }
+        if (data && data.method === 'request') { showRequest(t); return; }
         if (method === 'other') { showOther(t, data); return; }
         btn.textContent = L('جارٍ تحويلك إلى صفحة الدفع...', 'Taking you to the payment page...');
         const r = await sb.functions.invoke('create-training-checkout', { body: { registration_id: data.id } });
@@ -479,6 +494,12 @@
       L('سيتواصل معك فريقنا عبر واتساب قريباً بتفاصيل الدفع. نحجز لك المقعد 12 ساعة، ويُعتمد نهائياً فور إتمام الدفع.', 'Our team will WhatsApp you shortly with the payment details. Your seat is held for 12 hours and confirmed once payment is complete.'),
       dlHtml([[L('التدريب', 'Training'), esc(f(t, 'title'))], [L('الباقة', 'Package'), esc(f(p, 'name'))], [L('المبلغ', 'Amount'), '<span class="num">' + N(d.final_jod) + ' ' + L('د.أ', 'JOD') + '</span>'], [L('الموعد', 'When'), esc(fmtDate(t.starts_at)) + ' · <span class="num">' + esc(fmtTime(t.starts_at)) + '</span>']]),
       '<a class="btn" target="_blank" rel="noopener" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، سجّلت في ورشة ', 'Hello, I registered for ') + f(t, 'title') + L(' وأريد تفاصيل الدفع', ' and would like the payment details')) + '">' + L('تواصل معنا الآن على واتساب', 'Message us on WhatsApp now') + '</a><a class="btn ghost" href="' + BASE + '">' + L('كل التدريبات', 'All trainings') + '</a>');
+  }
+  function showRequest(t) {
+    panel('ok', ICON.check, L('استلمنا طلب تسجيلك', 'We received your request'),
+      L('سيتواصل معك فريقنا عبر واتساب قريباً بتفاصيل الرسوم وطريقة الدفع. يُعتمد مقعدك بعد تأكيد الدفع.', 'Our team will WhatsApp you soon with the fee details and how to pay. Your seat is confirmed once payment is made.'),
+      dlHtml([[L('البرنامج', 'Program'), esc(f(t, 'title'))], [L('يبدأ', 'Starts'), esc(fmtDate(t.starts_at))], [L('المواعيد', 'Schedule'), esc(f(t, 'schedule_text') || fmtTime(t.starts_at))]]),
+      '<a class="btn" target="_blank" rel="noopener" href="https://wa.me/' + WA + '?text=' + encodeURIComponent(L('مرحباً، سجّلت في ', 'Hello, I registered for ') + f(t, 'title') + L(' وأريد تفاصيل الرسوم', ' and would like the fee details')) + '">' + L('تواصل معنا على واتساب', 'Message us on WhatsApp') + '</a><a class="btn ghost" href="' + BASE + '">' + L('كل التدريبات', 'All trainings') + '</a>');
   }
   function showPayRetry(id) {
     panel('warn', ICON.hourglass, L('تم تسجيل طلبك، بقي الدفع', 'Registered. Payment is the last step'),
@@ -515,7 +536,7 @@
       await new Promise((r) => setTimeout(r, 2500)); d = await get() || d; tries++;
     }
     document.title = L('تسجيلك — بوضوح', 'Your registration — Bewoduh');
-    const rows = [[L('التدريب', 'Training'), esc(EN && d.title_en ? d.title_en : d.title)], [L('الباقة', 'Package'), esc(EN && d.package_en ? d.package_en : d.package)], [L('الموعد', 'When'), esc(fmtDate(d.starts_at)) + ' · <span class="num">' + esc(fmtTime(d.starts_at)) + '</span>'], [L('المبلغ', 'Amount'), '<span class="num">' + N(d.final_jod) + ' ' + L('د.أ', 'JOD') + '</span>']];
+    const rows = [[L('التدريب', 'Training'), esc(EN && d.title_en ? d.title_en : d.title)], [L('الباقة', 'Package'), esc(EN && d.package_en ? d.package_en : d.package)], [L('الموعد', 'When'), esc(fmtDate(d.starts_at)) + ' · <span class="num">' + esc(fmtTime(d.starts_at)) + '</span>'], [L('المبلغ', 'Amount'), d.final_jod == null ? '—' : '<span class="num">' + N(d.final_jod) + ' ' + L('د.أ', 'JOD') + '</span>']];
     const links = '<a class="btn" href="' + BASE + '">' + L('كل التدريبات', 'All trainings') + '</a>';
     if (d.status === 'paid') {
       panel('ok', ICON.check, L('تم تأكيد مقعدك', 'Your seat is confirmed'), L('شكراً لك. أرسلنا إيصال الدفع إلى بريدك، وسنرسل لك رابط الورشة ومادتها عبر البريد وواتساب قبل الموعد.', 'Thank you. We emailed your receipt, and will send the workshop link and materials by email and WhatsApp before the session.'), dlHtml(rows), links);
@@ -536,7 +557,7 @@
       const o = { '@context': 'https://schema.org', '@type': 'Event', name: f(t, 'title'), description: f(t, 'summary'), startDate: t.starts_at, endDate: endIso(t),
         eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', eventStatus: 'https://schema.org/EventScheduled', image: location.origin + (t.image_url || ''),
         location: { '@type': 'VirtualLocation', url: location.origin + BASE + '?t=' + t.slug }, organizer: { '@type': 'Organization', name: 'Bewoduh', url: 'https://bewoduh.com' },
-        offers: t.pk.map((p) => ({ '@type': 'Offer', name: f(p, 'name'), price: String(p.price_jod), priceCurrency: 'JOD', availability: 'https://schema.org/InStock', url: location.origin + BASE + '?t=' + t.slug })) };
+        offers: t.pk.filter((p) => p.price_jod > 0).map((p) => ({ '@type': 'Offer', name: f(p, 'name'), price: String(p.price_jod), priceCurrency: 'JOD', availability: 'https://schema.org/InStock', url: location.origin + BASE + '?t=' + t.slug })) };
       const s = document.createElement('script'); s.type = 'application/ld+json'; s.textContent = JSON.stringify(o); document.head.appendChild(s);
     } catch (e) {}
   }

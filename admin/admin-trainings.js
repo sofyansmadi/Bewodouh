@@ -11,13 +11,15 @@
   const fromAmman = (v) => (v ? new Date(v + ':00+03:00').toISOString() : null); // الأردن UTC+3 ثابت
   const toast = (m, t) => (window.kxToast ? window.kxToast(m, t) : alert(m));
   const lines = (s) => String(s || '').split('\n').map((x) => x.trim()).filter(Boolean);
-  const LV = { master: 'ماجستير', phd: 'دكتوراه', graduate: 'خريج/باحث مستقل' };
+  const LV = { bachelor: 'بكالوريوس', master: 'ماجستير', phd: 'دكتوراه', graduate: 'خريج/باحث مستقل' };
   const SP = { clinical: 'علم نفس (إكلينيكي/عام/تربوي)', counselling: 'إرشاد نفسي وأسري', social: 'علوم اجتماعية', other: 'تخصص آخر' };
   const ST = { not_started: 'لم يبدأ / اختيار العنوان', proposal: 'إعداد الخطة', framework: 'الإطار النظري والدراسات السابقة', fieldwork: 'التطبيق والتحليل والنتائج', final: 'المراجعة النهائية والتدقيق' };
   const STAT = {
     pending: { l: 'بانتظار الدفع', c: '#7D5F27', bg: '#FBF1DC' }, paid: { l: 'مدفوع', c: '#2E6B45', bg: '#DCEFE3' },
     cancelled: { l: 'ملغى', c: '#6B6072', bg: '#ECE8EE' }, refunded: { l: 'مُسترد', c: '#5B4A86', bg: '#E8E2F4' },
   };
+  const METHOD = { card: 'بطاقة', other: 'أخرى (كليك/تحويل)', request: 'طلب (الرسوم لاحقاً)' };
+  const amt = (v) => (v == null ? '—' : n2(v));
   const chip = (s) => `<span class="trx-chip" style="color:${STAT[s].c};background:${STAT[s].bg}">${STAT[s].l}</span>`;
 
   /* ---------- أنماط ---------- */
@@ -74,8 +76,8 @@
   new MutationObserver(() => { head.style.display = btn.style.display === 'none' ? 'none' : ''; }).observe(btn, { attributes: true, attributeFilter: ['style'] });
   async function loadBadge() {
     try {
-      const r = await sb().from('training_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('payment_method', 'other');
-      if (!r.error) { badge.textContent = String(r.count || 0); badge.classList.toggle('on', (r.count || 0) > 0); badge.title = 'طلبات دفع بطريقة أخرى بانتظار التأكيد'; }
+      const r = await sb().from('training_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending').in('payment_method', ['other', 'request']);
+      if (!r.error) { badge.textContent = String(r.count || 0); badge.classList.toggle('on', (r.count || 0) > 0); badge.title = 'طلبات تسجيل بانتظار المتابعة'; }
     } catch (e) { /* لا شيء */ }
   }
   setTimeout(loadBadge, 4000); setInterval(loadBadge, 120000);
@@ -113,18 +115,18 @@
     paintList();
   }
   const regsOf = (id) => DATA.regs.filter((x) => x.training_id === id);
-  const held = (x) => x.status === 'paid' || (x.status === 'pending' && Date.now() - new Date(x.created_at).getTime() < (x.payment_method === 'other' ? 12 * 3600e3 : 90 * 60e3));
+  const held = (x) => x.status === 'paid' || (x.status === 'pending' && x.payment_method !== 'request' && Date.now() - new Date(x.created_at).getTime() < (x.payment_method === 'other' ? 12 * 3600e3 : 90 * 60e3));
 
   function paintList() {
     const items = DATA.trainings.map((t) => {
-      const rs = regsOf(t.id), paid = rs.filter((x) => x.status === 'paid'), pend = rs.filter((x) => x.status === 'pending' && held(x)), rev = paid.reduce((s, x) => s + Number(x.final_jod), 0);
+      const rs = regsOf(t.id), paid = rs.filter((x) => x.status === 'paid'), pend = rs.filter((x) => x.status === 'pending' && (held(x) || x.payment_method === 'request')), rev = paid.reduce((s, x) => s + Number(x.final_jod), 0);
       const past = new Date(t.starts_at).getTime() < Date.now();
       return `<div class="trx-card"><div class="ph" style="background-image:url('${esc(t.image_url || '')}')"></div><div>
         <h3>${esc(t.title)}</h3>
         <div class="trx-meta"><span>📅 ${fmtDT(t.starts_at)} (عمّان)</span><span>⏱ ${t.duration_min} دقيقة</span><span>🔗 <code>/trainings/?t=${esc(t.slug)}</code></span></div>
         <div style="margin:8px 0;">${t.is_published ? '<span class="trx-chip" style="color:#2E6B45;background:#DCEFE3">منشور</span>' : '<span class="trx-chip" style="color:#6B6072;background:#ECE8EE">مخفي (مسودة)</span>'}
           ${past ? '<span class="trx-chip" style="color:#6B6072;background:#ECE8EE">انتهى الموعد</span>' : (t.registration_open ? '<span class="trx-chip" style="color:#2E6B45;background:#DCEFE3">التسجيل مفتوح</span>' : '<span class="trx-chip" style="color:#9C3F47;background:#F6E5E7">التسجيل مغلق</span>')}</div>
-        <div class="trx-kp"><span>المقاعد <b>${paid.length + pend.length}/${t.seats}</b></span><span>مدفوع <b>${paid.length}</b></span><span>بانتظار الدفع <b>${pend.length}</b></span><span>الإيراد <b>${n2(rev)}</b> د.أ</span></div>
+        <div class="trx-kp"><span>المقاعد <b>${paid.length + pend.filter(held).length}/${t.seats}</b></span><span>مدفوع <b>${paid.length}</b></span><span>بانتظار الدفع <b>${pend.length}</b></span><span>الإيراد <b>${n2(rev)}</b> د.أ</span></div>
         <div class="trx-acts"><button class="pri" data-regs="${t.id}">التسجيلات (${rs.length})</button><button data-edit="${t.id}">تعديل</button>
           <a href="/trainings/?t=${esc(t.slug)}" target="_blank" rel="noopener">فتح الصفحة</a><button data-copy="${t.id}">نسخ الرابط</button></div></div></div>`;
     }).join('');
@@ -156,15 +158,22 @@
     const m = modal(`<div class="trx-hd"><h3>${isNew ? 'تدريب جديد' : 'تعديل: ' + esc(t.title)}</h3><button type="button" class="trx-x" aria-label="إغلاق">&times;</button></div>
       <div class="trx-g2">${inp('tTitle', 'العنوان (عربي) *', v.title)}${inp('tTitleEn', 'Title (English)', v.title_en)}</div>
       <div class="trx-g2">${inp('tKick', 'سطر صغير فوق العنوان (عربي)', v.kicker)}${inp('tKickEn', 'Kicker (English)', v.kicker_en)}</div>
+      <div class="trx-g2"><div class="trx-f"><label for="tMode">طريقة الرسوم</label><select id="tMode"><option value="paid"${v.price_mode !== 'on_request' ? ' selected' : ''}>سعر معلن ودفع على الصفحة</option><option value="on_request"${v.price_mode === 'on_request' ? ' selected' : ''}>طلب تسجيل فقط (الرسوم تُرسل لاحقاً)</option></select></div>
+        <div class="trx-f"><label for="tForm">أسئلة نموذج التسجيل</label><select id="tForm"><option value="research"${v.form_type !== 'clinical' ? ' selected' : ''}>بحث علمي (ماجستير/دكتوراه + مرحلة البحث)</option><option value="clinical"${v.form_type === 'clinical' ? ' selected' : ''}>تدريب إكلينيكي (يشمل البكالوريوس)</option></select></div></div>
       ${inp('tSlug', 'الرابط المختصر *', v.slug, 'text', 'research-roadmap', 'حروف إنجليزية صغيرة وأرقام وشرطة فقط. يظهر في العنوان: /trainings/?t=…')}
       <div class="trx-g2">${ta('tSum', 'ملخص قصير (عربي)', v.summary, '', 3)}${ta('tSumEn', 'Short summary (English)', v.summary_en, '', 3)}</div>
       <div class="trx-g2">${ta('tAud', 'لمن التدريب؟ (عربي)', v.audience, '', 3)}${ta('tAudEn', 'Who is it for? (English)', v.audience_en, '', 3)}</div>
       <div class="trx-g2">${ta('tTop', 'المحاور (كل محور بسطر) — عربي', (v.topics || []).join('\n'), '', 5)}${ta('tTopEn', 'Topics (one per line) — English', (v.topics_en || []).join('\n'), '', 5)}</div>
+      <div class="trx-g2">${inp('tTopT', 'عنوان قسم المحاور (عربي)', v.topics_title)}${inp('tTopTe', 'Topics heading (English)', v.topics_title_en)}</div>
+      <div class="trx-g2">${ta('tPerk', 'امتيازات المشاركين (كل واحد بسطر) — عربي', (v.perks || []).join('\n'), '', 4)}${ta('tPerkE', 'Perks (one per line) — English', (v.perks_en || []).join('\n'), '', 4)}</div>
       <div class="trx-g2">${ta('tSup', 'المشرف/المقدّمون (عربي)', v.supervisor, '', 2)}${ta('tSupEn', 'Supervisor / presenters (English)', v.supervisor_en, '', 2)}</div>
       <div class="trx-g2">${ta('tFmt', 'ملاحظة عن التنظيم (عربي)', v.format_note, '', 2)}${ta('tFmtEn', 'Format note (English)', v.format_note_en, '', 2)}</div>
       <div class="trx-g2">${ta('tTerms', 'نص الإقرار عند التسجيل (عربي)', v.terms, '', 2)}${ta('tTermsEn', 'Consent text (English)', v.terms_en, '', 2)}</div>
       <div class="trx-sec">الموعد والمكان</div>
       <div class="trx-g3">${inp('tStart', 'الموعد (بتوقيت الأردن) *', toAmman(v.starts_at) || dflt, 'datetime-local')}${inp('tDur', 'المدة (دقيقة)', v.duration_min, 'number')}${inp('tSeats', 'عدد المقاعد', v.seats, 'number')}</div>
+      <div class="trx-g2">${inp('tSched', 'نص المواعيد (للبرامج المتكررة) — عربي', v.schedule_text, 'text', 'كل جمعة 6:00 – 9:00 مساءً')}${inp('tSchedE', 'Schedule text (English)', v.schedule_text_en)}</div>
+      <div class="trx-g2">${inp('tDurT', 'المدة الكلية — عربي', v.duration_text, 'text', '4 أشهر')}${inp('tDurTe', 'Total duration (English)', v.duration_text_en)}</div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-top:8px"><input type="checkbox" id="tShowSeats"${v.show_seats !== false ? ' checked' : ''} style="width:auto"> إظهار عدد المقاعد المتبقية للزوار</label>
       <div class="trx-g2">${inp('tLoc', 'المكان (عربي)', v.location)}${inp('tLocEn', 'Location (English)', v.location_en)}</div>
       ${inp('tMeet', 'رابط الاجتماع (Google Meet) — سرّي', secret, 'url', 'https://meet.google.com/...', 'لا يظهر للزوار أبداً. يصل المسجَّلين المدفوعين بالبريد عند إرساله من هنا (زر «إرسال الرابط» في صفحة التسجيلات) أو تلقائياً مع تأكيد الدفع إن كان موجوداً.')}
       <div class="trx-sec">الصورة</div>
@@ -194,7 +203,7 @@
     });
     // الباقات
     const pks = (v.pk || []).map((p) => ({ ...p }));
-    const pkHtml = (p, i) => `<div class="trx-pk" data-i="${i}"><div class="trx-g3">${inp('pkN' + i, 'اسم الباقة (عربي) *', p.name)}${inp('pkNe' + i, 'Package name (English)', p.name_en)}${inp('pkP' + i, 'السعر بالدينار *', p.price_jod, 'number')}</div>
+    const pkHtml = (p, i) => `<div class="trx-pk" data-i="${i}"><div class="trx-g3">${inp('pkN' + i, 'اسم الباقة (عربي) *', p.name)}${inp('pkNe' + i, 'Package name (English)', p.name_en)}${inp('pkP' + i, 'السعر بالدينار (اتركه فارغاً مع «الرسوم لاحقاً»)', p.price_jod, 'number')}</div>
       <div class="trx-g2">${ta('pkF' + i, 'المزايا (كل ميزة بسطر) — عربي', (p.features || []).join('\n'), '', 4)}${ta('pkFe' + i, 'Features (one per line) — English', (p.features_en || []).join('\n'), '', 4)}</div>
       <div class="row"><label><input type="checkbox" id="pkFt${i}"${p.is_featured ? ' checked' : ''}> «الأكثر طلباً»</label><label><input type="checkbox" id="pkA${i}"${p.is_active !== false ? ' checked' : ''}> مفعّلة</label><label>الترتيب <input type="number" id="pkO${i}" value="${p.sort_order == null ? i + 1 : p.sort_order}" style="width:70px"></label><button type="button" class="trx-btn bad" data-rm="${i}">حذف الباقة</button></div></div>`;
     const readPks = () => pks.forEach((p, i) => { if (!$('pkN' + i)) return; Object.assign(p, { name: $('pkN' + i).value.trim(), name_en: $('pkNe' + i).value.trim() || null, price_jod: Number($('pkP' + i).value), features: lines($('pkF' + i).value), features_en: lines($('pkFe' + i).value), is_featured: $('pkFt' + i).checked, is_active: $('pkA' + i).checked, sort_order: Number($('pkO' + i).value) || i + 1 }); });
@@ -220,9 +229,14 @@
       if (!/^[a-z0-9-]{3,60}$/.test(slug)) { msg.textContent = 'الرابط المختصر: حروف إنجليزية صغيرة وأرقام وشرطة (3 إلى 60).'; return; }
       if (!g('tStart')) { msg.textContent = 'حدّد الموعد.'; return; }
       const act = pks.filter((p) => p.is_active);
-      if (!pks.length || pks.some((p) => !p.name || !(p.price_jod >= 1))) { msg.textContent = 'كل باقة تحتاج اسماً وسعراً (1 د.أ فأكثر).'; return; }
+      const onReq = q('#tMode').value === 'on_request';
+      pks.forEach((p) => { if (onReq && !(p.price_jod >= 1)) p.price_jod = null; });
+      if (!pks.length || pks.some((p) => !p.name || (!onReq && !(p.price_jod >= 1)))) { msg.textContent = 'كل باقة تحتاج اسماً وسعراً (1 د.أ فأكثر).'; return; }
       if (!act.length) { msg.textContent = 'فعّل باقة واحدة على الأقل.'; return; }
       const row = {
+        price_mode: q('#tMode').value, form_type: q('#tForm').value, topics_title: g('tTopT') || null, topics_title_en: g('tTopTe') || null,
+        perks: lines(q('#tPerk').value), perks_en: lines(q('#tPerkE').value), schedule_text: g('tSched') || null, schedule_text_en: g('tSchedE') || null,
+        duration_text: g('tDurT') || null, duration_text_en: g('tDurTe') || null, show_seats: q('#tShowSeats').checked,
         slug, title: g('tTitle'), title_en: g('tTitleEn') || null, kicker: g('tKick') || null, kicker_en: g('tKickEn') || null,
         summary: g('tSum') || null, summary_en: g('tSumEn') || null, audience: g('tAud') || null, audience_en: g('tAudEn') || null,
         topics: lines(q('#tTop').value), topics_en: lines(q('#tTopEn').value), supervisor: g('tSup') || null, supervisor_en: g('tSupEn') || null,
@@ -268,20 +282,28 @@
       return regsOf(t.id).filter((x) => (f.st === 'all' || x.status === f.st) && (!s || [x.full_name, x.whatsapp, x.email, x.country_univ].join(' ').toLowerCase().includes(s)));
     };
     const draw = () => {
-      const all = regsOf(t.id), paid = all.filter((x) => x.status === 'paid'), pend = all.filter((x) => x.status === 'pending' && held(x)), rev = paid.reduce((s, x) => s + Number(x.final_jod), 0);
-      q('#rSum').innerHTML = `<div class="trx-kp"><span>مدفوع <b>${paid.length}</b></span><span>محجوز بانتظار الدفع <b>${pend.length}</b></span><span>المقاعد المتبقية <b>${Math.max(0, t.seats - paid.length - pend.length)}</b> من ${t.seats}</span><span>الإيراد <b>${n2(rev)}</b> د.أ</span></div>`;
+      const all = regsOf(t.id), paid = all.filter((x) => x.status === 'paid'), pend = all.filter((x) => x.status === 'pending' && held(x)), reqs = all.filter((x) => x.status === 'pending' && x.payment_method === 'request'), rev = paid.reduce((s, x) => s + Number(x.final_jod), 0);
+      q('#rSum').innerHTML = `<div class="trx-kp"><span>مدفوع <b>${paid.length}</b></span><span>محجوز بانتظار الدفع <b>${pend.length}</b></span>${reqs.length ? `<span>طلبات بانتظار إرسال الرسوم <b>${reqs.length}</b></span>` : ''}<span>المقاعد المتبقية <b>${Math.max(0, t.seats - paid.length - pend.length)}</b> من ${t.seats}</span><span>الإيراد <b>${n2(rev)}</b> د.أ</span></div>`;
       q('#rBody').innerHTML = rows().map((x) => `<tr><td><b>${esc(x.full_name)}</b><br><small>${esc(x.country_univ)}</small></td>
         <td dir="ltr" style="text-align:right"><a href="https://wa.me/${esc(String(x.whatsapp).replace(/[^0-9]/g, ''))}" target="_blank" rel="noopener">${esc(x.whatsapp)}</a><br><small>${esc(x.email)}</small></td>
         <td>${esc(pkName(x.package_id))}${x.discount_pct ? `<br><small>خصم ${x.discount_pct}%${x.discount_kind === 'early' ? ' (مبكر)' : ' (مجموعة)'}</small>` : ''}</td>
-        <td>${n2(x.final_jod)} د.أ<br><small>≈ $${n2(x.final_usd)}</small></td><td>${x.payment_method === 'card' ? 'بطاقة' : 'أخرى (كليك/تحويل)'}</td>
+        <td>${x.final_jod == null ? '—' : `${n2(x.final_jod)} د.أ<br><small>≈ $${n2(x.final_usd)}</small>`}</td><td>${METHOD[x.payment_method]}</td>
         <td>${chip(x.status)}${x.link_sent_at ? '<br><small>أُرسل الرابط ✓</small>' : ''}</td><td><small>${fmtDT(x.created_at)}</small></td>
         <td style="white-space:nowrap"><button class="trx-btn" data-d="${x.id}">تفاصيل</button> ${x.status !== 'paid' ? `<button class="trx-btn ok" data-paid="${x.id}">تأكيد الدفع</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted-light)">لا توجد تسجيلات.</td></tr>';
       q('#rBody').querySelectorAll('[data-d]').forEach((b) => b.addEventListener('click', () => openReg(DATA.regs.find((r) => r.id === b.dataset.d), t, () => draw())));
       q('#rBody').querySelectorAll('[data-paid]').forEach((b) => b.addEventListener('click', async () => {
         const x = DATA.regs.find((r) => r.id === b.dataset.paid);
-        if (!confirm('تأكيد استلام دفعة ' + x.full_name + ' (' + n2(x.final_jod) + ' د.أ)؟ سيصله إيميل تأكيد المقعد.')) return;
-        const { error } = await sb().from('training_registrations').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', x.id);
-        if (error) { toast('تعذّر التأكيد', 'err'); return; } x.status = 'paid'; x.paid_at = new Date().toISOString(); toast('تم تأكيد الدفع وإرسال الإيميل', 'ok'); draw(); paintList();
+        const patch = { status: 'paid', paid_at: new Date().toISOString() };
+        if (x.final_jod == null) {
+          const v = prompt('كم المبلغ الذي دفعه ' + x.full_name + ' بالدينار؟');
+          if (v === null) return;
+          const jod = Number(String(v).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).trim());
+          if (!(jod >= 0)) { toast('اكتب رقماً صحيحاً.', 'err'); return; }
+          patch.price_jod = jod; patch.final_jod = jod; patch.final_usd = Math.round(jod / Number(t.jod_per_usd || 0.709) * 100) / 100;
+        }
+        if (!confirm('تأكيد دفع ' + x.full_name + ' (' + n2(patch.final_jod != null ? patch.final_jod : x.final_jod) + ' د.أ)؟ سيصله إيميل تأكيد المقعد.')) return;
+        const { error } = await sb().from('training_registrations').update(patch).eq('id', x.id);
+        if (error) { toast('تعذّر التأكيد', 'err'); return; } Object.assign(x, patch); toast('تم تأكيد الدفع وإرسال الإيميل', 'ok'); draw(); paintList();
       }));
     };
     q('#rQ').addEventListener('input', (e) => { f.q = e.target.value; draw(); });
@@ -289,7 +311,7 @@
     q('#rCsv').addEventListener('click', () => {
       const head = ['التاريخ', 'الاسم', 'واتساب', 'البريد', 'البلد والجامعة', 'المرحلة', 'التخصص', 'مرحلة البحث', 'التحدي', 'الباقة', 'السعر الأصلي (د.أ)', 'الخصم %', 'نوع الخصم', 'أسماء الزملاء', 'المبلغ المدفوع (د.أ)', 'المبلغ ($)', 'طريقة الدفع', 'الحالة', 'تاريخ الدفع', 'ملاحظة'];
       const esc2 = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-      const data = rows().map((x) => [fmtDT(x.created_at), x.full_name, "'" + x.whatsapp, x.email, x.country_univ, LV[x.level], SP[x.specialization], ST[x.stage], x.challenge, pkName(x.package_id), x.price_jod, x.discount_pct, x.discount_kind, x.group_names || '', x.final_jod, x.final_usd, x.payment_method === 'card' ? 'بطاقة' : 'أخرى', STAT[x.status].l, x.paid_at ? fmtDT(x.paid_at) : '', x.admin_note || '']);
+      const data = rows().map((x) => [fmtDT(x.created_at), x.full_name, "'" + x.whatsapp, x.email, x.country_univ, LV[x.level], SP[x.specialization], ST[x.stage] || '', x.challenge, pkName(x.package_id), x.price_jod == null ? '' : x.price_jod, x.discount_pct, x.discount_kind, x.group_names || '', x.final_jod == null ? '' : x.final_jod, x.final_usd == null ? '' : x.final_usd, METHOD[x.payment_method], STAT[x.status].l, x.paid_at ? fmtDT(x.paid_at) : '', x.admin_note || '']);
       const blob = new Blob(['﻿' + [head].concat(data).map((r) => r.map(esc2).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'registrations-' + t.slug + '.csv'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
     });
@@ -308,10 +330,10 @@
   function openReg(x, t, done) {
     const p = (t.pk.find((k) => k.id === x.package_id) || {}).name || '—';
     const m = modal(`<div class="trx-hd"><h3>${esc(x.full_name)}</h3><button type="button" class="trx-x" aria-label="إغلاق">&times;</button></div>
-      <dl class="trx-dl"><dt>الحالة</dt><dd>${chip(x.status)}</dd><dt>الباقة</dt><dd>${esc(p)}</dd><dt>المبلغ</dt><dd>${n2(x.final_jod)} د.أ (≈ $${n2(x.final_usd)})${x.discount_pct ? ' — خصم ' + x.discount_pct + '%' : ''}</dd>
-      <dt>طريقة الدفع</dt><dd>${x.payment_method === 'card' ? 'بطاقة (Stripe)' : 'أخرى (كليك/تحويل)'}</dd><dt>واتساب</dt><dd dir="ltr" style="text-align:right"><a href="https://wa.me/${esc(String(x.whatsapp).replace(/[^0-9]/g, ''))}" target="_blank" rel="noopener">${esc(x.whatsapp)}</a></dd>
+      <dl class="trx-dl"><dt>الحالة</dt><dd>${chip(x.status)}</dd><dt>الباقة</dt><dd>${esc(p)}</dd><dt>المبلغ</dt><dd>${x.final_jod == null ? 'لم يُحدَّد بعد' : `${n2(x.final_jod)} د.أ (≈ $${n2(x.final_usd)})${x.discount_pct ? ' — خصم ' + x.discount_pct + '%' : ''}`}</dd>
+      <dt>طريقة الدفع</dt><dd>${METHOD[x.payment_method]}</dd><dt>واتساب</dt><dd dir="ltr" style="text-align:right"><a href="https://wa.me/${esc(String(x.whatsapp).replace(/[^0-9]/g, ''))}" target="_blank" rel="noopener">${esc(x.whatsapp)}</a></dd>
       <dt>البريد</dt><dd dir="ltr" style="text-align:right">${esc(x.email)}</dd><dt>البلد والجامعة</dt><dd>${esc(x.country_univ)}</dd><dt>المرحلة</dt><dd>${esc(LV[x.level])}</dd><dt>التخصص</dt><dd>${esc(SP[x.specialization])}</dd>
-      <dt>مرحلة البحث</dt><dd>${esc(ST[x.stage])}</dd><dt>التحدي</dt><dd style="white-space:pre-wrap">${esc(x.challenge)}</dd>${x.group_names ? `<dt>أسماء الزملاء</dt><dd style="white-space:pre-wrap">${esc(x.group_names)}</dd>` : ''}
+      ${x.stage ? `<dt>مرحلة البحث</dt><dd>${esc(ST[x.stage])}</dd>` : ''}<dt>${x.stage ? 'التحدي' : 'ما يأمله من البرنامج'}</dt><dd style="white-space:pre-wrap">${esc(x.challenge)}</dd>${x.group_names ? `<dt>أسماء الزملاء</dt><dd style="white-space:pre-wrap">${esc(x.group_names)}</dd>` : ''}
       <dt>سُجّل في</dt><dd>${fmtDT(x.created_at)}</dd>${x.paid_at ? `<dt>دُفع في</dt><dd>${fmtDT(x.paid_at)}</dd>` : ''}${x.stripe_session_id ? `<dt>مرجع Stripe</dt><dd dir="ltr" style="text-align:right;font-size:12px">${esc(x.stripe_session_id)}</dd>` : ''}</dl>
       <div class="trx-f"><label for="xNote">ملاحظة داخلية</label><textarea id="xNote">${esc(x.admin_note || '')}</textarea></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
