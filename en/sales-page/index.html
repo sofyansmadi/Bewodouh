@@ -466,6 +466,8 @@ const PACKAGE_RECOMMENDATIONS = [
 ];
 
 const ORIGINAL_SUBMIT_TEXT = 'Confirm & continue to payment';
+const submitLabel = () => (window.__bwFree ? 'Confirm free booking' : ORIGINAL_SUBMIT_TEXT);
+const PROMO_ERR = {"promo_already_used": "This code was already used with this email or phone number. Remove the code to book a paid session.", "promo_exhausted": "All places for this code have been taken.", "too_many_requests": "Too many attempts from your device today. Please contact us on WhatsApp.", "invalid_phone": "The phone number looks wrong. Include the country code."};
 window.__slotMode = false;
 window.__selectedSlot = null;
 window.__slotHintText = "Times are shown in your device's timezone. Free rescheduling up to 24 hours before the session.";
@@ -656,7 +658,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Confirm & continue to payment';
+    submitBtn.textContent = submitLabel();
     dateTimeHint.style.color = 'var(--alert)';
     dateTimeHint.textContent = 'Unable to send the booking — the database connection hasn\'t been set up yet.';
     return;
@@ -667,7 +669,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     ({ error } = await supabaseClient.rpc('book_with_slot', { p_slot_id: window.__selectedSlot.id, p_booking: payload }));
     if (error && /slot_unavailable/.test(error.message || '')) {
       submitBtn.disabled = false;
-      submitBtn.textContent = ORIGINAL_SUBMIT_TEXT;
+      submitBtn.textContent = submitLabel();
       dateTimeHint.style.color = 'var(--alert)';
       dateTimeHint.textContent = 'That slot was just booked. Please choose another time.';
       window.__selectedSlot = null;
@@ -680,15 +682,27 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
   if (error) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Confirm & continue to payment';
+    submitBtn.textContent = submitLabel();
     dateTimeHint.style.color = 'var(--alert)';
-    dateTimeHint.textContent = 'An error occurred while sending the booking. Please try again.';
+    const ek = Object.keys(PROMO_ERR).find((k) => String(error.message || '').includes(k));
+    dateTimeHint.textContent = ek ? PROMO_ERR[ek] : 'An error occurred while sending the booking. Please try again.';
     console.error('booking submit:', error);
     return;
   }
 
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('successBox').classList.add('active');
+
+  // كود خصم 100%: الحجز مؤكد من الخادم بدون أي دفع، فلا نحوّل لصفحة الدفع
+  const freeInfo = await fetchPaymentInfo(bookingId);
+  if (freeInfo && Number(freeInfo.discount_percent) === 100 && Number(freeInfo.final_usd) === 0) {
+    const box = document.getElementById('successBox');
+    box.querySelector('h2').textContent = 'Your free booking is registered';
+    box.querySelector('p').textContent = 'No payment is needed. We emailed you the details, and our team will contact you to confirm your session time.';
+    document.getElementById('pay-container').replaceChildren();
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
 
   const payMethod = (document.querySelector('input[name="bkPayMethod"]:checked') || {}).value || 'card';
   if (payMethod === 'cliq') {
@@ -758,17 +772,23 @@ async function fetchPaymentInfo(bookingId) {
   const __qp = new URLSearchParams(location.search).get('promo');
   if (__qp && !codeEl.value) codeEl.value = __qp.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 40);
   let last = '', seq = 0;
+  function setFree(free) {
+    window.__bwFree = free;
+    document.querySelectorAll('#bookingForm .pm-title, #bookingForm .pm-group').forEach((el) => { el.style.display = free ? 'none' : ''; });
+    const li = document.querySelector('#bookingForm .pm-group + ul li'); if (li) li.style.display = free ? 'none' : '';
+    const b = document.querySelector('#bookingForm button[type="submit"]'); if (b && !b.disabled) b.textContent = submitLabel();
+  }
   async function refresh(typedByUser) {
     const pkg = pkgEl.value, email = (emailEl.value || '').trim(), code = (codeEl.value || '').trim();
     const key = [pkg, email.toLowerCase(), code.toUpperCase()].join('|');
     if (!typedByUser && key === last) return;
     last = key;
-    if (!pkg || typeof supabaseClient === 'undefined' || !supabaseClient) { sumEl.style.display = 'none'; msgEl.textContent = ''; return; }
+    if (!pkg || typeof supabaseClient === 'undefined' || !supabaseClient) { sumEl.style.display = 'none'; msgEl.textContent = ''; setFree(false); return; }
     const mine = ++seq;
     if (typedByUser) { msgEl.style.color = 'var(--text-muted-light)'; msgEl.textContent = PROMO_T.checking; }
     const { data, error } = await supabaseClient.rpc('check_promo', { p_email: email, p_package: pkg, p_code: code });
     if (mine !== seq) return;
-    if (error || !data || data.list_usd == null) { sumEl.style.display = 'none'; msgEl.textContent = ''; return; }
+    if (error || !data || data.list_usd == null) { sumEl.style.display = 'none'; msgEl.textContent = ''; setFree(false); return; }
     const pct = Number(data.percent) || 0;
     let msg = '', color = '#2E6B45';
     if (code && !data.code_ok) { color = 'var(--alert)'; msg = PROMO_T.code_bad + (pct > 0 ? PROMO_T.code_bad_keep.replace('{p}', pct) : ''); }
@@ -779,11 +799,12 @@ async function fetchPaymentInfo(bookingId) {
     if (typedByUser && code && data.code_ok && window.__bwPromoSent !== code.toUpperCase()) { window.__bwPromoSent = code.toUpperCase(); bwTrack('PromoApplied', { content_name: pkg, promo_code: code.toUpperCase(), label: 'promo_applied' }); }
     sumEl.style.display = 'block';
     sumEl.dataset.usd = String(data.final_usd); sumEl.dataset.list = String(data.list_usd);
+    setFree(pct === 100 && Number(data.final_usd) === 0);
     sumEl.replaceChildren();
     sumEl.append(PROMO_T.price + ': ');
     if (pct > 0) {
       const old = document.createElement('s'); old.style.cssText = 'color:var(--text-muted-light); font-weight:500; margin-inline-end:6px;'; old.textContent = '$' + fmtUsd(data.list_usd);
-      const nw = document.createElement('span'); nw.style.color = '#2E6B45'; nw.textContent = '$' + fmtUsd(data.final_usd) + ' (' + pct + '% ' + PROMO_T.off + ')';
+      const nw = document.createElement('span'); nw.style.color = '#2E6B45'; nw.textContent = (pct === 100 ? 'Free' : '$' + fmtUsd(data.final_usd)) + ' (' + pct + '% ' + PROMO_T.off + ')';
       sumEl.append(old, nw);
     } else { sumEl.append('$' + fmtUsd(data.list_usd)); }
   }

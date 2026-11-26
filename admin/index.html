@@ -379,7 +379,7 @@
         <form id="promoForm">
           <div class="form-grid">
             <div class="field"><label for="pmCode">الكود (حروف إنجليزية وأرقام)</label><input type="text" id="pmCode" maxlength="32" placeholder="WELCOME20" style="direction:ltr; text-transform:uppercase;"></div>
-            <div class="field"><label for="pmPercent">نسبة الخصم %</label><input type="number" id="pmPercent" min="1" max="99" value="20" required></div>
+            <div class="field"><label for="pmPercent">نسبة الخصم %</label><input type="number" id="pmPercent" min="1" max="100" value="20" required><small style="display:block; margin-top:4px; color:var(--text-muted-light);">100% = حجز مجاني بدون صفحة دفع (يلزمه كود وحد أقصى للاستخدام)</small></div>
             <div class="field full"><label for="pmDesc">وصف داخلي (اختياري)</label><input type="text" id="pmDesc" maxlength="200" placeholder="مثلاً: حملة رمضان"></div>
             <div class="field"><label for="pmPackage">ينطبق على</label><select id="pmPackage" style="width:100%; border:1.5px solid var(--fog-dim); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14.5px; background:var(--fog);"><option value="">كل الباقات</option></select></div>
             <div class="field"><label for="pmMax">أقصى عدد استخدامات (اختياري)</label><input type="number" id="pmMax" min="1" placeholder="غير محدود"></div>
@@ -1102,7 +1102,9 @@ async function loadBookings(){
     const formatted = dt.toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' });
     const options = statusOptions.map(s => `<option value="${s}"${s === b.status ? ' selected' : ''}>${s}</option>`).join('');
     // الحجز غير المدفوع: لا يُؤكَّد ولا يُتواصل معه، وبينلغي تلقائياً بعد ٩٠ دقيقة
-    const payCell = b.paid
+    const payCell = b.paid && b.payment_method === 'free'
+      ? '<span class="badge-yes" style="background:rgba(91,74,134,.14); color:#5B4A86;">مجاني (كود)</span>'
+      : b.paid
       ? '<span class="badge-yes" style="background:rgba(60,140,90,.14); color:#2E6B45;">مدفوع</span>'
       : (b.status === 'ملغى'
           ? '<span class="badge-yes" style="background:rgba(120,110,130,.14); color:#6B6072;">غير مدفوع (ملغى)</span>'
@@ -1810,7 +1812,8 @@ document.getElementById('promoForm').addEventListener('submit', async (e) => {
   const percent = parseInt(document.getElementById('pmPercent').value, 10);
   if (!code && !auto) return fail('اكتب كوداً، أو فعّل «يُطبَّق تلقائياً على الجميع».');
   if (code && !/^[A-Z0-9_-]{3,32}$/.test(code)) return fail('الكود: ٣ إلى ٣٢ حرفاً إنجليزياً كبيراً أو أرقاماً أو - أو _ فقط.');
-  if (!(percent >= 1 && percent <= 99)) return fail('نسبة الخصم من ١ إلى ٩٩.');
+  if (!(percent >= 1 && percent <= 100)) return fail('نسبة الخصم من ١ إلى ١٠٠.');
+  if (percent === 100 && (!code || auto || !(parseInt(document.getElementById('pmMax').value, 10) > 0))) return fail('خصم ١٠٠٪ يلزمه كود (بدون تطبيق تلقائي) وحد أقصى لعدد الاستخدامات.');
   const pkg = document.getElementById('pmPackage').value;
   const row = {
     code: code || null,
@@ -1825,6 +1828,7 @@ document.getElementById('promoForm').addEventListener('submit', async (e) => {
     max_redemptions: parseInt(document.getElementById('pmMax').value, 10) || null,
   };
   if (row.starts_at && row.ends_at && row.ends_at <= row.starts_at) return fail('تاريخ الانتهاء لازم يكون بعد البداية.');
+  if (percent === 100 && !confirm('هذا الكود يجعل الحجز مجانياً بالكامل' + (row.applies_to_packages ? '' : ' على كل الباقات (ومنها باقة 8 جلسات)') + ' بحد أقصى ' + row.max_redemptions + ' استخداماً. متابعة؟')) return;
   if (auto && !confirm('الخصم «التلقائي» يُطبَّق على كل الزبائن بدون كود' + (row.first_session_only ? ' (لأول جلسة للشخص)' : '') + '. متابعة؟')) return;
   const { error } = await supabaseClient.from('promo_codes').insert(row);
   if (error) return fail(error.code === '23505' ? 'هذا الكود موجود مسبقاً.' : 'تعذّر الحفظ: ' + error.message);
